@@ -39,7 +39,7 @@ kotlin {
             dependsOn(commonMain)
             kotlin.srcDirs("src/jvmMain/kotlin")
             dependencies {
-                implementation("androidx.appcompat:appcompat:1.5.1")
+                implementation("androidx.appcompat:appcompat:1.6.0")
                 implementation("androidx.activity:activity-compose:1.6.1")
             }
         }
@@ -53,14 +53,14 @@ kotlin {
 }
 compose.desktop {
     application {
-        mainClass = "Main_desktopKt" // "Main_terminalKt"
+        mainClass = "Main_terminalKt" // "Main_desktopKt" "Main_terminalKt"
 
         nativeDistributions {
             targetFormats(
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb,
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.AppImage
             )
-            packageName = "FittoniaDesktop" // "FittoniaTerminal"
+            packageName = "FittoniaTerminal" // "FittoniaDesktop" "FittoniaTerminal"
             packageVersion = "1.0"
         }
     }
