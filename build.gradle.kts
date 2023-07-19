@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("com.android.application")
     kotlin("multiplatform")
     id("org.jetbrains.compose")
+    alias(libs.plugins.android.application) // False positive error.
 }
 
 version = "1.0"
@@ -24,7 +24,7 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(compose.material)
                 implementation(compose.runtime)
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+                implementation(libs.kotlinx.coroutines.core.library)
             }
         }
 
@@ -39,8 +39,8 @@ kotlin {
             dependsOn(commonMain)
             kotlin.srcDirs("src/jvmMain/kotlin")
             dependencies {
-                implementation("androidx.appcompat:appcompat:1.6.0")
-                implementation("androidx.activity:activity-compose:1.6.1")
+                implementation(libs.appcompat.library)
+                implementation(libs.activity.compose.library)
             }
         }
 
@@ -67,20 +67,20 @@ compose.desktop {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = libs.versions.javaVersion.get()
 }
 
 android {
-    compileSdk = 33
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = 26
-        targetSdk = 33
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     sourceSets {
@@ -90,4 +90,8 @@ android {
         }
     }
     namespace = "org.huntersmeadow.fittonia"
+}
+
+dependencies {
+    api(libs.mockk.library)
 }
