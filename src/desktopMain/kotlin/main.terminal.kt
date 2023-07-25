@@ -23,6 +23,12 @@ fun main(args: Array<String>) {
                     "Año Nuevo en Chile - A reading passage about celebrating New Year in Valparaíso, Chile."//😊
                 println("S Sending: $stringMessage")
                 server.sendString(message = stringMessage)
+
+                println("S Receiving: \"file.txt\"")
+                server.receiveFile(destination = "/home/hunterneo/Desktop/TRANSFER/RECEIVE/")
+
+                println("S Sending: \"song.mp3\"")
+                server.sendFile(filePath = "/home/hunterneo/Desktop/TRANSFER/SEND/song.mp3")
             }
 
             "client" -> {
@@ -38,6 +44,12 @@ fun main(args: Array<String>) {
                 println(client.receiveLong().toString())
                 print("C Receiving: ")
                 println(client.receiveString())
+
+                println("C Sending: \"file.txt\"")
+                client.sendFile(filePath = "/home/hunterneo/Desktop/TRANSFER/SEND/file.txt")
+
+                println("C Receiving: \"song.mp3\"")
+                client.receiveFile(destination = "/home/hunterneo/Desktop/TRANSFER/RECEIVE/")
             }
         }
     } catch (e: HMeadowSocket.HMeadowSocketError) {

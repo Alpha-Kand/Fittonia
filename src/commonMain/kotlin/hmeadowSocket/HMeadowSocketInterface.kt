@@ -1,10 +1,14 @@
 package hmeadowSocket
 
+import java.io.BufferedInputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.io.File
 import java.io.IOException
 import java.net.Socket
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import kotlin.io.path.Path
 import java.util.Arrays
 
 interface HMeadowSocketInterface {
@@ -16,7 +20,7 @@ interface HMeadowSocketInterface {
     fun sendLong(message: Long)
     fun receiveLong(): Long
 
-    fun sendFile(path: String, rename: String = "")
+    fun sendFile(filePath: String, rename: String = "")
     fun receiveFile(destination: String): String
 
     fun sendString(message: String)
@@ -24,6 +28,11 @@ interface HMeadowSocketInterface {
 }
 
 class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
+
+    companion object {
+        private const val BUFFER_SIZE_LONG: Long = 8192
+        private const val BUFFER_SIZE_INT: Int = 8192
+    }
 
     lateinit var mDataInput: DataInputStream
     lateinit var mDataOutput: DataOutputStream
@@ -51,9 +60,60 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         return String(readNBytes(messageLength), StandardCharsets.UTF_8)
     }
 
+    override fun sendFile(filePath: String, rename: String) {
+        val bufferedReadFile = BufferedInputStream(File(filePath).inputStream())
+        val path = Path(filePath)
+        val size = Files.size(path)
 
-    override fun sendFile(path: String, rename: String) {}
-    override fun receiveFile(destination: String): String { return "" }
+        // 1. Send file size in bytes.
+        sendLong(size)
+
+        // 2. Send file name plus trailing whitespace.
+        sendString(rename.takeIf { it.isNotEmpty() } ?: path.fileName.toString())
+
+        // 3. Send the file.
+        var remainingBytes = size
+        while(remainingBytes > 0) {
+            val nextBytes = remainingBytes.coerceAtLeast(BUFFER_SIZE_LONG)
+            mDataOutput.write(bufferedReadFile.readNBytes(nextBytes.toInt()))
+            remainingBytes -= nextBytes
+        }
+
+        bufferedReadFile.close()
+    }
+
+    override fun receiveFile(destination: String): String {
+        /* Must receive the following information in order.
+           1. (8 byte int) File size in bytes.
+           2. (127 char bytes) File name. Character bytes at beginning of buffer, then blank spaces
+              up to max file name size.
+           3. (File data bytes) Should consist of full blocks of buffer size plus one partially
+              filled buffer to finish the file transfer.
+         */
+
+        // 1. Get total file size in bytes.
+        var transferByteCount = receiveLong()
+        // 2. Get file name.
+        val fileName = destination + receiveString()
+        // 3. Receive and write file data.
+        if (transferByteCount == 0L) {
+            // File to transfer is empty, just create a new empty file.
+            File(fileName).createNewFile()
+        } else {
+            val file = File(fileName)
+            while (transferByteCount > 0) {
+                // Read next amount of data from socket.
+                val readByteArray = readNBytes(transferByteCount.coerceAtMost(BUFFER_SIZE_LONG).toInt())
+                if (readByteArray.isNotEmpty()) {
+                    // Write data to file.
+                    transferByteCount -= BUFFER_SIZE_LONG
+                    file.appendBytes(readByteArray)
+                }
+            }
+        }
+
+        return fileName
+    }
 
     /**
      * VIRTUAL COPY AND PASTE OF OFFICIAL 'readNBytes' METHOD FOR ANDROID JAVA 8 COMPATIBILITY.
@@ -189,7 +249,7 @@ class HMeadowSocketInterfaceTest : HMeadowSocketInterface {
     override fun sendLong(message: Long) {}
     override fun receiveLong() = 5L
 
-    override fun sendFile(path: String, rename: String) {}
+    override fun sendFile(filePath: String, rename: String) {}
     override fun receiveFile(destination: String): String { return "" }
 
     override fun sendString(message: String) {}
