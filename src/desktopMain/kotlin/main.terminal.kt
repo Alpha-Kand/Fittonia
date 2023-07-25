@@ -14,10 +14,15 @@ fun main(args: Array<String>) {
                 println("SERVER")
                 val server = HMeadowSocketServer(port = PORT)
 
-                print("Receiving: ")
+                print("S Receiving: ")
                 println(server.receiveInt().toString())
-                println("Sending: 5")
+                println("S Sending: 5")
                 server.sendLong(5)
+
+                val stringMessage =
+                    "Año Nuevo en Chile - A reading passage about celebrating New Year in Valparaíso, Chile."//😊
+                println("S Sending: $stringMessage")
+                server.sendString(message = stringMessage)
             }
 
             "client" -> {
@@ -27,14 +32,16 @@ fun main(args: Array<String>) {
                     port = PORT
                 )
 
-                println("Sending: 4")
+                println("C Sending: 4")
                 client.sendInt(4)
-                print("Receiving: ")
+                print("C Receiving: ")
                 println(client.receiveLong().toString())
+                print("C Receiving: ")
+                println(client.receiveString())
             }
         }
-    }catch(e: HMeadowSocket.HMeadowSocketError) {
-        when(e.errorType) {
+    } catch (e: HMeadowSocket.HMeadowSocketError) {
+        when (e.errorType) {
             HMeadowSocket.SocketErrorType.CLIENT_SETUP -> print("There was an error setting up CLIENT")
             HMeadowSocket.SocketErrorType.SERVER_SETUP -> print("There was an error setting up SERVER")
         }
