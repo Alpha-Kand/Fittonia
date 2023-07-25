@@ -15,12 +15,12 @@ fun FittoniaApp() {
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text("Fittonia") }
+                        title = { Text("Fittonia") },
                     )
-                }
+                },
             ) {
                 Column(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) {
                     Text("Hello World!")
                 }

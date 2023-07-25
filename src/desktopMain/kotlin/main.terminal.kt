@@ -14,42 +14,46 @@ fun main(args: Array<String>) {
                 println("SERVER")
                 val server = HMeadowSocketServer(port = PORT)
 
-                print("S Receiving: ")
+                print("Server Receiving: ")
                 println(server.receiveInt().toString())
-                println("S Sending: 5")
+                println("Server Sending: 5")
                 server.sendLong(5)
 
                 val stringMessage =
-                    "Año Nuevo en Chile - A reading passage about celebrating New Year in Valparaíso, Chile."//😊
-                println("S Sending: $stringMessage")
+                    "Año Nuevo en Chile - A reading passage about celebrating New Year in Valparaíso, Chile." // 😊
+                println("Server Sending: $stringMessage")
                 server.sendString(message = stringMessage)
 
-                println("S Receiving: \"file.txt\"")
+                println("Server Receiving: \"file.txt\"")
                 server.receiveFile(destination = "/home/hunterneo/Desktop/TRANSFER/RECEIVE/")
 
-                println("S Sending: \"song.mp3\"")
+                println("Server Sending: \"song.mp3\"")
                 server.sendFile(filePath = "/home/hunterneo/Desktop/TRANSFER/SEND/song.mp3")
+
+                println("Server shutdown normally")
             }
 
             "client" -> {
                 println("CLIENT")
                 val client = HMeadowSocketClient(
                     ipAddress = InetAddress.getByName("localhost"),
-                    port = PORT
+                    port = PORT,
                 )
 
-                println("C Sending: 4")
+                println("Client Sending: 4")
                 client.sendInt(4)
-                print("C Receiving: ")
+                print("Client Receiving: ")
                 println(client.receiveLong().toString())
-                print("C Receiving: ")
+                print("Client Receiving: ")
                 println(client.receiveString())
 
-                println("C Sending: \"file.txt\"")
+                println("Client Sending: \"file.txt\"")
                 client.sendFile(filePath = "/home/hunterneo/Desktop/TRANSFER/SEND/file.txt")
 
-                println("C Receiving: \"song.mp3\"")
+                println("Client Receiving: \"song.mp3\"")
                 client.receiveFile(destination = "/home/hunterneo/Desktop/TRANSFER/RECEIVE/")
+
+                println("Client shutdown normally")
             }
         }
     } catch (e: HMeadowSocket.HMeadowSocketError) {

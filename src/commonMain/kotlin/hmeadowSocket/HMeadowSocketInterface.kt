@@ -8,8 +8,8 @@ import java.io.IOException
 import java.net.Socket
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import kotlin.io.path.Path
 import java.util.Arrays
+import kotlin.io.path.Path
 
 interface HMeadowSocketInterface {
     fun bindToSocket(socket: Socket) {}
@@ -73,7 +73,7 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
 
         // 3. Send the file.
         var remainingBytes = size
-        while(remainingBytes > 0) {
+        while (remainingBytes > 0) {
             val nextBytes = remainingBytes.coerceAtLeast(BUFFER_SIZE_LONG)
             mDataOutput.write(bufferedReadFile.readNBytes(nextBytes.toInt()))
             remainingBytes -= nextBytes
@@ -250,8 +250,12 @@ class HMeadowSocketInterfaceTest : HMeadowSocketInterface {
     override fun receiveLong() = 5L
 
     override fun sendFile(filePath: String, rename: String) {}
-    override fun receiveFile(destination: String): String { return "" }
+    override fun receiveFile(destination: String): String {
+        return ""
+    }
 
     override fun sendString(message: String) {}
-    override fun receiveString(): String { return "" }
+    override fun receiveString(): String {
+        return ""
+    }
 }
