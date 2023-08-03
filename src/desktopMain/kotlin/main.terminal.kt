@@ -1,12 +1,17 @@
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
+import settingsManager.SettingsManager
 import java.net.InetAddress
 
 const val PORT = 2334
 
 fun main(args: Array<String>) {
     println("Fittonia Terminal Program 2")
+
+    val foo = SettingsManager.settingsManager
+    SettingsManager.settingsManager.saveSettings()
+    return
 
     try {
         when (args[0]) {

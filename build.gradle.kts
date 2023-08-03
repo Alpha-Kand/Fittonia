@@ -25,6 +25,7 @@ kotlin {
                 implementation(compose.material)
                 implementation(compose.runtime)
                 implementation(libs.kotlinx.coroutines.core.library)
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.4")
             }
         }
 

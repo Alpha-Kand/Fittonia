@@ -9,7 +9,7 @@
     appcompat = "1.6.1"
     kotlinx-coroutines-core = "1.7.1"
     mockk = "1.13.5"
-    androidApplication = "8.0.2"
+    androidApplication = "8.1.0"
 
 [libraries]
 
