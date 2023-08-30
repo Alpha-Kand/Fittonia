@@ -1,19 +1,37 @@
 [versions]
 
+    # SDK
     minSdk = "26"
     targetSdk = "33"
     compileSdk = "33"
     javaVersion = "17"
+    androidApplication = "8.1.0"
 
+    # Unit Tests
+    mockk = "1.13.5"
+    junit = "4.13.2"
+    junitJupiterApi = "5.8.2"
+
+    # Settings Writing/Reading
+    jacksonModuleKotlin = "2.11.4"
+
+    # Libraries
     activity-compose = "1.7.2"
     appcompat = "1.6.1"
     kotlinx-coroutines-core = "1.7.1"
-    mockk = "1.13.5"
-    androidApplication = "8.1.0"
 
 [libraries]
 
     mockk-library = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+    junit = { module = "junit:junit", version.ref = "junit" }
+    junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiterApi" }
+    junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiterApi" }
+    junit-vintage-engine = { module = "org.junit.jupiter:junit-vintage-engine", version.ref = "junitJupiterApi" }
+    junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junitJupiterApi" }
+    junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiterApi" }
+    kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-core" }
+
+    jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jacksonModuleKotlin" }
     activity-compose-library = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
     appcompat-library = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
     kotlinx-coroutines-core-library = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core"}

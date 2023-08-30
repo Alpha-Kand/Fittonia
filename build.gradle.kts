@@ -25,14 +25,21 @@ kotlin {
                 implementation(compose.material)
                 implementation(compose.runtime)
                 implementation(libs.kotlinx.coroutines.core.library)
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.4")
+                implementation(libs.jackson.module.kotlin)
             }
         }
 
-        val commonTest by getting {
+        val desktopTest by getting {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
+                api(libs.mockk.library)
+                api(libs.junit.jupiter.api)
+                api(libs.junit.jupiter.params)
+                api(libs.junit.jupiter.engine)
+                implementation(libs.junit)
+                api(libs.junit.jupiter)
+                api(libs.kotlinx.coroutines.test)
             }
         }
 
@@ -71,6 +78,10 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = libs.versions.javaVersion.get()
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
 android {
     compileSdk = libs.versions.compileSdk.get().toInt()
 
@@ -95,4 +106,10 @@ android {
 
 dependencies {
     api(libs.mockk.library)
+    api(libs.junit.jupiter.api)
+    api(libs.junit.jupiter.params)
+    api(libs.junit.jupiter.engine)
+    api(libs.junit.vintage.engine)
+    implementation(libs.junit)
+    api(libs.junit.jupiter)
 }
