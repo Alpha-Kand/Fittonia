@@ -1,3 +1,8 @@
+import commandHandler.AddCommand
+import commandHandler.CommandHandler
+import commandHandler.DumpCommand
+import commandHandler.ListDestinationsCommand
+import commandHandler.RemoveCommand
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
@@ -9,8 +14,33 @@ const val PORT = 2334
 fun main(args: Array<String>) {
     println("Fittonia Terminal Program 2")
 
-    val foo = SettingsManager.settingsManager
+    val settings = SettingsManager.settingsManager
     SettingsManager.settingsManager.saveSettings()
+    when (val command = CommandHandler(args = args).getCommand()) {
+        is AddCommand -> {
+            settings.addDestination(name = command.getName(), ip = command.getIP(), password = command.getPassword())
+        }
+
+        is RemoveCommand -> {
+            settings.removeDestination(name = command.getName())
+        }
+
+        is ListDestinationsCommand -> {
+            println()
+            settings.settings.destinations.forEach {
+                println("Name: " + it.name)
+                println("IP: " + it.ip)
+                println()
+            }
+        }
+
+        is DumpCommand -> {
+            settings.setDumpPath(command.getDumpPath())
+        }
+
+        else -> throw IllegalStateException("No valid command detected.")
+    }
+
     return
 
     try {

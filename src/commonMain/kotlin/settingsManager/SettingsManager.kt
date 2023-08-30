@@ -18,8 +18,9 @@ class SettingsManager private constructor() {
         val settingsManager = SettingsManager()
     }
 
-    private val settingsPath = "/home/hunterneo/Desktop/TRANSFER/fittoniaSettings.xml"
-    val settings = loadSettings()
+    private val settingsPath = "/home/hunterneo/Desktop/TRANSFER/fittoniaSettings|1.xml" // TODO
+    var settings = loadSettings()
+        private set
 
     private fun loadSettings(): SettingsData {
         val settingsFile = File(settingsPath)
@@ -41,7 +42,44 @@ class SettingsManager private constructor() {
         encrypted?.let { File(settingsPath).writeText(encrypted) }
     }
 
-    class SettingsData(
+    fun setDumpPath(dumpPath: String) {
+        settings = settings.copy(dumpPath = dumpPath)
+        saveSettings()
+    }
+
+    fun addDestination(
+        name: String,
+        ip: String,
+        password: String,
+    ) {
+        if (settings.destinations.find { it.name == name } != null) {
+            throw IllegalArgumentException(
+                "A destination with that name is already registered. Delete the old one and try again.",
+            )
+        }
+        settings = settings.copy(
+            destinations = settings.destinations + listOf(
+                SettingsData.Destination(
+                    name = name,
+                    ip = ip,
+                    password = password,
+                ),
+            ),
+        )
+        saveSettings()
+    }
+
+    fun removeDestination(name: String) {
+        if(settings.destinations.find { it.name == name} == null){
+            throw IllegalArgumentException("Destination with that name not found.")
+        }
+        settings = settings.copy(
+            destinations = settings.destinations.filterNot { name == it.name },
+        )
+        saveSettings()
+    }
+
+    data class SettingsData(
         val destinations: List<Destination>,
         val dumpPath: String,
     ) {
