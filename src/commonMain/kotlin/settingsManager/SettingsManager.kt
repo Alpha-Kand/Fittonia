@@ -25,8 +25,8 @@ class SettingsManager private constructor() {
     private fun loadSettings(): SettingsData {
         val settingsFile = File(settingsPath)
         return if (settingsFile.isFile) {
-            val encryptedSettings = settingsFile.readText()
-            AESEncyption.decrypt(encryptedSettings)?.let {
+            val decryptedText = AESEncyption.decrypt(settingsFile.readText())
+            decryptedText?.let {
                 jacksonObjectMapper().readValue<SettingsData>(it)
             } ?: throw IllegalStateException("")
         } else {
