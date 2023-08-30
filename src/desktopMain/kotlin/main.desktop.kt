@@ -8,7 +8,7 @@ import androidx.compose.ui.window.singleWindowApplication
 fun main(args: Array<String>) =
     singleWindowApplication(
         title = "Fittonia",
-        state = WindowState(size = DpSize(500.dp, 800.dp))
+        state = WindowState(size = DpSize(500.dp, 800.dp)),
     ) {
         FittoniaApp()
     }

@@ -8,15 +8,9 @@ pluginManagement {
     }
 
     plugins {
-        val kotlinVersion = extra["kotlin.version"] as String
-        kotlin("multiplatform").version(kotlinVersion)
-        kotlin("android").version(kotlinVersion)
-
-        val androidGradleProjectVersion = extra["androidgradleproject.version"] as String
-        id("com.android.application").version(androidGradleProjectVersion)
-
-        val composeVersion = extra["compose.version"] as String
-        id("org.jetbrains.compose").version(composeVersion)
+        kotlin("multiplatform").version("1.8.0")
+        kotlin("android").version("1.7.10")
+        id("org.jetbrains.compose").version("1.4.1")
     }
 }
 
