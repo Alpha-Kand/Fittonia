@@ -14,28 +14,38 @@ const val PORT = 2334
 fun main(args: Array<String>) {
     println("Fittonia Terminal Program 2")
 
-    val settings = SettingsManager.settingsManager
+    val settingsManager = SettingsManager.settingsManager
     SettingsManager.settingsManager.saveSettings()
     when (val command = CommandHandler(args = args).getCommand()) {
         is AddCommand -> {
-            settings.addDestination(name = command.getName(), ip = command.getIP(), password = command.getPassword())
+            settingsManager.addDestination(name = command.getName(), ip = command.getIP(), password = command.getPassword())
         }
 
         is RemoveCommand -> {
-            settings.removeDestination(name = command.getName())
+            settingsManager.removeDestination(name = command.getName())
         }
 
         is ListDestinationsCommand -> {
             println()
-            settings.settings.destinations.forEach {
+            val printDestination: (SettingsManager.SettingsData.Destination) -> Unit = {
                 println("Name: " + it.name)
                 println("IP: " + it.ip)
                 println()
             }
+            command.getName()?.let { searchName ->
+                settingsManager.settings.destinations.find { it.name == searchName }?.let {
+                    printDestination(it)
+                } ?: run {
+                    println("No destination found with that name.")
+                    println()
+                }
+            } ?: settingsManager.settings.destinations.forEach {
+                printDestination(it)
+            }
         }
 
         is DumpCommand -> {
-            settings.setDumpPath(command.getDumpPath())
+            settingsManager.setDumpPath(command.getDumpPath())
         }
 
         else -> throw IllegalStateException("No valid command detected.")
