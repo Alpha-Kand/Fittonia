@@ -1,7 +1,5 @@
 package commandHandler
 
-import java.util.Locale
-
 class CommandHandler(private val args: Array<String>) {
 
     private val commands = listOf(addCommand, removeCommand, dumpCommand, listDestinationsCommand, "send", "server", "terminal")
@@ -11,8 +9,7 @@ class CommandHandler(private val args: Array<String>) {
         val enteredParameters = mutableListOf<String>()
 
         args.forEach { arg ->
-            val lowerCaseArg = arg.lowercase(locale = Locale.ROOT)
-            commands.find { it == lowerCaseArg }?.let { command ->
+            commands.find { it == arg }?.let { command ->
                 enteredCommands.add(command)
             } ?: enteredParameters.add(arg)
         }
@@ -32,7 +29,7 @@ class CommandHandler(private val args: Array<String>) {
         enteredParameters.forEach { par ->
             if (Regex(pattern = "\\w+=.+").containsMatchIn(par)) {
                 command.addArg(
-                    argumentName = par.substringBefore(delimiter = "=").lowercase(locale = Locale.ROOT),
+                    argumentName = par.substringBefore(delimiter = "="),
                     value = par.substringAfter(delimiter = "="),
                 )
             } else {
