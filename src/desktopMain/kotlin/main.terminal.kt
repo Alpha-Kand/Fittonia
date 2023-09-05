@@ -8,17 +8,23 @@ import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
 import settingsManager.SettingsManager
 import java.net.InetAddress
+import java.nio.file.Files
+import java.nio.file.Paths
 
 const val PORT = 2334
 
 fun main(args: Array<String>) {
-    println("Fittonia Terminal Program 2")
+    println("!> Fittonia Terminal Program 2 <!")
 
     val settingsManager = SettingsManager.settingsManager
     SettingsManager.settingsManager.saveSettings()
     when (val command = CommandHandler(args = args).getCommand()) {
         is AddCommand -> {
-            settingsManager.addDestination(name = command.getName(), ip = command.getIP(), password = command.getPassword())
+            settingsManager.addDestination(
+                name = command.getName(),
+                ip = command.getIP(),
+                password = command.getPassword(),
+            )
         }
 
         is RemoveCommand -> {
@@ -45,7 +51,28 @@ fun main(args: Array<String>) {
         }
 
         is DumpCommand -> {
-            settingsManager.setDumpPath(command.getDumpPath())
+            command.getDumpPath()?.let {
+                val path = Paths.get(it).toAbsolutePath()
+                if (Files.exists(path)) {
+                    if (Files.isDirectory(path)) {
+                        settingsManager.setDumpPath(path.toString())
+
+                        if (!Files.list(path).findFirst().isPresent) {
+                            println("Warning: New dump path is not empty.")
+                        }
+                    } else {
+                        println("Supplied path was not a valid directory.")
+                    }
+                } else {
+                    println("Supplied path does not exist.")
+                }
+            } ?: run {
+                if (settingsManager.settings.dumpPath.isEmpty()) {
+                    println("No dump path set.")
+                } else {
+                    println("Current dump path: " + settingsManager.settings.dumpPath)
+                }
+            }
         }
 
         else -> throw IllegalStateException("No valid command detected.")

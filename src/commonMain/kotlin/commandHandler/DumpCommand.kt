@@ -5,11 +5,9 @@ import requireNull
 object DumpCommand : Command() {
     private var path: String? = null
 
-    fun getDumpPath() = verifyArgumentIsSet(argument = path, reportingName = pathArguments.first())
+    fun getDumpPath() = path
 
-    override fun verify() {
-        getDumpPath()
-    }
+    override fun verify() {}
 
     override fun addArg(argumentName: String, value: String) {
         try {
