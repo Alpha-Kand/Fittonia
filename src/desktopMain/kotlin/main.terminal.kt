@@ -15,6 +15,7 @@ const val PORT = 2334
 
 fun main(args: Array<String>) {
     println("!> Fittonia Terminal Program 2 <!")
+    println()
 
     val settingsManager = SettingsManager.settingsManager
     SettingsManager.settingsManager.saveSettings()
