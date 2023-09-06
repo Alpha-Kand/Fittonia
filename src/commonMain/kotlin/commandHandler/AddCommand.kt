@@ -6,10 +6,12 @@ object AddCommand : Command() {
     private var name: String? = null
     private var ip: String? = null
     private var password: String? = null
+    private var port: Int? = null
 
     fun getName() = verifyArgumentIsSet(argument = name, reportingName = nameArguments.first())
     fun getIP() = verifyArgumentIsSet(argument = ip, reportingName = ipArguments.first())
     fun getPassword() = verifyArgumentIsSet(argument = password, reportingName = passwordArguments.first())
+    fun getPort() = port
 
     override fun verify() {
         getName()
@@ -31,6 +33,11 @@ object AddCommand : Command() {
         if (passwordArguments.contains(argumentName)) {
             requireNull(password)
             password = value
+            return@tryCatch true
+        }
+        if (portArguments.contains(argumentName)) {
+            requireNull(port)
+            port = value.toInt()
             return@tryCatch true
         }
         return@tryCatch false

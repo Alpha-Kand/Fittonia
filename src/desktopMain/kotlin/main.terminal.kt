@@ -21,13 +21,7 @@ fun main(args: Array<String>) {
     val settingsManager = SettingsManager.settingsManager
     SettingsManager.settingsManager.saveSettings()
     when (val command = CommandHandler(args = args).getCommand()) {
-        is AddCommand -> {
-            settingsManager.addDestination(
-                name = command.getName(),
-                ip = command.getIP(),
-                password = command.getPassword(),
-            )
-        }
+        is AddCommand -> addExecution(command = command)
 
         is RemoveCommand -> {
             settingsManager.removeDestination(name = command.getName())
@@ -88,6 +82,10 @@ fun main(args: Array<String>) {
 
                 ServerFlags.SEND_STRING -> {
                     println("TODO SEND STRING")
+                }
+
+                ServerFlags.ADD_DESTINATION -> {
+                    server.sendInt(ServerFlags.CONFIRM) // TODO: Add password checking.
                 }
                 else -> {
                     server.sendInt(ServerFlags.DENY)
