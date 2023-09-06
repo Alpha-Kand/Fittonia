@@ -24,26 +24,22 @@ object SendFilesCommand : Command() {
         getFiles()
     }
 
-    override fun addArg(argumentName: String, value: String) {
-        try {
-            if (portArguments.contains(argumentName)) {
-                requireNull(port)
-                port = value
-                return
-            }
-            if (destinationArguments.contains(argumentName)) {
-                requireNull(destination)
-                destination = value
-                return
-            }
-            if (filesArguments.contains(argumentName)) {
-                requireNull(files)
-                files = value
-                return
-            }
-            throw IllegalArgumentException("This command does not take this argument: $argumentName")
-        } catch (e: IllegalStateException) {
-            throw IllegalStateException("Duplicate argument found: $argumentName")
+    override fun addArg(argumentName: String, value: String) = tryCatch(argumentName = argumentName, value = value) {
+        if (portArguments.contains(argumentName)) {
+            requireNull(port)
+            port = value
+            return@tryCatch true
         }
+        if (destinationArguments.contains(argumentName)) {
+            requireNull(destination)
+            destination = value
+            return@tryCatch true
+        }
+        if (filesArguments.contains(argumentName)) {
+            requireNull(files)
+            files = value
+            return@tryCatch true
+        }
+        return@tryCatch false
     }
 }

@@ -17,27 +17,22 @@ object AddCommand : Command() {
         getPassword()
     }
 
-    override fun addArg(argumentName: String, value: String) {
-        try {
-            if (nameArguments.contains(argumentName)) {
-                requireNull(name)
-                name = value
-                return
-            }
-            if (ipArguments.contains(argumentName)) {
-                requireNull(ip)
-                ip = value
-                return
-            }
-            if (passwordArguments.contains(argumentName)) {
-                requireNull(password)
-                password = value
-                return
-            }
-
-            throw IllegalArgumentException("This command does not take this argument: $argumentName")
-        } catch (e: IllegalStateException) {
-            throw IllegalStateException("Duplicate argument found: $argumentName")
+    override fun addArg(argumentName: String, value: String) = tryCatch(argumentName = argumentName, value = value) {
+        if (nameArguments.contains(argumentName)) {
+            requireNull(name)
+            name = value
+            return@tryCatch true
         }
+        if (ipArguments.contains(argumentName)) {
+            requireNull(ip)
+            ip = value
+            return@tryCatch true
+        }
+        if (passwordArguments.contains(argumentName)) {
+            requireNull(password)
+            password = value
+            return@tryCatch true
+        }
+        return@tryCatch false
     }
 }

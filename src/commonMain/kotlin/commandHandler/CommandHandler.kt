@@ -52,4 +52,16 @@ sealed class Command {
         argument: String?,
         reportingName: String,
     ): String = requireNotNull(argument) { "Required argument was not found: $reportingName" }
+
+    fun tryCatch(argumentName: String, value:String, addArgBlock: () -> Boolean) {
+        try {
+            if(addArgBlock()) return
+
+            throw IllegalArgumentException("This command does not take this argument: $argumentName")
+        } catch (e: IllegalStateException) {
+            throw IllegalStateException("Duplicate argument found: $argumentName")
+        } catch (e: NumberFormatException) {
+            throw IllegalStateException("Non-numerical port: $value")
+        }
+    }
 }

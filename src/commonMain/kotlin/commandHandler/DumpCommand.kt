@@ -9,16 +9,12 @@ object DumpCommand : Command() {
 
     override fun verify() {}
 
-    override fun addArg(argumentName: String, value: String) {
-        try {
-            if (pathArguments.contains(argumentName)) {
-                requireNull(path)
-                path = value
-                return
-            }
-            throw IllegalArgumentException("This command does not take this argument: $argumentName")
-        } catch (e: IllegalStateException) {
-            throw IllegalStateException("Duplicate argument found: $argumentName")
+    override fun addArg(argumentName: String, value: String) = tryCatch(argumentName = argumentName, value = value) {
+        if (pathArguments.contains(argumentName)) {
+            requireNull(path)
+            path = value
+            return@tryCatch true
         }
+        return@tryCatch false
     }
 }
