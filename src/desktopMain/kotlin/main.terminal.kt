@@ -53,7 +53,7 @@ fun main(args: Array<String>) {
                     if (Files.isDirectory(path)) {
                         settingsManager.setDumpPath(path.toString())
 
-                        if (!Files.list(path).findFirst().isPresent) {
+                        if (Files.list(path).findFirst().isPresent) {
                             println("Warning: New dump path is not empty.")
                         }
                     } else {
