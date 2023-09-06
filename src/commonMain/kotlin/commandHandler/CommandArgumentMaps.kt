@@ -7,13 +7,14 @@ const val dumpCommand = "dump"
 const val serverCommand = "server"
 const val sendFilesCommand = "send"
 
-val nameArguments = listOf("name", "-n")
-val ipArguments = listOf("ip", "-i")
-val passwordArguments = listOf("password", "-P", "pw")
-val pathArguments = listOf("path", "dump", "-D")
-val portArguments = listOf("port", "-p")
-val destinationArguments = listOf("destination", "-d", "dest")
-val filesArguments = listOf("files", "-f", "source", "-s")
+val nameArguments = listOf("--name", "-n")
+val ipArguments = listOf("--ip", "-i")
+val passwordArguments = listOf("--password", "-P", "--pw")
+val pathArguments = listOf("--path", "--dump", "-D")
+val portArguments = listOf("--port", "-p")
+val destinationArguments = listOf("--destination", "-d", "--dest")
+val filesArguments = listOf("--files", "-f", "--source", "-s")
+val clearArguments = listOf("--clear")
 
 class ServerFlags {
     companion object {

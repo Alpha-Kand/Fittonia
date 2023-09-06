@@ -29,7 +29,7 @@ class CommandHandler(private val args: Array<String>) {
         }
 
         enteredParameters.forEach { par ->
-            if (Regex(pattern = "\\w+=.+").containsMatchIn(par)) {
+            if (Regex(pattern = "-{1,2}\\w+=.+").containsMatchIn(par)) { // Passed value.
                 command.addArg(
                     argumentName = par.substringBefore(delimiter = "="),
                     value = par.substringAfter(delimiter = "="),
