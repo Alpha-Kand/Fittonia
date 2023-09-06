@@ -2,7 +2,7 @@ package commandHandler
 
 class CommandHandler(private val args: Array<String>) {
 
-    private val commands = listOf(addCommand, removeCommand, dumpCommand, listDestinationsCommand, "send", "server", "terminal")
+    private val commands = listOf(addCommand, removeCommand, dumpCommand, listDestinationsCommand, sendFilesCommand, serverCommand, "terminal")
 
     fun getCommand(): Command {
         val enteredCommands = mutableListOf<String>()
@@ -23,6 +23,8 @@ class CommandHandler(private val args: Array<String>) {
             removeCommand -> RemoveCommand
             listDestinationsCommand -> ListDestinationsCommand
             dumpCommand -> DumpCommand
+            serverCommand -> ServerCommand
+            sendFilesCommand -> SendFilesCommand
             else -> throw IllegalArgumentException()
         }
 

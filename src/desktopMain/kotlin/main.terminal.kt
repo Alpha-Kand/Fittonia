@@ -3,6 +3,9 @@ import commandHandler.CommandHandler
 import commandHandler.DumpCommand
 import commandHandler.ListDestinationsCommand
 import commandHandler.RemoveCommand
+import commandHandler.SendFilesCommand
+import commandHandler.ServerCommand
+import commandHandler.ServerFlags
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
@@ -10,8 +13,6 @@ import settingsManager.SettingsManager
 import java.net.InetAddress
 import java.nio.file.Files
 import java.nio.file.Paths
-
-const val PORT = 2334
 
 fun main(args: Array<String>) {
     println("!> Fittonia Terminal Program 2 <!")
@@ -76,6 +77,52 @@ fun main(args: Array<String>) {
             }
         }
 
+        is ServerCommand -> {
+            println("Server started, waiting for a client.")
+            val server = HMeadowSocketServer(port = command.getPort())
+            when(server.receiveInt()) {
+                ServerFlags.SEND_FILES -> {
+                    server.sendInt(ServerFlags.CONFIRM)
+                    println("TODO From client: " + server.receiveString())
+                }
+
+                ServerFlags.SEND_STRING -> {
+                    println("TODO SEND STRING")
+                }
+                else -> {
+                    server.sendInt(ServerFlags.DENY)
+                    println("Received invalid server command from client.")
+                }
+            }
+        }
+
+        is SendFilesCommand -> {
+            val client = if(command.getDestination() != null) {
+                val destination = settingsManager.settings.destinations.find { it.name == command.getDestination() }
+                if (destination == null) {
+                    println("No registered destination found with the name: " + command.getDestination())
+                    return
+                }
+                HMeadowSocketClient(
+                    ipAddress = InetAddress.getByName(destination.ip), //"localhost"),
+                    port = command.getPort(),
+                )
+            } else {
+                HMeadowSocketClient(
+                    ipAddress = InetAddress.getByName(command.getIP()),
+                    port = command.getPort(),
+                )
+            }
+
+            client.sendInt(ServerFlags.SEND_FILES)
+            if(client.receiveInt() == ServerFlags.CONFIRM) {
+                client.sendString(command.getFiles())
+                println("TODO Send files")
+            } else {
+                println("TODO Server denied request.")
+            }
+        }
+
         else -> throw IllegalStateException("No valid command detected.")
     }
 
@@ -85,7 +132,7 @@ fun main(args: Array<String>) {
         when (args[0]) {
             "server" -> {
                 println("SERVER")
-                val server = HMeadowSocketServer(port = PORT)
+                val server = HMeadowSocketServer(port = 2334)
 
                 print("Server Receiving: ")
                 println(server.receiveInt().toString())
@@ -110,7 +157,7 @@ fun main(args: Array<String>) {
                 println("CLIENT")
                 val client = HMeadowSocketClient(
                     ipAddress = InetAddress.getByName("localhost"),
-                    port = PORT,
+                    port = 2334,
                 )
 
                 println("Client Sending: 4")
