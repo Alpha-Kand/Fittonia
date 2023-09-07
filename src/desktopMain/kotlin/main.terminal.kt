@@ -5,122 +5,26 @@ import commandHandler.ListDestinationsCommand
 import commandHandler.RemoveCommand
 import commandHandler.SendFilesCommand
 import commandHandler.ServerCommand
-import commandHandler.ServerFlags
+import commandHandler.executeCommand.addExecution
+import commandHandler.executeCommand.listDestinationsExecution
+import commandHandler.executeCommand.removeExecution
+import commandHandler.executeCommand.sendFilesExecution
+import commandHandler.executeCommand.serverExecution
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
 import settingsManager.SettingsManager
 import java.net.InetAddress
-import java.nio.file.Files
-import java.nio.file.Paths
 
 fun main(args: Array<String>) {
-    println("!> Fittonia Terminal Program 2 <!")
-    println()
-
-    val settingsManager = SettingsManager.settingsManager
     SettingsManager.settingsManager.saveSettings()
     when (val command = CommandHandler(args = args).getCommand()) {
         is AddCommand -> addExecution(command = command)
-
-        is RemoveCommand -> {
-            settingsManager.removeDestination(name = command.getName())
-        }
-
-        is ListDestinationsCommand -> {
-            println()
-            val printDestination: (SettingsManager.SettingsData.Destination) -> Unit = {
-                println("Name: " + it.name)
-                println("IP: " + it.ip)
-                println()
-            }
-            command.getName()?.let { searchName ->
-                settingsManager.settings.destinations.find { it.name == searchName }?.let {
-                    printDestination(it)
-                } ?: run {
-                    println("No destination found with that name.")
-                    println()
-                }
-            } ?: settingsManager.settings.destinations.forEach {
-                printDestination(it)
-            }
-        }
-
-        is DumpCommand -> {
-            command.getDumpPath()?.let {
-                val path = Paths.get(it).toAbsolutePath()
-                if (Files.exists(path)) {
-                    if (Files.isDirectory(path)) {
-                        settingsManager.setDumpPath(path.toString())
-
-                        if (Files.list(path).findFirst().isPresent) {
-                            println("Warning: New dump path is not empty.")
-                        }
-                    } else {
-                        println("Supplied path was not a valid directory.")
-                    }
-                } else {
-                    println("Supplied path does not exist.")
-                }
-            } ?: run {
-                if (settingsManager.settings.dumpPath.isEmpty()) {
-                    println("No dump path set.")
-                } else {
-                    println("Current dump path: " + settingsManager.settings.dumpPath)
-                }
-            }
-        }
-
-        is ServerCommand -> {
-            println("Server started, waiting for a client.")
-            val server = HMeadowSocketServer(port = command.getPort())
-            when(server.receiveInt()) {
-                ServerFlags.SEND_FILES -> {
-                    server.sendInt(ServerFlags.CONFIRM)
-                    println("TODO From client: " + server.receiveString())
-                }
-
-                ServerFlags.SEND_STRING -> {
-                    println("TODO SEND STRING")
-                }
-
-                ServerFlags.ADD_DESTINATION -> {
-                    server.sendInt(ServerFlags.CONFIRM) // TODO: Add password checking.
-                }
-                else -> {
-                    server.sendInt(ServerFlags.DENY)
-                    println("Received invalid server command from client.")
-                }
-            }
-        }
-
-        is SendFilesCommand -> {
-            val client = if(command.getDestination() != null) {
-                val destination = settingsManager.settings.destinations.find { it.name == command.getDestination() }
-                if (destination == null) {
-                    println("No registered destination found with the name: " + command.getDestination())
-                    return
-                }
-                HMeadowSocketClient(
-                    ipAddress = InetAddress.getByName(destination.ip), //"localhost"),
-                    port = command.getPort(),
-                )
-            } else {
-                HMeadowSocketClient(
-                    ipAddress = InetAddress.getByName(command.getIP()),
-                    port = command.getPort(),
-                )
-            }
-
-            client.sendInt(ServerFlags.SEND_FILES)
-            if(client.receiveInt() == ServerFlags.CONFIRM) {
-                client.sendString(command.getFiles())
-                println("TODO Send files")
-            } else {
-                println("TODO Server denied request.")
-            }
-        }
-
+        is RemoveCommand -> removeExecution(command = command)
+        is ListDestinationsCommand -> listDestinationsExecution(command = command)
+        is DumpCommand -> dumpExecution(command = command)
+        is ServerCommand -> serverExecution(command = command)
+        is SendFilesCommand -> sendFilesExecution(command = command)
         else -> throw IllegalStateException("No valid command detected.")
     }
 
