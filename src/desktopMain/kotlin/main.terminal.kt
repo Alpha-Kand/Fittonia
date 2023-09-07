@@ -7,6 +7,7 @@ import commandHandler.SendFilesCommand
 import commandHandler.ServerCommand
 import commandHandler.SetDefaultPortCommand
 import commandHandler.executeCommand.addExecution
+import commandHandler.executeCommand.dumpExecution
 import commandHandler.executeCommand.listDestinationsExecution
 import commandHandler.executeCommand.removeExecution
 import commandHandler.executeCommand.sendFilesExecution
