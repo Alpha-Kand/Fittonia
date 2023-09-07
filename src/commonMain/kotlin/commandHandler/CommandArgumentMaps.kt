@@ -6,6 +6,7 @@ const val listDestinationsCommand = "list"
 const val dumpCommand = "dump"
 const val serverCommand = "server"
 const val sendFilesCommand = "send"
+const val setDefaultPortCommand = "default-port"
 
 val nameArguments = listOf("--name", "-n")
 val ipArguments = listOf("--ip", "-i")
@@ -23,5 +24,6 @@ class ServerFlags {
 
         const val SEND_FILES = 100
         const val SEND_STRING = 101
+        const val ADD_DESTINATION = 102
     }
 }
