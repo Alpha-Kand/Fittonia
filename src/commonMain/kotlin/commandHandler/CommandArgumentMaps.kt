@@ -7,6 +7,7 @@ const val dumpCommand = "dump"
 const val serverCommand = "server"
 const val sendFilesCommand = "send"
 const val setDefaultPortCommand = "default-port"
+const val serverPasswordCommand = "server-password"
 
 val nameArguments = listOf("--name", "-n")
 val ipArguments = listOf("--ip", "-i")
@@ -16,6 +17,8 @@ val portArguments = listOf("--port", "-p")
 val destinationArguments = listOf("--destination", "-d", "--dest")
 val filesArguments = listOf("--files", "-f", "--source", "-s")
 val clearArguments = listOf("--clear")
+val newArguments = listOf("--new")
+val oldArguments = listOf("--old")
 
 class ServerFlags {
     companion object {

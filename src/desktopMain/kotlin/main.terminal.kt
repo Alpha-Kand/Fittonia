@@ -5,6 +5,7 @@ import commandHandler.ListDestinationsCommand
 import commandHandler.RemoveCommand
 import commandHandler.SendFilesCommand
 import commandHandler.ServerCommand
+import commandHandler.ServerPasswordCommand
 import commandHandler.SetDefaultPortCommand
 import commandHandler.executeCommand.addExecution
 import commandHandler.executeCommand.dumpExecution
@@ -12,6 +13,7 @@ import commandHandler.executeCommand.listDestinationsExecution
 import commandHandler.executeCommand.removeExecution
 import commandHandler.executeCommand.sendFilesExecution
 import commandHandler.executeCommand.serverExecution
+import commandHandler.executeCommand.serverPasswordExecution
 import commandHandler.executeCommand.setDefaultPortExecution
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
@@ -29,6 +31,7 @@ fun main(args: Array<String>) {
         is ServerCommand -> serverExecution(command = command)
         is SendFilesCommand -> sendFilesExecution(command = command)
         is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
+        is ServerPasswordCommand -> serverPasswordExecution(command = command)
         else -> throw IllegalStateException("No valid command detected.")
     }
 

@@ -12,6 +12,7 @@ class CommandHandler(private val args: Array<String>) {
         sendFilesCommand,
         serverCommand,
         setDefaultPortCommand,
+        serverPasswordCommand,
         "terminal",
     )
 
@@ -37,6 +38,7 @@ class CommandHandler(private val args: Array<String>) {
             serverCommand -> ServerCommand
             sendFilesCommand -> SendFilesCommand
             setDefaultPortCommand -> SetDefaultPortCommand
+            serverPasswordCommand -> ServerPasswordCommand
             else -> throw IllegalArgumentException()
         }
 
@@ -46,7 +48,7 @@ class CommandHandler(private val args: Array<String>) {
                     argumentName = par.substringBefore(delimiter = "="),
                     value = par.substringAfter(delimiter = "="),
                 )
-            } else if(Regex(pattern = "-{1,2}\\w+(?<!=)\$").containsMatchIn(par)) { // Flag.
+            } else if (Regex(pattern = "-{1,2}\\w+(?<!=)\$").containsMatchIn(par)) { // Flag.
                 command.addArg(
                     argumentName = par.substringBefore(delimiter = "="),
                     value = "",
@@ -70,9 +72,9 @@ sealed class Command {
         reportingName: String,
     ): T = requireNotNull(argument) { "Required argument was not found: $reportingName" }
 
-    fun tryCatch(argumentName: String, value:String, addArgBlock: () -> Boolean) {
+    fun tryCatch(argumentName: String, value: String, addArgBlock: () -> Boolean) {
         try {
-            if(addArgBlock()) return
+            if (addArgBlock()) return
 
             throw IllegalArgumentException("This command does not take this argument: $argumentName")
         } catch (e: IllegalStateException) {
@@ -83,8 +85,8 @@ sealed class Command {
     }
 }
 
-fun verifyPortNumber(port: Int?):Boolean {
-    if(port != null) {
+fun verifyPortNumber(port: Int?): Boolean {
+    if (port != null) {
         val commonReservedPortLimit = 1024
         val maxPortNumber = 65535
         if (port < commonReservedPortLimit || port > maxPortNumber) {
