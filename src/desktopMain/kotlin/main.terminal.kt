@@ -3,41 +3,35 @@ import commandHandler.CommandHandler
 import commandHandler.DumpCommand
 import commandHandler.ListDestinationsCommand
 import commandHandler.RemoveCommand
+import commandHandler.SendFilesCommand
+import commandHandler.ServerCommand
+import commandHandler.ServerPasswordCommand
+import commandHandler.SetDefaultPortCommand
+import commandHandler.executeCommand.addExecution
+import commandHandler.executeCommand.dumpExecution
+import commandHandler.executeCommand.listDestinationsExecution
+import commandHandler.executeCommand.removeExecution
+import commandHandler.executeCommand.sendFilesExecution
+import commandHandler.executeCommand.serverExecution
+import commandHandler.executeCommand.serverPasswordExecution
+import commandHandler.executeCommand.setDefaultPortExecution
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
 import settingsManager.SettingsManager
 import java.net.InetAddress
 
-const val PORT = 2334
-
 fun main(args: Array<String>) {
-    println("Fittonia Terminal Program 2")
-
-    val settings = SettingsManager.settingsManager
     SettingsManager.settingsManager.saveSettings()
     when (val command = CommandHandler(args = args).getCommand()) {
-        is AddCommand -> {
-            settings.addDestination(name = command.getName(), ip = command.getIP(), password = command.getPassword())
-        }
-
-        is RemoveCommand -> {
-            settings.removeDestination(name = command.getName())
-        }
-
-        is ListDestinationsCommand -> {
-            println()
-            settings.settings.destinations.forEach {
-                println("Name: " + it.name)
-                println("IP: " + it.ip)
-                println()
-            }
-        }
-
-        is DumpCommand -> {
-            settings.setDumpPath(command.getDumpPath())
-        }
-
+        is AddCommand -> addExecution(command = command)
+        is RemoveCommand -> removeExecution(command = command)
+        is ListDestinationsCommand -> listDestinationsExecution(command = command)
+        is DumpCommand -> dumpExecution(command = command)
+        is ServerCommand -> serverExecution(command = command)
+        is SendFilesCommand -> sendFilesExecution(command = command)
+        is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
+        is ServerPasswordCommand -> serverPasswordExecution(command = command)
         else -> throw IllegalStateException("No valid command detected.")
     }
 
@@ -47,7 +41,7 @@ fun main(args: Array<String>) {
         when (args[0]) {
             "server" -> {
                 println("SERVER")
-                val server = HMeadowSocketServer(port = PORT)
+                val server = HMeadowSocketServer(port = 2334)
 
                 print("Server Receiving: ")
                 println(server.receiveInt().toString())
@@ -72,7 +66,7 @@ fun main(args: Array<String>) {
                 println("CLIENT")
                 val client = HMeadowSocketClient(
                     ipAddress = InetAddress.getByName("localhost"),
-                    port = PORT,
+                    port = 2334,
                 )
 
                 println("Client Sending: 4")

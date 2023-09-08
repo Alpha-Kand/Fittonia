@@ -34,8 +34,8 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         private const val BUFFER_SIZE_INT: Int = 8192
     }
 
-    lateinit var mDataInput: DataInputStream
-    lateinit var mDataOutput: DataOutputStream
+    private lateinit var mDataInput: DataInputStream
+    private lateinit var mDataOutput: DataOutputStream
 
     override fun bindToSocket(socket: Socket) {
         mDataInput = DataInputStream(socket.getInputStream())

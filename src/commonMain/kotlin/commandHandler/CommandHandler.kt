@@ -1,18 +1,31 @@
 package commandHandler
 
-import java.util.Locale
+import hmeadowSocket.HMeadowSocket
+import hmeadowSocket.HMeadowSocketClient
+import hmeadowSocket.HMeadowSocketServer
+import settingsManager.SettingsManager
+import java.lang.NumberFormatException
 
 class CommandHandler(private val args: Array<String>) {
 
-    private val commands = listOf(addCommand, removeCommand, dumpCommand, listDestinationsCommand, "send", "server", "terminal")
+    private val commands = listOf(
+        addCommand,
+        removeCommand,
+        dumpCommand,
+        listDestinationsCommand,
+        sendFilesCommand,
+        serverCommand,
+        setDefaultPortCommand,
+        serverPasswordCommand,
+        "terminal",
+    )
 
     fun getCommand(): Command {
         val enteredCommands = mutableListOf<String>()
         val enteredParameters = mutableListOf<String>()
 
         args.forEach { arg ->
-            val lowerCaseArg = arg.lowercase(locale = Locale.ROOT)
-            commands.find { it == lowerCaseArg }?.let { command ->
+            commands.find { it == arg }?.let { command ->
                 enteredCommands.add(command)
             } ?: enteredParameters.add(arg)
         }
@@ -26,14 +39,23 @@ class CommandHandler(private val args: Array<String>) {
             removeCommand -> RemoveCommand
             listDestinationsCommand -> ListDestinationsCommand
             dumpCommand -> DumpCommand
+            serverCommand -> ServerCommand
+            sendFilesCommand -> SendFilesCommand
+            setDefaultPortCommand -> SetDefaultPortCommand
+            serverPasswordCommand -> ServerPasswordCommand
             else -> throw IllegalArgumentException()
         }
 
         enteredParameters.forEach { par ->
-            if (Regex(pattern = "\\w+=.+").containsMatchIn(par)) {
+            if (Regex(pattern = "-{1,2}\\w+=.+").containsMatchIn(par)) { // Passed value.
                 command.addArg(
-                    argumentName = par.substringBefore(delimiter = "=").lowercase(locale = Locale.ROOT),
+                    argumentName = par.substringBefore(delimiter = "="),
                     value = par.substringAfter(delimiter = "="),
+                )
+            } else if (Regex(pattern = "-{1,2}\\w+(?<!=)\$").containsMatchIn(par)) { // Flag.
+                command.addArg(
+                    argumentName = par.substringBefore(delimiter = "="),
+                    value = "",
                 )
             } else {
                 throw IllegalArgumentException("Invalid parameter: $par")
@@ -49,8 +71,61 @@ sealed class Command {
     abstract fun addArg(argumentName: String, value: String)
     abstract fun verify()
 
-    fun verifyArgumentIsSet(
-        argument: String?,
+    fun <T> verifyArgumentIsSet(
+        argument: T?,
         reportingName: String,
-    ): String = requireNotNull(argument) { "Required argument was not found: $reportingName" }
+    ): T = requireNotNull(argument) { "Required argument was not found: $reportingName" }
+
+    fun tryCatch(argumentName: String, value: String, addArgBlock: () -> Boolean) {
+        try {
+            if (addArgBlock()) return
+
+            throw IllegalArgumentException("This command does not take this argument: $argumentName")
+        } catch (e: IllegalStateException) {
+            throw IllegalStateException("Duplicate argument found: $argumentName")
+        } catch (e: NumberFormatException) {
+            throw IllegalStateException("Non-numerical port: $value")
+        }
+    }
+}
+
+fun verifyPortNumber(port: Int?): Boolean {
+    if (port != null) {
+        val commonReservedPortLimit = 1024
+        val maxPortNumber = 65535
+        if (port < commonReservedPortLimit || port > maxPortNumber) {
+            throw IllegalArgumentException(
+                "Given port out of range ($commonReservedPortLimit-$maxPortNumber): $port",
+            )
+        }
+        return true
+    }
+    return false
+}
+
+fun HMeadowSocketClient.sendPassword(password: String): Boolean {
+    sendString(password)
+    return receiveConfirmation()
+}
+
+fun HMeadowSocketServer.receivePassword(): Boolean {
+    return if (SettingsManager.settingsManager.checkPassword(receiveString())) {
+        sendConfirmation()
+        true
+    } else {
+        sendDeny()
+        false
+    }
+}
+
+fun HMeadowSocket.receiveConfirmation(): Boolean {
+    return receiveInt() == ServerFlags.CONFIRM
+}
+
+fun HMeadowSocket.sendConfirmation() {
+    sendInt(ServerFlags.CONFIRM)
+}
+
+fun HMeadowSocket.sendDeny() {
+    sendInt(ServerFlags.DENY)
 }

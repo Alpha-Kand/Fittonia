@@ -16,10 +16,14 @@ class SettingsManager private constructor() {
 
     companion object {
         val settingsManager = SettingsManager()
+        private const val DEFAULT_PORT = 61113 // Randomly chosen.
     }
 
-    private val settingsPath = "/home/hunterneo/Desktop/TRANSFER/fittoniaSettings|1.xml" // TODO
+    private val settingsPath = "/home/hunterneo/Desktop/TRANSFER/fittoniaSettings|3.xml" // TODO
     var settings = loadSettings()
+        private set
+
+    var defaultPort = settings.defaultPort
         private set
 
     private fun loadSettings(): SettingsData {
@@ -70,7 +74,7 @@ class SettingsManager private constructor() {
     }
 
     fun removeDestination(name: String) {
-        if(settings.destinations.find { it.name == name} == null){
+        if (settings.destinations.find { it.name == name } == null) {
             throw IllegalArgumentException("Destination with that name not found.")
         }
         settings = settings.copy(
@@ -79,13 +83,33 @@ class SettingsManager private constructor() {
         saveSettings()
     }
 
+    fun setDefaultPort(port: Int) {
+        settings = settings.copy(defaultPort = port)
+        saveSettings()
+    }
+
+    fun clearDefaultPort() = setDefaultPort(port = DEFAULT_PORT)
+
+    fun setServerPassword(newPassword: String) {
+        settings = settings.copy(serverPassword = newPassword)
+        saveSettings()
+    }
+
+    fun checkPassword(password: String): Boolean {
+        return settings.serverPassword == password
+    }
+
     data class SettingsData(
         val destinations: List<Destination>,
         val dumpPath: String,
+        val defaultPort: Int,
+        val serverPassword: String,
     ) {
         constructor() : this(
             destinations = emptyList(),
             dumpPath = "",
+            defaultPort = DEFAULT_PORT,
+            serverPassword = "",
         )
 
         data class Destination(
