@@ -1,5 +1,9 @@
 package commandHandler
 
+import hmeadowSocket.HMeadowSocket
+import hmeadowSocket.HMeadowSocketClient
+import hmeadowSocket.HMeadowSocketServer
+import settingsManager.SettingsManager
 import java.lang.NumberFormatException
 
 class CommandHandler(private val args: Array<String>) {
@@ -97,4 +101,31 @@ fun verifyPortNumber(port: Int?): Boolean {
         return true
     }
     return false
+}
+
+fun HMeadowSocketClient.sendPassword(password: String): Boolean {
+    sendString(password)
+    return receiveConfirmation()
+}
+
+fun HMeadowSocketServer.receivePassword(): Boolean {
+    return if (SettingsManager.settingsManager.checkPassword(receiveString())) {
+        sendConfirmation()
+        true
+    } else {
+        sendDeny()
+        false
+    }
+}
+
+fun HMeadowSocket.receiveConfirmation(): Boolean {
+    return receiveInt() == ServerFlags.CONFIRM
+}
+
+fun HMeadowSocket.sendConfirmation() {
+    sendInt(ServerFlags.CONFIRM)
+}
+
+fun HMeadowSocket.sendDeny() {
+    sendInt(ServerFlags.DENY)
 }

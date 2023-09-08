@@ -2,6 +2,8 @@ package commandHandler.executeCommand
 
 import commandHandler.SendFilesCommand
 import commandHandler.ServerFlags
+import commandHandler.receiveConfirmation
+import commandHandler.sendPassword
 import hmeadowSocket.HMeadowSocketClient
 import settingsManager.SettingsManager
 import java.net.InetAddress
@@ -28,10 +30,15 @@ fun sendFilesExecution(command: SendFilesCommand) {
     }
 
     client.sendInt(ServerFlags.SEND_FILES)
-    if (client.receiveInt() == ServerFlags.CONFIRM) {
+    if (client.receiveConfirmation()) {
+        if (!client.sendPassword(command.getPassword())) {
+            println("Server refused password.")
+            return
+        }
+
         client.sendString(command.getFiles())
         println("TODO Send files")
     } else {
-        println("TODO Server denied request.")
+        println("Connected, but request refused.")
     }
 }

@@ -95,6 +95,10 @@ class SettingsManager private constructor() {
         saveSettings()
     }
 
+    fun checkPassword(password: String): Boolean {
+        return settings.serverPassword == password
+    }
+
     data class SettingsData(
         val destinations: List<Destination>,
         val dumpPath: String,
