@@ -29,5 +29,18 @@ class ServerFlags {
         const val SEND_FILES = 100
         const val SEND_STRING = 101
         const val ADD_DESTINATION = 102
+
+        const val HAVE_JOB_NAME = 103
+        const val NEED_JOB_NAME = 104
+    }
+}
+
+class FileTransfer {
+    companion object {
+        const val tempPrefix = "fittonia"
+        const val tempSuffix = ".fittonia"
+
+        const val filePrefix = "F?"
+        const val dirPrefix = "D?"
     }
 }

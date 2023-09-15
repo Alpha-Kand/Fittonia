@@ -99,17 +99,26 @@ class SettingsManager private constructor() {
         return settings.serverPassword == password
     }
 
+    fun getAutoJobName(): String {
+        val jobName = settings.nextAutoJobName
+        settings = settings.copy(nextAutoJobName = jobName + 1)
+        saveSettings()
+        return jobName.toString()
+    }
+
     data class SettingsData(
         val destinations: List<Destination>,
         val dumpPath: String,
         val defaultPort: Int,
         val serverPassword: String,
+        val nextAutoJobName: Long,
     ) {
         constructor() : this(
             destinations = emptyList(),
             dumpPath = "",
             defaultPort = DEFAULT_PORT,
             serverPassword = "",
+            nextAutoJobName = 0,
         )
 
         data class Destination(

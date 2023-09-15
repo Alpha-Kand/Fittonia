@@ -11,11 +11,7 @@ fun serverExecution(command: ServerCommand) {
     println("Server started, waiting for a client.")
     val server = HMeadowSocketServer(port = command.getPort())
     when (server.receiveInt()) {
-        ServerFlags.SEND_FILES -> {
-            server.sendConfirmation()
-            if (!server.receivePassword()) return
-            println("TODO From client: " + server.receiveString())
-        }
+        ServerFlags.SEND_FILES -> serverSendFilesExecution(server = server)
 
         ServerFlags.SEND_STRING -> {
             server.sendConfirmation()
