@@ -19,6 +19,7 @@ val filesArguments = listOf("--files", "-f", "--source", "-s")
 val clearArguments = listOf("--clear")
 val newArguments = listOf("--new")
 val oldArguments = listOf("--old")
+val jobArguments = listOf("--job", "-j")
 
 class ServerFlags {
     companion object {

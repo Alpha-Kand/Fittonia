@@ -46,21 +46,34 @@ class CommandHandler(private val args: Array<String>) {
             else -> throw IllegalArgumentException()
         }
 
+        var collectSources = false
+        val sourceList = mutableListOf<String>()
+
         enteredParameters.forEach { par ->
-            if (Regex(pattern = "-{1,2}\\w+=.+").containsMatchIn(par)) { // Passed value.
+            if (collectSources) {
+                sourceList.add(par)
+            } else if (Regex(pattern = "-{1,2}\\w+=.+").containsMatchIn(par)) { // Passed value.
                 command.addArg(
                     argumentName = par.substringBefore(delimiter = "="),
                     value = par.substringAfter(delimiter = "="),
                 )
             } else if (Regex(pattern = "-{1,2}\\w+(?<!=)\$").containsMatchIn(par)) { // Flag.
+                val arg = par.substringBefore(delimiter = "=")
                 command.addArg(
-                    argumentName = par.substringBefore(delimiter = "="),
+                    argumentName = arg,
                     value = "",
                 )
+                if (filesArguments.contains(arg)) {
+                    collectSources = true
+                }
             } else {
                 throw IllegalArgumentException("Invalid parameter: $par")
             }
         }
+        if (command is SendFilesCommand) {
+            command.setFiles(sourceList.toList())
+        }
+
         command.verify()
         return command
     }
