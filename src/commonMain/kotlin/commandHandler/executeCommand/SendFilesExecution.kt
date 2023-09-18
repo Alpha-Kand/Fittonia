@@ -3,12 +3,9 @@ package commandHandler.executeCommand
 import commandHandler.FileTransfer
 import commandHandler.SendFilesCommand
 import commandHandler.ServerFlags
-import commandHandler.receiveConfirmation
-import commandHandler.sendPassword
-import hmeadowSocket.HMeadowSocketClient
-import settingsManager.SettingsManager
+import commandHandler.canContinue
+import commandHandler.setupSendCommandClient
 import java.io.File
-import java.net.InetAddress
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -17,32 +14,9 @@ import java.util.stream.Collectors
 import kotlin.io.path.isRegularFile
 
 fun sendFilesExecution(command: SendFilesCommand) {
-    val client = if (command.getDestination() != null) {
-        val destination = SettingsManager
-            .settingsManager
-            .settings
-            .destinations.find { it.name == command.getDestination() }
-        if (destination == null) {
-            println("No registered destination found with the name: " + command.getDestination())
-            return
-        }
-        HMeadowSocketClient(
-            ipAddress = InetAddress.getByName(destination.ip), // "localhost"),
-            port = command.getPort(),
-        )
-    } else {
-        HMeadowSocketClient(
-            ipAddress = InetAddress.getByName(command.getIP()),
-            port = command.getPort(),
-        )
-    }
-
+    val client = setupSendCommandClient(command = command)
     client.sendInt(ServerFlags.SEND_FILES)
-    if (client.receiveConfirmation()) {
-        if (!client.sendPassword(command.getPassword())) {
-            println("Server refused password.")
-            return
-        }
+    if (canContinue(command = command, client = client)) {
         command.getJob()?.let { jobName ->
             client.sendInt(ServerFlags.HAVE_JOB_NAME)
             client.sendString(jobName)
@@ -77,8 +51,6 @@ fun sendFilesExecution(command: SendFilesCommand) {
                 }
             }
         }
-    } else {
-        println("Connected, but request refused.")
     }
 }
 
@@ -114,7 +86,7 @@ private fun getFileList(input: List<String>): List<Pair<Path, Path>> {
                 Files.find(
                     path,
                     Int.MAX_VALUE,
-                    { filePath: Path?, fileAttr: BasicFileAttributes -> fileAttr.isRegularFile || fileAttr.isDirectory },
+                    { _: Path?, fileAttr: BasicFileAttributes -> fileAttr.isRegularFile || fileAttr.isDirectory },
                 ).forEach { x: Path? ->
                     x?.let {
                         // println(path.parent.relativize(it))
