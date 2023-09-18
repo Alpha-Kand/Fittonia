@@ -2,7 +2,7 @@ package commandHandler
 
 import requireNull
 
-object SendFilesCommand : Command() {
+object SendFilesCommand : Command {
     private var port: String? = null
     private var destination: String? = null
     private var files: List<String>? = null

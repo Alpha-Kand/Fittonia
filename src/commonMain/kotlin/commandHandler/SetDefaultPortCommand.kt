@@ -1,9 +1,8 @@
 package commandHandler
 
 import requireNull
-import java.lang.NumberFormatException
 
-object SetDefaultPortCommand : Command() {
+object SetDefaultPortCommand : Command {
     private var port: Int? = null
     private var clear: Boolean = false
 
@@ -11,7 +10,7 @@ object SetDefaultPortCommand : Command() {
     fun getClear() = clear
 
     override fun verify() {
-        if(verifyPortNumber(port) && clear){
+        if (verifyPortNumber(port) && clear) {
             throw IllegalStateException("Cannot set and reset default port at the same time.")
         }
     }
@@ -25,7 +24,7 @@ object SetDefaultPortCommand : Command() {
             }
 
             if (clearArguments.contains(argumentName)) {
-                if(value.isEmpty()) {
+                if (value.isEmpty()) {
                     clear = true
                     return
                 } else {

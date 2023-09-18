@@ -2,7 +2,7 @@ package commandHandler
 
 import requireNull
 
-object RemoveCommand : Command() {
+object RemoveCommand : Command {
     private var name: String? = null
 
     fun getName() = verifyArgumentIsSet(argument = name, reportingName = nameArguments.first())

@@ -2,7 +2,7 @@ package commandHandler
 
 import requireNull
 
-object ListDestinationsCommand : Command() {
+object ListDestinationsCommand : Command {
     private var name: String? = null
 
     fun getName() = name

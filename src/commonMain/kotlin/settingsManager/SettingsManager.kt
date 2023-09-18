@@ -106,6 +106,15 @@ class SettingsManager private constructor() {
         return jobName.toString()
     }
 
+    fun findDestination(destinationName: String?): SettingsData.Destination? {
+        return destinationName?.let {
+            settingsManager
+                .settings
+                .destinations.find { it.name == destinationName }
+                ?: throw IllegalArgumentException("No registered destination found with the name: $destinationName")
+        }
+    }
+
     data class SettingsData(
         val destinations: List<Destination>,
         val dumpPath: String,
