@@ -10,6 +10,19 @@ const val setDefaultPortCommand = "default-port"
 const val serverPasswordCommand = "server-password"
 const val sendStringCommand = "send-message"
 
+val commands = listOf(
+    addCommand,
+    removeCommand,
+    dumpCommand,
+    listDestinationsCommand,
+    sendFilesCommand,
+    serverCommand,
+    setDefaultPortCommand,
+    serverPasswordCommand,
+    sendStringCommand,
+    "terminal",
+)
+
 val nameArguments = listOf("--name", "-n")
 val ipArguments = listOf("--ip", "-i")
 val passwordArguments = listOf("--password", "-P", "--pw")

@@ -1,24 +1,6 @@
 package commandHandler
 
-import hmeadowSocket.HMeadowSocket
-import hmeadowSocket.HMeadowSocketClient
-import hmeadowSocket.HMeadowSocketServer
-import settingsManager.SettingsManager
-import java.lang.NumberFormatException
-
 class CommandHandler(private val args: Array<String>) {
-
-    private val commands = listOf(
-        addCommand,
-        removeCommand,
-        dumpCommand,
-        listDestinationsCommand,
-        sendFilesCommand,
-        serverCommand,
-        setDefaultPortCommand,
-        serverPasswordCommand,
-        "terminal",
-    )
 
     fun getCommand(): Command {
         val enteredCommands = mutableListOf<String>()
