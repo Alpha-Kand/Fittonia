@@ -2,7 +2,7 @@ package commandHandler
 
 import requireNull
 
-object ServerPasswordCommand : Command() {
+object ServerPasswordCommand : Command {
     private var newPassword: String? = null
     private var oldPassword: String? = null
 

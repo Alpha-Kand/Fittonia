@@ -21,7 +21,11 @@ interface HMeadowSocketInterface {
     fun receiveLong(): Long
 
     fun sendFile(filePath: String, rename: String = "")
-    fun receiveFile(destination: String): String
+    fun receiveFile(
+        destination: String,
+        prefix: String,
+        suffix: String,
+    ): Pair<String, String>
 
     fun sendString(message: String)
     fun receiveString(): String
@@ -82,7 +86,11 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         bufferedReadFile.close()
     }
 
-    override fun receiveFile(destination: String): String {
+    override fun receiveFile(
+        destination: String,
+        prefix: String,
+        suffix: String,
+    ): Pair<String, String> {
         /* Must receive the following information in order.
            1. (8 byte int) File size in bytes.
            2. (127 char bytes) File name. Character bytes at beginning of buffer, then blank spaces
@@ -94,13 +102,16 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         // 1. Get total file size in bytes.
         var transferByteCount = receiveLong()
         // 2. Get file name.
-        val fileName = destination + receiveString()
+        val fileName = receiveString()
         // 3. Receive and write file data.
+        val file = if (destination.isEmpty()) {
+            File.createTempFile(prefix, suffix)
+        } else {
+            File.createTempFile(prefix, suffix, File(Path("$destination/").toString()))
+        }
         if (transferByteCount == 0L) {
             // File to transfer is empty, just create a new empty file.
-            File(fileName).createNewFile()
         } else {
-            val file = File(fileName)
             while (transferByteCount > 0) {
                 // Read next amount of data from socket.
                 val readByteArray = readNBytes(transferByteCount.coerceAtMost(BUFFER_SIZE_LONG).toInt())
@@ -112,7 +123,7 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
             }
         }
 
-        return fileName
+        return file.absolutePath to fileName
     }
 
     /**
@@ -250,8 +261,12 @@ class HMeadowSocketInterfaceTest : HMeadowSocketInterface {
     override fun receiveLong() = 5L
 
     override fun sendFile(filePath: String, rename: String) {}
-    override fun receiveFile(destination: String): String {
-        return ""
+    override fun receiveFile(
+        destination: String,
+        prefix: String,
+        suffix: String,
+    ): Pair<String, String> {
+        return "" to ""
     }
 
     override fun sendString(message: String) {}

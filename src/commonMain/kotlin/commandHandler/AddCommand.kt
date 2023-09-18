@@ -2,7 +2,7 @@ package commandHandler
 
 import requireNull
 
-object AddCommand : Command() {
+object AddCommand : Command {
     private var name: String? = null
     private var ip: String? = null
     private var password: String? = null

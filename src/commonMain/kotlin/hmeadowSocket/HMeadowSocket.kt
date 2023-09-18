@@ -24,8 +24,20 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
     fun sendString(message: String) = socketInterface.sendString(message)
     fun receiveString() = socketInterface.receiveString()
 
-    fun sendFile(filePath: String, rename: String = "") = socketInterface.sendFile(filePath = filePath, rename = rename)
-    fun receiveFile(destination: String): String = socketInterface.receiveFile(destination = destination)
+    fun sendFile(
+        filePath: String,
+        rename: String = "",
+    ) = socketInterface.sendFile(filePath = filePath, rename = rename)
+
+    fun receiveFile(
+        destination: String = "",
+        prefix: String = "___",
+        suffix: String = "___",
+    ): Pair<String, String> = socketInterface.receiveFile(
+        destination = destination,
+        prefix = prefix,
+        suffix = suffix,
+    )
 }
 
 class HMeadowSocketServer(
