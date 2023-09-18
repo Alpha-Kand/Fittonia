@@ -8,6 +8,7 @@ const val serverCommand = "server"
 const val sendFilesCommand = "send"
 const val setDefaultPortCommand = "default-port"
 const val serverPasswordCommand = "server-password"
+const val sendStringCommand = "send-message"
 
 val nameArguments = listOf("--name", "-n")
 val ipArguments = listOf("--ip", "-i")
@@ -20,6 +21,7 @@ val clearArguments = listOf("--clear")
 val newArguments = listOf("--new")
 val oldArguments = listOf("--old")
 val jobArguments = listOf("--job", "-j")
+val stringArguments = listOf("--message", "--string")
 
 class ServerFlags {
     companion object {

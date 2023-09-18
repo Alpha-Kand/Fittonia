@@ -16,7 +16,8 @@ fun serverExecution(command: ServerCommand) {
         ServerFlags.SEND_STRING -> {
             server.sendConfirmation()
             if (!server.receivePassword()) return
-            println("TODO SEND STRING")
+            println("Received message from client.")
+            println(server.receiveString())
         }
 
         ServerFlags.ADD_DESTINATION -> {

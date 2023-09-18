@@ -43,6 +43,7 @@ class CommandHandler(private val args: Array<String>) {
             sendFilesCommand -> SendFilesCommand
             setDefaultPortCommand -> SetDefaultPortCommand
             serverPasswordCommand -> ServerPasswordCommand
+            sendStringCommand -> SendStringCommand
             else -> throw IllegalArgumentException()
         }
 
