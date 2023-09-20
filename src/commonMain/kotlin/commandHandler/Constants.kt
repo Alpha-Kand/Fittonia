@@ -8,7 +8,7 @@ const val serverCommand = "server"
 const val sendFilesCommand = "send"
 const val setDefaultPortCommand = "default-port"
 const val serverPasswordCommand = "server-password"
-const val sendStringCommand = "send-message"
+const val sendMessageCommand = "send-message"
 
 val commands = listOf(
     addCommand,
@@ -19,7 +19,7 @@ val commands = listOf(
     serverCommand,
     setDefaultPortCommand,
     serverPasswordCommand,
-    sendStringCommand,
+    sendMessageCommand,
     "terminal",
 )
 
@@ -34,7 +34,7 @@ val clearArguments = listOf("--clear")
 val newArguments = listOf("--new")
 val oldArguments = listOf("--old")
 val jobArguments = listOf("--job", "-j")
-val stringArguments = listOf("--message", "--string")
+val messageArguments = listOf("--message", "--string")
 
 class ServerFlags {
     companion object {
@@ -42,7 +42,7 @@ class ServerFlags {
         const val DENY = 51
 
         const val SEND_FILES = 100
-        const val SEND_STRING = 101
+        const val SEND_MESSAGE = 101
         const val ADD_DESTINATION = 102
 
         const val HAVE_JOB_NAME = 103

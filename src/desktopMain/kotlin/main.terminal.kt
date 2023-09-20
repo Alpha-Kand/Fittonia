@@ -4,7 +4,7 @@ import commandHandler.DumpCommand
 import commandHandler.ListDestinationsCommand
 import commandHandler.RemoveCommand
 import commandHandler.SendFilesCommand
-import commandHandler.SendStringCommand
+import commandHandler.SendMessageCommand
 import commandHandler.ServerCommand
 import commandHandler.ServerPasswordCommand
 import commandHandler.SetDefaultPortCommand
@@ -13,7 +13,7 @@ import commandHandler.executeCommand.dumpExecution
 import commandHandler.executeCommand.listDestinationsExecution
 import commandHandler.executeCommand.removeExecution
 import commandHandler.executeCommand.sendFilesExecution
-import commandHandler.executeCommand.sendStringExecution
+import commandHandler.executeCommand.sendMessageExecution
 import commandHandler.executeCommand.serverExecution
 import commandHandler.executeCommand.serverPasswordExecution
 import commandHandler.executeCommand.setDefaultPortExecution
@@ -31,7 +31,7 @@ fun main(args: Array<String>) {
         is SendFilesCommand -> sendFilesExecution(command = command)
         is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
         is ServerPasswordCommand -> serverPasswordExecution(command = command)
-        is SendStringCommand -> sendStringExecution(command = command)
+        is SendMessageCommand -> sendMessageExecution(command = command)
         else -> throw IllegalStateException("No valid command detected.")
     }
 

@@ -1,14 +1,14 @@
 package commandHandler.executeCommand
 
-import commandHandler.SendStringCommand
+import commandHandler.SendMessageCommand
 import commandHandler.ServerFlags
 import commandHandler.canContinue
 import commandHandler.setupSendCommandClient
 
-fun sendStringExecution(command: SendStringCommand) {
+fun sendMessageExecution(command: SendMessageCommand) {
     val client = setupSendCommandClient(command = command)
-    client.sendInt(ServerFlags.SEND_STRING)
+    client.sendInt(ServerFlags.SEND_MESSAGE)
     if (canContinue(command = command, client = client)) {
-        client.sendString(command.getString())
+        client.sendString(command.getMessage())
     }
 }

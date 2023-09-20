@@ -25,36 +25,38 @@ class CommandHandler(private val args: Array<String>) {
             sendFilesCommand -> SendFilesCommand
             setDefaultPortCommand -> SetDefaultPortCommand
             serverPasswordCommand -> ServerPasswordCommand
-            sendStringCommand -> SendStringCommand
+            sendMessageCommand -> SendMessageCommand
             else -> throw IllegalArgumentException()
         }
 
-        var collectSources = false
-        val sourceList = mutableListOf<String>()
+        var collectTrailingArgs = false
+        val trailingArgs = mutableListOf<String>()
 
         enteredParameters.forEach { par ->
-            if (collectSources) {
-                sourceList.add(par)
+            if (collectTrailingArgs) {
+                trailingArgs.add(par)
             } else if (Regex(pattern = "-{1,2}\\w+=.+").containsMatchIn(par)) { // Passed value.
                 command.addArg(
                     argumentName = par.substringBefore(delimiter = "="),
                     value = par.substringAfter(delimiter = "="),
                 )
             } else if (Regex(pattern = "-{1,2}\\w+(?<!=)\$").containsMatchIn(par)) { // Flag.
-                val arg = par.substringBefore(delimiter = "=")
                 command.addArg(
-                    argumentName = arg,
+                    argumentName = par,
                     value = "",
                 )
-                if (filesArguments.contains(arg)) {
-                    collectSources = true
+                if (filesArguments.contains(par) || messageArguments.contains(par)) {
+                    collectTrailingArgs = true
                 }
             } else {
                 throw IllegalArgumentException("Invalid parameter: $par")
             }
         }
         if (command is SendFilesCommand) {
-            command.setFiles(sourceList.toList())
+            command.setFiles(trailingArgs.toList())
+        }
+        if (command is SendMessageCommand) {
+            command.setMessage(trailingArgs.joinToString(separator = " "))
         }
 
         command.verify()

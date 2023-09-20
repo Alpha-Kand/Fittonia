@@ -13,7 +13,7 @@ fun serverExecution(command: ServerCommand) {
     when (server.receiveInt()) {
         ServerFlags.SEND_FILES -> serverSendFilesExecution(server = server)
 
-        ServerFlags.SEND_STRING -> {
+        ServerFlags.SEND_MESSAGE -> {
             server.sendConfirmation()
             if (!server.receivePassword()) return
             println("Received message from client.")
