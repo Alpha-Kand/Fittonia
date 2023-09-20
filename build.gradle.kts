@@ -61,14 +61,29 @@ kotlin {
 }
 compose.desktop {
     application {
-        mainClass = "Main_terminalKt" // "Main_desktopKt" "Main_terminalKt"
+        val buildType = Properties().run {
+            load(file("local.properties").inputStream())
+            getProperty("DESKTOP_BUILD_TYPE", "")
+        }.toInt()
+
+        mainClass = when (buildType) {
+            1 -> "Main_terminalKt"
+            2 -> "Main_clientengineKt"
+            3 -> "Main_desktopKt"
+            else -> "???"
+        }
 
         nativeDistributions {
             targetFormats(
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb,
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.AppImage,
             )
-            packageName = "FittoniaTerminal" // "FittoniaDesktop" "FittoniaTerminal"
+            packageName = when (buildType) {
+                1 -> "FittoniaTerminal"
+                2 -> "FittoniaClientEngine"
+                3 -> "FittoniaDesktop"
+                else -> "???"
+            }
             packageVersion = "1.0"
         }
     }
