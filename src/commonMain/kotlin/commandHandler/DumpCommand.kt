@@ -2,7 +2,7 @@ package commandHandler
 
 import requireNull
 
-object DumpCommand : Command {
+class DumpCommand : Command {
     private var path: String? = null
 
     fun getDumpPath() = path

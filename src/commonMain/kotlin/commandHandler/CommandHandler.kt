@@ -1,6 +1,6 @@
 package commandHandler
 
-class CommandHandler(private val args: Array<String>) {
+class CommandHandler(private val args: List<String>) {
 
     fun getCommand(): Command {
         val enteredCommands = mutableListOf<String>()
@@ -17,15 +17,16 @@ class CommandHandler(private val args: Array<String>) {
         }
 
         val command = when (enteredCommands.first()) {
-            addCommand -> AddCommand
-            removeCommand -> RemoveCommand
-            listDestinationsCommand -> ListDestinationsCommand
-            dumpCommand -> DumpCommand
-            serverCommand -> ServerCommand
-            sendFilesCommand -> SendFilesCommand
-            setDefaultPortCommand -> SetDefaultPortCommand
-            serverPasswordCommand -> ServerPasswordCommand
-            sendMessageCommand -> SendMessageCommand
+            addCommand -> AddCommand()
+            removeCommand -> RemoveCommand()
+            listDestinationsCommand -> ListDestinationsCommand()
+            dumpCommand -> DumpCommand()
+            serverCommand -> ServerCommand()
+            sendFilesCommand -> SendFilesCommand()
+            setDefaultPortCommand -> SetDefaultPortCommand()
+            serverPasswordCommand -> ServerPasswordCommand()
+            sendMessageCommand -> SendMessageCommand()
+            exitCommand -> ExitCommand
             else -> throw IllegalArgumentException()
         }
 

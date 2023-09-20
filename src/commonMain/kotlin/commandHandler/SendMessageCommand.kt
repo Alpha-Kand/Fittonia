@@ -1,6 +1,6 @@
 package commandHandler
 
-object SendMessageCommand : SendCommand(), Command {
+class SendMessageCommand : SendCommand(), Command {
     private var message: String? = null
 
     fun getMessage() = verifyArgumentIsSet(argument = message, reportingName = messageArguments.first())

@@ -9,6 +9,7 @@ const val sendFilesCommand = "send"
 const val setDefaultPortCommand = "default-port"
 const val serverPasswordCommand = "server-password"
 const val sendMessageCommand = "send-message"
+const val exitCommand = "exit"
 
 val commands = listOf(
     addCommand,
@@ -20,7 +21,7 @@ val commands = listOf(
     setDefaultPortCommand,
     serverPasswordCommand,
     sendMessageCommand,
-    "terminal",
+    exitCommand,
 )
 
 val nameArguments = listOf("--name", "-n")

@@ -2,7 +2,7 @@ package commandHandler
 
 import requireNull
 
-object SetDefaultPortCommand : Command {
+class SetDefaultPortCommand : Command {
     private var port: Int? = null
     private var clear: Boolean = false
 
