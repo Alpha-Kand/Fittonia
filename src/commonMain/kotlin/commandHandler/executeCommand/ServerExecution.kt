@@ -9,7 +9,7 @@ import hmeadowSocket.HMeadowSocketServer
 
 fun serverExecution(command: ServerCommand) {
     println("Server started, waiting for a client.")
-    val server = HMeadowSocketServer(port = command.getPort())
+    val server = HMeadowSocketServer.getServer(port = command.getPort())
     when (server.receiveInt()) {
         ServerFlags.SEND_FILES -> serverSendFilesExecution(server = server)
 

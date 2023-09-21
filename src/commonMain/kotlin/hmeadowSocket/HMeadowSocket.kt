@@ -40,15 +40,36 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
     )
 }
 
-class HMeadowSocketServer(
-    port: Int,
+class HMeadowSocketServer private constructor(
+    socket: Socket,
     override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
 ) : HMeadowSocket(socketInterface) {
     init {
         try {
-            socketInterface.bindToSocket(ServerSocket(port).accept())
+            socketInterface.bindToSocket(socket)
         } catch (e: Exception) {
             throw HMeadowSocketError(errorType = SocketErrorType.SERVER_SETUP, error = e)
+        }
+    }
+
+    private data class ActiveServerSocket(
+        val serverSocket: ServerSocket,
+        val port: Int,
+    )
+
+    companion object {
+        private val mActiveServers = mutableListOf<ActiveServerSocket>()
+
+        fun getServer(port: Int): HMeadowSocketServer {
+            return HMeadowSocketServer(
+                socket = mActiveServers.find {
+                    it.port == port
+                }?.serverSocket?.accept() ?: run {
+                    val newServerSocket = ServerSocket(port)
+                    mActiveServers.add(ActiveServerSocket(serverSocket = newServerSocket, port = port))
+                    newServerSocket.accept()
+                },
+            )
         }
     }
 }

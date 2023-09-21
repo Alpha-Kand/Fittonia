@@ -12,7 +12,7 @@ import java.util.Arrays
 import kotlin.io.path.Path
 
 interface HMeadowSocketInterface {
-    fun bindToSocket(socket: Socket) {}
+    fun bindToSocket(socket: Socket)
 
     fun sendInt(message: Int)
     fun receiveInt(): Int
