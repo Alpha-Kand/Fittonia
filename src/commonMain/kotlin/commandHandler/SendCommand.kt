@@ -6,12 +6,12 @@ import settingsManager.SettingsManager
 import java.net.InetAddress
 
 sealed class SendCommand : Command {
-    private var port: String? = null
+    private var port: Int? = null
     private var destination: String? = null
     private var ip: String? = null
     private var password: String? = null
 
-    fun getPort() = verifyArgumentIsSet(argument = port, reportingName = portArguments.first()).toInt()
+    fun getPort() = verifyArgumentIsSet(argument = port, reportingName = portArguments.first())
     fun getDestination() = destination
     fun getIP() = verifyArgumentIsSet(argument = ip, reportingName = ipArguments.first())
     fun getPassword() = verifyArgumentIsSet(argument = password, reportingName = passwordArguments.first())
@@ -21,13 +21,13 @@ sealed class SendCommand : Command {
             getIP()
             getPassword()
         }
-        getPort()
+        verifyPortNumber(port)
     }
 
     fun handleSendCommandArgument(argumentName: String, value: String): Boolean {
         if (portArguments.contains(argumentName)) {
             requireNull(port)
-            port = value
+            port = value.toInt()
             return true
         }
         if (destinationArguments.contains(argumentName)) {
