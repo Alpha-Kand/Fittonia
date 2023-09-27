@@ -1,5 +1,8 @@
 package commandHandler
 
+import FittoniaError
+import FittoniaErrorType
+
 class SendMessageCommand : SendCommand(), Command {
     private var message: String? = null
 
@@ -9,7 +12,7 @@ class SendMessageCommand : SendCommand(), Command {
         if (message == null) {
             message = input
         } else {
-            throw IllegalStateException("Tried to set message more than once.")
+            throw FittoniaError(FittoniaErrorType.CANT_SEND_MESSAGE_TWICE)
         }
     }
 

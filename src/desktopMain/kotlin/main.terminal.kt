@@ -23,28 +23,21 @@ import java.util.Scanner
 import java.util.concurrent.TimeUnit
 
 fun main(args: Array<String>) {
-    SettingsManager.settingsManager.saveSettings()
-    if (args.isNotEmpty()) {
-        handleArguments(args.toList())
-    }
-    val scanner = Scanner(System.`in`)
-    do {
-        print("> ")
-        val input = scanner.nextLine()?.split(" ") ?: return
-        val shouldContinue = handleArguments(input)
-    } while (shouldContinue)
-
-    return
-
     try {
-    } catch (e: HMeadowSocket.HMeadowSocketError) {
-        when (e.errorType) {
-            HMeadowSocket.SocketErrorType.CLIENT_SETUP -> print("There was an error setting up CLIENT")
-            HMeadowSocket.SocketErrorType.SERVER_SETUP -> print("There was an error setting up SERVER")
+        SettingsManager.settingsManager.saveSettings()
+        if (args.isNotEmpty()) {
+            handleArguments(args.toList())
         }
-        e.message?.let {
-            println(" " + e.message)
-        } ?: println(".")
+        val scanner = Scanner(System.`in`)
+        do {
+            print("> ")
+            val input = scanner.nextLine()?.split(" ") ?: return
+            val shouldContinue = handleArguments(input)
+        } while (shouldContinue)
+    } catch (e: FittoniaError) {
+        reportFittoniaError(e)
+    } catch (e: HMeadowSocket.HMeadowSocketError) {
+        reportHMSocketError(e)
     }
 }
 

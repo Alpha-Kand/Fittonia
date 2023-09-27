@@ -1,5 +1,8 @@
 package commandHandler
 
+import FittoniaError
+import FittoniaErrorType
+
 class CommandHandler(private val args: List<String>) {
 
     fun getCommand(): Command {
@@ -13,21 +16,26 @@ class CommandHandler(private val args: List<String>) {
         }
 
         if (enteredCommands.size > 1 || enteredCommands.isEmpty()) {
-            throw IllegalStateException("Invalid number of commands detected: " + enteredCommands.size.toString())
+            throw FittoniaError(FittoniaErrorType.INVALID_NUM_OF_COMMANDS, enteredCommands.size)
         }
 
-        val command = when (enteredCommands.first()) {
-            addCommand -> AddCommand()
-            removeCommand -> RemoveCommand()
-            listDestinationsCommand -> ListDestinationsCommand()
-            dumpCommand -> DumpCommand()
-            serverCommand -> ServerCommand()
-            sendFilesCommand -> SendFilesCommand()
-            setDefaultPortCommand -> SetDefaultPortCommand()
-            serverPasswordCommand -> ServerPasswordCommand()
-            sendMessageCommand -> SendMessageCommand()
-            exitCommand -> ExitCommand
-            else -> throw IllegalArgumentException()
+        val command: Command
+        try {
+            command = when (enteredCommands.first()) {
+                addCommand -> AddCommand()
+                removeCommand -> RemoveCommand()
+                listDestinationsCommand -> ListDestinationsCommand()
+                dumpCommand -> DumpCommand()
+                serverCommand -> ServerCommand()
+                sendFilesCommand -> SendFilesCommand()
+                setDefaultPortCommand -> SetDefaultPortCommand()
+                serverPasswordCommand -> ServerPasswordCommand()
+                sendMessageCommand -> SendMessageCommand()
+                exitCommand -> ExitCommand
+                else -> throw IllegalArgumentException()
+            }
+        } catch (_: Exception) {
+            throw FittoniaError(FittoniaErrorType.INVALID_NUM_OF_COMMANDS, 0)
         }
 
         var collectTrailingArgs = false
@@ -50,7 +58,7 @@ class CommandHandler(private val args: List<String>) {
                     collectTrailingArgs = true
                 }
             } else {
-                throw IllegalArgumentException("Invalid parameter: $par")
+                throw FittoniaError(FittoniaErrorType.INVALID_ARGUMENT, par)
             }
         }
         if (command is SendFilesCommand) {
