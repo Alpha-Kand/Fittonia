@@ -55,7 +55,9 @@ kotlin {
 
         val desktopMain by getting {
             dependencies {
+                implementation(libs.kotlinx.coroutines.core.library)
                 implementation(compose.desktop.currentOs)
+                implementation(libs.kotter.library)
             }
         }
     }
