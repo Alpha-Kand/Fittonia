@@ -57,9 +57,7 @@ class SettingsManager private constructor() {
         password: String,
     ) {
         if (settings.destinations.find { it.name == name } != null) {
-            throw IllegalArgumentException(
-                "A destination with that name is already registered. Delete the old one and try again.",
-            )
+            throw FittoniaError(FittoniaErrorType.ADD_DESTINATION_ALREADY_EXISTS)
         }
         settings = settings.copy(
             destinations = settings.destinations + listOf(

@@ -21,6 +21,9 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
     fun sendLong(message: Long) = socketInterface.sendLong(message)
     fun receiveLong() = socketInterface.receiveLong()
 
+    fun sendBoolean(message: Boolean) = socketInterface.sendBoolean(message)
+    fun receiveBoolean() = socketInterface.receiveBoolean()
+
     fun sendString(message: String) = socketInterface.sendString(message)
     fun receiveString() = socketInterface.receiveString()
 

@@ -20,7 +20,7 @@ sealed class SendCommand : Command {
 
     override fun verify() {
         if (destination == null) {
-            getIP()
+            // getIP()
             getPassword()
         }
         verifyPortNumber(port)
@@ -71,15 +71,17 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     )
 }
 
-fun canContinue(command: SendCommand, client: HMeadowSocketClient): Boolean {
+fun canContinue(command: SendCommand, client: HMeadowSocketClient, parent: HMeadowSocketClient): Boolean {
     val destination = SettingsManager.settingsManager.findDestination(command.getDestination())
     if (client.receiveConfirmation()) {
         if (client.sendPassword(password = destination?.password ?: command.getPassword())) {
             return true
         }
-        println("Server refused password.")
+        parent.sendInt(ServerFlags.HAS_MORE)
+        parent.sendString("Server refused password.")
         return false
     }
-    println("Connected, but request refused.")
+    parent.sendInt(ServerFlags.HAS_MORE)
+    parent.sendString("Connected, but request refused.")
     return false
 }

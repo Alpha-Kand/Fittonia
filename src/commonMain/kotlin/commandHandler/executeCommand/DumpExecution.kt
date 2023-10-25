@@ -1,11 +1,13 @@
 package commandHandler.executeCommand
 
+import com.varabyte.kotter.foundation.text.textLine
+import com.varabyte.kotter.runtime.Session
 import commandHandler.DumpCommand
 import settingsManager.SettingsManager
 import java.nio.file.Files
 import java.nio.file.Paths
 
-fun dumpExecution(command: DumpCommand) {
+fun Session.dumpExecution(command: DumpCommand) = section {
     val settingsManager = SettingsManager.settingsManager
     command.getDumpPath()?.let {
         val path = Paths.get(it).toAbsolutePath()
@@ -14,19 +16,19 @@ fun dumpExecution(command: DumpCommand) {
                 settingsManager.setDumpPath(path.toString())
 
                 if (Files.list(path).findFirst().isPresent) {
-                    println("Warning: New dump path is not empty.")
+                    textLine("Warning: New dump path is not empty.")
                 }
             } else {
-                println("Supplied path was not a valid directory.")
+                textLine("Supplied path was not a valid directory.")
             }
         } else {
-            println("Supplied path does not exist.")
+            textLine("Supplied path does not exist.")
         }
     } ?: run {
         if (settingsManager.settings.dumpPath.isEmpty()) {
-            println("No dump path set.")
+            textLine("No dump path set.")
         } else {
-            println("Current dump path: " + settingsManager.settings.dumpPath)
+            textLine("Current dump path: " + settingsManager.settings.dumpPath)
         }
     }
-}
+}.run()

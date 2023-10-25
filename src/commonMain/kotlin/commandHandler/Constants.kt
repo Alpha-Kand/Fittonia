@@ -51,6 +51,9 @@ class ServerFlags {
 
         const val HAVE_JOB_NAME = 103
         const val NEED_JOB_NAME = 104
+
+        const val DONE = 105
+        const val HAS_MORE = 106
     }
 }
 
