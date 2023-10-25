@@ -1,5 +1,7 @@
 package commandHandler
 
+import SessionManager
+import commandHandler.Command.Companion.verifyArgumentIsSet
 import hmeadowSocket.HMeadowSocketClient
 import requireNull
 import settingsManager.SettingsManager
@@ -22,6 +24,13 @@ sealed class SendCommand : Command {
             getPassword()
         }
         verifyPortNumber(port)
+    }
+
+    fun setFromSession() {
+        SessionManager.port?.let { port = it }
+        SessionManager.destination?.let { destination = it }
+        SessionManager.ip?.let { ip = it }
+        SessionManager.password?.let { password = it }
     }
 
     fun handleSendCommandArgument(argumentName: String, value: String): Boolean {

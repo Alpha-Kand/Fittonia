@@ -1,5 +1,6 @@
 package commandHandler
 
+import commandHandler.Command.Companion.verifyArgumentIsSet
 import requireNull
 
 class ServerCommand : Command {

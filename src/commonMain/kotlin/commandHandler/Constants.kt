@@ -10,6 +10,7 @@ const val setDefaultPortCommand = "default-port"
 const val serverPasswordCommand = "server-password"
 const val sendMessageCommand = "send-message"
 const val exitCommand = "exit"
+const val sessionCommand = "session"
 
 val commands = listOf(
     addCommand,
@@ -22,6 +23,7 @@ val commands = listOf(
     serverPasswordCommand,
     sendMessageCommand,
     exitCommand,
+    sessionCommand,
 )
 
 val nameArguments = listOf("--name", "-n")
@@ -36,6 +38,7 @@ val newArguments = listOf("--new")
 val oldArguments = listOf("--old")
 val jobArguments = listOf("--job", "-j")
 val messageArguments = listOf("--message", "--string")
+val sessionArguments = listOf("--session", "-s")
 
 class ServerFlags {
     companion object {

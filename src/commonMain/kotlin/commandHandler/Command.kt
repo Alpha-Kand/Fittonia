@@ -12,11 +12,6 @@ sealed interface Command {
     fun addArg(argumentName: String, value: String)
     fun verify()
 
-    fun <T> verifyArgumentIsSet(
-        argument: T?,
-        reportingName: String,
-    ): T = argument ?: throw FittoniaError(FittoniaErrorType.REQUIRED_ARGUMENT_NOT_FOUND, reportingName)
-
     fun tryCatch(argumentName: String, value: String, addArgBlock: () -> Boolean) {
         try {
             if (addArgBlock()) return
@@ -26,6 +21,13 @@ sealed interface Command {
         } catch (e: NumberFormatException) {
             throw FittoniaError(FittoniaErrorType.NON_NUMERICAL_PORT, value)
         }
+    }
+
+    companion object {
+        fun <T> verifyArgumentIsSet(
+            argument: T?,
+            reportingName: String,
+        ): T = argument ?: throw FittoniaError(FittoniaErrorType.REQUIRED_ARGUMENT_NOT_FOUND, reportingName)
     }
 }
 

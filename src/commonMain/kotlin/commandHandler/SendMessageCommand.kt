@@ -2,6 +2,7 @@ package commandHandler
 
 import FittoniaError
 import FittoniaErrorType
+import commandHandler.Command.Companion.verifyArgumentIsSet
 
 class SendMessageCommand : SendCommand(), Command {
     private var message: String? = null

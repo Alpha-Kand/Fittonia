@@ -2,6 +2,7 @@ package commandHandler
 
 import FittoniaError
 import FittoniaErrorType
+import commandHandler.Command.Companion.verifyArgumentIsSet
 import requireNull
 
 class SendFilesCommand : SendCommand(), Command {

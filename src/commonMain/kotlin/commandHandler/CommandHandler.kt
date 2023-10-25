@@ -2,6 +2,7 @@ package commandHandler
 
 import FittoniaError
 import FittoniaErrorType
+import SessionManager
 
 class CommandHandler(private val args: List<String>) {
 
@@ -32,6 +33,7 @@ class CommandHandler(private val args: List<String>) {
                 serverPasswordCommand -> ServerPasswordCommand()
                 sendMessageCommand -> SendMessageCommand()
                 exitCommand -> ExitCommand
+                sessionCommand -> SessionCommand
                 else -> throw IllegalArgumentException()
             }
         } catch (_: Exception) {
@@ -50,12 +52,16 @@ class CommandHandler(private val args: List<String>) {
                     value = par.substringAfter(delimiter = "="),
                 )
             } else if (Regex(pattern = "-{1,2}\\w+(?<!=)\$").containsMatchIn(par)) { // Flag.
-                command.addArg(
-                    argumentName = par,
-                    value = "",
-                )
-                if (filesArguments.contains(par) || messageArguments.contains(par)) {
-                    collectTrailingArgs = true
+                if (sessionArguments.contains(par)) {
+                    SessionManager.sessionActive = true
+                } else {
+                    command.addArg(
+                        argumentName = par,
+                        value = "",
+                    )
+                    if (filesArguments.contains(par) || messageArguments.contains(par)) {
+                        collectTrailingArgs = true
+                    }
                 }
             } else {
                 throw FittoniaError(FittoniaErrorType.INVALID_ARGUMENT, par)
@@ -63,9 +69,14 @@ class CommandHandler(private val args: List<String>) {
         }
         if (command is SendFilesCommand) {
             command.setFiles(trailingArgs.toList())
+            SessionManager.setSessionParams(command = command)
         }
         if (command is SendMessageCommand) {
             command.setMessage(trailingArgs.joinToString(separator = " "))
+            SessionManager.setSessionParams(command = command)
+        }
+        if (command is SessionCommand) {
+            SessionManager.sessionActive = true
         }
 
         command.verify()

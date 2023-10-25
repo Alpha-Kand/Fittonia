@@ -1,3 +1,8 @@
+import com.varabyte.kotter.foundation.input.input
+import com.varabyte.kotter.foundation.input.onInputEntered
+import com.varabyte.kotter.foundation.input.runUntilInputEntered
+import com.varabyte.kotter.foundation.session
+import com.varabyte.kotter.foundation.text.text
 import commandHandler.AddCommand
 import commandHandler.CommandHandler
 import commandHandler.DumpCommand
@@ -19,21 +24,26 @@ import commandHandler.executeCommand.setDefaultPortExecution
 import hmeadowSocket.HMeadowSocket
 import settingsManager.SettingsManager
 import java.io.File
-import java.util.Scanner
 import java.util.concurrent.TimeUnit
 
-fun main(args: Array<String>) {
+fun main(args: Array<String>) = session {
     try {
         SettingsManager.settingsManager.saveSettings()
         if (args.isNotEmpty()) {
             handleArguments(args.toList())
+        } else {
+            // TODO show version & --version & --help.
         }
-        val scanner = Scanner(System.`in`)
-        do {
-            print("> ")
-            val input = scanner.nextLine()?.split(" ") ?: return
-            val shouldContinue = handleArguments(input)
-        } while (shouldContinue)
+
+        while (SessionManager.sessionActive) {
+            var commandLine = ""
+            section {
+                text("> "); input()
+            }.runUntilInputEntered {
+                onInputEntered { commandLine = input }
+            }
+            handleArguments(input = SessionManager.getSessionParams(commandLine.split(" ")))
+        }
     } catch (e: FittoniaError) {
         reportFittoniaError(e)
     } catch (e: HMeadowSocket.HMeadowSocketError) {
