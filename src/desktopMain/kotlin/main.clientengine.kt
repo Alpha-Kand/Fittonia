@@ -46,18 +46,18 @@ fun main(args: Array<String>) {
 }
 
 fun sendFittoniaError(e: FittoniaError, parent: HMeadowSocketClient) {
-    parent.reportToParent(e.getErrorMessage())
+    parent.reportTextLine(e.getErrorMessage())
 }
 
 fun sendHMSocketError(e: HMeadowSocket.HMeadowSocketError, parent: HMeadowSocketClient) {
-    parent.reportToParent(
-        when (e.errorType) {
+    parent.reportTextLine(
+        text = when (e.errorType) {
             HMeadowSocket.SocketErrorType.CLIENT_SETUP -> "There was an error setting up CLIENT"
             HMeadowSocket.SocketErrorType.SERVER_SETUP -> "There was an error setting up SERVER"
         },
     )
-    parent.reportToParent(
-        e.message?.let {
+    parent.reportTextLine(
+        text = e.message?.let {
             "       $it"
         } ?: ".",
     )

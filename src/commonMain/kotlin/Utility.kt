@@ -30,15 +30,8 @@ fun Session.printLine(text: String, color: Color = Color.WHITE) = section { colo
 fun Session.printLine(text: String, color: Int) = section { rgb(color); textLine(text) }.run()
 fun Session.printLine() = section { textLine() }.run()
 
-fun HMeadowSocketClient.reportToParent(text: String, newLine: Boolean = true, color: Color = Color.WHITE) {
-    sendInt(message = ServerFlags.HAS_MORE)
+fun HMeadowSocketClient.reportTextLine(text: String, color: Color = Color.WHITE) {
+    sendInt(message = ServerFlags.PRINT_LINE)
     sendInt(message = color.ordinal)
-    when (newLine) {
-        true -> sendInt(message = 1)
-        false -> sendInt(message = 0)
-    }
     sendString(message = text)
-}
-
-fun HMeadowSocketClient.reportErrorToParent() {
 }
