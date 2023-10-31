@@ -1,13 +1,12 @@
 package commandHandler.executeCommand
 
-import com.varabyte.kotter.foundation.text.Color
 import commandHandler.FileTransfer
 import commandHandler.SendFilesCommand
 import commandHandler.ServerFlags
 import commandHandler.canContinue
 import commandHandler.setupSendCommandClient
 import hmeadowSocket.HMeadowSocketClient
-import reportToParent
+import reportTextLine
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -25,77 +24,136 @@ fun sendFilesExecution(command: SendFilesCommand, parent: HMeadowSocketClient) {
             client.sendString(jobName)
         } ?: client.sendInt(ServerFlags.NEED_JOB_NAME)
 
+        val serverDestinationDirLength = client.receiveInt()
         val tempSourceListFile = File.createTempFile(FileTransfer.tempPrefix, FileTransfer.tempSuffix)
-        val fileCount = writeSourceFileList(
+        val (fileCount, fileNameTooLong) = writeSourceFileList(
             sourceList = command.getFiles(),
             tempSourceListFile = tempSourceListFile,
+            serverDestinationDirLength = serverDestinationDirLength,
             parent = parent,
         )
-        client.sendInt(fileCount)
 
-        var sendFlag: SendFileFlag = SendFileFlag.RELATIVE_PATH
-        tempSourceListFile.bufferedReader().lines().collect(Collectors.toList()).forEach { path ->
-            when (sendFlag) {
-                SendFileFlag.RELATIVE_PATH -> { // Relative path.
-                    parent.reportToParent(text = "Sending: ${path.substring(startIndex = 2)}", newLine = false)
-                    client.sendString(path)
-                    sendFlag = if (path.substring(0, 2) == FileTransfer.filePrefix) {
-                        SendFileFlag.FILE_PATH
-                    } else {
-                        SendFileFlag.FOLDER_PATH
+        val fileListCrawler = mutableListOf<String>()
+        var skipped = 0
+        if (fileNameTooLong) {
+            parent.sendInt(ServerFlags.FILE_NAMES_TOO_LONG)
+            parent.sendInt(serverDestinationDirLength)
+            tempSourceListFile.bufferedReader().lines().collect(Collectors.toList()).forEach {
+                fileListCrawler.add(it)
+
+                if (fileListCrawler.size == 3) {
+                    val fileLengthStatus = fileListCrawler[0]
+                    val relativePath = fileListCrawler[1]
+
+                    if (fileLengthStatus.first() == '1') {
+                        parent.sendInt(ServerFlags.HAS_MORE)
+                        parent.sendString(relativePath.substring(startIndex = FileTransfer.prefixLength))
+                        skipped += 1
+                    }
+                    fileListCrawler.clear()
+                }
+            }
+            parent.sendInt(ServerFlags.DONE)
+        }
+
+        var skipInvalid = false
+
+        when (parent.receiveInt()) {
+            FileTransfer.NORMAL -> {
+                client.sendInt(ServerFlags.CONFIRM)
+                client.sendInt(fileCount)
+            }
+
+            FileTransfer.CANCEL -> {
+                client.sendInt(ServerFlags.CANCEL_SEND_FILES)
+                parent.sendInt(ServerFlags.DONE)
+                return
+            }
+
+            FileTransfer.SKIP_INVALID -> {
+                val sendingFileAmount = fileCount - skipped
+                parent.reportTextLine(text = "Sending $sendingFileAmount files.")
+                client.sendInt(ServerFlags.CONFIRM)
+                client.sendInt(fileCount - skipped)
+                skipInvalid = true
+            }
+
+            FileTransfer.COMPRESS_EVERYTHING -> {
+                println("COMPRESS FILES")
+            }
+
+            FileTransfer.COMPRESS_INVALID -> {
+                println("COMPRESS FILES")
+            }
+
+            else -> {
+                println("send files else")
+            }
+        }
+
+        tempSourceListFile.bufferedReader().lines().collect(Collectors.toList()).forEach {
+            fileListCrawler.add(it)
+
+            if (fileListCrawler.size == 3) {
+                val fileLengthStatus = fileListCrawler[0]
+                val relativePath = fileListCrawler[1]
+                val absolutePath = fileListCrawler[2]
+
+                if (fileLengthStatus.first() == '1') {
+                    if (!skipInvalid) {
+                        // todo: compress or throw error I think.
+                    }
+                } else {
+                    client.sendString(relativePath)
+                    if (relativePath.substring(0, FileTransfer.prefixLength) == FileTransfer.filePrefix) {
+                        client.sendFile(filePath = absolutePath)
                     }
                 }
-
-                SendFileFlag.FILE_PATH -> {
-                    client.sendFile(filePath = path.toString())
-                    sendFlag = SendFileFlag.RELATIVE_PATH
-                    parent.reportToParent(text = " Done.", color = Color.GREEN)
-                }
-
-                SendFileFlag.FOLDER_PATH -> {
-                    sendFlag = SendFileFlag.RELATIVE_PATH
-                    parent.reportToParent(text = " Done.", color = Color.GREEN)
-                }
+                fileListCrawler.clear()
             }
         }
     }
 }
 
-private enum class SendFileFlag {
-    RELATIVE_PATH,
-    FILE_PATH,
-    FOLDER_PATH,
-}
-
 private fun writeSourceFileList(
     sourceList: List<String>,
     tempSourceListFile: File,
+    serverDestinationDirLength: Int,
     parent: HMeadowSocketClient,
-): Int {
+): Pair<Int, Boolean> {
+    var fileNameTooLong = false
     val fileList = getFileList(input = sourceList, parent = parent)
     val sourceListFileWriter = tempSourceListFile.bufferedWriter()
     fileList.forEach { pathPair ->
         val (absolutePath, relativePath) = pathPair
+        fileNameTooLong = fileNameTooLong || serverDestinationDirLength + relativePath.toString().length > 127
+        sourceListFileWriter.write(if (serverDestinationDirLength + relativePath.toString().length > 127) "1" else "0")
+        sourceListFileWriter.newLine()
         sourceListFileWriter.write((if (absolutePath.isRegularFile()) FileTransfer.filePrefix else FileTransfer.dirPrefix) + relativePath)
         sourceListFileWriter.newLine()
         sourceListFileWriter.write(absolutePath.toString())
         sourceListFileWriter.newLine()
     }
     sourceListFileWriter.close()
-    return fileList.size
+
+    return fileList.size to fileNameTooLong
 }
 
 private fun getFileList(
     input: List<String>,
     parent: HMeadowSocketClient,
 ): List<Pair<Path, Path>> {
+    parent.reportTextLine(text = "Finding files to send...\uD83D\uDD0E")
+    parent.sendInt(message = ServerFlags.SEND_FILES_COLLECTING)
+
     val fileList = mutableListOf<Pair<Path, Path>>()
+    val doesntExist = mutableListOf<String>()
     input.forEach { inputPath ->
         val path = Paths.get(inputPath)
         if (Files.exists(path)) {
             if (Files.isRegularFile(path)) {
-                // textLine(path.fileName)
                 fileList.add(path to path.fileName)
+                parent.reportFindingFiles(amount = fileList.size)
             } else {
                 Files.find(
                     path,
@@ -103,15 +161,21 @@ private fun getFileList(
                     { _: Path?, fileAttr: BasicFileAttributes -> fileAttr.isRegularFile || fileAttr.isDirectory },
                 ).forEach { x: Path? ->
                     x?.let {
-                        // textLine(path.parent.relativize(it))
                         fileList.add(x to path.parent.relativize(it))
+                        parent.reportFindingFiles(amount = fileList.size)
                     }
                 }
             }
         } else {
-            parent.reportToParent(text = "\"$inputPath\" doesn't exist.")
+            doesntExist.add(inputPath) // TODO
         }
     }
-
+    parent.reportFindingFiles(amount = fileList.size)
+    parent.sendInt(message = ServerFlags.DONE)
     return fileList.toList()
+}
+
+private fun HMeadowSocketClient.reportFindingFiles(amount: Int) {
+    sendInt(message = ServerFlags.HAS_MORE)
+    sendInt(message = amount)
 }

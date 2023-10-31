@@ -52,8 +52,13 @@ class ServerFlags {
         const val HAVE_JOB_NAME = 103
         const val NEED_JOB_NAME = 104
 
+        // ClientEngine -> Terminal Reporting
         const val DONE = 105
         const val HAS_MORE = 106
+        const val PRINT_LINE = 107
+        const val FILE_NAMES_TOO_LONG = 108
+        const val SEND_FILES_COLLECTING = 109
+        const val CANCEL_SEND_FILES = 110
     }
 }
 
@@ -62,7 +67,23 @@ class FileTransfer {
         const val tempPrefix = "fittonia"
         const val tempSuffix = ".fittonia"
 
+        const val prefixLength = 2
         const val filePrefix = "F?"
         const val dirPrefix = "D?"
+
+        const val NORMAL = 0
+        const val CANCEL = 1
+        const val SKIP_INVALID = 2
+        const val COMPRESS_EVERYTHING = 3
+        const val COMPRESS_INVALID = 4
+        const val SHOW_ALL = 5
+
+        val actionList = listOf(
+            CANCEL,
+            SKIP_INVALID,
+            COMPRESS_EVERYTHING,
+            COMPRESS_INVALID,
+            SHOW_ALL,
+        )
     }
 }
