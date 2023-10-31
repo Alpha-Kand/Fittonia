@@ -1,8 +1,11 @@
 package commandHandler
 
+import FittoniaError
+import FittoniaErrorType
+import commandHandler.Command.Companion.verifyArgumentIsSet
 import requireNull
 
-object SendFilesCommand : SendCommand(), Command {
+class SendFilesCommand : SendCommand(), Command {
     private var files: List<String>? = null
     private var job: String? = null
 
@@ -13,7 +16,7 @@ object SendFilesCommand : SendCommand(), Command {
         super.verify()
         getJob()?.let { jobName ->
             if (!jobName.all { it.isLetterOrDigit() }) {
-                throw IllegalArgumentException("Job name can only contain letters and digits.")
+                throw FittoniaError(FittoniaErrorType.JOB_NAME_ILLEGAL_CHARACTERS)
             }
         }
         getFiles()
@@ -23,7 +26,7 @@ object SendFilesCommand : SendCommand(), Command {
         if (newFiles.isNotEmpty()) {
             files = newFiles
         } else {
-            throw IllegalStateException("Tried to collect files to send more than once.")
+            throw FittoniaError(FittoniaErrorType.CANT_COLLECT_FILES_TWICE)
         }
     }
 

@@ -1,21 +1,34 @@
 package commandHandler.executeCommand
 
+import FittoniaError
+import com.varabyte.kotter.foundation.input.input
+import com.varabyte.kotter.foundation.input.onInputEntered
+import com.varabyte.kotter.foundation.input.runUntilInputEntered
+import com.varabyte.kotter.foundation.text.textLine
+import com.varabyte.kotter.runtime.Session
 import commandHandler.AddCommand
 import commandHandler.ServerFlags
 import commandHandler.receiveConfirmation
 import commandHandler.sendPassword
 import hmeadowSocket.HMeadowSocketClient
+import printLine
 import settingsManager.SettingsManager
 import java.net.InetAddress
 
-fun addExecution(command: AddCommand) {
+fun Session.addExecution(command: AddCommand) {
     val settingsManager = SettingsManager.settingsManager
 
     if (settingsManager.settings.destinations.find { it.ip == command.getIP() } != null) {
-        println("A destination with this IP address is already registered. Are you sure you want to add another destination with this IP (y/n)?")
-        if (readlnOrNull()?.lowercase() != "y") return
+        var userInput = ""
+        section {
+            textLine(text = "A destination with this IP address is already registered.")
+            textLine(text = "Are you sure you want to add another destination with this IP (y/n)?")
+            input()
+        }.runUntilInputEntered {
+            onInputEntered { userInput = input }
+        }
+        if (userInput.lowercase() != "y") return
     }
-
     val client = HMeadowSocketClient(
         ipAddress = InetAddress.getByName(command.getIP()),
         port = command.getPort() ?: settingsManager.defaultPort,
@@ -24,16 +37,22 @@ fun addExecution(command: AddCommand) {
     client.sendInt(ServerFlags.ADD_DESTINATION)
     if (client.receiveConfirmation()) {
         if (!client.sendPassword(command.getPassword())) {
-            println("Server refused password.")
+            printLine(text = "Server refused password.")
             return
         }
-        settingsManager.addDestination(
-            name = command.getName(),
-            ip = command.getIP(),
-            password = command.getPassword(),
-        )
-        println("Destination added.")
+        try {
+            settingsManager.addDestination(
+                name = command.getName(),
+                ip = command.getIP(),
+                password = command.getPassword(),
+            )
+        } catch (e: FittoniaError) {
+            client.sendBoolean(false)
+            throw e
+        }
+        client.sendBoolean(true)
+        printLine(text = "Destination added.")
     } else {
-        println("Connected, but request refused.")
+        printLine(text = "Connected, but request refused.")
     }
 }

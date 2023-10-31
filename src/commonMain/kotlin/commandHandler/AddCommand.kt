@@ -1,8 +1,9 @@
 package commandHandler
 
+import commandHandler.Command.Companion.verifyArgumentIsSet
 import requireNull
 
-object AddCommand : Command {
+class AddCommand : Command {
     private var name: String? = null
     private var ip: String? = null
     private var password: String? = null

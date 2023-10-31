@@ -1,33 +1,42 @@
 package commandHandler
 
+import SessionManager
+import commandHandler.Command.Companion.verifyArgumentIsSet
 import hmeadowSocket.HMeadowSocketClient
 import requireNull
 import settingsManager.SettingsManager
 import java.net.InetAddress
 
 sealed class SendCommand : Command {
-    private var port: String? = null
+    private var port: Int? = null
     private var destination: String? = null
     private var ip: String? = null
     private var password: String? = null
 
-    fun getPort() = verifyArgumentIsSet(argument = port, reportingName = portArguments.first()).toInt()
+    fun getPort() = verifyArgumentIsSet(argument = port, reportingName = portArguments.first())
     fun getDestination() = destination
     fun getIP() = verifyArgumentIsSet(argument = ip, reportingName = ipArguments.first())
     fun getPassword() = verifyArgumentIsSet(argument = password, reportingName = passwordArguments.first())
 
     override fun verify() {
         if (destination == null) {
-            getIP()
+            // getIP()
             getPassword()
         }
-        getPort()
+        verifyPortNumber(port)
+    }
+
+    fun setFromSession() {
+        SessionManager.port?.let { port = it }
+        SessionManager.destination?.let { destination = it }
+        SessionManager.ip?.let { ip = it }
+        SessionManager.password?.let { password = it }
     }
 
     fun handleSendCommandArgument(argumentName: String, value: String): Boolean {
         if (portArguments.contains(argumentName)) {
             requireNull(port)
-            port = value
+            port = value.toInt()
             return true
         }
         if (destinationArguments.contains(argumentName)) {
@@ -62,15 +71,17 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     )
 }
 
-fun canContinue(command: SendCommand, client: HMeadowSocketClient): Boolean {
+fun canContinue(command: SendCommand, client: HMeadowSocketClient, parent: HMeadowSocketClient): Boolean {
     val destination = SettingsManager.settingsManager.findDestination(command.getDestination())
     if (client.receiveConfirmation()) {
         if (client.sendPassword(password = destination?.password ?: command.getPassword())) {
             return true
         }
-        println("Server refused password.")
+        parent.sendInt(ServerFlags.HAS_MORE)
+        parent.sendString("Server refused password.")
         return false
     }
-    println("Connected, but request refused.")
+    parent.sendInt(ServerFlags.HAS_MORE)
+    parent.sendString("Connected, but request refused.")
     return false
 }

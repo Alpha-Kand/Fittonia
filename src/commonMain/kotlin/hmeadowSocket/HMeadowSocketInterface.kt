@@ -1,24 +1,28 @@
 package hmeadowSocket
 
 import java.io.BufferedInputStream
+import java.io.BufferedReader
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
 import java.io.IOException
+import java.io.InputStreamReader
 import java.net.Socket
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.Arrays
 import kotlin.io.path.Path
 
 interface HMeadowSocketInterface {
-    fun bindToSocket(socket: Socket) {}
+    fun bindToSocket(socket: Socket)
 
     fun sendInt(message: Int)
     fun receiveInt(): Int
 
     fun sendLong(message: Long)
     fun receiveLong(): Long
+
+    fun sendBoolean(message: Boolean)
+    fun receiveBoolean(): Boolean
 
     fun sendFile(filePath: String, rename: String = "")
     fun receiveFile(
@@ -40,10 +44,12 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
 
     private lateinit var mDataInput: DataInputStream
     private lateinit var mDataOutput: DataOutputStream
+    private lateinit var mInputStreamReader: BufferedReader
 
     override fun bindToSocket(socket: Socket) {
         mDataInput = DataInputStream(socket.getInputStream())
         mDataOutput = DataOutputStream(socket.getOutputStream())
+        mInputStreamReader = BufferedReader(InputStreamReader(socket.getInputStream()))
     }
 
     override fun sendInt(message: Int) = mDataOutput.writeInt(message)
@@ -52,16 +58,19 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
     override fun sendLong(message: Long) = mDataOutput.writeLong(message)
     override fun receiveLong() = mDataInput.readLong()
 
+    override fun sendBoolean(message: Boolean) = mDataOutput.writeBoolean(message)
+    override fun receiveBoolean() = mDataInput.readBoolean()
+
     override fun sendString(message: String) {
-        val byteArray = message.toByteArray()
+        val byteArray = message.encodeToByteArray()
         val totalBytes = byteArray.size
         sendInt(message = totalBytes)
-        mDataOutput.write(message.toByteArray(), 0, totalBytes)
+        mDataOutput.write(byteArray, 0, totalBytes)
     }
 
     override fun receiveString(): String {
         val messageLength = receiveInt()
-        return String(readNBytes(messageLength), StandardCharsets.UTF_8)
+        return String(readNBytes(messageLength), Charsets.UTF_8)
     }
 
     override fun sendFile(filePath: String, rename: String) {
@@ -259,6 +268,9 @@ class HMeadowSocketInterfaceTest : HMeadowSocketInterface {
 
     override fun sendLong(message: Long) {}
     override fun receiveLong() = 5L
+
+    override fun sendBoolean(message: Boolean) {}
+    override fun receiveBoolean() = true
 
     override fun sendFile(filePath: String, rename: String) {}
     override fun receiveFile(

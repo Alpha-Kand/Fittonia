@@ -1,5 +1,7 @@
 package settingsManager
 
+import FittoniaError
+import FittoniaErrorType
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.ByteArrayOutputStream
@@ -30,9 +32,7 @@ class SettingsManager private constructor() {
         val settingsFile = File(settingsPath)
         return if (settingsFile.isFile) {
             val decryptedText = AESEncyption.decrypt(settingsFile.readText())
-            decryptedText?.let {
-                jacksonObjectMapper().readValue<SettingsData>(it)
-            } ?: throw IllegalStateException("")
+            decryptedText.let { jacksonObjectMapper().readValue<SettingsData>(it) }
         } else {
             SettingsData()
         }
@@ -43,7 +43,7 @@ class SettingsManager private constructor() {
         jacksonObjectMapper().writeValue(byteArrayOutputStream, settings)
 
         val encrypted = AESEncyption.encrypt(String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8))
-        encrypted?.let { File(settingsPath).writeText(encrypted) }
+        encrypted.let { File(settingsPath).writeText(encrypted) }
     }
 
     fun setDumpPath(dumpPath: String) {
@@ -57,9 +57,7 @@ class SettingsManager private constructor() {
         password: String,
     ) {
         if (settings.destinations.find { it.name == name } != null) {
-            throw IllegalArgumentException(
-                "A destination with that name is already registered. Delete the old one and try again.",
-            )
+            throw FittoniaError(FittoniaErrorType.ADD_DESTINATION_ALREADY_EXISTS)
         }
         settings = settings.copy(
             destinations = settings.destinations + listOf(
@@ -111,7 +109,7 @@ class SettingsManager private constructor() {
             settingsManager
                 .settings
                 .destinations.find { it.name == destinationName }
-                ?: throw IllegalArgumentException("No registered destination found with the name: $destinationName")
+                ?: throw FittoniaError(FittoniaErrorType.DESTINATION_NOT_FOUND, destinationName)
         }
     }
 
@@ -145,7 +143,7 @@ private object AESEncyption {
     private const val salt = "QWxsIHRoYXQgZ2xpdHRlcg=="
     private const val iv = "SG9tZSBzd2VldCBwaW5lYQ=="
 
-    fun encrypt(strToEncrypt: String): String? {
+    fun encrypt(strToEncrypt: String): String {
         try {
             val decoder = Base64.getDecoder()
             val ivParameterSpec = IvParameterSpec(decoder.decode(iv))
@@ -157,12 +155,11 @@ private object AESEncyption {
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec)
             return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.toByteArray(Charsets.UTF_8)))
         } catch (e: Exception) {
-            println("Error while encrypting: $e")
+            throw FittoniaError(FittoniaErrorType.ENCRYPTION_ERROR, e.javaClass::class)
         }
-        return null
     }
 
-    fun decrypt(strToDecrypt: String): String? {
+    fun decrypt(strToDecrypt: String): String {
         try {
             val decoder = Base64.getDecoder()
             val ivParameterSpec = IvParameterSpec(decoder.decode(iv))
@@ -174,8 +171,7 @@ private object AESEncyption {
             cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec)
             return String(cipher.doFinal(decoder.decode(strToDecrypt)))
         } catch (e: Exception) {
-            println("Error while decrypting: $e")
+            throw FittoniaError(FittoniaErrorType.DECRYPTION_ERROR, e.javaClass::class)
         }
-        return null
     }
 }

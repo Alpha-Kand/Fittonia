@@ -1,42 +1,63 @@
 package commandHandler.executeCommand
 
+import com.varabyte.kotter.foundation.text.green
+import com.varabyte.kotter.foundation.text.text
+import com.varabyte.kotter.foundation.text.textLine
+import com.varabyte.kotter.runtime.Session
 import commandHandler.FileTransfer
 import commandHandler.ServerFlags
 import commandHandler.receivePassword
 import commandHandler.sendConfirmation
 import hmeadowSocket.HMeadowSocketServer
+import printLine
 import settingsManager.SettingsManager
 import java.nio.file.Files
 import kotlin.io.path.Path
 
-fun serverSendFilesExecution(server: HMeadowSocketServer) {
+fun Session.serverSendFilesExecution(server: HMeadowSocketServer) {
     server.sendConfirmation()
     if (!server.receivePassword()) return
 
     val jobPath = determineJobPath(server = server)
     Files.createDirectory(Path(jobPath))
+    server.sendInt(jobPath.length)
 
     val tempReceivingFolder = Files.createTempDirectory(FileTransfer.tempPrefix)
+    when (server.receiveInt()) {
+        ServerFlags.CANCEL_SEND_FILES -> {
+            printLine(text = "Client cancelled sending files.")
+            printLine()
+            return
+        }
+
+        else -> Unit
+    }
+
     val fileTransferCount = server.receiveInt()
+    printLine(text = "$fileTransferCount")
 
-    repeat(fileTransferCount) {
-        val relativePath = server.receiveString()
-        val receivedLocalDir = relativePath.substring(startIndex = 2)
-        val destinationPath = "$jobPath/$receivedLocalDir"
-        if (relativePath.substring(0, 2) == FileTransfer.filePrefix) {
-            print("Receiving: $receivedLocalDir")
-            val (tempFile, _) = server.receiveFile(
-                destination = "$tempReceivingFolder/",
-                prefix = FileTransfer.tempPrefix,
-                suffix = FileTransfer.tempSuffix,
-            )
-
-            Files.move(Path(tempFile), Path(destinationPath))
-            println(" Done.")
+    repeat(times = fileTransferCount) {
+        val relativePathWithPrefix = server.receiveString()
+        val relativePathNoPrefix = relativePathWithPrefix.substring(startIndex = FileTransfer.prefixLength)
+        val prefix = relativePathWithPrefix.substring(0, FileTransfer.prefixLength)
+        val destinationPath = "$jobPath/$relativePathNoPrefix"
+        if (prefix == FileTransfer.filePrefix) {
+            section {
+                text("Receiving: $relativePathNoPrefix")
+                val (tempFile, _) = server.receiveFile(
+                    destination = "$tempReceivingFolder/",
+                    prefix = FileTransfer.tempPrefix,
+                    suffix = FileTransfer.tempSuffix,
+                )
+                Files.move(Path(tempFile), Path(destinationPath))
+                green { textLine(text = " Done.") }
+            }.run()
         } else {
             Files.createDirectory(Path(destinationPath))
         }
     }
+    printLine(text = "$fileTransferCount files received")
+    printLine()
 }
 
 private fun determineJobPath(server: HMeadowSocketServer): String {

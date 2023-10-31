@@ -1,37 +1,46 @@
 package commandHandler.executeCommand
 
+import com.varabyte.kotter.runtime.Session
 import commandHandler.ServerCommand
 import commandHandler.ServerFlags
 import commandHandler.receivePassword
 import commandHandler.sendConfirmation
 import commandHandler.sendDeny
 import hmeadowSocket.HMeadowSocketServer
+import printLine
 
-fun serverExecution(command: ServerCommand) {
-    println("Server started, waiting for a client.")
-    val server = HMeadowSocketServer(port = command.getPort())
-    when (server.receiveInt()) {
-        ServerFlags.SEND_FILES -> serverSendFilesExecution(server = server)
+fun Session.serverExecution(command: ServerCommand) {
+    printLine("Server started.")
+    while (true) {
+        printLine("⏳ Waiting for a client.")
+        val server = HMeadowSocketServer.getServer(port = command.getPort())
+        when (server.receiveInt()) {
+            ServerFlags.SEND_FILES -> serverSendFilesExecution(server = server)
 
-        ServerFlags.SEND_STRING -> {
-            server.sendConfirmation()
-            if (!server.receivePassword()) return
-            println("Received message from client.")
-            println(server.receiveString())
-        }
-
-        ServerFlags.ADD_DESTINATION -> {
-            server.sendConfirmation()
-            if (!server.receivePassword()) {
-                println("Client attempted to add this server as destination, password refused.")
-                return
+            ServerFlags.SEND_MESSAGE -> {
+                server.sendConfirmation()
+                if (!server.receivePassword()) return
+                printLine("Received message from client.")
+                printLine(server.receiveString(), color = 0xccc949) // Lightish yellow.
             }
-            println("Client added this server as a destination.")
-        }
 
-        else -> {
-            server.sendDeny()
-            println("Received invalid server command from client.")
+            ServerFlags.ADD_DESTINATION -> {
+                server.sendConfirmation()
+                if (!server.receivePassword()) {
+                    printLine("Client attempted to add this server as destination, password refused.")
+                    return
+                }
+                if (server.receiveBoolean()) {
+                    printLine("Client added this server as a destination.")
+                } else {
+                    printLine("Client failed to add this server as a destination.")
+                }
+            }
+
+            else -> {
+                server.sendDeny()
+                printLine("Received invalid server command from client.")
+            }
         }
     }
 }

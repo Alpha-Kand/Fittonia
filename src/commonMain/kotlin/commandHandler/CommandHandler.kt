@@ -1,6 +1,10 @@
 package commandHandler
 
-class CommandHandler(private val args: Array<String>) {
+import FittoniaError
+import FittoniaErrorType
+import SessionManager
+
+class CommandHandler(private val args: List<String>) {
 
     fun getCommand(): Command {
         val enteredCommands = mutableListOf<String>()
@@ -13,48 +17,66 @@ class CommandHandler(private val args: Array<String>) {
         }
 
         if (enteredCommands.size > 1 || enteredCommands.isEmpty()) {
-            throw IllegalStateException("Invalid number of commands detected: " + enteredCommands.size.toString())
+            throw FittoniaError(FittoniaErrorType.INVALID_NUM_OF_COMMANDS, enteredCommands.size)
         }
 
-        val command = when (enteredCommands.first()) {
-            addCommand -> AddCommand
-            removeCommand -> RemoveCommand
-            listDestinationsCommand -> ListDestinationsCommand
-            dumpCommand -> DumpCommand
-            serverCommand -> ServerCommand
-            sendFilesCommand -> SendFilesCommand
-            setDefaultPortCommand -> SetDefaultPortCommand
-            serverPasswordCommand -> ServerPasswordCommand
-            sendStringCommand -> SendStringCommand
-            else -> throw IllegalArgumentException()
+        val command: Command
+        try {
+            command = when (enteredCommands.first()) {
+                addCommand -> AddCommand()
+                removeCommand -> RemoveCommand()
+                listDestinationsCommand -> ListDestinationsCommand()
+                dumpCommand -> DumpCommand()
+                serverCommand -> ServerCommand()
+                sendFilesCommand -> SendFilesCommand()
+                setDefaultPortCommand -> SetDefaultPortCommand()
+                serverPasswordCommand -> ServerPasswordCommand()
+                sendMessageCommand -> SendMessageCommand()
+                exitCommand -> ExitCommand
+                sessionCommand -> SessionCommand
+                else -> throw IllegalArgumentException()
+            }
+        } catch (_: Exception) {
+            throw FittoniaError(FittoniaErrorType.INVALID_NUM_OF_COMMANDS, 0)
         }
 
-        var collectSources = false
-        val sourceList = mutableListOf<String>()
+        var collectTrailingArgs = false
+        val trailingArgs = mutableListOf<String>()
 
         enteredParameters.forEach { par ->
-            if (collectSources) {
-                sourceList.add(par)
+            if (collectTrailingArgs) {
+                trailingArgs.add(par)
             } else if (Regex(pattern = "-{1,2}\\w+=.+").containsMatchIn(par)) { // Passed value.
                 command.addArg(
                     argumentName = par.substringBefore(delimiter = "="),
                     value = par.substringAfter(delimiter = "="),
                 )
             } else if (Regex(pattern = "-{1,2}\\w+(?<!=)\$").containsMatchIn(par)) { // Flag.
-                val arg = par.substringBefore(delimiter = "=")
-                command.addArg(
-                    argumentName = arg,
-                    value = "",
-                )
-                if (filesArguments.contains(arg)) {
-                    collectSources = true
+                if (sessionArguments.contains(par)) {
+                    SessionManager.sessionActive = true
+                } else {
+                    command.addArg(
+                        argumentName = par,
+                        value = "",
+                    )
+                    if (filesArguments.contains(par) || messageArguments.contains(par)) {
+                        collectTrailingArgs = true
+                    }
                 }
             } else {
-                throw IllegalArgumentException("Invalid parameter: $par")
+                throw FittoniaError(FittoniaErrorType.INVALID_ARGUMENT, par)
             }
         }
         if (command is SendFilesCommand) {
-            command.setFiles(sourceList.toList())
+            command.setFiles(trailingArgs.toList())
+            SessionManager.setSessionParams(command = command)
+        }
+        if (command is SendMessageCommand) {
+            command.setMessage(trailingArgs.joinToString(separator = " "))
+            SessionManager.setSessionParams(command = command)
+        }
+        if (command is SessionCommand) {
+            SessionManager.sessionActive = true
         }
 
         command.verify()
