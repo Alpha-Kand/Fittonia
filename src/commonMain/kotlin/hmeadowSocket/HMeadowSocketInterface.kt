@@ -8,7 +8,6 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.Socket
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.Arrays
 import kotlin.io.path.Path
@@ -66,12 +65,12 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         val byteArray = message.encodeToByteArray()
         val totalBytes = byteArray.size
         sendInt(message = totalBytes)
-        mDataOutput.write(message.toByteArray(), 0, totalBytes)
+        mDataOutput.write(byteArray, 0, totalBytes)
     }
 
     override fun receiveString(): String {
         val messageLength = receiveInt()
-        return String(readNBytes(messageLength), StandardCharsets.UTF_8)
+        return String(readNBytes(messageLength), Charsets.UTF_8)
     }
 
     override fun sendFile(filePath: String, rename: String) {
