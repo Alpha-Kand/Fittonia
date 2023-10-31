@@ -16,19 +16,19 @@ fun Session.dumpExecution(command: DumpCommand) = section {
                 settingsManager.setDumpPath(path.toString())
 
                 if (Files.list(path).findFirst().isPresent) {
-                    textLine("Warning: New dump path is not empty.")
+                    textLine(text = "Warning: New dump path is not empty.")
                 }
             } else {
-                textLine("Supplied path was not a valid directory.")
+                textLine(text = "Supplied path was not a valid directory.")
             }
         } else {
-            textLine("Supplied path does not exist.")
+            textLine(text = "Supplied path does not exist.")
         }
     } ?: run {
         if (settingsManager.settings.dumpPath.isEmpty()) {
-            textLine("No dump path set.")
+            textLine(text = "No dump path set.")
         } else {
-            textLine("Current dump path: " + settingsManager.settings.dumpPath)
+            textLine(text = "Current dump path: " + settingsManager.settings.dumpPath)
         }
     }
 }.run()

@@ -12,6 +12,6 @@ fun Session.setDefaultPortExecution(command: SetDefaultPortCommand) = section {
     } else if (command.getPort() != null) {
         settingsManager.setDefaultPort(requireNotNull(command.getPort()))
     } else {
-        textLine("Current default port set to: ${settingsManager.defaultPort}")
+        textLine(text = "Current default port set to: ${settingsManager.defaultPort}")
     }
 }.run()

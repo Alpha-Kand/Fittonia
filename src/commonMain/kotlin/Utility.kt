@@ -18,12 +18,12 @@ fun <T> requireNull(value: T?) {
 fun Session.reportHMSocketError(e: HMeadowSocket.HMeadowSocketError) = section {
     red { text("Error: ") }
     when (e.errorType) {
-        HMeadowSocket.SocketErrorType.CLIENT_SETUP -> textLine("There was an error setting up CLIENT")
-        HMeadowSocket.SocketErrorType.SERVER_SETUP -> textLine("There was an error setting up SERVER")
+        HMeadowSocket.SocketErrorType.CLIENT_SETUP -> textLine(text = "There was an error setting up CLIENT")
+        HMeadowSocket.SocketErrorType.SERVER_SETUP -> textLine(text = "There was an error setting up SERVER")
     }
     e.message?.let {
-        textLine("       $it")
-    } ?: textLine(".")
+        textLine(text = "       $it")
+    } ?: textLine(text = ".")
 }.run()
 
 fun Session.printLine(text: String, color: Color = Color.WHITE) = section { color(color); textLine(text) }.run()

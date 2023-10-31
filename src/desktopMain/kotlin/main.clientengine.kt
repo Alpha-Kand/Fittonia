@@ -22,10 +22,11 @@ fun main(args: Array<String>) {
             )
         } catch (e: HMeadowSocket.HMeadowSocketError) {
             sleep(100)
+            println("DEBUG: Client failed connection $failAttempts")
             failAttempts -= 1
         }
         if (failAttempts <= 0) {
-            println("dead")
+            println("DEBUG: Client dead")
             exitProcess(status = 1)
         }
     }
