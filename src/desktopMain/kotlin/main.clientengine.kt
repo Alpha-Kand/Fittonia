@@ -4,7 +4,7 @@ import commandHandler.SendFilesCommand
 import commandHandler.SendMessageCommand
 import commandHandler.ServerFlags
 import commandHandler.executeCommand.sendFilesExecution
-import commandHandler.executeCommand.sendMessageExecution
+import commandHandler.executeCommand.sendMessageExecutionClientEngine
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
 import java.lang.Thread.sleep
@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
     try {
         when (val command = CommandHandler(args = args.toList()).getCommand()) {
             is SendFilesCommand -> sendFilesExecution(command = command, parent = parent)
-            is SendMessageCommand -> sendMessageExecution(command = command, parent = parent)
+            is SendMessageCommand -> sendMessageExecutionClientEngine(command = command, parent = parent)
             else -> Unit
         }
     } catch (e: FittoniaError) {
