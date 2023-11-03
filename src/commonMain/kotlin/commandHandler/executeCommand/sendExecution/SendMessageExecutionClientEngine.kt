@@ -1,4 +1,4 @@
-package commandHandler.executeCommand
+package commandHandler.executeCommand.sendExecution
 
 import commandHandler.SendMessageCommand
 import commandHandler.ServerFlags

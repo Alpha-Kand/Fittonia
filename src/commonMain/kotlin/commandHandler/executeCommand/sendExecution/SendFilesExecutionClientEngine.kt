@@ -1,4 +1,4 @@
-package commandHandler.executeCommand
+package commandHandler.executeCommand.sendExecution
 
 import commandHandler.FileTransfer
 import commandHandler.SendFilesCommand
@@ -15,7 +15,7 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.util.stream.Collectors
 import kotlin.io.path.isRegularFile
 
-fun sendFilesExecution(command: SendFilesCommand, parent: HMeadowSocketClient) {
+fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSocketClient) {
     val client = setupSendCommandClient(command = command)
     client.sendInt(ServerFlags.SEND_FILES)
     if (canContinue(command = command, client = client, parent = parent)) {

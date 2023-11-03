@@ -78,7 +78,7 @@ class FileTransfer {
         const val COMPRESS_INVALID = 4
         const val SHOW_ALL = 5
 
-        val actionList = listOf(
+        val defaultActionList = listOf(
             CANCEL,
             SKIP_INVALID,
             COMPRESS_EVERYTHING,

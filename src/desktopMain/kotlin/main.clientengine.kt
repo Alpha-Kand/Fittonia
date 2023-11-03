@@ -3,8 +3,8 @@ import commandHandler.CommandHandler
 import commandHandler.SendFilesCommand
 import commandHandler.SendMessageCommand
 import commandHandler.ServerFlags
-import commandHandler.executeCommand.sendFilesExecution
-import commandHandler.executeCommand.sendMessageExecutionClientEngine
+import commandHandler.executeCommand.sendExecution.sendFilesExecutionClientEngine
+import commandHandler.executeCommand.sendExecution.sendMessageExecutionClientEngine
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
 import java.lang.Thread.sleep
@@ -33,7 +33,7 @@ fun main(args: Array<String>) {
 
     try {
         when (val command = CommandHandler(args = args.toList()).getCommand()) {
-            is SendFilesCommand -> sendFilesExecution(command = command, parent = parent)
+            is SendFilesCommand -> sendFilesExecutionClientEngine(command = command, parent = parent)
             is SendMessageCommand -> sendMessageExecutionClientEngine(command = command, parent = parent)
             else -> Unit
         }

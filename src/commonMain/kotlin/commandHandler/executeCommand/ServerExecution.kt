@@ -10,9 +10,9 @@ import hmeadowSocket.HMeadowSocketServer
 import printLine
 
 fun Session.serverExecution(command: ServerCommand) {
-    printLine("Server started.")
+    printLine(text = "Server started.")
     while (true) {
-        printLine("⏳ Waiting for a client.")
+        printLine(text = "⏳ Waiting for a client.")
         val server = HMeadowSocketServer.getServer(port = command.getPort())
         when (server.receiveInt()) {
             ServerFlags.SEND_FILES -> serverSendFilesExecution(server = server)
@@ -20,26 +20,26 @@ fun Session.serverExecution(command: ServerCommand) {
             ServerFlags.SEND_MESSAGE -> {
                 server.sendConfirmation()
                 if (!server.receivePassword()) return
-                printLine("Received message from client.")
+                printLine(text = "Received message from client.")
                 printLine(server.receiveString(), color = 0xccc949) // Lightish yellow.
             }
 
             ServerFlags.ADD_DESTINATION -> {
                 server.sendConfirmation()
                 if (!server.receivePassword()) {
-                    printLine("Client attempted to add this server as destination, password refused.")
+                    printLine(text = "Client attempted to add this server as destination, password refused.")
                     return
                 }
                 if (server.receiveBoolean()) {
-                    printLine("Client added this server as a destination.")
+                    printLine(text = "Client added this server as a destination.")
                 } else {
-                    printLine("Client failed to add this server as a destination.")
+                    printLine(text = "Client failed to add this server as a destination.")
                 }
             }
 
             else -> {
                 server.sendDeny()
-                printLine("Received invalid server command from client.")
+                printLine(text = "Received invalid server command from client.")
             }
         }
     }
