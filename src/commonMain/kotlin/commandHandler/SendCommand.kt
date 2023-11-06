@@ -20,7 +20,7 @@ sealed class SendCommand : Command {
 
     override fun verify() {
         if (destination == null) {
-            // getIP()
+            // getIP() TODO
             getPassword()
         }
         verifyPortNumber(port)

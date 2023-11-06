@@ -42,7 +42,7 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
         if (fileNameTooLong) {
             parent.sendInt(ServerFlags.FILE_NAMES_TOO_LONG)
             parent.sendInt(serverDestinationDirLength)
-            tempSourceListFile.bufferedReader().lines().forEach {
+            tempSourceListFile.lineStream {
                 fileListCrawler.add(it)
 
                 if (fileListCrawler.size == 3) {
@@ -86,7 +86,7 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
                 parent.reportTextLine(text = "Compressing files...")
                 val zipFile = File.createTempFile(FileTransfer.tempPrefix, FileTransfer.tempSuffix)
                 val zipStream = ZipOutputStream(BufferedOutputStream(zipFile.outputStream()))
-                tempSourceListFile.bufferedReader().lines().forEach {
+                tempSourceListFile.lineStream {
                     fileListCrawler.add(it)
 
                     if (fileListCrawler.size == 3) {
@@ -120,7 +120,7 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
             }
         }
 
-        tempSourceListFile.bufferedReader().lines().forEach {
+        tempSourceListFile.lineStream {
             fileListCrawler.add(it)
 
             if (fileListCrawler.size == 3) {
@@ -140,6 +140,14 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
                 }
                 fileListCrawler.clear()
             }
+        }
+    }
+}
+
+private fun File.lineStream(block: (String) -> Unit) {
+    this.bufferedReader().use { reader ->
+        reader.lines().forEach { line ->
+            block(line)
         }
     }
 }
