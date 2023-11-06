@@ -7,12 +7,16 @@ import commandHandler.canContinue
 import commandHandler.setupSendCommandClient
 import hmeadowSocket.HMeadowSocketClient
 import reportTextLine
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.attribute.BasicFileAttributes
-import java.util.stream.Collectors
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlin.io.path.isRegularFile
 
 fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSocketClient) {
@@ -38,7 +42,7 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
         if (fileNameTooLong) {
             parent.sendInt(ServerFlags.FILE_NAMES_TOO_LONG)
             parent.sendInt(serverDestinationDirLength)
-            tempSourceListFile.bufferedReader().lines().collect(Collectors.toList()).forEach {
+            tempSourceListFile.bufferedReader().lines().forEach {
                 fileListCrawler.add(it)
 
                 if (fileListCrawler.size == 3) {
@@ -79,7 +83,32 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
             }
 
             FileTransfer.COMPRESS_EVERYTHING -> {
-                println("COMPRESS FILES")
+                parent.reportTextLine(text = "Compressing files...")
+                val zipFile = File.createTempFile(FileTransfer.tempPrefix, FileTransfer.tempSuffix)
+                val zipStream = ZipOutputStream(BufferedOutputStream(zipFile.outputStream()))
+                tempSourceListFile.bufferedReader().lines().forEach {
+                    fileListCrawler.add(it)
+
+                    if (fileListCrawler.size == 3) {
+                        val relativePath = fileListCrawler[1]
+                        val absolutePath = fileListCrawler[2]
+
+                        if (relativePath.substring(0, FileTransfer.prefixLength) == FileTransfer.filePrefix) {
+                            zipStream.putNextEntry(ZipEntry(relativePath.substring(FileTransfer.prefixLength)))
+                            BufferedInputStream(FileInputStream(absolutePath)).copyTo(zipStream, 1024)
+                        }
+                        fileListCrawler.clear()
+                    }
+                }
+                zipStream.close()
+                parent.reportTextLine(text = "Sending compressed file...")
+                client.sendInt(ServerFlags.CONFIRM)
+                client.sendInt(message = 1)
+                client.sendString(FileTransfer.filePrefix + "compressed.zip")
+                client.sendFile(filePath = zipFile.absolutePath)
+                parent.reportTextLine(text = "Done")
+                parent.sendInt(ServerFlags.DONE)
+                return
             }
 
             FileTransfer.COMPRESS_INVALID -> {
@@ -91,7 +120,7 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
             }
         }
 
-        tempSourceListFile.bufferedReader().lines().collect(Collectors.toList()).forEach {
+        tempSourceListFile.bufferedReader().lines().forEach {
             fileListCrawler.add(it)
 
             if (fileListCrawler.size == 3) {

@@ -56,7 +56,7 @@ fun Session.serverSendFilesExecution(server: HMeadowSocketServer) {
             Files.createDirectory(Path(destinationPath))
         }
     }
-    printLine(text = "$fileTransferCount files received")
+    printLine(text = "$fileTransferCount file(s) received")
     printLine()
 }
 
