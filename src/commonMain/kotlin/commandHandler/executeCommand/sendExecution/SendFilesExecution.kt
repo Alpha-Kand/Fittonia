@@ -100,8 +100,11 @@ private fun Session.clientEngineFileNamesTooLong(clientEngine: HMeadowSocketServ
             )
         }
 
-        val actionList =
-            FileTransfer.defaultActionList + if (pathCountOverCutoff) listOf(FileTransfer.SHOW_ALL) else emptyList()
+        val actionList = if (pathCountOverCutoff) {
+            FileTransfer.defaultActionList
+        } else {
+            FileTransfer.defaultActionList.filter { it != FileTransfer.SHOW_ALL }
+        }
         section {
             textLine()
             val sb = StringBuilder("What would you like to do? (")
