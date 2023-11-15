@@ -83,6 +83,8 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
             }
 
             FileTransfer.COMPRESS_EVERYTHING -> {
+                client.sendInt(ServerFlags.CONFIRM)
+                client.sendInt(message = 1)
                 parent.reportTextLine(text = "Compressing files...")
                 val zipFile = File.createTempFile(FileTransfer.tempPrefix, FileTransfer.tempSuffix)
                 val zipStream = ZipOutputStream(BufferedOutputStream(zipFile.outputStream()))
@@ -102,8 +104,6 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
                 }
                 zipStream.close()
                 parent.reportTextLine(text = "Sending compressed file...")
-                client.sendInt(ServerFlags.CONFIRM)
-                client.sendInt(message = 1)
                 client.sendString(FileTransfer.filePrefix + "compressed.zip")
                 client.sendFile(filePath = zipFile.absolutePath)
                 parent.reportTextLine(text = "Done")
@@ -112,7 +112,41 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
             }
 
             FileTransfer.COMPRESS_INVALID -> {
-                println("COMPRESS FILES")
+                client.sendInt(ServerFlags.CONFIRM)
+                client.sendInt(message = (fileCount - skipped) + 1)
+                parent.reportTextLine(text = "Sending & compressing files...")
+                val zipFile = File.createTempFile(FileTransfer.tempPrefix, FileTransfer.tempSuffix)
+                val zipStream = ZipOutputStream(BufferedOutputStream(zipFile.outputStream()))
+                tempSourceListFile.lineStream {
+                    fileListCrawler.add(it)
+
+                    if (fileListCrawler.size == 3) {
+                        val fileLengthStatus = fileListCrawler[0]
+                        val relativePath = fileListCrawler[1]
+                        val absolutePath = fileListCrawler[2]
+
+                        if (fileLengthStatus.first() == '1') {
+                            if (relativePath.substring(0, FileTransfer.prefixLength) == FileTransfer.filePrefix) {
+                                zipStream.putNextEntry(ZipEntry(relativePath.substring(FileTransfer.prefixLength)))
+                                BufferedInputStream(FileInputStream(absolutePath)).copyTo(zipStream, 1024)
+                            }
+                        } else {
+                            client.sendString(relativePath)
+                            if (relativePath.substring(0, FileTransfer.prefixLength) == FileTransfer.filePrefix) {
+                                client.sendFile(filePath = absolutePath)
+                            }
+                        }
+
+                        fileListCrawler.clear()
+                    }
+                }
+                zipStream.close()
+                parent.reportTextLine(text = "Sending compressed file...")
+                client.sendString(FileTransfer.filePrefix + "compressed.zip")
+                client.sendFile(filePath = zipFile.absolutePath)
+                parent.reportTextLine(text = "Done")
+                parent.sendInt(ServerFlags.DONE)
+                return
             }
 
             else -> {
