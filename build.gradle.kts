@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.Properties
 
 plugins {
     kotlin("multiplatform")
@@ -15,6 +14,7 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
+
 kotlin {
     android()
     jvm("desktop")
@@ -62,31 +62,20 @@ kotlin {
         }
     }
 }
+
 compose.desktop {
     application {
-        val buildType = Properties().run {
-            load(file("local.properties").inputStream())
-            getProperty("DESKTOP_BUILD_TYPE", "")
-        }.toInt()
-
-        mainClass = when (buildType) {
-            1 -> "Main_terminalKt"
-            2 -> "Main_clientengineKt"
-            3 -> "Main_desktopKt"
-            else -> "???"
-        }
-
+        // Run configuration as:
+        // Task = 'packageReleaseUberJarForCurrentOS'
+        // Environment Variables = 'MAINCLASS=Main_terminalKt;PACKAGENAME=FittoniaTerminal'
+        // Customize per build target e.g. "terminal, client engine, etc."
+        mainClass = System.getenv("MAINCLASS")
         nativeDistributions {
             targetFormats(
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb,
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.AppImage,
             )
-            packageName = when (buildType) {
-                1 -> "FittoniaTerminal"
-                2 -> "FittoniaClientEngine"
-                3 -> "FittoniaDesktop"
-                else -> "???"
-            }
+            packageName = System.getenv("PACKAGENAME")
             packageVersion = "1.0"
         }
     }
