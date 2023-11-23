@@ -13,7 +13,7 @@ fun Session.serverExecution(command: ServerCommand) {
     printLine(text = "Server started.")
     while (true) {
         printLine(text = "⏳ Waiting for a client.")
-        val server = HMeadowSocketServer.getServer(port = command.getPort())
+        val server = HMeadowSocketServer.createServer(port = command.getPort())
         when (server.receiveInt()) {
             ServerFlags.SEND_FILES -> serverSendFilesExecution(server = server)
 
@@ -42,5 +42,6 @@ fun Session.serverExecution(command: ServerCommand) {
                 printLine(text = "Received invalid server command from client.")
             }
         }
+        server.close()
     }
 }

@@ -62,12 +62,14 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     val destination = SettingsManager.settingsManager.findDestination(command.getDestination())
     return destination?.let {
         HMeadowSocketClient(
-            ipAddress = InetAddress.getByName(destination.ip), // "localhost"),
+            ipAddress = InetAddress.getByName(destination.ip),
             port = command.getPort(),
+            timeoutMillis = 2000L,
         )
     } ?: HMeadowSocketClient(
         ipAddress = InetAddress.getByName(command.getIP()),
         port = command.getPort(),
+        timeoutMillis = 2000L,
     )
 }
 

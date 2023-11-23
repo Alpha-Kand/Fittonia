@@ -20,6 +20,11 @@ fun Session.reportHMSocketError(e: HMeadowSocket.HMeadowSocketError) = section {
     when (e.errorType) {
         HMeadowSocket.SocketErrorType.CLIENT_SETUP -> textLine(text = "There was an error setting up CLIENT")
         HMeadowSocket.SocketErrorType.SERVER_SETUP -> textLine(text = "There was an error setting up SERVER")
+        HMeadowSocket.SocketErrorType.COULD_NOT_BIND_SERVER_TO_GIVEN_PORT ->
+            textLine(text = "Could not create server on given port.")
+
+        HMeadowSocket.SocketErrorType.COULD_NOT_FIND_AVAILABLE_PORT ->
+            textLine(text = "Could not find any available ports.")
     }
     e.message?.let {
         textLine(text = "       $it")

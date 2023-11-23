@@ -1,13 +1,19 @@
 package hmeadowSocket
 
+import java.io.IOException
+import java.lang.Thread.sleep
+import java.net.BindException
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
+import java.time.Instant
 
 sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
     enum class SocketErrorType {
         CLIENT_SETUP,
         SERVER_SETUP,
+        COULD_NOT_BIND_SERVER_TO_GIVEN_PORT,
+        COULD_NOT_FIND_AVAILABLE_PORT,
     }
 
     class HMeadowSocketError(
@@ -41,10 +47,12 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         prefix = prefix,
         suffix = suffix,
     )
+
+    abstract fun close()
 }
 
 class HMeadowSocketServer private constructor(
-    socket: Socket,
+    private val socket: Socket,
     override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
 ) : HMeadowSocket(socketInterface) {
     init {
@@ -55,24 +63,48 @@ class HMeadowSocketServer private constructor(
         }
     }
 
-    private data class ActiveServerSocket(
-        val serverSocket: ServerSocket,
-        val port: Int,
-    )
+    override fun close() {
+        socket.close()
+    }
 
     companion object {
-        private val mActiveServers = mutableListOf<ActiveServerSocket>()
 
-        fun getServer(port: Int): HMeadowSocketServer {
-            return HMeadowSocketServer(
-                socket = mActiveServers.find {
-                    it.port == port
-                }?.serverSocket?.accept() ?: run {
-                    val newServerSocket = ServerSocket(port)
-                    mActiveServers.add(ActiveServerSocket(serverSocket = newServerSocket, port = port))
-                    newServerSocket.accept()
-                },
-            )
+        /**
+         * Creates a server on the given port or throws an error.
+         */
+        fun createServer(port: Int): HMeadowSocketServer {
+            try {
+                return HMeadowSocketServer(socket = ServerSocket(port).accept())
+            } catch (e: BindException) {
+                throw HMeadowSocketError(errorType = SocketErrorType.COULD_NOT_BIND_SERVER_TO_GIVEN_PORT, e)
+            }
+        }
+
+        /**
+         * Creates a server on or after the given port. Calls [onFindAvailablePort] after a server socket was
+         * successfully created, but before it blocks for a client.
+         *
+         * In the unlikely event no ports are found, throws an error.
+         */
+        fun createServerAnyPort(
+            startingPort: Int,
+            onFindAvailablePort: (port: Int) -> Unit = {},
+        ): HMeadowSocketServer {
+            var validPort = startingPort
+            var serverSocket: ServerSocket
+            while (true) {
+                try {
+                    serverSocket = ServerSocket(validPort)
+                    break
+                } catch (e: BindException) {
+                    validPort += 1
+                    if (validPort > 65535) { // 65535 is the highest port number possible (2^16)-1.
+                        throw HMeadowSocketError(errorType = SocketErrorType.COULD_NOT_FIND_AVAILABLE_PORT, e)
+                    }
+                }
+            }
+            onFindAvailablePort(validPort)
+            return HMeadowSocketServer(socket = serverSocket.accept())
         }
     }
 }
@@ -80,13 +112,27 @@ class HMeadowSocketServer private constructor(
 class HMeadowSocketClient(
     ipAddress: InetAddress,
     port: Int,
+    timeoutMillis: Long = 0,
     override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
 ) : HMeadowSocket(socketInterface) {
+    private val socket: Socket
+
     init {
-        try {
-            socketInterface.bindToSocket(Socket(ipAddress, port))
-        } catch (e: Exception) {
-            throw HMeadowSocketError(errorType = SocketErrorType.CLIENT_SETUP, error = e)
-        }
+        val timeLimit = Instant.now().toEpochMilli() + timeoutMillis
+        var trySocket: Socket? = null
+        do {
+            try {
+                trySocket = Socket(ipAddress, port)
+                socketInterface.bindToSocket(trySocket)
+                break
+            } catch (e: IOException) {
+                sleep(timeoutMillis / 10)
+            }
+        } while (Instant.now().toEpochMilli() < timeLimit)
+        socket = trySocket ?: throw IllegalStateException() // TODO CLIENT_CONNECTION_TIMEOUT
+    }
+
+    override fun close() {
+        socket.close()
     }
 }

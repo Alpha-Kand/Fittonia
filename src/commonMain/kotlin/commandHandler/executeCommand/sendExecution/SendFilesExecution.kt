@@ -16,9 +16,9 @@ import hmeadowSocket.HMeadowSocketServer
 import printLine
 
 fun Session.sendFilesExecution(inputTokens: List<String>) {
-    startClientEngine(inputTokens = inputTokens)
-
-    val clientEngine = HMeadowSocketServer.getServer(port = 10778)
+    val clientEngine = HMeadowSocketServer.createServerAnyPort(startingPort = 10778) { port ->
+        startClientEngine(inputTokens = inputTokens + listOf("clientengineport=$port"))
+    }
     while (true) {
         when (clientEngine.receiveInt()) {
             ServerFlags.PRINT_LINE -> clientEnginePrintLine(clientEngine = clientEngine)
@@ -111,7 +111,7 @@ private fun Session.clientEngineFileNamesTooLong(clientEngine: HMeadowSocketServ
             actionList.forEach {
                 sb.append("$it,")
             }
-            sb.dropLast(1)
+            sb.dropLast(2)
             sb.append(')')
             textLine(text = sb.toString())
 

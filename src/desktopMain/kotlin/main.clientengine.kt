@@ -7,29 +7,18 @@ import commandHandler.executeCommand.sendExecution.sendFilesExecutionClientEngin
 import commandHandler.executeCommand.sendExecution.sendMessageExecutionClientEngine
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
-import java.lang.Thread.sleep
 import java.net.InetAddress
-import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-    var failAttempts = 50 // todo
-    var parent: HMeadowSocketClient? = null
-    while (parent == null) {
-        try {
-            parent = HMeadowSocketClient(
-                ipAddress = InetAddress.getByName("localhost"),
-                port = 10778,
-            )
-        } catch (e: HMeadowSocket.HMeadowSocketError) {
-            sleep(100)
-            println("DEBUG: Client failed connection $failAttempts")
-            failAttempts -= 1
-        }
-        if (failAttempts <= 0) {
-            println("DEBUG: Client dead")
-            exitProcess(status = 1)
-        }
-    }
+    val port = args.find {
+        it.startsWith("clientengineport=")
+    }?.substringAfter('=')?.toIntOrNull() ?: throw IllegalArgumentException() // exitProcess(1)
+
+    val parent = HMeadowSocketClient(
+        ipAddress = InetAddress.getByName("localhost"),
+        port = port,
+        timeoutMillis = 3000L,
+    )
 
     try {
         when (val command = CommandHandler(args = args.toList()).getCommand()) {
@@ -54,6 +43,10 @@ fun sendHMSocketError(e: HMeadowSocket.HMeadowSocketError, parent: HMeadowSocket
         text = when (e.errorType) {
             HMeadowSocket.SocketErrorType.CLIENT_SETUP -> "There was an error setting up CLIENT"
             HMeadowSocket.SocketErrorType.SERVER_SETUP -> "There was an error setting up SERVER"
+            HMeadowSocket.SocketErrorType.COULD_NOT_BIND_SERVER_TO_GIVEN_PORT ->
+                "Could not create server on given port."
+
+            HMeadowSocket.SocketErrorType.COULD_NOT_FIND_AVAILABLE_PORT -> "Could not find any available ports."
         },
     )
     parent.reportTextLine(
