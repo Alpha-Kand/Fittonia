@@ -1,4 +1,4 @@
-
+import com.varabyte.kotter.foundation.text.Color
 import commandHandler.CommandHandler
 import commandHandler.SendFilesCommand
 import commandHandler.SendMessageCommand
@@ -12,7 +12,7 @@ import java.net.InetAddress
 fun main(args: Array<String>) {
     val port = args.find {
         it.startsWith("clientengineport=")
-    }?.substringAfter('=')?.toIntOrNull() ?: throw IllegalArgumentException() // exitProcess(1)
+    }?.substringAfter('=')?.toIntOrNull() ?: throw IllegalArgumentException()
 
     val parent = HMeadowSocketClient(
         ipAddress = InetAddress.getByName("localhost"),
@@ -39,19 +39,11 @@ fun sendFittoniaError(e: FittoniaError, parent: HMeadowSocketClient) {
 }
 
 fun sendHMSocketError(e: HMeadowSocket.HMeadowSocketError, parent: HMeadowSocketClient) {
-    parent.reportTextLine(
-        text = when (e.errorType) {
-            HMeadowSocket.SocketErrorType.CLIENT_SETUP -> "There was an error setting up CLIENT"
-            HMeadowSocket.SocketErrorType.SERVER_SETUP -> "There was an error setting up SERVER"
-            HMeadowSocket.SocketErrorType.COULD_NOT_BIND_SERVER_TO_GIVEN_PORT ->
-                "Could not create server on given port."
-
-            HMeadowSocket.SocketErrorType.COULD_NOT_FIND_AVAILABLE_PORT -> "Could not find any available ports."
-        },
-    )
-    parent.reportTextLine(
-        text = e.message?.let {
-            "       $it"
-        } ?: ".",
-    )
+    parent.reportTextLine("Error: ", Color.RED)
+    e.hmMessage?.let {
+        parent.reportTextLine(text = it)
+    }
+    e.message?.let {
+        parent.reportTextLine(text = "       $it")
+    } ?: parent.reportTextLine(text = ".")
 }

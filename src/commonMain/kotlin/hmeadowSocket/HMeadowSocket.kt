@@ -1,52 +1,97 @@
 package hmeadowSocket
 
+import hmeadowSocket.HMeadowSocket.HMeadowSocketError.ClientSetupException
+import hmeadowSocket.HMeadowSocket.HMeadowSocketError.CouldNotBindServerToGivenPort
+import hmeadowSocket.HMeadowSocket.HMeadowSocketError.CouldNotFindAvailablePort
+import hmeadowSocket.HMeadowSocket.HMeadowSocketError.FailedToReceiveException
+import hmeadowSocket.HMeadowSocket.HMeadowSocketError.FailedToSendException
+import hmeadowSocket.HMeadowSocket.HMeadowSocketError.ServerSetupException
 import java.io.IOException
 import java.lang.Thread.sleep
-import java.net.BindException
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.time.Instant
 
 sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
-    enum class SocketErrorType {
-        CLIENT_SETUP,
-        SERVER_SETUP,
-        COULD_NOT_BIND_SERVER_TO_GIVEN_PORT,
-        COULD_NOT_FIND_AVAILABLE_PORT,
+
+    sealed class HMeadowSocketError(
+        error: Exception,
+    ) : Exception(error.message) {
+        abstract val hmMessage: String?
+
+        class ClientSetupException(error: Exception) : HMeadowSocketError(error = error) {
+            override val hmMessage: String = "There was an error setting up CLIENT"
+        }
+
+        class ServerSetupException(error: Exception) : HMeadowSocketError(error = error) {
+            override val hmMessage: String = "There was an error setting up SERVER"
+        }
+
+        class CouldNotBindServerToGivenPort(error: Exception) : HMeadowSocketError(error = error) {
+            override val hmMessage: String = "Could not create server on given port."
+        }
+
+        class CouldNotFindAvailablePort(error: Exception) : HMeadowSocketError(error = error) {
+            override val hmMessage: String = "Could not find any available ports."
+        }
+
+        class FailedToReceiveException(error: Exception) : HMeadowSocketError(error = error) {
+            override val hmMessage: String =
+                "Failed to receive data. Other side of connection might have closed unexpectedly."
+        }
+
+        class FailedToSendException(error: Exception) : HMeadowSocketError(error = error) {
+            override val hmMessage: String = "Failed to send data."
+        }
     }
 
-    class HMeadowSocketError(
-        val errorType: SocketErrorType,
-        error: Exception,
-    ) : Exception(error.message)
+    @Throws(FailedToReceiveException::class)
+    private fun <T> receiveErrorWrapper(receive: () -> T): T {
+        try {
+            return receive()
+        } catch (e: Exception) {
+            throw FailedToReceiveException(e)
+        }
+    }
 
-    fun sendInt(message: Int) = socketInterface.sendInt(message)
-    fun receiveInt() = socketInterface.receiveInt()
+    @Throws(FailedToSendException::class)
+    private fun sendErrorWrapper(send: () -> Unit) {
+        try {
+            send()
+        } catch (e: Exception) {
+            throw throw FailedToSendException(e)
+        }
+    }
 
-    fun sendLong(message: Long) = socketInterface.sendLong(message)
-    fun receiveLong() = socketInterface.receiveLong()
+    fun sendInt(message: Int) = sendErrorWrapper { socketInterface.sendInt(message) }
+    fun receiveInt() = receiveErrorWrapper { socketInterface.receiveInt() }
 
-    fun sendBoolean(message: Boolean) = socketInterface.sendBoolean(message)
-    fun receiveBoolean() = socketInterface.receiveBoolean()
+    fun sendLong(message: Long) = sendErrorWrapper { socketInterface.sendLong(message) }
+    fun receiveLong() = receiveErrorWrapper { socketInterface.receiveLong() }
 
-    fun sendString(message: String) = socketInterface.sendString(message)
-    fun receiveString() = socketInterface.receiveString()
+    fun sendBoolean(message: Boolean) = sendErrorWrapper { socketInterface.sendBoolean(message) }
+    fun receiveBoolean() = receiveErrorWrapper { socketInterface.receiveBoolean() }
+
+    fun sendString(message: String) = sendErrorWrapper { socketInterface.sendString(message) }
+    fun receiveString() = receiveErrorWrapper { socketInterface.receiveString() }
 
     fun sendFile(
         filePath: String,
         rename: String = "",
-    ) = socketInterface.sendFile(filePath = filePath, rename = rename)
+    ) = sendErrorWrapper { socketInterface.sendFile(filePath = filePath, rename = rename) }
 
     fun receiveFile(
         destination: String = "",
         prefix: String = "___",
         suffix: String = "___",
-    ): Pair<String, String> = socketInterface.receiveFile(
-        destination = destination,
-        prefix = prefix,
-        suffix = suffix,
-    )
+    ): Pair<String, String> = receiveErrorWrapper {
+        socketInterface.receiveFile(
+            destination = destination,
+            prefix = prefix,
+            suffix = suffix,
+        )
+    }
 
     abstract fun close()
 }
@@ -59,7 +104,7 @@ class HMeadowSocketServer private constructor(
         try {
             socketInterface.bindToSocket(socket)
         } catch (e: Exception) {
-            throw HMeadowSocketError(errorType = SocketErrorType.SERVER_SETUP, error = e)
+            throw ServerSetupException(e)
         }
     }
 
@@ -72,11 +117,14 @@ class HMeadowSocketServer private constructor(
         /**
          * Creates a server on the given port or throws an error.
          */
+        @Throws(CouldNotBindServerToGivenPort::class, ServerSetupException::class)
         fun createServer(port: Int): HMeadowSocketServer {
             try {
                 return HMeadowSocketServer(socket = ServerSocket(port).accept())
-            } catch (e: BindException) {
-                throw HMeadowSocketError(errorType = SocketErrorType.COULD_NOT_BIND_SERVER_TO_GIVEN_PORT, e)
+            } catch (e: ServerSetupException) {
+                throw e
+            } catch (e: Exception) {
+                throw CouldNotBindServerToGivenPort(e)
             }
         }
 
@@ -86,6 +134,7 @@ class HMeadowSocketServer private constructor(
          *
          * In the unlikely event no ports are found, throws an error.
          */
+        @Throws(CouldNotFindAvailablePort::class, ServerSetupException::class)
         fun createServerAnyPort(
             startingPort: Int,
             onFindAvailablePort: (port: Int) -> Unit = {},
@@ -96,10 +145,10 @@ class HMeadowSocketServer private constructor(
                 try {
                     serverSocket = ServerSocket(validPort)
                     break
-                } catch (e: BindException) {
+                } catch (e: Exception) {
                     validPort += 1
                     if (validPort > 65535) { // 65535 is the highest port number possible (2^16)-1.
-                        throw HMeadowSocketError(errorType = SocketErrorType.COULD_NOT_FIND_AVAILABLE_PORT, e)
+                        throw CouldNotFindAvailablePort(e)
                     }
                 }
             }
@@ -109,7 +158,7 @@ class HMeadowSocketServer private constructor(
     }
 }
 
-class HMeadowSocketClient(
+class HMeadowSocketClient @Throws(ClientSetupException::class) constructor(
     ipAddress: InetAddress,
     port: Int,
     timeoutMillis: Long = 0,
@@ -129,7 +178,7 @@ class HMeadowSocketClient(
                 sleep(timeoutMillis / 10)
             }
         } while (Instant.now().toEpochMilli() < timeLimit)
-        socket = trySocket ?: throw IllegalStateException() // TODO CLIENT_CONNECTION_TIMEOUT
+        socket = trySocket ?: throw ClientSetupException(Exception())
     }
 
     override fun close() {
