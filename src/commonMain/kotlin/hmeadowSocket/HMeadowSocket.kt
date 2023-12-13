@@ -96,9 +96,9 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
     abstract fun close()
 }
 
-class HMeadowSocketServer private constructor(
+open class HMeadowSocketServer(
     private val socket: Socket,
-    override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
+    final override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
 ) : HMeadowSocket(socketInterface) {
     init {
         try {
@@ -129,6 +129,20 @@ class HMeadowSocketServer private constructor(
         }
 
         /**
+         * Creates a server socket on the given port or throws an error.
+         */
+        @Throws(CouldNotBindServerToGivenPort::class, ServerSetupException::class)
+        fun createServerSocket(port: Int): Socket {
+            try {
+                return ServerSocket(port).accept()
+            } catch (e: ServerSetupException) {
+                throw e
+            } catch (e: Exception) {
+                throw CouldNotBindServerToGivenPort(e)
+            }
+        }
+
+        /**
          * Creates a server on or after the given port. Calls [onFindAvailablePort] after a server socket was
          * successfully created, but before it blocks for a client.
          *
@@ -139,6 +153,19 @@ class HMeadowSocketServer private constructor(
             startingPort: Int,
             onFindAvailablePort: (port: Int) -> Unit = {},
         ): HMeadowSocketServer {
+            return HMeadowSocketServer(
+                socket = createServerSocketAnyPort(
+                    startingPort = startingPort,
+                    onFindAvailablePort = onFindAvailablePort,
+                ),
+            )
+        }
+
+        @Throws(CouldNotFindAvailablePort::class, ServerSetupException::class)
+        fun createServerSocketAnyPort(
+            startingPort: Int,
+            onFindAvailablePort: (port: Int) -> Unit = {},
+        ): Socket {
             var validPort = startingPort
             var serverSocket: ServerSocket
             while (true) {
@@ -153,16 +180,16 @@ class HMeadowSocketServer private constructor(
                 }
             }
             onFindAvailablePort(validPort)
-            return HMeadowSocketServer(socket = serverSocket.accept())
+            return serverSocket.accept()
         }
     }
 }
 
-class HMeadowSocketClient @Throws(ClientSetupException::class) constructor(
+open class HMeadowSocketClient @Throws(ClientSetupException::class) constructor(
     ipAddress: InetAddress,
     port: Int,
     timeoutMillis: Long = 0,
-    override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
+    final override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
 ) : HMeadowSocket(socketInterface) {
     private val socket: Socket
 
