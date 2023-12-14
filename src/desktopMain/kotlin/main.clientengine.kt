@@ -45,5 +45,5 @@ fun sendHMSocketError(e: HMeadowSocket.HMeadowSocketError, parent: HMeadowSocket
     }
     e.message?.let {
         parent.reportTextLine(text = "       $it")
-    } ?: parent.reportTextLine(text = ".")
+    }
 }
