@@ -13,7 +13,10 @@ fun Session.serverExecution(command: ServerCommand) {
     printLine(text = "Server started.")
     while (true) {
         printLine(text = "⏳ Waiting for a client.")
-        val server = HMeadowSocketServer.createServer(port = command.getPort())
+        val server = HMeadowSocketServer.createServer(
+            port = command.getPort(),
+            timeoutMillis = 2000,
+        )
         when (server.receiveInt()) {
             ServerFlags.SEND_FILES -> serverSendFilesExecution(server = server)
 

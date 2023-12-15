@@ -60,7 +60,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         try {
             send()
         } catch (e: Exception) {
-            throw throw FailedToSendException(e)
+            throw FailedToSendException(e)
         }
     }
 
@@ -94,6 +94,18 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
     }
 
     abstract fun close()
+
+    abstract fun sendClose()
+
+    open fun closeSocket(socket: Socket) {
+        try {
+            sendInt(-1)
+            receiveInt()
+            socket.close()
+        } catch (e: FailedToReceiveException) {
+            // Expected, trying to shutdown anyway.
+        }
+    }
 }
 
 open class HMeadowSocketServer(
@@ -109,8 +121,11 @@ open class HMeadowSocketServer(
     }
 
     override fun close() {
+        socketInterface.close()
         socket.close()
     }
+
+    override fun sendClose() = closeSocket(socket = socket)
 
     companion object {
 
@@ -118,9 +133,23 @@ open class HMeadowSocketServer(
          * Creates a server on the given port or throws an error.
          */
         @Throws(CouldNotBindServerToGivenPort::class, ServerSetupException::class)
-        fun createServer(port: Int): HMeadowSocketServer {
+        fun createServer(port: Int, timeoutMillis: Long = 0): HMeadowSocketServer {
+            val timeLimit = Instant.now().toEpochMilli() + timeoutMillis
+            var exception: Exception
+            do {
+                try {
+                    val serverSocket = ServerSocket(port)
+                    val hmeadowSocketServer = HMeadowSocketServer(socket = serverSocket.accept())
+                    serverSocket.close()
+                    return hmeadowSocketServer
+                } catch (e: IOException) {
+                    exception = e
+                    sleep(timeoutMillis / 10)
+                }
+            } while (Instant.now().toEpochMilli() < timeLimit)
+
             try {
-                return HMeadowSocketServer(socket = ServerSocket(port).accept())
+                throw exception
             } catch (e: ServerSetupException) {
                 throw e
             } catch (e: Exception) {
@@ -209,6 +238,9 @@ open class HMeadowSocketClient @Throws(ClientSetupException::class) constructor(
     }
 
     override fun close() {
+        socketInterface.close()
         socket.close()
     }
+
+    override fun sendClose() = closeSocket(socket = socket)
 }

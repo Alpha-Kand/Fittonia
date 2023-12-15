@@ -14,6 +14,7 @@ import kotlin.io.path.Path
 
 interface HMeadowSocketInterface {
     fun bindToSocket(socket: Socket)
+    fun close()
 
     fun sendInt(message: Int)
     fun receiveInt(): Int
@@ -50,6 +51,12 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         mDataInput = DataInputStream(socket.getInputStream())
         mDataOutput = DataOutputStream(socket.getOutputStream())
         mInputStreamReader = BufferedReader(InputStreamReader(socket.getInputStream()))
+    }
+
+    override fun close() {
+        mDataInput.close()
+        mDataOutput.close()
+        mInputStreamReader.close()
     }
 
     override fun sendInt(message: Int) = mDataOutput.writeInt(message)
@@ -262,6 +269,7 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
 class HMeadowSocketInterfaceTest : HMeadowSocketInterface {
 
     override fun bindToSocket(socket: Socket) {}
+    override fun close() {}
 
     override fun sendInt(message: Int) {}
     override fun receiveInt() = 4

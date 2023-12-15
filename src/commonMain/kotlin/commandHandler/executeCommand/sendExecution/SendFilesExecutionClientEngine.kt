@@ -153,6 +153,9 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
                 println("send files else")
             }
         }
+    }
+    client.close()
+}
 
         tempSourceListFile.lineStream {
             fileListCrawler.add(it)
