@@ -3,7 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
-    alias(libs.plugins.android.application) // False positive error.
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kover)
 }
 
 version = "1.0"
@@ -15,9 +16,16 @@ repositories {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
+val testAttribute: Attribute<String> = Attribute.of("key", String::class.java)
+
 kotlin {
     android()
-    jvm("desktop")
+    jvm(name = "common") {
+        attributes.attribute(testAttribute, "common")
+    }
+    jvm(name = "desktop") {
+        attributes.attribute(testAttribute, "desktop")
+    }
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -27,10 +35,16 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(libs.kotlinx.coroutines.core.library)
                 implementation(libs.jackson.module.kotlin)
+                implementation(libs.kotter.library)
             }
         }
 
-        val desktopTest by getting {
+        commonTest {
+            koverReport {
+                defaults {
+                    mergeWith("release")
+                }
+            }
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
@@ -41,6 +55,35 @@ kotlin {
                 implementation(libs.junit)
                 api(libs.junit.jupiter)
                 api(libs.kotlinx.coroutines.test)
+                api(libs.kover)
+            }
+        }
+
+        val desktopMain by getting {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.core.library)
+                implementation(compose.desktop.currentOs)
+                implementation(libs.kotter.library)
+            }
+        }
+
+        val desktopTest by getting {
+            koverReport {
+                defaults {
+                    mergeWith("release")
+                }
+            }
+            dependencies {
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+                api(libs.mockk.library)
+                api(libs.junit.jupiter.api)
+                api(libs.junit.jupiter.params)
+                api(libs.junit.jupiter.engine)
+                implementation(libs.junit)
+                api(libs.junit.jupiter)
+                api(libs.kotlinx.coroutines.test)
+                api(libs.kover)
             }
         }
 
@@ -50,14 +93,6 @@ kotlin {
             dependencies {
                 implementation(libs.appcompat.library)
                 implementation(libs.activity.compose.library)
-            }
-        }
-
-        val desktopMain by getting {
-            dependencies {
-                implementation(libs.kotlinx.coroutines.core.library)
-                implementation(compose.desktop.currentOs)
-                implementation(libs.kotter.library)
             }
         }
     }
@@ -78,11 +113,12 @@ compose.desktop {
             packageName = System.getenv("PACKAGENAME")
             packageVersion = "1.0"
         }
+        from(kotlin.targets.getByName("desktop"))
     }
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = libs.versions.javaVersion.get()
+    kotlinOptions.jvmTarget = "17"
 }
 
 tasks.withType<Test> {
@@ -90,11 +126,11 @@ tasks.withType<Test> {
 }
 
 android {
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk = 34
 
     defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        minSdk = 26
+        targetSdk = 34
     }
 
     compileOptions {
@@ -109,14 +145,4 @@ android {
         }
     }
     namespace = "org.huntersmeadow.fittonia"
-}
-
-dependencies {
-    api(libs.mockk.library)
-    api(libs.junit.jupiter.api)
-    api(libs.junit.jupiter.params)
-    api(libs.junit.jupiter.engine)
-    api(libs.junit.vintage.engine)
-    implementation(libs.junit)
-    api(libs.junit.jupiter)
 }
