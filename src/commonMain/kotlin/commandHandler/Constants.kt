@@ -85,5 +85,8 @@ class FileTransfer {
             COMPRESS_INVALID,
             SHOW_ALL,
         )
+
+        fun String.stripPrefix() = this.substring(startIndex = prefixLength)
+        fun String.getPrefix() = this.substring(startIndex = 0, endIndex = prefixLength)
     }
 }
