@@ -157,30 +157,6 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
     client.close()
 }
 
-        tempSourceListFile.lineStream {
-            fileListCrawler.add(it)
-
-            if (fileListCrawler.size == 3) {
-                val fileLengthStatus = fileListCrawler[0]
-                val relativePath = fileListCrawler[1]
-                val absolutePath = fileListCrawler[2]
-
-                if (fileLengthStatus.first() == '1') {
-                    if (!skipInvalid) {
-                        // todo: compress or throw error I think.
-                    }
-                } else {
-                    client.sendString(relativePath)
-                    if (relativePath.substring(0, FileTransfer.prefixLength) == FileTransfer.filePrefix) {
-                        client.sendFile(filePath = absolutePath)
-                    }
-                }
-                fileListCrawler.clear()
-            }
-        }
-    }
-}
-
 private fun File.lineStream(block: (String) -> Unit) {
     this.bufferedReader().use { reader ->
         reader.lines().forEach { line ->
