@@ -37,13 +37,11 @@ fun Session.serverSendFilesExecution(server: HMeadowSocketServer) {
     printLine(text = "$fileTransferCount")
 
     repeat(times = fileTransferCount) {
-        val relativePathWithPrefix = server.receiveString()
-        val relativePathNoPrefix = relativePathWithPrefix.substring(startIndex = FileTransfer.prefixLength)
-        val prefix = relativePathWithPrefix.substring(0, FileTransfer.prefixLength)
-        val destinationPath = "$jobPath/$relativePathNoPrefix"
-        if (prefix == FileTransfer.filePrefix) {
+        val relativePath = server.receiveString()
+        val destinationPath = "$jobPath/$relativePath"
+        if (server.receiveBoolean()) { // Is a file.
             section {
-                text("Receiving: $relativePathNoPrefix")
+                text("Receiving: $relativePath")
                 val (tempFile, _) = server.receiveFile(
                     destination = "$tempReceivingFolder/",
                     prefix = FileTransfer.tempPrefix,

@@ -30,9 +30,13 @@ fun Session.sendFilesExecution(inputTokens: List<String>) {
 }
 
 private fun Session.clientEnginePrintLine(clientEngine: HMeadowSocketServer) {
+    // TODO
+    val aaa = clientEngine.receiveInt()
+    val bbb = clientEngine.receiveString()
+    clientEngine.sendInt(ServerFlags.CONFIRM)
     section {
-        color(Color.values()[clientEngine.receiveInt()])
-        textLine(text = clientEngine.receiveString())
+        color(Color.values()[aaa])
+        textLine(text = bbb)
     }.run()
 }
 

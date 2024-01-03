@@ -33,4 +33,5 @@ fun HMeadowSocketClient.reportTextLine(text: String, color: Color = Color.WHITE)
     sendInt(message = ServerFlags.PRINT_LINE)
     sendInt(message = color.ordinal)
     sendString(message = text)
+    receiveInt()
 }
