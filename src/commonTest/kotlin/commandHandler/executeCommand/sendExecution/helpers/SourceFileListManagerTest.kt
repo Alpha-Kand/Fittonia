@@ -8,7 +8,9 @@ import fileOperationWrappers.FittoniaTempFileBase.FittoniaTempFileMock.TempFileL
 import io.mockk.every
 import io.mockk.mockkObject
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import kotlin.io.path.Path
 
@@ -39,7 +41,7 @@ private class SourceFileListManagerTest : BaseMockkTest() {
             onItemFound = {},
         )
         TempFileLines.fileLines.forEachIndexed { index, line ->
-            Assertions.assertEquals(line, BufferedWriterFileLines.bufferedFileLines[index])
+            assertEquals(line, BufferedWriterFileLines.bufferedFileLines[index])
         }
     }
 
@@ -65,7 +67,7 @@ private class SourceFileListManagerTest : BaseMockkTest() {
             onItemFound = {},
         )
         TempFileLines.fileLines.forEachIndexed { index, line ->
-            Assertions.assertEquals(line, BufferedWriterFileLines.bufferedFileLines[index])
+            assertEquals(line, BufferedWriterFileLines.bufferedFileLines[index])
         }
     }
 
@@ -77,7 +79,7 @@ private class SourceFileListManagerTest : BaseMockkTest() {
             serverDestinationDirLength = 100,
             onItemFound = {},
         )
-        Assertions.assertTrue(BufferedWriterFileLines.bufferedFileLines.isEmpty())
+        assertTrue(BufferedWriterFileLines.bufferedFileLines.isEmpty())
     }
 
     @UnitTest
@@ -94,7 +96,7 @@ private class SourceFileListManagerTest : BaseMockkTest() {
             onItemFound = {},
         )
         TempFileLines.fileLines.forEachIndexed { index, line ->
-            Assertions.assertEquals(line, BufferedWriterFileLines.bufferedFileLines[index])
+            assertEquals(line, BufferedWriterFileLines.bufferedFileLines[index])
         }
     }
 
@@ -106,10 +108,10 @@ private class SourceFileListManagerTest : BaseMockkTest() {
             serverDestinationDirLength = 126,
             onItemFound = {},
         )
-        Assertions.assertEquals(listOf("ccc", "fff"), sourceFileListManager.filesNameTooLong)
-        Assertions.assertTrue(sourceFileListManager.foundItemNameTooLong)
-        Assertions.assertEquals(3, sourceFileListManager.totalItemCount)
-        Assertions.assertEquals(1, sourceFileListManager.validItemCount)
+        assertEquals(listOf("ccc", "fff"), sourceFileListManager.filesNameTooLong)
+        assertTrue(sourceFileListManager.foundItemNameTooLong)
+        assertEquals(3, sourceFileListManager.totalItemCount)
+        assertEquals(1, sourceFileListManager.validItemCount)
     }
 
     @UnitTest
@@ -135,20 +137,20 @@ private class SourceFileListManagerTest : BaseMockkTest() {
             itemInfos.add(it)
         }
 
-        Assertions.assertEquals(2, itemInfos.size)
+        assertEquals(2, itemInfos.size)
 
         itemInfos[0].run {
-            Assertions.assertTrue(isFile)
-            Assertions.assertEquals("/user/home/file", absolutePath)
-            Assertions.assertEquals("/home/file", relativePath)
-            Assertions.assertFalse(nameIsTooLong)
+            assertTrue(isFile)
+            assertEquals("/user/home/file", absolutePath)
+            assertEquals("/home/file", relativePath)
+            assertFalse(nameIsTooLong)
         }
 
         itemInfos[1].run {
-            Assertions.assertFalse(isFile)
-            Assertions.assertEquals("/user/home/directory", absolutePath)
-            Assertions.assertEquals("/home/directory", relativePath)
-            Assertions.assertTrue(nameIsTooLong)
+            assertFalse(isFile)
+            assertEquals("/user/home/directory", absolutePath)
+            assertEquals("/home/directory", relativePath)
+            assertTrue(nameIsTooLong)
         }
     }
 
@@ -163,6 +165,6 @@ private class SourceFileListManagerTest : BaseMockkTest() {
                 onFileFoundCount++
             },
         )
-        Assertions.assertEquals(3, onFileFoundCount - 1)
+        assertEquals(3, onFileFoundCount - 1)
     }
 }
