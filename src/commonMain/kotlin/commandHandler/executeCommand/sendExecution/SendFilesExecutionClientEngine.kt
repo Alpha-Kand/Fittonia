@@ -15,12 +15,7 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
     val client = setupSendCommandClient(command = command)
     client.sendInt(ServerFlags.SEND_FILES)
     if (canContinue(command = command, client = client, parent = parent)) {
-        command.getJob()?.let { jobName ->
-            client.sendInt(ServerFlags.HAVE_JOB_NAME)
-            client.sendString(jobName)
-        } ?: client.sendInt(ServerFlags.NEED_JOB_NAME)
-
-        val serverDestinationDirLength = client.receiveInt()
+        val serverDestinationDirLength = client.sendFilesClientSetup(job = command.getJob())
 
         parent.reportTextLine(text = "Finding files to send...\uD83D\uDD0E")
         parent.sendInt(message = ServerFlags.SEND_FILES_COLLECTING)
@@ -123,6 +118,14 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
         }
     }
     client.close()
+}
+
+fun HMeadowSocketClient.sendFilesClientSetup(job: String?): Int {
+    job?.let { jobName ->
+        sendInt(ServerFlags.HAVE_JOB_NAME)
+        sendString(jobName)
+    } ?: sendInt(ServerFlags.NEED_JOB_NAME)
+    return receiveInt()
 }
 
 private fun HMeadowSocketClient.reportFindingFiles(amount: Int) {

@@ -46,4 +46,12 @@ internal object FileOperations {
             }
         }
     }
+
+    fun createDirectory(path: Path): Path {
+        return if (Config.isMockking) {
+            path
+        } else {
+            Files.createDirectory(path)
+        }
+    }
 }
