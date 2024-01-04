@@ -19,10 +19,7 @@ repositories {
 val testAttribute: Attribute<String> = Attribute.of("key", String::class.java)
 
 kotlin {
-    android()
-    jvm(name = "common") {
-        attributes.attribute(testAttribute, "common")
-    }
+    androidTarget()
     jvm(name = "desktop") {
         attributes.attribute(testAttribute, "desktop")
     }
@@ -60,6 +57,7 @@ kotlin {
         }
 
         val desktopMain by getting {
+            dependsOn(commonMain)
             dependencies {
                 implementation(libs.kotlinx.coroutines.core.library)
                 implementation(compose.desktop.currentOs)
@@ -113,7 +111,6 @@ compose.desktop {
             packageName = System.getenv("PACKAGENAME")
             packageVersion = "1.0"
         }
-        from(kotlin.targets.getByName("desktop"))
     }
 }
 
