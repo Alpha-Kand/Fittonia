@@ -114,7 +114,7 @@ open class HMeadowSocketServer(
 ) : HMeadowSocket(socketInterface) {
     init {
         try {
-            socketInterface.bindToSocket(socket)
+            socketInterface.bindToSocket { socket }
         } catch (e: Exception) {
             throw ServerSetupException(e)
         }
@@ -223,18 +223,19 @@ open class HMeadowSocketClient @Throws(ClientSetupException::class) constructor(
     private val socket: Socket
 
     init {
-        val timeLimit = Instant.now().toEpochMilli() + timeoutMillis
-        var trySocket: Socket? = null
-        do {
-            try {
-                trySocket = Socket(ipAddress, port)
-                socketInterface.bindToSocket(trySocket)
-                break
-            } catch (e: IOException) {
-                sleep(timeoutMillis / 10)
-            }
-        } while (Instant.now().toEpochMilli() < timeLimit)
-        socket = trySocket ?: throw ClientSetupException(Exception())
+        socket = socketInterface.bindToSocket {
+            val timeLimit = Instant.now().toEpochMilli() + timeoutMillis
+            var trySocket: Socket? = null
+            do {
+                try {
+                    trySocket = Socket(ipAddress, port)
+                    break
+                } catch (e: IOException) {
+                    sleep(timeoutMillis / 10)
+                }
+            } while (Instant.now().toEpochMilli() < timeLimit)
+            trySocket ?: throw ClientSetupException(Exception())
+        }
     }
 
     override fun close() {

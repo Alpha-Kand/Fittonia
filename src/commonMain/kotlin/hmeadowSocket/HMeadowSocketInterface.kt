@@ -13,7 +13,7 @@ import java.util.Arrays
 import kotlin.io.path.Path
 
 interface HMeadowSocketInterface {
-    fun bindToSocket(socket: Socket)
+    fun bindToSocket(block: () -> Socket): Socket
     fun close()
 
     fun sendInt(message: Int)
@@ -47,10 +47,12 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
     private lateinit var mDataOutput: DataOutputStream
     private lateinit var mInputStreamReader: BufferedReader
 
-    override fun bindToSocket(socket: Socket) {
+    override fun bindToSocket(block: () -> Socket): Socket {
+        val socket = block()
         mDataInput = DataInputStream(socket.getInputStream())
         mDataOutput = DataOutputStream(socket.getOutputStream())
         mInputStreamReader = BufferedReader(InputStreamReader(socket.getInputStream()))
+        return socket
     }
 
     override fun close() {
@@ -266,19 +268,22 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
     }
 }
 
-class HMeadowSocketInterfaceTest : HMeadowSocketInterface {
+open class HMeadowSocketInterfaceTest : HMeadowSocketInterface {
 
-    override fun bindToSocket(socket: Socket) {}
+    override fun bindToSocket(block: () -> Socket): Socket {
+        return Socket()
+    }
+
     override fun close() {}
 
     override fun sendInt(message: Int) {}
-    override fun receiveInt() = 4
+    override fun receiveInt() = 0
 
     override fun sendLong(message: Long) {}
-    override fun receiveLong() = 5L
+    override fun receiveLong() = 0L
 
     override fun sendBoolean(message: Boolean) {}
-    override fun receiveBoolean() = true
+    override fun receiveBoolean() = false
 
     override fun sendFile(filePath: String, rename: String) {}
     override fun receiveFile(
