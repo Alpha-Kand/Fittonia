@@ -1,10 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.Properties
 
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
-    alias(libs.plugins.android.application) // False positive error.
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kover)
 }
 
 version = "1.0"
@@ -15,9 +15,14 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
+
+val testAttribute: Attribute<String> = Attribute.of("key", String::class.java)
+
 kotlin {
-    android()
-    jvm("desktop")
+    androidTarget()
+    jvm(name = "desktop") {
+        attributes.attribute(testAttribute, "desktop")
+    }
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -27,10 +32,16 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(libs.kotlinx.coroutines.core.library)
                 implementation(libs.jackson.module.kotlin)
+                implementation(libs.kotter.library)
             }
         }
 
-        val desktopTest by getting {
+        commonTest {
+            koverReport {
+                defaults {
+                    mergeWith("release")
+                }
+            }
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
@@ -41,6 +52,36 @@ kotlin {
                 implementation(libs.junit)
                 api(libs.junit.jupiter)
                 api(libs.kotlinx.coroutines.test)
+                api(libs.kover)
+            }
+        }
+
+        val desktopMain by getting {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(libs.kotlinx.coroutines.core.library)
+                implementation(compose.desktop.currentOs)
+                implementation(libs.kotter.library)
+            }
+        }
+
+        val desktopTest by getting {
+            koverReport {
+                defaults {
+                    mergeWith("release")
+                }
+            }
+            dependencies {
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+                api(libs.mockk.library)
+                api(libs.junit.jupiter.api)
+                api(libs.junit.jupiter.params)
+                api(libs.junit.jupiter.engine)
+                implementation(libs.junit)
+                api(libs.junit.jupiter)
+                api(libs.kotlinx.coroutines.test)
+                api(libs.kover)
             }
         }
 
@@ -52,48 +93,29 @@ kotlin {
                 implementation(libs.activity.compose.library)
             }
         }
-
-        val desktopMain by getting {
-            dependencies {
-                implementation(libs.kotlinx.coroutines.core.library)
-                implementation(compose.desktop.currentOs)
-                implementation(libs.kotter.library)
-            }
-        }
     }
 }
+
 compose.desktop {
     application {
-        val buildType = Properties().run {
-            load(file("local.properties").inputStream())
-            getProperty("DESKTOP_BUILD_TYPE", "")
-        }.toInt()
-
-        mainClass = when (buildType) {
-            1 -> "Main_terminalKt"
-            2 -> "Main_clientengineKt"
-            3 -> "Main_desktopKt"
-            else -> "???"
-        }
-
+        // Run configuration as:
+        // Task = 'packageReleaseUberJarForCurrentOS'
+        // Environment Variables = 'MAINCLASS=Main_terminalKt;PACKAGENAME=FittoniaTerminal'
+        // Customize per build target e.g. "terminal, client engine, etc."
+        mainClass = System.getenv("MAINCLASS")
         nativeDistributions {
             targetFormats(
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb,
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.AppImage,
             )
-            packageName = when (buildType) {
-                1 -> "FittoniaTerminal"
-                2 -> "FittoniaClientEngine"
-                3 -> "FittoniaDesktop"
-                else -> "???"
-            }
+            packageName = System.getenv("PACKAGENAME")
             packageVersion = "1.0"
         }
     }
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = libs.versions.javaVersion.get()
+    kotlinOptions.jvmTarget = "17"
 }
 
 tasks.withType<Test> {
@@ -101,11 +123,11 @@ tasks.withType<Test> {
 }
 
 android {
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk = 34
 
     defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        minSdk = 26
+        targetSdk = 34
     }
 
     compileOptions {
@@ -120,14 +142,4 @@ android {
         }
     }
     namespace = "org.huntersmeadow.fittonia"
-}
-
-dependencies {
-    api(libs.mockk.library)
-    api(libs.junit.jupiter.api)
-    api(libs.junit.jupiter.params)
-    api(libs.junit.jupiter.engine)
-    api(libs.junit.vintage.engine)
-    implementation(libs.junit)
-    api(libs.junit.jupiter)
 }

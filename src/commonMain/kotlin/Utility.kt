@@ -17,9 +17,8 @@ fun <T> requireNull(value: T?) {
 
 fun Session.reportHMSocketError(e: HMeadowSocket.HMeadowSocketError) = section {
     red { text("Error: ") }
-    when (e.errorType) {
-        HMeadowSocket.SocketErrorType.CLIENT_SETUP -> textLine(text = "There was an error setting up CLIENT")
-        HMeadowSocket.SocketErrorType.SERVER_SETUP -> textLine(text = "There was an error setting up SERVER")
+    e.hmMessage?.let {
+        textLine(text = it)
     }
     e.message?.let {
         textLine(text = "       $it")
@@ -34,4 +33,5 @@ fun HMeadowSocketClient.reportTextLine(text: String, color: Color = Color.WHITE)
     sendInt(message = ServerFlags.PRINT_LINE)
     sendInt(message = color.ordinal)
     sendString(message = text)
+    receiveInt()
 }

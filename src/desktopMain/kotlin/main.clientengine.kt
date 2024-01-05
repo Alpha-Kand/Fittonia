@@ -1,39 +1,28 @@
-
+import com.varabyte.kotter.foundation.text.Color
 import commandHandler.CommandHandler
 import commandHandler.SendFilesCommand
 import commandHandler.SendMessageCommand
 import commandHandler.ServerFlags
-import commandHandler.executeCommand.sendFilesExecution
-import commandHandler.executeCommand.sendMessageExecutionClientEngine
+import commandHandler.executeCommand.sendExecution.sendFilesExecutionClientEngine
+import commandHandler.executeCommand.sendExecution.sendMessageExecutionClientEngine
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
-import java.lang.Thread.sleep
 import java.net.InetAddress
-import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-    var failAttempts = 50 // todo
-    var parent: HMeadowSocketClient? = null
-    while (parent == null) {
-        try {
-            parent = HMeadowSocketClient(
-                ipAddress = InetAddress.getByName("localhost"),
-                port = 10778,
-            )
-        } catch (e: HMeadowSocket.HMeadowSocketError) {
-            sleep(100)
-            println("DEBUG: Client failed connection $failAttempts")
-            failAttempts -= 1
-        }
-        if (failAttempts <= 0) {
-            println("DEBUG: Client dead")
-            exitProcess(status = 1)
-        }
-    }
+    val port = args.find {
+        it.startsWith("clientengineport=")
+    }?.substringAfter('=')?.toIntOrNull() ?: throw IllegalArgumentException()
+
+    val parent = HMeadowSocketClient(
+        ipAddress = InetAddress.getByName("localhost"),
+        port = port,
+        timeoutMillis = 3000L,
+    )
 
     try {
         when (val command = CommandHandler(args = args.toList()).getCommand()) {
-            is SendFilesCommand -> sendFilesExecution(command = command, parent = parent)
+            is SendFilesCommand -> sendFilesExecutionClientEngine(command = command, parent = parent)
             is SendMessageCommand -> sendMessageExecutionClientEngine(command = command, parent = parent)
             else -> Unit
         }
@@ -50,15 +39,11 @@ fun sendFittoniaError(e: FittoniaError, parent: HMeadowSocketClient) {
 }
 
 fun sendHMSocketError(e: HMeadowSocket.HMeadowSocketError, parent: HMeadowSocketClient) {
-    parent.reportTextLine(
-        text = when (e.errorType) {
-            HMeadowSocket.SocketErrorType.CLIENT_SETUP -> "There was an error setting up CLIENT"
-            HMeadowSocket.SocketErrorType.SERVER_SETUP -> "There was an error setting up SERVER"
-        },
-    )
-    parent.reportTextLine(
-        text = e.message?.let {
-            "       $it"
-        } ?: ".",
-    )
+    parent.reportTextLine("Error: ", Color.RED)
+    e.hmMessage?.let {
+        parent.reportTextLine(text = it)
+    }
+    e.message?.let {
+        parent.reportTextLine(text = "       $it")
+    }
 }

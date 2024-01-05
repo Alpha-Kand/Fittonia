@@ -8,6 +8,7 @@ import commandHandler.FileTransfer
 import commandHandler.ServerFlags
 import commandHandler.receivePassword
 import commandHandler.sendConfirmation
+import fileOperationWrappers.FileOperations
 import hmeadowSocket.HMeadowSocketServer
 import printLine
 import settingsManager.SettingsManager
@@ -15,13 +16,14 @@ import java.nio.file.Files
 import kotlin.io.path.Path
 
 fun Session.serverSendFilesExecution(server: HMeadowSocketServer) {
+    // ~~~~~~~~~~
     server.sendConfirmation()
     if (!server.receivePassword()) return
+    // ~~~~~~~~~~
 
-    val jobPath = determineJobPath(server = server)
-    Files.createDirectory(Path(jobPath))
-    server.sendInt(jobPath.length)
+    val jobPath = server.sendFilesServerSetup()
 
+    // ~~~~~~~~~~
     val tempReceivingFolder = Files.createTempDirectory(FileTransfer.tempPrefix)
     when (server.receiveInt()) {
         ServerFlags.CANCEL_SEND_FILES -> {
@@ -32,18 +34,18 @@ fun Session.serverSendFilesExecution(server: HMeadowSocketServer) {
 
         else -> Unit
     }
+    // ~~~~~~~~~~
 
+    // ~~~~~~~~~~
     val fileTransferCount = server.receiveInt()
     printLine(text = "$fileTransferCount")
 
     repeat(times = fileTransferCount) {
-        val relativePathWithPrefix = server.receiveString()
-        val relativePathNoPrefix = relativePathWithPrefix.substring(startIndex = FileTransfer.prefixLength)
-        val prefix = relativePathWithPrefix.substring(0, FileTransfer.prefixLength)
-        val destinationPath = "$jobPath/$relativePathNoPrefix"
-        if (prefix == FileTransfer.filePrefix) {
+        val relativePath = server.receiveString()
+        val destinationPath = "$jobPath/$relativePath"
+        if (server.receiveBoolean()) { // Is a file.
             section {
-                text("Receiving: $relativePathNoPrefix")
+                text("Receiving: $relativePath")
                 val (tempFile, _) = server.receiveFile(
                     destination = "$tempReceivingFolder/",
                     prefix = FileTransfer.tempPrefix,
@@ -56,20 +58,27 @@ fun Session.serverSendFilesExecution(server: HMeadowSocketServer) {
             Files.createDirectory(Path(destinationPath))
         }
     }
-    printLine(text = "$fileTransferCount files received")
+    printLine(text = "$fileTransferCount file(s) received")
     printLine()
 }
 
-private fun determineJobPath(server: HMeadowSocketServer): String {
+fun HMeadowSocketServer.sendFilesServerSetup(): String {
+    val jobPath = determineJobPath()
+    FileOperations.createDirectory(path = Path(jobPath))
+    sendInt(jobPath.length)
+    return jobPath
+}
+
+private fun HMeadowSocketServer.determineJobPath(): String {
     val settingsManager = SettingsManager.settingsManager
-    val initialJobName = if (server.receiveInt() == ServerFlags.NEED_JOB_NAME) {
+    val initialJobName = if (receiveInt() == ServerFlags.NEED_JOB_NAME) {
         settingsManager.getAutoJobName()
     } else {
-        server.receiveString()
+        receiveString()
     }
 
     var nonConflictedJobName: String = initialJobName
-    while (Files.exists(Path(path = settingsManager.settings.dumpPath + "/$nonConflictedJobName"))) {
+    while (FileOperations.exists(Path(path = settingsManager.settings.dumpPath + "/$nonConflictedJobName"))) {
         nonConflictedJobName = initialJobName + "_" + settingsManager.getAutoJobName()
     }
     return settingsManager.settings.dumpPath + "/$nonConflictedJobName"

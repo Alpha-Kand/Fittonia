@@ -24,9 +24,4 @@ class TestTest {
         val foo = mockk<Int>(relaxed = true)
         Assertions.assertEquals(true, true)
     }
-
-    @Test
-    fun broken() = runTest {
-        Assertions.assertEquals(true, false)
-    }
 }

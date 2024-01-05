@@ -78,12 +78,15 @@ class FileTransfer {
         const val COMPRESS_INVALID = 4
         const val SHOW_ALL = 5
 
-        val actionList = listOf(
+        val defaultActionList = listOf(
             CANCEL,
             SKIP_INVALID,
             COMPRESS_EVERYTHING,
             COMPRESS_INVALID,
             SHOW_ALL,
         )
+
+        fun String.stripPrefix() = this.substring(startIndex = prefixLength)
+        fun String.getPrefix() = this.substring(startIndex = 0, endIndex = prefixLength)
     }
 }
