@@ -34,6 +34,9 @@ interface HMeadowSocketInterface {
 
     fun sendString(message: String)
     fun receiveString(): String
+
+    fun sendContinue()
+    fun receiveContinue()
 }
 
 class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
@@ -142,6 +145,11 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         }
 
         return file.absolutePath to fileName
+    }
+
+    override fun sendContinue() = sendBoolean(message = true)
+    override fun receiveContinue() {
+        receiveBoolean()
     }
 
     /**

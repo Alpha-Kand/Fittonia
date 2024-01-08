@@ -93,6 +93,9 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         )
     }
 
+    fun sendContinue() = socketInterface.sendContinue()
+    fun receiveContinue() = socketInterface.receiveContinue()
+
     abstract fun close()
 
     abstract fun sendClose()
