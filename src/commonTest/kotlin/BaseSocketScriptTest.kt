@@ -67,9 +67,18 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
             println(e)
         } finally {
             var k = 0
-            clientList.zip(serverList) { a, b ->
-                println("$k. Client.${a.flag.name} - Server.${b.flag.name}")
-                k++
+            if (clientList.isEmpty() || serverList.isEmpty()) {
+                clientList.forEach {
+                    println("$k. Client.${it.flag.name}")
+                }
+                serverList.forEach {
+                    println("Server.${it.flag.name}")
+                }
+            } else {
+                clientList.zip(serverList) { a, b ->
+                    println("$k. Client.${a.flag.name} - Server.${b.flag.name}")
+                    k++
+                }
             }
             Assertions.assertEquals(clientList.size, serverList.size)
             clientList.zip(serverList) { a, b ->
