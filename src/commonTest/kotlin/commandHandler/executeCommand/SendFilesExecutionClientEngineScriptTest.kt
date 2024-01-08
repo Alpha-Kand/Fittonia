@@ -4,10 +4,13 @@ import BaseSocketScriptTest
 import UnitTest
 import commandHandler.FileTransfer
 import commandHandler.executeCommand.sendExecution.helpers.SendFileItemInfo
+import commandHandler.executeCommand.sendExecution.helpers.SourceFileListManager
 import commandHandler.executeCommand.sendExecution.sendFilesClientSetup
+import commandHandler.executeCommand.sendExecution.sendFilesNormal
 import commandHandler.executeCommand.sendExecution.sendItem
 import commandHandler.executeCommand.sendExecution.sendItemCount
 import fileOperationWrappers.FileOperations
+import fileOperationWrappers.FittoniaTempFileBase
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -148,6 +151,37 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
                 assertTrue(dir.toString().isEmpty())
                 assertEquals(-1, count)
                 assertTrue(cancel)
+            },
+        )
+    }
+
+    @UnitTest
+    fun sendFilesNormal() = runSocketScriptTest {
+        launchSockets(
+            clientBlock = {
+                mockkObject(FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines)
+                every { FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines.fileLines } returns mutableListOf(
+                    "0\n",
+                    "F?ccc\n",
+                    "/aaa/bbb/ccc\n",
+                    "0\n",
+                    "F?fff\n",
+                    "/ddd/eee/fff\n",
+                )
+                generateClient().sendFilesNormal(
+                    sourceFileListManager = SourceFileListManager(
+                        userInputPaths = emptyList(),
+                        serverDestinationDirLength = 100,
+                        onItemFound = {},
+                    ),
+                )
+            },
+            serverBlock = {
+                val server = generateServer()
+                server.waitForItemCount()
+                repeat(times = 2) {
+                    server.receiveItem("", Path(""), { }, { })
+                }
             },
         )
     }

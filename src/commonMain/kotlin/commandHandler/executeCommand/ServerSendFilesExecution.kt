@@ -96,5 +96,6 @@ fun HMeadowSocketServer.receiveItem(
     } else {
         FileOperations.createDirectory(path = Path(destinationPath))
     }
+    sendContinue()
     onDone()
 }

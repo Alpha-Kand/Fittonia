@@ -41,10 +41,7 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
 
         when (choice) {
             FileTransfer.NORMAL -> {
-                client.sendItemCount(itemCount = sourceFileListManager.totalItemCount)
-                sourceFileListManager.forEachItem { fileInfo ->
-                    client.sendItem(sendFileItemInfo = fileInfo)
-                }
+                client.sendFilesNormal(sourceFileListManager = sourceFileListManager)
                 parent.reportTextLine(text = "Done")
                 parent.sendInt(ServerFlags.DONE)
             }
@@ -139,5 +136,13 @@ internal fun HMeadowSocketClient.sendItem(sendFileItemInfo: SendFileItemInfo) {
     sendBoolean(sendFileItemInfo.isFile)
     if (sendFileItemInfo.isFile) {
         sendFile(filePath = sendFileItemInfo.absolutePath)
+    }
+    receiveContinue()
+}
+
+internal fun HMeadowSocketClient.sendFilesNormal(sourceFileListManager: SourceFileListManager) {
+    sendItemCount(itemCount = sourceFileListManager.totalItemCount)
+    sourceFileListManager.forEachItem { fileInfo ->
+        sendItem(sendFileItemInfo = fileInfo)
     }
 }
