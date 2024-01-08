@@ -24,6 +24,9 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
 
         SEND_BOOLEAN(value = 102),
         RECEIVE_BOOLEAN(value = -102),
+
+        SEND_FILE(value = 103),
+        RECEIVE_FILE(value = -103),
     }
 
     private data class Communication(val flag: TestFlags, val value: String)
@@ -148,6 +151,31 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
 
         override fun sendBoolean(message: Boolean) {
             Communication(flag = TestFlags.SEND_BOOLEAN, value = message.toString()).let {
+                thisQueue.add(it)
+                thisList.add(it)
+            }
+        }
+
+        override fun receiveFile(
+            destination: String,
+            prefix: String,
+            suffix: String,
+        ): Pair<String, String> {
+            return otherQueue.poll(1000, TimeUnit.MILLISECONDS)?.run {
+                if (flag == TestFlags.SEND_FILE) {
+                    thisList.add(this.copy(flag = TestFlags.RECEIVE_FILE))
+                    "absolutePath" to "fileName"
+                } else {
+                    throw Exception()
+                }
+            } ?: throw Exception()
+        }
+
+        override fun sendFile(
+            filePath: String,
+            rename: String,
+        ) {
+            Communication(flag = TestFlags.SEND_FILE, value = Pair(filePath, rename).toString()).let {
                 thisQueue.add(it)
                 thisList.add(it)
             }

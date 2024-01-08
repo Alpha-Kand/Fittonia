@@ -134,10 +134,10 @@ private fun HMeadowSocketClient.reportFindingFiles(amount: Int) {
     sendInt(message = amount)
 }
 
-private fun HMeadowSocketClient.sendItem(sendFileItemInfo: SendFileItemInfo) {
-    this.sendString(sendFileItemInfo.relativePath)
-    this.sendBoolean(sendFileItemInfo.isFile)
+internal fun HMeadowSocketClient.sendItem(sendFileItemInfo: SendFileItemInfo) {
+    sendString(sendFileItemInfo.relativePath)
+    sendBoolean(sendFileItemInfo.isFile)
     if (sendFileItemInfo.isFile) {
-        this.sendFile(filePath = sendFileItemInfo.absolutePath)
+        sendFile(filePath = sendFileItemInfo.absolutePath)
     }
 }

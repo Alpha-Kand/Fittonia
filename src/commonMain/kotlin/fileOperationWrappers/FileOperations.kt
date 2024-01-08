@@ -56,6 +56,14 @@ internal object FileOperations {
         }
     }
 
+    fun move(source: Path, destination: Path): Path {
+        return if (Config.isMockking) {
+            destination
+        } else {
+            Files.move(source, destination)
+        }
+    }
+
     fun createTempDirectory(prefix: String): Path {
         return if (Config.isMockking) {
             Path(prefix)

@@ -1,5 +1,6 @@
 package commandHandler.executeCommand
 
+import com.varabyte.kotter.foundation.liveVarOf
 import com.varabyte.kotter.foundation.text.green
 import com.varabyte.kotter.foundation.text.text
 import com.varabyte.kotter.foundation.text.textLine
@@ -12,6 +13,7 @@ import fileOperationWrappers.FileOperations
 import hmeadowSocket.HMeadowSocketServer
 import printLine
 import settingsManager.SettingsManager
+import java.nio.file.Path
 import kotlin.io.path.Path
 
 fun Session.serverSendFilesExecution(server: HMeadowSocketServer) {
@@ -29,21 +31,18 @@ fun Session.serverSendFilesExecution(server: HMeadowSocketServer) {
     }
     printLine(text = "$fileTransferCount")
     repeat(times = fileTransferCount) {
-        val relativePath = server.receiveString()
-        val destinationPath = "$jobPath/$relativePath"
-        if (server.receiveBoolean()) { // Is a file.
-            section {
-                text("Receiving: $relativePath")
-                val (tempFile, _) = server.receiveFile(
-                    destination = "$tempReceivingFolder/",
-                    prefix = FileTransfer.tempPrefix,
-                    suffix = FileTransfer.tempSuffix,
-                )
-                Files.move(Path(tempFile), Path(destinationPath))
-                green { textLine(text = " Done.") }
-            }.run()
-        } else {
-            Files.createDirectory(Path(destinationPath))
+        var relativePath by liveVarOf(value = "")
+        var complete by liveVarOf(value = false)
+        section {
+            text("Receiving: $relativePath")
+            if (complete) green { textLine(text = " Done.") }
+        }.run {
+            server.receiveItem(
+                jobPath = jobPath,
+                tempReceivingFolder = tempReceivingFolder,
+                onGetRelativePath = { relativePath = it },
+                onDone = { complete = true },
+            )
         }
     }
     printLine(text = "$fileTransferCount file(s) received")
@@ -76,4 +75,26 @@ fun HMeadowSocketServer.waitForItemCount() = if (receiveBoolean()) {
     Triple(FileOperations.createTempDirectory(FileTransfer.tempPrefix), receiveInt(), false)
 } else {
     Triple(Path(""), -1, true)
+}
+
+fun HMeadowSocketServer.receiveItem(
+    jobPath: String,
+    tempReceivingFolder: Path,
+    onGetRelativePath: (String) -> Unit,
+    onDone: () -> Unit,
+) {
+    val relativePath = receiveString()
+    onGetRelativePath(relativePath)
+    val destinationPath = "$jobPath/$relativePath"
+    if (receiveBoolean()) { // Is a file.
+        val (tempFile, _) = receiveFile(
+            destination = "$tempReceivingFolder/",
+            prefix = FileTransfer.tempPrefix,
+            suffix = FileTransfer.tempSuffix,
+        )
+        FileOperations.move(source = Path(tempFile), destination = Path(destinationPath))
+    } else {
+        FileOperations.createDirectory(path = Path(destinationPath))
+    }
+    onDone()
 }

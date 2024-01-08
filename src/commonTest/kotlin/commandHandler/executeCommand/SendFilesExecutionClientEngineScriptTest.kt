@@ -2,16 +2,22 @@ package commandHandler.executeCommand
 
 import BaseSocketScriptTest
 import UnitTest
+import commandHandler.FileTransfer
+import commandHandler.executeCommand.sendExecution.helpers.SendFileItemInfo
 import commandHandler.executeCommand.sendExecution.sendFilesClientSetup
+import commandHandler.executeCommand.sendExecution.sendItem
 import commandHandler.executeCommand.sendExecution.sendItemCount
 import fileOperationWrappers.FileOperations
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import settingsManager.SettingsManager
+import kotlin.io.path.Path
 
 private class SendFilesScriptTest : BaseSocketScriptTest() {
 
@@ -50,6 +56,68 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
             serverBlock = {
                 val jobPath = generateServer().sendFilesServerSetup()
                 assertEquals("dumpPath/jobAutoName", jobPath)
+            },
+        )
+    }
+
+    @UnitTest
+    fun sendItemFile() = runSocketScriptTest {
+        launchSockets(
+            clientBlock = {
+                generateClient().sendItem(
+                    sendFileItemInfo = SendFileItemInfo(
+                        absolutePath = "absolutePath",
+                        relativePath = "relativePath",
+                        nameIsTooLong = false,
+                        prefix = FileTransfer.filePrefix,
+                    ),
+                )
+            },
+            serverBlock = {
+                val onGetRelativePath = mockk<(String) -> Unit>(relaxed = true)
+                val onDone = mockk<() -> Unit>(relaxed = true)
+                generateServer().receiveItem(
+                    jobPath = "jobPath",
+                    tempReceivingFolder = Path("tempReceivingFolder"),
+                    onGetRelativePath = onGetRelativePath,
+                    onDone = onDone,
+                )
+
+                verify { onGetRelativePath(any()) }
+                verify { onDone() }
+                verify { FileOperations.move(any(), any()) }
+                verify(exactly = 0) { FileOperations.createDirectory(any()) }
+            },
+        )
+    }
+
+    @UnitTest
+    fun sendItemDirectory() = runSocketScriptTest {
+        launchSockets(
+            clientBlock = {
+                generateClient().sendItem(
+                    sendFileItemInfo = SendFileItemInfo(
+                        absolutePath = "absolutePath",
+                        relativePath = "relativePath",
+                        nameIsTooLong = false,
+                        prefix = FileTransfer.dirPrefix,
+                    ),
+                )
+            },
+            serverBlock = {
+                val onGetRelativePath = mockk<(String) -> Unit>(relaxed = true)
+                val onDone = mockk<() -> Unit>(relaxed = true)
+                generateServer().receiveItem(
+                    jobPath = "jobPath",
+                    tempReceivingFolder = Path("tempReceivingFolder"),
+                    onGetRelativePath = onGetRelativePath,
+                    onDone = onDone,
+                )
+
+                verify { onGetRelativePath(any()) }
+                verify { onDone() }
+                verify(exactly = 0) { FileOperations.move(any(), any()) }
+                verify { FileOperations.createDirectory(any()) }
             },
         )
     }
