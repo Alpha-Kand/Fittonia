@@ -7,6 +7,7 @@ import commandHandler.executeCommand.sendExecution.helpers.SendFileItemInfo
 import commandHandler.executeCommand.sendExecution.helpers.SourceFileListManager
 import commandHandler.executeCommand.sendExecution.sendFilesClientSetup
 import commandHandler.executeCommand.sendExecution.sendFilesNormal
+import commandHandler.executeCommand.sendExecution.sendFilesSkipInvalid
 import commandHandler.executeCommand.sendExecution.sendItem
 import commandHandler.executeCommand.sendExecution.sendItemCount
 import fileOperationWrappers.FileOperations
@@ -33,6 +34,8 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
         mockkObject(FileOperations)
         mockkObject(FileOperations.FileOperationMock)
         every { FileOperations.FileOperationMock.exists } returns false
+
+        mockkObject(FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines)
     }
 
     @UnitTest
@@ -159,7 +162,6 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
     fun sendFilesNormal() = runSocketScriptTest {
         launchSockets(
             clientBlock = {
-                mockkObject(FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines)
                 every { FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines.fileLines } returns mutableListOf(
                     "0\n",
                     "F?ccc\n",
@@ -169,6 +171,39 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
                     "/ddd/eee/fff\n",
                 )
                 generateClient().sendFilesNormal(
+                    sourceFileListManager = SourceFileListManager(
+                        userInputPaths = emptyList(),
+                        serverDestinationDirLength = 100,
+                        onItemFound = {},
+                    ),
+                )
+            },
+            serverBlock = {
+                val server = generateServer()
+                server.waitForItemCount()
+                repeat(times = 2) {
+                    server.receiveItem("", Path(""), { }, { })
+                }
+            },
+        )
+    }
+
+    @UnitTest
+    fun sendFilesSkipInvalid() = runSocketScriptTest {
+        launchSockets(
+            clientBlock = {
+                every { FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines.fileLines } returns mutableListOf(
+                    "0\n",
+                    "F?ccc\n",
+                    "/aaa/bbb/ccc\n",
+                    "1\n",
+                    "F?fff\n",
+                    "/ddd/eee/fff\n",
+                    "0\n",
+                    "F?ggg\n",
+                    "/hhh/iii/jjj\n",
+                )
+                generateClient().sendFilesSkipInvalid(
                     sourceFileListManager = SourceFileListManager(
                         userInputPaths = emptyList(),
                         serverDestinationDirLength = 100,

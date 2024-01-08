@@ -41,6 +41,7 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
 
         when (choice) {
             FileTransfer.NORMAL -> {
+                parent.reportTextLine(text = "Sending ${sourceFileListManager.totalItemCount} files.")
                 client.sendFilesNormal(sourceFileListManager = sourceFileListManager)
                 parent.reportTextLine(text = "Done")
                 parent.sendInt(ServerFlags.DONE)
@@ -52,14 +53,8 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
             }
 
             FileTransfer.SKIP_INVALID -> {
-                val sendingFileAmount = sourceFileListManager.validItemCount
-                parent.reportTextLine(text = "Sending $sendingFileAmount files.")
-                client.sendItemCount(itemCount = sendingFileAmount)
-                sourceFileListManager.forEachItem { fileInfo ->
-                    if (!fileInfo.nameIsTooLong) {
-                        client.sendItem(sendFileItemInfo = fileInfo)
-                    }
-                }
+                parent.reportTextLine(text = "Sending ${sourceFileListManager.totalItemCount} files.")
+                client.sendFilesSkipInvalid(sourceFileListManager = sourceFileListManager)
                 parent.reportTextLine(text = "Done")
                 parent.sendInt(ServerFlags.DONE)
             }
@@ -144,5 +139,14 @@ internal fun HMeadowSocketClient.sendFilesNormal(sourceFileListManager: SourceFi
     sendItemCount(itemCount = sourceFileListManager.totalItemCount)
     sourceFileListManager.forEachItem { fileInfo ->
         sendItem(sendFileItemInfo = fileInfo)
+    }
+}
+
+internal fun HMeadowSocketClient.sendFilesSkipInvalid(sourceFileListManager: SourceFileListManager) {
+    sendItemCount(itemCount = sourceFileListManager.validItemCount)
+    sourceFileListManager.forEachItem { fileInfo ->
+        if (!fileInfo.nameIsTooLong) {
+            sendItem(sendFileItemInfo = fileInfo)
+        }
     }
 }
