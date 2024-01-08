@@ -4,6 +4,7 @@ import Config
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.BasicFileAttributes
+import kotlin.io.path.Path
 
 internal object FileOperations {
 
@@ -52,6 +53,14 @@ internal object FileOperations {
             path
         } else {
             Files.createDirectory(path)
+        }
+    }
+
+    fun createTempDirectory(prefix: String): Path {
+        return if (Config.isMockking) {
+            Path(prefix)
+        } else {
+            Files.createTempDirectory(prefix)
         }
     }
 }

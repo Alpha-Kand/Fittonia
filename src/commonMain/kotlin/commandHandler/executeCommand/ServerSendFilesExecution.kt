@@ -12,7 +12,6 @@ import fileOperationWrappers.FileOperations
 import hmeadowSocket.HMeadowSocketServer
 import printLine
 import settingsManager.SettingsManager
-import java.nio.file.Files
 import kotlin.io.path.Path
 
 fun Session.serverSendFilesExecution(server: HMeadowSocketServer) {
@@ -22,24 +21,13 @@ fun Session.serverSendFilesExecution(server: HMeadowSocketServer) {
     // ~~~~~~~~~~
 
     val jobPath = server.sendFilesServerSetup()
-
-    // ~~~~~~~~~~
-    val tempReceivingFolder = Files.createTempDirectory(FileTransfer.tempPrefix)
-    when (server.receiveInt()) {
-        ServerFlags.CANCEL_SEND_FILES -> {
-            printLine(text = "Client cancelled sending files.")
-            printLine()
-            return
-        }
-
-        else -> Unit
+    val (tempReceivingFolder, fileTransferCount, clientCancelled) = server.waitForItemCount()
+    if (clientCancelled) {
+        printLine(text = "Client cancelled sending files.")
+        printLine()
+        return
     }
-    // ~~~~~~~~~~
-
-    // ~~~~~~~~~~
-    val fileTransferCount = server.receiveInt()
     printLine(text = "$fileTransferCount")
-
     repeat(times = fileTransferCount) {
         val relativePath = server.receiveString()
         val destinationPath = "$jobPath/$relativePath"
@@ -82,4 +70,10 @@ private fun HMeadowSocketServer.determineJobPath(): String {
         nonConflictedJobName = initialJobName + "_" + settingsManager.getAutoJobName()
     }
     return settingsManager.settings.dumpPath + "/$nonConflictedJobName"
+}
+
+fun HMeadowSocketServer.waitForItemCount() = if (receiveBoolean()) {
+    Triple(FileOperations.createTempDirectory(FileTransfer.tempPrefix), receiveInt(), false)
+} else {
+    Triple(Path(""), -1, true)
 }

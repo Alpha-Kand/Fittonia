@@ -21,6 +21,9 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
 
         SEND_STRING(value = 101),
         RECEIVE_STRING(value = -101),
+
+        SEND_BOOLEAN(value = 102),
+        RECEIVE_BOOLEAN(value = -102),
     }
 
     private data class Communication(val flag: TestFlags, val value: String)
@@ -127,6 +130,24 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
 
         override fun sendString(message: String) {
             Communication(flag = TestFlags.SEND_STRING, value = message).let {
+                thisQueue.add(it)
+                thisList.add(it)
+            }
+        }
+
+        override fun receiveBoolean(): Boolean {
+            return otherQueue.poll(1000, TimeUnit.MILLISECONDS)?.run {
+                if (flag == TestFlags.SEND_BOOLEAN) {
+                    thisList.add(this.copy(flag = TestFlags.RECEIVE_BOOLEAN))
+                    value.toBoolean()
+                } else {
+                    throw Exception()
+                }
+            } ?: throw Exception()
+        }
+
+        override fun sendBoolean(message: Boolean) {
+            Communication(flag = TestFlags.SEND_BOOLEAN, value = message.toString()).let {
                 thisQueue.add(it)
                 thisList.add(it)
             }
