@@ -1,5 +1,6 @@
+import BaseSocketScriptTest.TestFlags.Companion.opposite
 import hmeadowSocket.HMeadowSocketClient
-import hmeadowSocket.HMeadowSocketInterfaceTest
+import hmeadowSocket.HMeadowSocketInterface
 import hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -27,6 +28,21 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
 
         SEND_FILE(value = 103),
         RECEIVE_FILE(value = -103),
+
+        SEND_CONTINUE(value = 104),
+        RECEIVE_CONTINUE(value = -104),
+
+        SEND_LONG(value = 105),
+        RECEIVE_LONG(value = -105),
+        ;
+
+        companion object {
+            fun TestFlags.opposite(): TestFlags {
+                return TestFlags.entries.first {
+                    it.value == this.value * -1
+                }
+            }
+        }
     }
 
     private data class Communication(val flag: TestFlags, val value: String)
@@ -101,84 +117,56 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
         otherQueue: LinkedBlockingQueue<Communication>,
         thisQueue: LinkedBlockingQueue<Communication>,
         thisList: MutableList<Communication>,
-    ) = object : HMeadowSocketInterfaceTest() {
-        override fun receiveInt(): Int {
-            return otherQueue.poll(1000, TimeUnit.MILLISECONDS)?.run {
-                if (flag == TestFlags.SEND_INT) {
-                    thisList.add(this.copy(flag = TestFlags.RECEIVE_INT))
-                    value.toInt()
-                } else {
-                    throw Exception()
-                }
-            } ?: throw Exception()
+    ) = object : HMeadowSocketInterface {
+
+        override fun bindToSocket(block: () -> Socket) = Socket()
+        override fun close() {}
+
+        override fun receiveInt() = receive(flag = TestFlags.RECEIVE_INT) { it.toInt() }
+        override fun sendInt(message: Int) = send(flag = TestFlags.SEND_INT, message = message.toString())
+
+        override fun receiveLong() = receive(flag = TestFlags.RECEIVE_LONG) { it.toLong() }
+        override fun sendLong(message: Long) = send(flag = TestFlags.SEND_LONG, message = message.toString())
+
+        override fun receiveString() = receive(flag = TestFlags.RECEIVE_STRING) { it }
+        override fun sendString(message: String) = send(flag = TestFlags.SEND_STRING, message = message)
+
+        override fun receiveContinue() {
+            receive(flag = TestFlags.RECEIVE_CONTINUE) { it }
         }
 
-        override fun sendInt(message: Int) {
-            Communication(flag = TestFlags.SEND_INT, value = message.toString()).let {
-                thisQueue.add(it)
-                thisList.add(it)
-            }
-        }
+        override fun sendContinue() = send(flag = TestFlags.SEND_CONTINUE, message = "continue")
 
-        override fun receiveString(): String {
-            return otherQueue.poll(1000, TimeUnit.MILLISECONDS)?.run {
-                if (flag == TestFlags.SEND_STRING) {
-                    thisList.add(this.copy(flag = TestFlags.RECEIVE_STRING))
-                    value
-                } else {
-                    throw Exception()
-                }
-            } ?: throw Exception()
-        }
-
-        override fun sendString(message: String) {
-            Communication(flag = TestFlags.SEND_STRING, value = message).let {
-                thisQueue.add(it)
-                thisList.add(it)
-            }
-        }
-
-        override fun receiveBoolean(): Boolean {
-            return otherQueue.poll(1000, TimeUnit.MILLISECONDS)?.run {
-                if (flag == TestFlags.SEND_BOOLEAN) {
-                    thisList.add(this.copy(flag = TestFlags.RECEIVE_BOOLEAN))
-                    value.toBoolean()
-                } else {
-                    throw Exception()
-                }
-            } ?: throw Exception()
-        }
-
-        override fun sendBoolean(message: Boolean) {
-            Communication(flag = TestFlags.SEND_BOOLEAN, value = message.toString()).let {
-                thisQueue.add(it)
-                thisList.add(it)
-            }
-        }
+        override fun receiveBoolean() = receive(flag = TestFlags.RECEIVE_BOOLEAN) { it.toBoolean() }
+        override fun sendBoolean(message: Boolean) = send(flag = TestFlags.SEND_BOOLEAN, message = message.toString())
 
         override fun receiveFile(
             destination: String,
             prefix: String,
             suffix: String,
-        ): Pair<String, String> {
-            return otherQueue.poll(1000, TimeUnit.MILLISECONDS)?.run {
-                if (flag == TestFlags.SEND_FILE) {
-                    thisList.add(this.copy(flag = TestFlags.RECEIVE_FILE))
-                    "absolutePath" to "fileName"
-                } else {
-                    throw Exception()
-                }
-            } ?: throw Exception()
-        }
+        ): Pair<String, String> = receive(flag = TestFlags.RECEIVE_FILE) { "absolutePath" to "fileName" }
 
         override fun sendFile(
             filePath: String,
             rename: String,
-        ) {
-            Communication(flag = TestFlags.SEND_FILE, value = Pair(filePath, rename).toString()).let {
+        ) = send(flag = TestFlags.SEND_FILE, message = Pair(filePath, rename).toString())
+
+        private fun send(flag: TestFlags, message: String) {
+            Communication(flag = flag, value = message).let {
                 thisQueue.add(it)
                 thisList.add(it)
             }
+        }
+
+        private fun <T> receive(flag: TestFlags, thingReceived: (String) -> T): T {
+            return otherQueue.poll(1000, TimeUnit.MILLISECONDS)?.let { communication ->
+                if (communication.flag == flag.opposite()) {
+                    thisList.add(communication.copy(flag = flag))
+                    thingReceived(communication.value)
+                } else {
+                    throw Exception()
+                }
+            } ?: throw Exception()
         }
     }
 }

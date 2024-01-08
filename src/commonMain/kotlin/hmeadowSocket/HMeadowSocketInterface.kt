@@ -275,35 +275,3 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         return resultBuffer
     }
 }
-
-open class HMeadowSocketInterfaceTest : HMeadowSocketInterface {
-
-    override fun bindToSocket(block: () -> Socket): Socket {
-        return Socket()
-    }
-
-    override fun close() {}
-
-    override fun sendInt(message: Int) {}
-    override fun receiveInt() = 0
-
-    override fun sendLong(message: Long) {}
-    override fun receiveLong() = 0L
-
-    override fun sendBoolean(message: Boolean) {}
-    override fun receiveBoolean() = false
-
-    override fun sendFile(filePath: String, rename: String) {}
-    override fun receiveFile(
-        destination: String,
-        prefix: String,
-        suffix: String,
-    ): Pair<String, String> {
-        return "" to ""
-    }
-
-    override fun sendString(message: String) {}
-    override fun receiveString(): String {
-        return ""
-    }
-}
