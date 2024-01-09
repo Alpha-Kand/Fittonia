@@ -70,14 +70,26 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
             if (clientList.isEmpty() || serverList.isEmpty()) {
                 clientList.forEach {
                     println("$k. Client.${it.flag.name}")
+                    k++
                 }
                 serverList.forEach {
-                    println("Server.${it.flag.name}")
+                    println("$k. Server.${it.flag.name}")
+                    k++
                 }
             } else {
                 clientList.zip(serverList) { a, b ->
                     println("$k. Client.${a.flag.name} - Server.${b.flag.name}")
                     k++
+                }
+                clientList.forEachIndexed { index, communication ->
+                    if (index > serverList.size - 1) {
+                        println("$index. Client.${communication.flag.name}")
+                    }
+                }
+                serverList.forEachIndexed { index, communication ->
+                    if (index > clientList.size - 1) {
+                        println("$index. Server.${communication.flag.name}")
+                    }
                 }
             }
             Assertions.assertEquals(clientList.size, serverList.size)
