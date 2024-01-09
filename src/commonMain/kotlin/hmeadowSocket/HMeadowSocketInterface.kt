@@ -34,6 +34,9 @@ interface HMeadowSocketInterface {
 
     fun sendString(message: String)
     fun receiveString(): String
+
+    fun sendContinue()
+    fun receiveContinue()
 }
 
 class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
@@ -142,6 +145,11 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         }
 
         return file.absolutePath to fileName
+    }
+
+    override fun sendContinue() = sendBoolean(message = true)
+    override fun receiveContinue() {
+        receiveBoolean()
     }
 
     /**
@@ -265,37 +273,5 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
             remainingBytes -= count
         }
         return resultBuffer
-    }
-}
-
-open class HMeadowSocketInterfaceTest : HMeadowSocketInterface {
-
-    override fun bindToSocket(block: () -> Socket): Socket {
-        return Socket()
-    }
-
-    override fun close() {}
-
-    override fun sendInt(message: Int) {}
-    override fun receiveInt() = 0
-
-    override fun sendLong(message: Long) {}
-    override fun receiveLong() = 0L
-
-    override fun sendBoolean(message: Boolean) {}
-    override fun receiveBoolean() = false
-
-    override fun sendFile(filePath: String, rename: String) {}
-    override fun receiveFile(
-        destination: String,
-        prefix: String,
-        suffix: String,
-    ): Pair<String, String> {
-        return "" to ""
-    }
-
-    override fun sendString(message: String) {}
-    override fun receiveString(): String {
-        return ""
     }
 }

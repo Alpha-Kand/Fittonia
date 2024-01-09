@@ -19,7 +19,6 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
 
         parent.reportTextLine(text = "Finding files to send...\uD83D\uDD0E")
         parent.sendInt(message = ServerFlags.SEND_FILES_COLLECTING)
-
         val sourceFileListManager = SourceFileListManager(
             userInputPaths = command.getFiles(),
             serverDestinationDirLength = serverDestinationDirLength,
@@ -42,57 +41,33 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
 
         when (choice) {
             FileTransfer.NORMAL -> {
-                client.sendInt(ServerFlags.CONFIRM)
-                client.sendInt(sourceFileListManager.totalItemCount)
-                sourceFileListManager.forEachItem { fileInfo ->
-                    client.sendItem(sendFileItemInfo = fileInfo)
-                }
+                parent.reportTextLine(text = "Sending ${sourceFileListManager.totalItemCount} files.")
+                client.sendFilesNormal(sourceFileListManager = sourceFileListManager)
                 parent.reportTextLine(text = "Done")
                 parent.sendInt(ServerFlags.DONE)
             }
 
             FileTransfer.CANCEL -> {
-                client.sendInt(ServerFlags.CANCEL_SEND_FILES)
+                client.sendItemCount(itemCount = null)
                 parent.sendInt(ServerFlags.DONE)
             }
 
             FileTransfer.SKIP_INVALID -> {
-                val sendingFileAmount = sourceFileListManager.validItemCount
-                parent.reportTextLine(text = "Sending $sendingFileAmount files.")
-                client.sendInt(ServerFlags.CONFIRM)
-                client.sendInt(sendingFileAmount)
-                sourceFileListManager.forEachItem { fileInfo ->
-                    if (!fileInfo.nameIsTooLong) {
-                        client.sendItem(sendFileItemInfo = fileInfo)
-                    }
-                }
+                parent.reportTextLine(text = "Sending ${sourceFileListManager.totalItemCount} files.")
+                client.sendFilesSkipInvalid(sourceFileListManager = sourceFileListManager)
                 parent.reportTextLine(text = "Done")
                 parent.sendInt(ServerFlags.DONE)
             }
 
             FileTransfer.COMPRESS_EVERYTHING -> {
-                client.sendInt(ServerFlags.CONFIRM)
-                client.sendInt(message = 1)
-                parent.reportTextLine(text = "Compressing files...")
-                val fileZipper = FileZipper()
-                sourceFileListManager.forEachItem { fileInfo ->
-                    if (fileInfo.isFile) {
-                        fileZipper.zipItem(fileInfo)
-                    }
-                }
-                parent.reportTextLine(text = "Sending compressed file...")
-                fileZipper.finalize { zipFilePath ->
-                    client.sendString("compressed.zip")
-                    client.sendBoolean(true) // compressed.zip is a file.
-                    client.sendFile(filePath = zipFilePath)
-                }
+                parent.reportTextLine(text = "Compressing and sending files...")
+                client.sendFilesCompressEverything(sourceFileListManager = sourceFileListManager)
                 parent.reportTextLine(text = "Done")
                 parent.sendInt(ServerFlags.DONE)
             }
 
             FileTransfer.COMPRESS_INVALID -> {
-                client.sendInt(ServerFlags.CONFIRM)
-                client.sendInt(message = sourceFileListManager.validItemCount + 1)
+                client.sendItemCount(itemCount = sourceFileListManager.validItemCount + 1)
                 parent.reportTextLine(text = "Sending & compressing files...")
                 val fileZipper = FileZipper()
                 sourceFileListManager.forEachItem { fileInfo ->
@@ -128,15 +103,52 @@ fun HMeadowSocketClient.sendFilesClientSetup(job: String?): Int {
     return receiveInt()
 }
 
+fun HMeadowSocketClient.sendItemCount(itemCount: Int?) = itemCount?.let {
+    sendBoolean(true)
+    sendInt(itemCount)
+} ?: sendBoolean(false)
+
+
 private fun HMeadowSocketClient.reportFindingFiles(amount: Int) {
     sendInt(message = ServerFlags.HAS_MORE)
     sendInt(message = amount)
 }
 
-private fun HMeadowSocketClient.sendItem(sendFileItemInfo: SendFileItemInfo) {
-    this.sendString(sendFileItemInfo.relativePath)
-    this.sendBoolean(sendFileItemInfo.isFile)
+internal fun HMeadowSocketClient.sendItem(sendFileItemInfo: SendFileItemInfo) {
+    sendString(sendFileItemInfo.relativePath)
+    sendBoolean(sendFileItemInfo.isFile)
     if (sendFileItemInfo.isFile) {
-        this.sendFile(filePath = sendFileItemInfo.absolutePath)
+        sendFile(filePath = sendFileItemInfo.absolutePath)
+    }
+    receiveContinue()
+}
+
+internal fun HMeadowSocketClient.sendFilesNormal(sourceFileListManager: SourceFileListManager) {
+    sendItemCount(itemCount = sourceFileListManager.totalItemCount)
+    sourceFileListManager.forEachItem { fileInfo ->
+        sendItem(sendFileItemInfo = fileInfo)
+    }
+}
+
+internal fun HMeadowSocketClient.sendFilesSkipInvalid(sourceFileListManager: SourceFileListManager) {
+    sendItemCount(itemCount = sourceFileListManager.validItemCount)
+    sourceFileListManager.forEachItem { fileInfo ->
+        if (!fileInfo.nameIsTooLong) {
+            sendItem(sendFileItemInfo = fileInfo)
+        }
+    }
+}
+
+internal fun HMeadowSocketClient.sendFilesCompressEverything(sourceFileListManager: SourceFileListManager) {
+    sendItemCount(itemCount = 1)
+    val fileZipper = FileZipper()
+    sourceFileListManager.forEachItem { fileInfo ->
+        fileZipper.zipItem(fileInfo)
+    }
+    fileZipper.finalize { zipFilePath ->
+        sendString("compressed.zip")
+        sendBoolean(true) // compressed.zip is a file.
+        sendFile(filePath = zipFilePath)
+        receiveContinue()
     }
 }
