@@ -67,22 +67,8 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
             }
 
             FileTransfer.COMPRESS_INVALID -> {
-                client.sendItemCount(itemCount = sourceFileListManager.validItemCount + 1)
                 parent.reportTextLine(text = "Sending & compressing files...")
-                val fileZipper = FileZipper()
-                sourceFileListManager.forEachItem { fileInfo ->
-                    if (fileInfo.nameIsTooLong) {
-                        fileZipper.zipItem(fileInfo)
-                    } else {
-                        client.sendItem(sendFileItemInfo = fileInfo)
-                    }
-                }
-                parent.reportTextLine(text = "Sending compressed file...")
-                fileZipper.finalize { zipFilePath ->
-                    client.sendString("compressed.zip")
-                    client.sendBoolean(true) // compressed.zip is a file.
-                    client.sendFile(filePath = zipFilePath)
-                }
+                client.sendFilesCompressInvalid(sourceFileListManager = sourceFileListManager)
                 parent.reportTextLine(text = "Done")
                 parent.sendInt(ServerFlags.DONE)
             }
@@ -145,6 +131,23 @@ internal fun HMeadowSocketClient.sendFilesCompressEverything(sourceFileListManag
     sourceFileListManager.forEachItem { fileInfo ->
         fileZipper.zipItem(fileInfo)
     }
+    finalizeFileZipper(fileZipper = fileZipper)
+}
+
+internal fun HMeadowSocketClient.sendFilesCompressInvalid(sourceFileListManager: SourceFileListManager) {
+    sendItemCount(itemCount = sourceFileListManager.validItemCount + 1)
+    val fileZipper = FileZipper()
+    sourceFileListManager.forEachItem { fileInfo ->
+        if (fileInfo.nameIsTooLong) {
+            fileZipper.zipItem(fileInfo)
+        } else {
+            sendItem(sendFileItemInfo = fileInfo)
+        }
+    }
+    finalizeFileZipper(fileZipper = fileZipper)
+}
+
+private fun HMeadowSocketClient.finalizeFileZipper(fileZipper: FileZipper) {
     fileZipper.finalize { zipFilePath ->
         sendString("compressed.zip")
         sendBoolean(true) // compressed.zip is a file.

@@ -8,6 +8,7 @@ import commandHandler.executeCommand.sendExecution.helpers.SendFileItemInfo
 import commandHandler.executeCommand.sendExecution.helpers.SourceFileListManager
 import commandHandler.executeCommand.sendExecution.sendFilesClientSetup
 import commandHandler.executeCommand.sendExecution.sendFilesCompressEverything
+import commandHandler.executeCommand.sendExecution.sendFilesCompressInvalid
 import commandHandler.executeCommand.sendExecution.sendFilesNormal
 import commandHandler.executeCommand.sendExecution.sendFilesSkipInvalid
 import commandHandler.executeCommand.sendExecution.sendItem
@@ -41,6 +42,12 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
         every { FileOperations.FileOperationMock.exists } returns false
 
         mockkObject(FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines)
+
+        mockkConstructor(FileZipper::class)
+        every { anyConstructed<FileZipper>().zipItem(any()) } just Runs
+        every { anyConstructed<FileZipper>().finalize(any()) } answers {
+            this.firstArg<(String) -> Unit>().invoke("")
+        }
     }
 
     @UnitTest
@@ -238,12 +245,6 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
                     "F?fff\n",
                     "/ddd/eee/fff\n",
                 )
-                mockkConstructor(FileZipper::class)
-                every { anyConstructed<FileZipper>().zipItem(any()) } just Runs
-                every { anyConstructed<FileZipper>().finalize(any()) } answers {
-                    this.firstArg<(String) -> Unit>().invoke("")
-                }
-
                 generateClient().sendFilesCompressEverything(
                     sourceFileListManager = SourceFileListManager(
                         userInputPaths = emptyList(),
@@ -259,6 +260,42 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
                 val (_, count, _) = server.waitForItemCount()
                 server.receiveItem("", Path(""), { }, { })
                 assertEquals(1, count)
+            },
+        )
+    }
+
+    @UnitTest
+    fun sendFilesCompressInvalid() = runSocketScriptTest {
+        launchSockets(
+            clientBlock = {
+                every { FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines.fileLines } returns mutableListOf(
+                    "0\n",
+                    "F?ccc\n",
+                    "/aaa/bbb/ccc\n",
+                    "1\n",
+                    "F?fff\n",
+                    "/ddd/eee/fff\n",
+                    "0\n",
+                    "F?ggg\n",
+                    "/hhh/iii/jjj\n",
+                    "1\n",
+                    "F?kkk\n",
+                    "/lll/mmm/nnn\n",
+                )
+                generateClient().sendFilesCompressInvalid(
+                    sourceFileListManager = SourceFileListManager(
+                        userInputPaths = emptyList(),
+                        serverDestinationDirLength = 100,
+                        onItemFound = {},
+                    ),
+                )
+            },
+            serverBlock = {
+                val server = generateServer()
+                server.waitForItemCount()
+                repeat(times = 3) {
+                    server.receiveItem("", Path(""), { }, { })
+                }
             },
         )
     }
