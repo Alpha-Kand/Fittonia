@@ -60,20 +60,8 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
             }
 
             FileTransfer.COMPRESS_EVERYTHING -> {
-                client.sendItemCount(itemCount = 1)
-                parent.reportTextLine(text = "Compressing files...")
-                val fileZipper = FileZipper()
-                sourceFileListManager.forEachItem { fileInfo ->
-                    if (fileInfo.isFile) {
-                        fileZipper.zipItem(fileInfo)
-                    }
-                }
-                parent.reportTextLine(text = "Sending compressed file...")
-                fileZipper.finalize { zipFilePath ->
-                    client.sendString("compressed.zip")
-                    client.sendBoolean(true) // compressed.zip is a file.
-                    client.sendFile(filePath = zipFilePath)
-                }
+                parent.reportTextLine(text = "Compressing and sending files...")
+                client.sendFilesCompressEverything(sourceFileListManager = sourceFileListManager)
                 parent.reportTextLine(text = "Done")
                 parent.sendInt(ServerFlags.DONE)
             }
@@ -148,5 +136,19 @@ internal fun HMeadowSocketClient.sendFilesSkipInvalid(sourceFileListManager: Sou
         if (!fileInfo.nameIsTooLong) {
             sendItem(sendFileItemInfo = fileInfo)
         }
+    }
+}
+
+internal fun HMeadowSocketClient.sendFilesCompressEverything(sourceFileListManager: SourceFileListManager) {
+    sendItemCount(itemCount = 1)
+    val fileZipper = FileZipper()
+    sourceFileListManager.forEachItem { fileInfo ->
+        fileZipper.zipItem(fileInfo)
+    }
+    fileZipper.finalize { zipFilePath ->
+        sendString("compressed.zip")
+        sendBoolean(true) // compressed.zip is a file.
+        sendFile(filePath = zipFilePath)
+        receiveContinue()
     }
 }

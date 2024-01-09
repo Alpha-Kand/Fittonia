@@ -3,17 +3,22 @@ package commandHandler.executeCommand
 import BaseSocketScriptTest
 import UnitTest
 import commandHandler.FileTransfer
+import commandHandler.executeCommand.sendExecution.helpers.FileZipper
 import commandHandler.executeCommand.sendExecution.helpers.SendFileItemInfo
 import commandHandler.executeCommand.sendExecution.helpers.SourceFileListManager
 import commandHandler.executeCommand.sendExecution.sendFilesClientSetup
+import commandHandler.executeCommand.sendExecution.sendFilesCompressEverything
 import commandHandler.executeCommand.sendExecution.sendFilesNormal
 import commandHandler.executeCommand.sendExecution.sendFilesSkipInvalid
 import commandHandler.executeCommand.sendExecution.sendItem
 import commandHandler.executeCommand.sendExecution.sendItemCount
 import fileOperationWrappers.FileOperations
 import fileOperationWrappers.FittoniaTempFileBase
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -217,6 +222,43 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
                 repeat(times = 2) {
                     server.receiveItem("", Path(""), { }, { })
                 }
+            },
+        )
+    }
+
+    @UnitTest
+    fun sendFilesCompressEverything() = runSocketScriptTest {
+        launchSockets(
+            clientBlock = {
+                every { FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines.fileLines } returns mutableListOf(
+                    "0\n",
+                    "F?ccc\n",
+                    "/aaa/bbb/ccc\n",
+                    "0\n",
+                    "F?fff\n",
+                    "/ddd/eee/fff\n",
+                )
+                mockkConstructor(FileZipper::class)
+                every { anyConstructed<FileZipper>().zipItem(any()) } just Runs
+                every { anyConstructed<FileZipper>().finalize(any()) } answers {
+                    this.firstArg<(String) -> Unit>().invoke("")
+                }
+
+                generateClient().sendFilesCompressEverything(
+                    sourceFileListManager = SourceFileListManager(
+                        userInputPaths = emptyList(),
+                        serverDestinationDirLength = 100,
+                        onItemFound = {},
+                    ),
+                )
+                verify(exactly = 2) { anyConstructed<FileZipper>().zipItem(any()) }
+                verify(exactly = 1) { anyConstructed<FileZipper>().finalize(any()) }
+            },
+            serverBlock = {
+                val server = generateServer()
+                val (_, count, _) = server.waitForItemCount()
+                server.receiveItem("", Path(""), { }, { })
+                assertEquals(1, count)
             },
         )
     }
