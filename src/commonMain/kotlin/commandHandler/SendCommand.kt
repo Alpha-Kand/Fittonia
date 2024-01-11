@@ -13,6 +13,7 @@ sealed class SendCommand : Command {
     private var ip: String? = null
     private var password: String? = null
 
+    open fun getDestination() = destination
     fun getPort() = verifyArgumentIsSet(argument = port, reportingName = portArguments.first())
     fun getDestination() = destination
     fun getIP() = verifyArgumentIsSet(argument = ip, reportingName = ipArguments.first())
