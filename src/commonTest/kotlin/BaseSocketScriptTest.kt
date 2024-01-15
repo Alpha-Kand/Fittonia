@@ -64,14 +64,11 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun runSocketScriptTest(
-        allowUnmatchedCommunication: Boolean = true,
         clientBlock: TestScope.() -> Unit,
         serverBlock: TestScope.() -> Unit,
     ) = runTest {
         try {
-            val handler = CoroutineExceptionHandler { _, exception ->
-                if (!allowUnmatchedCommunication) throw exception
-            }
+            val handler = CoroutineExceptionHandler { _, exception -> throw exception }
             joinAll(
                 GlobalScope.launch(handler) { clientBlock() },
                 GlobalScope.launch(handler) { serverBlock() },
@@ -103,7 +100,7 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
                     }
                 }
             }
-            if (!allowUnmatchedCommunication) Assertions.assertEquals(clientList.size, serverList.size)
+            Assertions.assertEquals(clientList.size, serverList.size)
             clientList.zip(serverList) { a, b ->
                 Assertions.assertEquals(a.flag.value, -(b.flag.value))
             }
