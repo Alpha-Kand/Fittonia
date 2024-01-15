@@ -62,6 +62,17 @@ class ServerFlags {
     }
 }
 
+enum class ServerCommandFlag {
+    SEND_FILES,
+    SEND_MESSAGE,
+    ADD_DESTINATION,
+    ;
+
+    companion object {
+        fun Int.toCommandFlag() = entries[this]
+    }
+}
+
 class FileTransfer {
     companion object {
         const val tempPrefix = "fittonia"

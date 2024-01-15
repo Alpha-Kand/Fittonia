@@ -3,6 +3,7 @@ package commandHandler
 import SessionManager
 import commandHandler.Command.Companion.verifyArgumentIsSet
 import hmeadowSocket.HMeadowSocketClient
+import receiveApproval
 import requireNull
 import settingsManager.SettingsManager
 import java.net.InetAddress
@@ -15,7 +16,6 @@ sealed class SendCommand : Command {
 
     open fun getDestination() = destination
     fun getPort() = verifyArgumentIsSet(argument = port, reportingName = portArguments.first())
-    fun getDestination() = destination
     fun getIP() = verifyArgumentIsSet(argument = ip, reportingName = ipArguments.first())
     fun getPassword() = verifyArgumentIsSet(argument = password, reportingName = passwordArguments.first())
 
@@ -74,17 +74,57 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     )
 }
 
-fun canContinue(command: SendCommand, client: HMeadowSocketClient, parent: HMeadowSocketClient): Boolean {
+fun HMeadowSocketClient.communicateCommand(
+    commandFlag: ServerCommandFlag,
+    password: String,
+    onSuccess: () -> Unit,
+    onPasswordRefused: () -> Unit,
+    onFailure: () -> Unit,
+): Boolean {
+    sendInt(message = commandFlag.ordinal)
+    return receiveApproval(
+        onConfirm = {
+            sendString(password)
+            receiveApproval(
+                onConfirm = {
+                    onSuccess()
+                    true
+                },
+                onDeny = {
+                    onPasswordRefused()
+                    false
+                },
+            )
+        },
+        onDeny = {
+            onFailure()
+            false
+        },
+    )
+}
+
+fun canContinueSendCommand(command: SendCommand, client: HMeadowSocketClient, parent: HMeadowSocketClient): Boolean {
     val destination = SettingsManager.settingsManager.findDestination(command.getDestination())
-    if (client.receiveConfirmation()) {
-        if (client.sendPassword(password = destination?.password ?: command.getPassword())) {
-            return true
-        }
-        parent.sendInt(ServerFlags.HAS_MORE)
-        parent.sendString("Server refused password.")
-        return false
+    val password = destination?.password ?: command.getPassword()
+    val commandFlag = when (command) {
+        is SendFilesCommand -> ServerCommandFlag.SEND_FILES
+        is SendMessageCommand -> ServerCommandFlag.SEND_MESSAGE
+        is AddCommand -> ServerCommandFlag.ADD_DESTINATION
     }
-    parent.sendInt(ServerFlags.HAS_MORE)
-    parent.sendString("Connected, but request refused.")
-    return false
+    return client.communicateCommand(
+        commandFlag = commandFlag,
+        password = password,
+        onSuccess = {
+            parent.sendInt(ServerFlags.HAS_MORE)
+            parent.sendString("Server accepted password.")
+        },
+        onPasswordRefused = {
+            parent.sendInt(ServerFlags.HAS_MORE)
+            parent.sendString("Server refused password.")
+        },
+        onFailure = {
+            parent.sendInt(ServerFlags.HAS_MORE)
+            parent.sendString("Connected, but request refused.")
+        },
+    )
 }

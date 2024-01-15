@@ -2,12 +2,48 @@ package commandHandler.executeCommand
 
 import com.varabyte.kotter.runtime.Session
 import commandHandler.ServerCommand
-import commandHandler.ServerFlags
-import commandHandler.receivePassword
-import commandHandler.sendConfirmation
-import commandHandler.sendDeny
+import commandHandler.ServerCommandFlag
+import commandHandler.ServerCommandFlag.Companion.toCommandFlag
+import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketServer
 import printLine
+import sendConfirmation
+import sendDeny
+import settingsManager.SettingsManager
+
+private fun HMeadowSocketServer.passwordIsValid() = SettingsManager.settingsManager.checkPassword(receiveString())
+
+fun HMeadowSocketServer.handleCommand(
+    onSendFilesCommand: (Boolean) -> Unit,
+    onSendMessageCommand: (Boolean) -> Unit,
+    onAddDestination: (Boolean) -> Unit,
+    onInvalidCommand: () -> Unit,
+) {
+    val command: ServerCommandFlag
+    try {
+        command = receiveInt().toCommandFlag()
+    } catch (e: Exception) {
+        sendDeny()
+        onInvalidCommand()
+        return
+    }
+    sendConfirmation()
+    val passwordIsValid = passwordIsValid()
+    sendApproval(choice = passwordIsValid)
+    when (command) {
+        ServerCommandFlag.SEND_FILES -> onSendFilesCommand(passwordIsValid)
+        ServerCommandFlag.SEND_MESSAGE -> onSendMessageCommand(passwordIsValid)
+        ServerCommandFlag.ADD_DESTINATION -> onAddDestination(passwordIsValid)
+    }
+}
+
+fun HMeadowSocket.sendApproval(choice: Boolean) {
+    if (choice) {
+        sendConfirmation()
+    } else {
+        sendDeny()
+    }
+}
 
 fun Session.serverExecution(command: ServerCommand) {
     printLine(text = "Server started.")
@@ -17,34 +53,32 @@ fun Session.serverExecution(command: ServerCommand) {
             port = command.getPort(),
             timeoutMillis = 2000,
         )
-        when (server.receiveInt()) {
-            ServerFlags.SEND_FILES -> serverSendFilesExecution(server = server)
-
-            ServerFlags.SEND_MESSAGE -> {
-                server.sendConfirmation()
-                if (!server.receivePassword()) return
+        server.handleCommand(
+            onSendFilesCommand = {
+                //todo it
+                serverSendFilesExecution(server = server)
+            },
+            onSendMessageCommand = {
+                //todo it
                 printLine(text = "Received message from client.")
                 printLine(server.receiveString(), color = 0xccc949) // Lightish yellow.
-            }
-
-            ServerFlags.ADD_DESTINATION -> {
-                server.sendConfirmation()
-                if (!server.receivePassword()) {
+            },
+            onAddDestination = {
+                //todo it
+                if (!it) {
                     printLine(text = "Client attempted to add this server as destination, password refused.")
-                    return
-                }
-                if (server.receiveBoolean()) {
-                    printLine(text = "Client added this server as a destination.")
                 } else {
-                    printLine(text = "Client failed to add this server as a destination.")
+                    if (server.receiveBoolean()) {
+                        printLine(text = "Client added this server as a destination.")
+                    } else {
+                        printLine(text = "Client failed to add this server as a destination.")
+                    }
                 }
-            }
-
-            else -> {
-                server.sendDeny()
+            },
+            onInvalidCommand = {
                 printLine(text = "Received invalid server command from client.")
             }
-        }
+        )
         server.close()
     }
 }

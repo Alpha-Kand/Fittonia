@@ -3,7 +3,7 @@ package commandHandler.executeCommand.sendExecution
 import commandHandler.FileTransfer
 import commandHandler.SendFilesCommand
 import commandHandler.ServerFlags
-import commandHandler.canContinue
+import commandHandler.canContinueSendCommand
 import commandHandler.executeCommand.sendExecution.helpers.FileZipper
 import commandHandler.executeCommand.sendExecution.helpers.SendFileItemInfo
 import commandHandler.executeCommand.sendExecution.helpers.SourceFileListManager
@@ -13,8 +13,7 @@ import reportTextLine
 
 fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSocketClient) {
     val client = setupSendCommandClient(command = command)
-    client.sendInt(ServerFlags.SEND_FILES)
-    if (canContinue(command = command, client = client, parent = parent)) {
+    if (canContinueSendCommand(command = command, client = client, parent = parent)) {
         val serverDestinationDirLength = client.sendFilesClientSetup(job = command.getJob())
 
         parent.reportTextLine(text = "Finding files to send...\uD83D\uDD0E")
