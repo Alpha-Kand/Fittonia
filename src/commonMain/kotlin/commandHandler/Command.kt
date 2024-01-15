@@ -5,6 +5,8 @@ import FittoniaErrorType
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
+import sendConfirmation
+import sendDeny
 import settingsManager.SettingsManager
 
 sealed interface Command {
@@ -58,14 +60,6 @@ fun HMeadowSocketServer.receivePassword(): Boolean {
     }
 }
 
-fun HMeadowSocket.receiveConfirmation(): Boolean {
+fun HMeadowSocket.receiveConfirmation(): Boolean { //TODO replace with sending and receiving booleans.
     return receiveInt() == ServerFlags.CONFIRM
-}
-
-fun HMeadowSocket.sendConfirmation() {
-    sendInt(ServerFlags.CONFIRM)
-}
-
-fun HMeadowSocket.sendDeny() {
-    sendInt(ServerFlags.DENY)
 }
