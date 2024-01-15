@@ -31,7 +31,7 @@ fun Session.addExecution(command: AddCommand) {
     }
     val client = HMeadowSocketClient(
         ipAddress = InetAddress.getByName(command.getIP()),
-        port = command.getPort() ?: settingsManager.defaultPort,
+        port = command.getPort(),
     )
 
     client.sendInt(ServerFlags.ADD_DESTINATION)
