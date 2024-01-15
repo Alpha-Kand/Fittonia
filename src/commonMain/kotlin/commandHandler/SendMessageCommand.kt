@@ -4,8 +4,9 @@ import FittoniaError
 import FittoniaErrorType
 import commandHandler.Command.Companion.verifyArgumentIsSet
 
-class SendMessageCommand : SendCommand(), Command {
-    private var message: String? = null
+class SendMessageCommand(
+    private var message: String? = null,
+) : SendCommand() {
 
     fun getMessage() = verifyArgumentIsSet(argument = message, reportingName = messageArguments.first())
 
@@ -26,9 +27,6 @@ class SendMessageCommand : SendCommand(), Command {
         if (handleSendCommandArgument(argumentName = argumentName, value = value)) {
             return@tryCatch true
         }
-        if (messageArguments.contains(argumentName)) {
-            return@tryCatch true
-        }
-        return@tryCatch false
+        return@tryCatch messageArguments.contains(argumentName)
     }
 }

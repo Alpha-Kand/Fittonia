@@ -5,9 +5,10 @@ import FittoniaErrorType
 import commandHandler.Command.Companion.verifyArgumentIsSet
 import requireNull
 
-class SendFilesCommand : SendCommand(), Command {
-    private var files: List<String>? = null
-    private var job: String? = null
+class SendFilesCommand(
+    private var files: List<String>? = null,
+    private var job: String? = null,
+) : SendCommand() {
 
     fun getFiles() = verifyArgumentIsSet(argument = files, reportingName = filesArguments.first())
     fun getJob() = job
@@ -39,9 +40,6 @@ class SendFilesCommand : SendCommand(), Command {
             job = value
             return@tryCatch true
         }
-        if (filesArguments.contains(argumentName)) {
-            return@tryCatch true
-        }
-        return@tryCatch false
+        return@tryCatch filesArguments.contains(argumentName)
     }
 }
