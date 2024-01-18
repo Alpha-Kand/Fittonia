@@ -29,6 +29,7 @@ import hmeadowSocket.HMeadowSocket
 import settingsManager.SettingsManager
 
 fun main(args: Array<String>) = session {
+    KotterSession.kotter = this
     try {
         SettingsManager.settingsManager.saveSettings()
         if (args.isNotEmpty()) {

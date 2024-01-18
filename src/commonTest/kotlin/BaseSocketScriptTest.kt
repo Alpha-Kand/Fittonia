@@ -2,8 +2,10 @@ import BaseSocketScriptTest.TestFlags.Companion.opposite
 import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketInterface
 import hmeadowSocket.HMeadowSocketServer
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -60,11 +62,17 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
         serverList.clear()
     }
 
-    fun runSocketScriptTest(testBlock: suspend TestScope.() -> Unit) = runTest {
+    @OptIn(DelicateCoroutinesApi::class)
+    fun runSocketScriptTest(
+        clientBlock: TestScope.() -> Unit,
+        serverBlock: TestScope.() -> Unit,
+    ) = runTest {
         try {
-            testBlock()
-        } catch (e: Exception) {
-            println(e)
+            val handler = CoroutineExceptionHandler { _, exception -> throw exception }
+            joinAll(
+                GlobalScope.launch(handler) { clientBlock() },
+                GlobalScope.launch(handler) { serverBlock() },
+            )
         } finally {
             var k = 0
             if (clientList.isEmpty() || serverList.isEmpty()) {
@@ -97,21 +105,6 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
                 Assertions.assertEquals(a.flag.value, -(b.flag.value))
             }
         }
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    suspend fun launchSockets(
-        clientBlock: () -> Unit,
-        serverBlock: () -> Unit,
-    ) {
-        val clientThread = GlobalScope.launch { clientBlock() }
-        clientThread.start()
-
-        val serverThread = GlobalScope.launch { serverBlock() }
-        serverThread.start()
-
-        clientThread.join()
-        serverThread.join()
     }
 
     fun generateClient() = HMeadowSocketClient(

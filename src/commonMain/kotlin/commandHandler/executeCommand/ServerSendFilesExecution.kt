@@ -8,10 +8,10 @@ import com.varabyte.kotter.runtime.Session
 import commandHandler.FileTransfer
 import commandHandler.ServerFlags
 import commandHandler.receivePassword
-import commandHandler.sendConfirmation
 import fileOperationWrappers.FileOperations
 import hmeadowSocket.HMeadowSocketServer
 import printLine
+import sendConfirmation
 import settingsManager.SettingsManager
 import java.nio.file.Path
 import kotlin.io.path.Path
