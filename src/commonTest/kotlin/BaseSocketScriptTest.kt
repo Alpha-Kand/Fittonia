@@ -15,6 +15,7 @@ import java.net.InetAddress
 import java.net.Socket
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
 abstract class BaseSocketScriptTest : BaseMockkTest() {
 
@@ -66,14 +67,20 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
     fun runSocketScriptTest(
         clientBlock: TestScope.() -> Unit,
         serverBlock: TestScope.() -> Unit,
-    ) = runTest {
+    ) {
+        var throwException: Throwable? = null
         try {
-            val handler = CoroutineExceptionHandler { _, exception -> throw exception }
-            joinAll(
-                GlobalScope.launch(handler) { clientBlock() },
-                GlobalScope.launch(handler) { serverBlock() },
-            )
+            val handler = CoroutineExceptionHandler { _, exception ->
+                throwException = exception
+            }
+            runTest(timeout = 5.seconds) {
+                joinAll(
+                    GlobalScope.launch(handler) { clientBlock() },
+                    GlobalScope.launch(handler) { serverBlock() },
+                )
+            }
         } finally {
+            throwException?.let { throw it }
             var k = 0
             if (clientList.isEmpty() || serverList.isEmpty()) {
                 clientList.forEach {
