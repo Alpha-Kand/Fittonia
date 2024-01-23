@@ -1,4 +1,5 @@
 import KotterSession.kotter
+import com.varabyte.kotter.foundation.input.runUntilInputEntered
 import com.varabyte.kotter.foundation.text.Color
 import com.varabyte.kotter.foundation.text.color
 import com.varabyte.kotter.foundation.text.red
@@ -56,11 +57,23 @@ object KotterSession {
     lateinit var kotter: Session
 }
 
+enum class KotterRunType {
+    RUN,
+    RUN_UNTIL_INPUT_ENTERED,
+}
+
 @OptIn(DelicateCoroutinesApi::class)
-fun kotterSection(renderBlock: MainRenderScope.() -> Unit, runBlock: RunScope.() -> Unit) {
+fun kotterSection(
+    renderBlock: MainRenderScope.() -> Unit,
+    runBlock: RunScope.() -> Unit = {},
+    runType: KotterRunType = KotterRunType.RUN,
+) {
     if (Config.isMockking) {
         runBlock(RunScope(kotter.section {}, GlobalScope))
     } else {
-        kotter.section(renderBlock).run(runBlock)
+        when (runType) {
+            KotterRunType.RUN -> kotter.section(renderBlock).run(runBlock)
+            KotterRunType.RUN_UNTIL_INPUT_ENTERED -> kotter.section(renderBlock).runUntilInputEntered(runBlock)
+        }
     }
 }
