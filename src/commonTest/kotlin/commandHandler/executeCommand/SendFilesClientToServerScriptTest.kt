@@ -62,7 +62,6 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
         },
     )
 
-
     @UnitTest
     fun sendFilesSetupWithoutJobName() = runSocketScriptTest(
         clientBlock = {
@@ -183,7 +182,7 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
             val server = generateServer()
             server.waitForItemCount()
             repeat(times = 2) {
-                server.receiveItem("", Path(""), { }, { })
+                server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
             }
         },
     )
@@ -214,7 +213,7 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
             val server = generateServer()
             server.waitForItemCount()
             repeat(times = 2) {
-                server.receiveItem("", Path(""), { }, { })
+                server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
             }
         },
     )
@@ -244,7 +243,7 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
         serverBlock = {
             val server = generateServer()
             val (_, count, _) = server.waitForItemCount()
-            server.receiveItem("", Path(""), { }, { })
+            server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
             assertEquals(1, count)
         },
     )
@@ -278,7 +277,7 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
             val server = generateServer()
             server.waitForItemCount()
             repeat(times = 3) {
-                server.receiveItem("", Path(""), { }, { })
+                server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
             }
         },
     )

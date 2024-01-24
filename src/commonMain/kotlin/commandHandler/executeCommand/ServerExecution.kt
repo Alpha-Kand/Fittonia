@@ -56,7 +56,7 @@ fun Session.serverExecution(command: ServerCommand) {
         server.handleCommand(
             onSendFilesCommand = {
                 //todo it
-                serverSendFilesExecution(server = server)
+                server.serverSendFilesExecution()
             },
             onSendMessageCommand = {
                 //todo it
