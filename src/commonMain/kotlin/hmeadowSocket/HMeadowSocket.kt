@@ -51,6 +51,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         try {
             return receive()
         } catch (e: Exception) {
+            this.close()
             throw FailedToReceiveException(e)
         }
     }
@@ -60,6 +61,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         try {
             send()
         } catch (e: Exception) {
+            this.close()
             throw FailedToSendException(e)
         }
     }
