@@ -1,8 +1,9 @@
 package commandHandler.executeCommand.sendExecution
 
+import KotterRunType
+import KotterSession.kotter
 import com.varabyte.kotter.foundation.input.input
 import com.varabyte.kotter.foundation.input.onInputEntered
-import com.varabyte.kotter.foundation.input.runUntilInputEntered
 import com.varabyte.kotter.foundation.liveVarOf
 import com.varabyte.kotter.foundation.text.Color
 import com.varabyte.kotter.foundation.text.color
@@ -24,7 +25,7 @@ fun Session.sendFilesExecution(inputTokens: List<String>) {
         when (clientEngine.receiveInt()) {
             ServerFlags.PRINT_LINE -> clientEnginePrintLine(clientEngine = clientEngine)
             ServerFlags.FILE_NAMES_TOO_LONG -> clientEngineFileNamesTooLong(clientEngine = clientEngine)
-            ServerFlags.SEND_FILES_COLLECTING -> clientEngineSendFilesCollecting(clientEngine = clientEngine)
+            ServerFlags.SEND_FILES_COLLECTING -> sendFilesCollecting(clientEngine = clientEngine)
             ServerFlags.DONE -> break
         }
     }
@@ -41,29 +42,32 @@ private fun Session.clientEnginePrintLine(clientEngine: HMeadowSocketServer) {
     }.run()
 }
 
-private fun Session.clientEngineSendFilesCollecting(clientEngine: HMeadowSocketServer) {
-    var fileCount by liveVarOf(0)
-    section {
-        text(text = "Total files found: ")
-        text(text = fileCount.toString())
-    }.run {
-        while (true) {
-            when (clientEngine.receiveInt()) {
-                ServerFlags.HAS_MORE -> {
-                    fileCount = clientEngine.receiveInt()
-                }
+private fun sendFilesCollecting(clientEngine: HMeadowSocketServer) {
+    var fileCount by kotter.liveVarOf(0)
+    kotterSection(
+        renderBlock = {
+            text(text = "Total files found: ")
+            text(text = fileCount.toString())
+        },
+        runBlock = {
+            while (true) {
+                when (clientEngine.receiveInt()) {
+                    ServerFlags.HAS_MORE -> {
+                        fileCount = clientEngine.receiveInt()
+                    }
 
-                ServerFlags.DONE -> {
-                    break
-                }
+                    ServerFlags.DONE -> {
+                        break
+                    }
 
-                else -> Unit
+                    else -> Unit
+                }
             }
         }
-    }
+    )
 }
 
-private fun Session.clientEngineFileNamesTooLong(clientEngine: HMeadowSocketServer) {
+private fun clientEngineFileNamesTooLong(clientEngine: HMeadowSocketServer) {
     val serverDestinationDirLength = clientEngine.receiveInt()
     val filePaths = mutableListOf<String>()
     while (clientEngine.receiveInt() == ServerFlags.HAS_MORE) {
@@ -110,43 +114,47 @@ private fun Session.clientEngineFileNamesTooLong(clientEngine: HMeadowSocketServ
         } else {
             FileTransfer.defaultActionList.filter { it != FileTransfer.SHOW_ALL }
         }
-        section {
-            textLine()
-            val sb = StringBuilder("What would you like to do? (")
-            actionList.forEach {
-                sb.append("$it,")
-            }
-            sb.dropLast(2)
-            sb.append(')')
-            textLine(text = sb.toString())
-
-            actionList.forEach { action ->
-                when (action) {
-                    FileTransfer.CANCEL -> textLine(text = "$action. Cancel sending files.")
-                    FileTransfer.SKIP_INVALID -> textLine(text = "$action. Skip invalid files.")
-                    FileTransfer.COMPRESS_EVERYTHING -> textLine(text = "$action. Compress all files and send as a single file.")
-                    FileTransfer.COMPRESS_INVALID -> textLine(text = "$action. Compress invalid files only and send as a single file (relative file paths will be preserved).")
-                    FileTransfer.SHOW_ALL -> textLine(text = "$action. Show all files and ask again.")
+        kotterSection(
+            renderBlock = {
+                textLine()
+                val sb = StringBuilder("What would you like to do? (")
+                actionList.forEach {
+                    sb.append("$it,")
                 }
-            }
-            text(text = "> "); input()
-        }.runUntilInputEntered {
-            onInputEntered {
-                val availableActionRange = IntRange(
-                    start = 1,
-                    endInclusive = actionList.size,
-                )
-                try {
-                    if (input.toInt() in availableActionRange) {
-                        userInput = input.toInt()
-                    } else {
+                sb.dropLast(2)
+                sb.append(')')
+                textLine(text = sb.toString())
+
+                actionList.forEach { action ->
+                    when (action) {
+                        FileTransfer.CANCEL -> textLine(text = "$action. Cancel sending files.")
+                        FileTransfer.SKIP_INVALID -> textLine(text = "$action. Skip invalid files.")
+                        FileTransfer.COMPRESS_EVERYTHING -> textLine(text = "$action. Compress all files and send as a single file.")
+                        FileTransfer.COMPRESS_INVALID -> textLine(text = "$action. Compress invalid files only and send as a single file (relative file paths will be preserved).")
+                        FileTransfer.SHOW_ALL -> textLine(text = "$action. Show all files and ask again.")
+                    }
+                }
+                text(text = "> "); input()
+            },
+            runBlock = {
+                onInputEntered {
+                    val availableActionRange = IntRange(
+                        start = 1,
+                        endInclusive = actionList.size,
+                    )
+                    try {
+                        if (input.toInt() in availableActionRange) {
+                            userInput = input.toInt()
+                        } else {
+                            rejectInput()
+                        }
+                    } catch (e: NumberFormatException) {
                         rejectInput()
                     }
-                } catch (e: NumberFormatException) {
-                    rejectInput()
                 }
-            }
-        }
+            },
+            runType = KotterRunType.RUN_UNTIL_INPUT_ENTERED,
+        )
         printLine()
 
         when (userInput) {
