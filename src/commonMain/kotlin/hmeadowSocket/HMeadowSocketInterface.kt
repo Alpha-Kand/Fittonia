@@ -39,7 +39,7 @@ interface HMeadowSocketInterface {
     fun receiveContinue()
 }
 
-class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
+open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
 
     companion object {
         private const val BUFFER_SIZE_LONG: Long = 8192
@@ -273,5 +273,101 @@ class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
             remainingBytes -= count
         }
         return resultBuffer
+    }
+}
+
+class HMeadowSocketInterfaceRealDebug(
+    private val tag: String,
+    private val print: (String) -> Unit = ::println,
+) : HMeadowSocketInterfaceReal() {
+    private var shush = false
+    private var count = 1
+    private fun printStatus(message: String) = print("$count tag:$tag $message").also { count++ }
+
+    override fun bindToSocket(block: () -> Socket): Socket {
+        printStatus("bindToSocket")
+        return super.bindToSocket(block)
+    }
+
+    override fun close() {
+        printStatus("close")
+        super.close()
+    }
+
+    override fun sendInt(message: Int) {
+        if (!shush) {
+            printStatus("sendInt = $message")
+        }
+        super.sendInt(message)
+    }
+
+    override fun receiveInt(): Int {
+        val value = super.receiveInt()
+        if (!shush) {
+            printStatus("receiveInt = $value")
+        }
+        return value
+    }
+
+    override fun sendLong(message: Long) {
+        printStatus("sendLong = $message")
+        super.sendLong(message)
+    }
+
+    override fun receiveLong(): Long {
+        val value = super.receiveLong()
+        printStatus("receiveLong = $value")
+        return value
+    }
+
+    override fun sendBoolean(message: Boolean) {
+        printStatus("sendBoolean = $message")
+        super.sendBoolean(message)
+    }
+
+    override fun receiveBoolean(): Boolean {
+        val value = super.receiveBoolean()
+        printStatus("receiveBoolean = $value")
+        return value
+    }
+
+    override fun sendFile(filePath: String, rename: String) {
+        printStatus("sendFile = (filePath: $filePath ) (rename: $rename )")
+        super.sendFile(filePath, rename)
+    }
+
+    override fun receiveFile(
+        destination: String,
+        prefix: String,
+        suffix: String,
+    ): Pair<String, String> {
+        val value = super.receiveFile(destination, prefix, suffix)
+        printStatus("receiveFile = (first: ${value.first} ) (second: ${value.second} )")
+        return value
+    }
+
+    override fun sendString(message: String) {
+        shush = true
+        super.sendString(message)
+        printStatus("sendString = $message")
+        shush = false
+    }
+
+    override fun receiveString(): String {
+        shush = true
+        val value = super.receiveString()
+        shush = false
+        printStatus("receiveString = $value")
+        return value
+    }
+
+    override fun sendContinue() {
+        printStatus("sendContinue")
+        super.sendContinue()
+    }
+
+    override fun receiveContinue() {
+        printStatus("receiveContinue")
+        super.receiveContinue()
     }
 }
