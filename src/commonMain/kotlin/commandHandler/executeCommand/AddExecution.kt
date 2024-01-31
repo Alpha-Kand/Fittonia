@@ -7,7 +7,7 @@ import com.varabyte.kotter.foundation.input.runUntilInputEntered
 import com.varabyte.kotter.foundation.text.textLine
 import com.varabyte.kotter.runtime.Session
 import commandHandler.AddCommand
-import commandHandler.ServerFlags
+import commandHandler.ServerFlagsString
 import commandHandler.receiveConfirmation
 import commandHandler.sendPassword
 import hmeadowSocket.HMeadowSocketClient
@@ -34,7 +34,7 @@ fun Session.addExecution(command: AddCommand) {
         port = command.getPort(),
     )
 
-    client.sendInt(ServerFlags.ADD_DESTINATION)
+    client.sendString(ServerFlagsString.ADD_DESTINATION)
     if (client.receiveConfirmation()) {
         if (!client.sendPassword(command.getPassword())) {
             printLine(text = "Server refused password.")

@@ -81,7 +81,7 @@ fun HMeadowSocketClient.communicateCommand(
     onPasswordRefused: () -> Unit,
     onFailure: () -> Unit,
 ): Boolean {
-    sendInt(message = commandFlag.ordinal)
+    sendString(message = commandFlag.text)
     return receiveApproval(
         onConfirm = {
             sendString(password)

@@ -43,6 +43,14 @@ fun HMeadowSocketClient.reportTextLine(text: String, color: Color = Color.WHITE)
     receiveInt()
 }
 
+fun HMeadowSocket.sendApproval(choice: Boolean) {
+    if (choice) {
+        sendConfirmation()
+    } else {
+        sendDeny()
+    }
+}
+
 fun <T> HMeadowSocket.receiveApproval(onConfirm: () -> T, onDeny: () -> T): T {
     receiveString()
     return when (receiveBoolean()) {
