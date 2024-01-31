@@ -80,7 +80,6 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
                 )
             }
         } finally {
-            throwException?.let { throw it }
             var k = 0
             if (clientList.isEmpty() || serverList.isEmpty()) {
                 clientList.forEach {
@@ -107,6 +106,7 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
                     }
                 }
             }
+            throwException?.let { throw it }
             Assertions.assertEquals(clientList.size, serverList.size)
             clientList.zip(serverList) { a, b ->
                 Assertions.assertEquals(a.flag.value, -(b.flag.value))
