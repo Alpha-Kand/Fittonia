@@ -20,7 +20,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkConstructor
-import io.mockk.mockkObject
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -33,15 +32,10 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
 
     @BeforeEach
     fun beforeEach() {
-        mockkObject(SettingsManager.settingsManager)
         every { SettingsManager.settingsManager.getAutoJobName() } returns "jobAutoName"
         every { SettingsManager.settingsManager.settings.dumpPath } returns "dumpPath"
 
-        mockkObject(FileOperations)
-        mockkObject(FileOperations.FileOperationMock)
         every { FileOperations.FileOperationMock.exists } returns false
-
-        mockkObject(FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines)
 
         mockkConstructor(FileZipper::class)
         every { anyConstructed<FileZipper>().zipItem(any()) } just Runs

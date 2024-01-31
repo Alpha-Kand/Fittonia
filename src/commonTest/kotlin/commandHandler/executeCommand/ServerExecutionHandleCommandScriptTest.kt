@@ -11,7 +11,6 @@ import commandHandler.communicateCommand
 import hmeadowSocket.HMeadowSocketServer
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -23,7 +22,6 @@ private class ServerClientHandleCommandScriptTest : BaseSocketScriptTest() {
 
     @BeforeEach
     fun beforeEach() {
-        mockkObject(SettingsManager.settingsManager)
         every {
             SettingsManager.settingsManager.findDestination(any())
         } returns SettingsManager.SettingsData.Destination(
