@@ -175,7 +175,7 @@ private class ServerClientHandleCommandScriptTest : BaseSocketScriptTest() {
         },
         serverBlock = {
             val server = generateServer()
-            server.receiveInt()
+            server.receiveString()
             server.sendDeny()
         },
     )
