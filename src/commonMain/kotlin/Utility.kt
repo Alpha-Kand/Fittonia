@@ -10,6 +10,7 @@ import com.varabyte.kotter.runtime.MainRenderScope
 import com.varabyte.kotter.runtime.RunScope
 import com.varabyte.kotter.runtime.Session
 import commandHandler.ServerFlags
+import commandHandler.ServerFlagsString
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -43,15 +44,23 @@ fun HMeadowSocketClient.reportTextLine(text: String, color: Color = Color.WHITE)
 }
 
 fun <T> HMeadowSocket.receiveApproval(onConfirm: () -> T, onDeny: () -> T): T {
+    receiveString()
     return when (receiveBoolean()) {
         true -> onConfirm()
         false -> onDeny()
     }
 }
 
-fun HMeadowSocket.sendConfirmation() = sendBoolean(true)
+// Should be private?
+fun HMeadowSocket.sendConfirmation() {
+    sendString(ServerFlagsString.CONFIRM)
+    sendBoolean(true)
+}
 
-fun HMeadowSocket.sendDeny() = sendBoolean(false)
+fun HMeadowSocket.sendDeny() {
+    sendString(ServerFlagsString.DENY)
+    sendBoolean(false)
+}
 
 object KotterSession {
     lateinit var kotter: Session

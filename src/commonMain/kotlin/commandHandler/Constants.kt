@@ -62,6 +62,13 @@ class ServerFlags {
     }
 }
 
+class ServerFlagsString {
+    companion object {
+        const val CONFIRM = "CONFIRM"
+        const val DENY = "DENY"
+    }
+}
+
 enum class ServerCommandFlag {
     SEND_FILES,
     SEND_MESSAGE,
