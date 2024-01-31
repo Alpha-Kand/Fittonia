@@ -13,6 +13,7 @@ import com.varabyte.kotter.runtime.Session
 import commandHandler.FileTransfer
 import commandHandler.ServerFlags
 import hmeadowSocket.HMeadowSocketServer
+import kotterSection
 import printLine
 
 fun Session.sendFilesExecution(inputTokens: List<String>) {
@@ -165,11 +166,13 @@ private fun Session.clientEngineFileNamesTooLong(clientEngine: HMeadowSocketServ
     }
 }
 
-private fun Session.renderCutoffPath(path: String, serverDestinationDirLength: Int, index: Int) {
+private fun renderCutoffPath(path: String, serverDestinationDirLength: Int, index: Int) {
     val cutoff = path.length - ((serverDestinationDirLength + path.length) - 127)
-    section {
-        text(text = "${index + 1} ")
-        text(text = path.subSequence(0, cutoff).toString())
-        red { textLine(text = path.substring(startIndex = cutoff)) }
-    }.run()
+    kotterSection(
+        renderBlock = {
+            text(text = "${index + 1} ")
+            text(text = path.subSequence(0, cutoff).toString())
+            red { textLine(text = path.substring(startIndex = cutoff)) }
+        },
+    )
 }
