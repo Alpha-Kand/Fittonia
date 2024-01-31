@@ -3,6 +3,7 @@ package commandHandler.executeCommand.sendExecution
 import commandHandler.FileTransfer
 import commandHandler.SendFilesCommand
 import commandHandler.ServerFlags
+import commandHandler.ServerFlagsString
 import commandHandler.canContinueSendCommand
 import commandHandler.executeCommand.sendExecution.helpers.FileZipper
 import commandHandler.executeCommand.sendExecution.helpers.SendFileItemInfo
@@ -82,9 +83,9 @@ fun sendFilesExecutionClientEngine(command: SendFilesCommand, parent: HMeadowSoc
 
 fun HMeadowSocketClient.sendFilesClientSetup(job: String?): Int {
     job?.let { jobName ->
-        sendInt(ServerFlags.HAVE_JOB_NAME)
+        sendString(ServerFlagsString.HAVE_JOB_NAME)
         sendString(jobName)
-    } ?: sendInt(ServerFlags.NEED_JOB_NAME)
+    } ?: sendString(ServerFlagsString.NEED_JOB_NAME)
     return receiveInt()
 }
 

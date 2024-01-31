@@ -6,7 +6,7 @@ import com.varabyte.kotter.foundation.text.green
 import com.varabyte.kotter.foundation.text.text
 import com.varabyte.kotter.foundation.text.textLine
 import commandHandler.FileTransfer
-import commandHandler.ServerFlags
+import commandHandler.ServerFlagsString
 import fileOperationWrappers.FileOperations
 import hmeadowSocket.HMeadowSocketServer
 import kotterSection
@@ -23,7 +23,6 @@ fun HMeadowSocketServer.serverSendFilesExecution() {
         printLine()
         return
     }
-    printLine(text = "$fileTransferCount")
     repeat(times = fileTransferCount) {
         receiveItemAndReport(jobPath = jobPath, tempReceivingFolder = tempReceivingFolder)
     }
@@ -34,6 +33,7 @@ fun HMeadowSocketServer.serverSendFilesExecution() {
 fun HMeadowSocketServer.receiveItemAndReport(jobPath: String, tempReceivingFolder: Path) {
     var relativePath by kotter.liveVarOf(value = "")
     var complete by kotter.liveVarOf(value = false)
+
     kotterSection(
         renderBlock = {
             text("Receiving: $relativePath")
@@ -59,15 +59,22 @@ fun HMeadowSocketServer.sendFilesServerSetup(): String {
 
 private fun HMeadowSocketServer.determineJobPath(): String {
     val settingsManager = SettingsManager.settingsManager
-    val initialJobName = if (receiveInt() == ServerFlags.NEED_JOB_NAME) {
-        settingsManager.getAutoJobName()
-    } else {
-        receiveString()
+
+    val initialJobName = when (receiveString()) {
+        ServerFlagsString.NEED_JOB_NAME -> settingsManager.getAutoJobName()
+        ServerFlagsString.HAVE_JOB_NAME -> receiveString()
+        else -> throw Exception() //TODO
     }
 
     var nonConflictedJobName: String = initialJobName
+
+    var i = 0
     while (FileOperations.exists(Path(path = settingsManager.settings.dumpPath + "/$nonConflictedJobName"))) {
         nonConflictedJobName = initialJobName + "_" + settingsManager.getAutoJobName()
+        i++
+        if (i > 20) {
+            throw Exception() //TODO
+        }
     }
     return settingsManager.settings.dumpPath + "/$nonConflictedJobName"
 }
