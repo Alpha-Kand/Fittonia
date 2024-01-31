@@ -3,14 +3,24 @@ package commandHandler.executeCommand
 import BaseSocketScriptTest
 import UnitTest
 import commandHandler.AddCommand
+import commandHandler.FileTransfer
 import commandHandler.SendFilesCommand
 import commandHandler.SendMessageCommand
+import commandHandler.ServerCommand
 import commandHandler.ServerCommandFlag
 import commandHandler.canContinueSendCommand
 import commandHandler.communicateCommand
+import commandHandler.executeCommand.sendExecution.foundFileNamesTooLong
+import commandHandler.executeCommand.sendExecution.helpers.SourceFileListManager
+import commandHandler.executeCommand.sendExecution.sendFilesCollecting
+import commandHandler.executeCommand.sendExecution.sendFilesExecutionClientEngine
+import commandHandler.setupSendCommandClient
+import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -29,6 +39,8 @@ private class ServerClientHandleCommandScriptTest : BaseSocketScriptTest() {
             ip = "ip",
             password = "password"
         )
+        every { SettingsManager.settingsManager.getAutoJobName() } returns "jobAutoName"
+        every { SettingsManager.settingsManager.settings.dumpPath } returns "dumpPath"
     }
 
     // Communicate Command
@@ -234,6 +246,94 @@ private class ServerClientHandleCommandScriptTest : BaseSocketScriptTest() {
         serverBlock = {
             generateServer().handleCommandMock()
             verifyHandleCommand(onSendFilesCommand)
+        },
+    )
+
+    @UnitTest
+    fun completeSendFilesCommunicationNormalPath() = runSocketScriptTest(
+        setupBlock = {
+            mockkFileOperationsFileExists(exists = true)
+        },
+        clientBlock = {
+            mockkStatic(::setupSendCommandClient)
+            every { setupSendCommandClient(any()) } returns generateClient()
+
+            mockkFittoniaTempFileMockFileLines()
+
+            mockkStatic("commandHandler.executeCommand.sendExecution.SendFilesExecutionClientEngineKt")
+            every { any<HMeadowSocketClient>().sendFilesCollecting(any(), any()) } returns SourceFileListManager(
+                userInputPaths = listOf("/aaa/bbb/ccc", "ddd/eee/fff"),
+                serverDestinationDirLength = 126,
+                onItemFound = {},
+            )
+            every { any<HMeadowSocketClient>().foundFileNamesTooLong(any(), any()) } returns FileTransfer.NORMAL
+
+            sendFilesExecutionClientEngine(
+                command = SendFilesCommand(
+                    files = listOf("file"),
+                    job = "job",
+                ).also { it.addArg("--port", "5555") },
+                parent = mockk(relaxed = true),
+            )
+        },
+        serverBlock = {
+            val server = generateServer()
+            mockkObject(HMeadowSocketServer)
+            every { HMeadowSocketServer.createServer(any(), any(), any()) } returns server
+
+            mockkStatic("commandHandler.executeCommand.ServerSendFilesExecutionKt")
+            every { any<HMeadowSocketServer>().sendFilesServerSetup() } answers {
+                server.receiveString()
+                server.receiveString()
+                server.sendInt(25)
+                "job path"
+            }
+
+            serverExecution(command = ServerCommand().also { it.addArg("--port", "5555") })
+        },
+    )
+
+    @UnitTest
+    fun completeSendFilesCommunicationCancelPath() = runSocketScriptTest(
+        setupBlock = {
+            mockkFileOperationsFileExists(exists = true)
+        },
+        clientBlock = {
+            mockkStatic(::setupSendCommandClient)
+            every { setupSendCommandClient(any()) } returns generateClient()
+
+            mockkFittoniaTempFileMockFileLines()
+
+            mockkStatic("commandHandler.executeCommand.sendExecution.SendFilesExecutionClientEngineKt")
+            every { any<HMeadowSocketClient>().sendFilesCollecting(any(), any()) } returns SourceFileListManager(
+                userInputPaths = listOf("/aaa/bbb/ccc", "ddd/eee/fff"),
+                serverDestinationDirLength = 126,
+                onItemFound = {},
+            )
+            every { any<HMeadowSocketClient>().foundFileNamesTooLong(any(), any()) } returns FileTransfer.CANCEL
+
+            sendFilesExecutionClientEngine(
+                command = SendFilesCommand(
+                    files = listOf("file"),
+                    job = "job",
+                ).also { it.addArg("--port", "5555") },
+                parent = mockk(relaxed = true),
+            )
+        },
+        serverBlock = {
+            val server = generateServer()
+            mockkObject(HMeadowSocketServer)
+            every { HMeadowSocketServer.createServer(any(), any(), any()) } returns server
+
+            mockkStatic("commandHandler.executeCommand.ServerSendFilesExecutionKt")
+            every { any<HMeadowSocketServer>().sendFilesServerSetup() } answers {
+                server.receiveString()
+                server.receiveString()
+                server.sendInt(25)
+                "job path"
+            }
+
+            serverExecution(command = ServerCommand().also { it.addArg("--port", "5555") })
         },
     )
 }

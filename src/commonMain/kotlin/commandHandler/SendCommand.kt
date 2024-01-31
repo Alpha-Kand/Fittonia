@@ -115,15 +115,15 @@ fun canContinueSendCommand(command: SendCommand, client: HMeadowSocketClient, pa
         commandFlag = commandFlag,
         password = password,
         onSuccess = {
-            parent.sendInt(ServerFlags.HAS_MORE)
+            parent.sendString(ServerFlagsString.HAS_MORE)
             parent.sendString("Server accepted password.")
         },
         onPasswordRefused = {
-            parent.sendInt(ServerFlags.HAS_MORE)
+            parent.sendString(ServerFlagsString.HAS_MORE)
             parent.sendString("Server refused password.")
         },
         onFailure = {
-            parent.sendInt(ServerFlags.HAS_MORE)
+            parent.sendString(ServerFlagsString.HAS_MORE)
             parent.sendString("Connected, but request refused.")
         },
     )

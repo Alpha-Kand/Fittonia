@@ -40,28 +40,6 @@ val jobArguments = listOf("--job", "-j")
 val messageArguments = listOf("--message", "--string")
 val sessionArguments = listOf("--session", "-s")
 
-class ServerFlags {
-    companion object {
-        const val CONFIRM = 50
-        const val DENY = 51
-
-        const val SEND_FILES = 100
-        const val SEND_MESSAGE = 101
-        const val ADD_DESTINATION = 102
-
-        const val HAVE_JOB_NAME = 103
-        const val NEED_JOB_NAME = 104
-
-        // ClientEngine -> Terminal Reporting
-        const val DONE = 105
-        const val HAS_MORE = 106
-        const val PRINT_LINE = 107
-        const val FILE_NAMES_TOO_LONG = 108
-        const val SEND_FILES_COLLECTING = 109
-        const val CANCEL_SEND_FILES = 110
-    }
-}
-
 class ServerFlagsString {
     companion object {
         const val CONFIRM = "CONFIRM"

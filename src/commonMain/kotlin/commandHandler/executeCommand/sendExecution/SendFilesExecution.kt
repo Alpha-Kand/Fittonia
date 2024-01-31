@@ -11,7 +11,7 @@ import com.varabyte.kotter.foundation.text.red
 import com.varabyte.kotter.foundation.text.text
 import com.varabyte.kotter.foundation.text.textLine
 import commandHandler.FileTransfer
-import commandHandler.ServerFlags
+import commandHandler.ServerFlagsString
 import hmeadowSocket.HMeadowSocketServer
 import kotterSection
 import printLine
@@ -21,18 +21,19 @@ fun sendFilesExecution(inputTokens: List<String>) {
         startClientEngine(inputTokens = inputTokens + listOf("clientengineport=$port"))
     }
     while (true) {
-        when (clientEngine.receiveInt()) {
-            ServerFlags.PRINT_LINE -> clientEngine.printLine()
-            ServerFlags.FILE_NAMES_TOO_LONG -> clientEngine.fileNamesTooLong()
-            ServerFlags.SEND_FILES_COLLECTING -> clientEngine.sendFilesCollecting()
-            ServerFlags.DONE -> break
+        when (clientEngine.receiveString()) {
+            ServerFlagsString.PRINT_LINE -> clientEngine.clientEnginePrintLine()
+            ServerFlagsString.FILE_NAMES_TOO_LONG -> clientEngine.fileNamesTooLong()
+            ServerFlagsString.SEND_FILES_COLLECTING -> clientEngine.sendFilesCollecting()
+            ServerFlagsString.DONE -> break
         }
     }
 }
 
-private fun HMeadowSocketServer.printLine() {
+private fun HMeadowSocketServer.clientEnginePrintLine() {
     val colourIndex = receiveInt()
     val message = receiveString()
+    sendContinue()
     kotterSection(
         renderBlock = {
             color(Color.entries[colourIndex])
@@ -50,12 +51,12 @@ private fun HMeadowSocketServer.sendFilesCollecting() {
         },
         runBlock = {
             while (true) {
-                when (receiveInt()) {
-                    ServerFlags.HAS_MORE -> {
+                when (receiveString()) {
+                    ServerFlagsString.HAS_MORE -> {
                         fileCount = receiveInt()
                     }
 
-                    ServerFlags.DONE -> {
+                    ServerFlagsString.DONE -> {
                         break
                     }
 
@@ -69,7 +70,7 @@ private fun HMeadowSocketServer.sendFilesCollecting() {
 private fun HMeadowSocketServer.fileNamesTooLong() {
     val serverDestinationDirLength = receiveInt()
     val filePaths = mutableListOf<String>()
-    while (receiveInt() == ServerFlags.HAS_MORE) {
+    while (receiveString() == ServerFlagsString.HAS_MORE) {
         filePaths.add(receiveString())
     }
 

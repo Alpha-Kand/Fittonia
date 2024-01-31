@@ -2,7 +2,7 @@ import com.varabyte.kotter.foundation.text.Color
 import commandHandler.CommandHandler
 import commandHandler.SendFilesCommand
 import commandHandler.SendMessageCommand
-import commandHandler.ServerFlags
+import commandHandler.ServerFlagsString
 import commandHandler.executeCommand.sendExecution.sendFilesExecutionClientEngine
 import commandHandler.executeCommand.sendExecution.sendMessageExecutionClientEngine
 import hmeadowSocket.HMeadowSocket
@@ -19,7 +19,6 @@ fun main(args: Array<String>) {
         port = port,
         timeoutMillis = 3000L,
     )
-
     try {
         when (val command = CommandHandler(args = args.toList()).getCommand()) {
             is SendFilesCommand -> sendFilesExecutionClientEngine(command = command, parent = parent)
@@ -31,7 +30,7 @@ fun main(args: Array<String>) {
     } catch (e: HMeadowSocket.HMeadowSocketError) {
         sendHMSocketError(e, parent = parent)
     }
-    parent.sendInt(ServerFlags.DONE)
+    parent.sendString(ServerFlagsString.DONE)
 }
 
 fun sendFittoniaError(e: FittoniaError, parent: HMeadowSocketClient) {

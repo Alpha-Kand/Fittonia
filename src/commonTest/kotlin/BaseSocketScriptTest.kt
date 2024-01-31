@@ -67,6 +67,7 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
     fun runSocketScriptTest(
         clientBlock: TestScope.() -> Unit,
         serverBlock: TestScope.() -> Unit,
+        setupBlock: TestScope.() -> Unit = {},
     ) {
         var throwException: Throwable? = null
         try {
@@ -74,6 +75,7 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
                 throwException = exception
             }
             runTest(timeout = 5.seconds) {
+                setupBlock()
                 joinAll(
                     GlobalScope.launch(handler) { clientBlock() },
                     GlobalScope.launch(handler) { serverBlock() },

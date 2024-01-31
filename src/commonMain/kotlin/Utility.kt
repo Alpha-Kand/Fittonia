@@ -9,7 +9,6 @@ import com.varabyte.kotter.foundation.text.textLine
 import com.varabyte.kotter.runtime.MainRenderScope
 import com.varabyte.kotter.runtime.RunScope
 import com.varabyte.kotter.runtime.Session
-import commandHandler.ServerFlags
 import commandHandler.ServerFlagsString
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
@@ -37,10 +36,10 @@ fun printLine(text: String, color: Int) = kotter.section { rgb(color); textLine(
 fun printLine() = kotter.section { textLine() }.run()
 
 fun HMeadowSocketClient.reportTextLine(text: String, color: Color = Color.WHITE) {
-    sendInt(message = ServerFlags.PRINT_LINE)
+    sendString(message = ServerFlagsString.PRINT_LINE)
     sendInt(message = color.ordinal)
     sendString(message = text)
-    receiveInt()
+    receiveContinue()
 }
 
 fun HMeadowSocket.sendApproval(choice: Boolean) {
