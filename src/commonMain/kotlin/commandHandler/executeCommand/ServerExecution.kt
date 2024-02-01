@@ -1,5 +1,6 @@
 package commandHandler.executeCommand
 
+import Config
 import commandHandler.ServerCommand
 import commandHandler.ServerCommandFlag
 import commandHandler.ServerCommandFlag.Companion.toCommandFlag
@@ -46,6 +47,7 @@ fun serverExecution(command: ServerCommand) {
             }
         )
         server.close()
+        if (Config.isMockking) return
     }
 }
 
