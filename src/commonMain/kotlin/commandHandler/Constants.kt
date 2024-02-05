@@ -65,7 +65,6 @@ enum class ServerCommandFlag(val text: String) {
     ;
 
     companion object {
-        fun Int.toCommandFlag() = entries[this]
         fun String.toCommandFlag() = entries.find { it.text == this }
     }
 }
