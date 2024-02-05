@@ -36,7 +36,11 @@ fun HMeadowSocketServer.receiveItemAndReport(jobPath: String, tempReceivingFolde
 
     kotterSection(
         renderBlock = {
-            text("Receiving: $relativePath")
+            if (relativePath.isBlank()) {
+                text("Receiving data from connection...")
+            } else {
+                text("Receiving: $relativePath")
+            }
             if (complete) green { textLine(text = " Done.") }
         },
         runBlock = {
