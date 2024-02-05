@@ -74,7 +74,7 @@ class FileTransfer {
         const val tempPrefix = "fittonia"
         const val tempSuffix = ".fittonia"
 
-        const val prefixLength = 2
+        private const val prefixLength = 2
         const val filePrefix = "F?"
         const val dirPrefix = "D?"
 
