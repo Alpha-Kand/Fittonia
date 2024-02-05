@@ -2,14 +2,9 @@ package commandHandler.executeCommand.sendExecution
 
 import KotterRunType
 import KotterSession.kotter
-import com.varabyte.kotter.foundation.input.input
 import com.varabyte.kotter.foundation.input.onInputEntered
 import com.varabyte.kotter.foundation.liveVarOf
 import com.varabyte.kotter.foundation.text.Color
-import com.varabyte.kotter.foundation.text.color
-import com.varabyte.kotter.foundation.text.red
-import com.varabyte.kotter.foundation.text.text
-import com.varabyte.kotter.foundation.text.textLine
 import commandHandler.FileTransfer
 import commandHandler.ServerFlagsString
 import hmeadowSocket.HMeadowSocketServer
@@ -34,21 +29,13 @@ private fun HMeadowSocketServer.clientEnginePrintLine() {
     val colourIndex = receiveInt()
     val message = receiveString()
     sendContinue()
-    kotterSection(
-        renderBlock = {
-            color(Color.entries[colourIndex])
-            textLine(text = message)
-        },
-    )
+    kotterSection(renderBlock = { clientEnginePrintLineRenderBlock(colourIndex, message) })
 }
 
 private fun HMeadowSocketServer.sendFilesCollecting() {
     var fileCount by kotter.liveVarOf(0)
     kotterSection(
-        renderBlock = {
-            text(text = "Total files found: ")
-            text(text = fileCount.toString())
-        },
+        renderBlock = { sendFilesCollectingRenderBlock(fileCount) },
         runBlock = {
             while (true) {
                 when (receiveString()) {
@@ -115,27 +102,7 @@ private fun HMeadowSocketServer.fileNamesTooLong() {
             FileTransfer.defaultActionList.filter { it != FileTransfer.SHOW_ALL }
         }
         kotterSection(
-            renderBlock = {
-                textLine()
-                val sb = StringBuilder("What would you like to do? (")
-                actionList.forEach {
-                    sb.append("$it,")
-                }
-                sb.dropLast(2)
-                sb.append(')')
-                textLine(text = sb.toString())
-
-                actionList.forEach { action ->
-                    when (action) {
-                        FileTransfer.CANCEL -> textLine(text = "$action. Cancel sending files.")
-                        FileTransfer.SKIP_INVALID -> textLine(text = "$action. Skip invalid files.")
-                        FileTransfer.COMPRESS_EVERYTHING -> textLine(text = "$action. Compress all files and send as a single file.")
-                        FileTransfer.COMPRESS_INVALID -> textLine(text = "$action. Compress invalid files only and send as a single file (relative file paths will be preserved).")
-                        FileTransfer.SHOW_ALL -> textLine(text = "$action. Show all files and ask again.")
-                    }
-                }
-                text(text = "> "); input()
-            },
+            renderBlock = { fileNamesTooLongRenderBlock(actionList) },
             runBlock = {
                 onInputEntered {
                     val availableActionRange = IntRange(
@@ -176,11 +143,5 @@ private fun HMeadowSocketServer.fileNamesTooLong() {
 
 private fun renderCutoffPath(path: String, serverDestinationDirLength: Int, index: Int) {
     val cutoff = path.length - ((serverDestinationDirLength + path.length) - 127)
-    kotterSection(
-        renderBlock = {
-            text(text = "${index + 1} ")
-            text(text = path.subSequence(0, cutoff).toString())
-            red { textLine(text = path.substring(startIndex = cutoff)) }
-        },
-    )
+    kotterSection(renderBlock = { renderCutoffPath(index, path, cutoff) })
 }
