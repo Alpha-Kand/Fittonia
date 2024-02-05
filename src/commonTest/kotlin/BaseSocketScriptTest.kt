@@ -104,7 +104,11 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
                 }
                 serverList.forEachIndexed { index, communication ->
                     if (index > clientList.size - 1) {
-                        println("$index. Server.${communication.flag.name} = \"${communication.value}\"")
+                        val sb = StringBuilder("")
+                        sb.append("$index. ")
+                        ("CLIENT." + communication.flag.name).map { sb.append(' ') }
+                        sb.append(" - Server.${communication.flag.name} = \"${communication.value}\"")
+                        println(sb.toString())
                     }
                 }
             }
@@ -189,7 +193,11 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
                 } else {
                     throw Exception()
                 }
-            } ?: throw Exception()
+            } ?: run {
+                thisList.add(Communication(flag = flag, value = ""))
+                thingReceived("")
+                throw Exception()
+            }
         }
     }
 }
