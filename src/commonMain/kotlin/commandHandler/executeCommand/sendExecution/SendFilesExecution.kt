@@ -1,25 +1,31 @@
 package commandHandler.executeCommand.sendExecution
 
+import FittoniaError
 import KotterRunType
 import KotterSession.kotter
 import com.varabyte.kotter.foundation.input.onInputEntered
 import com.varabyte.kotter.foundation.liveVarOf
 import com.varabyte.kotter.foundation.text.Color
+import commandHandler.AddCommand
 import commandHandler.FileTransfer
+import commandHandler.SendCommand
 import commandHandler.ServerFlagsString
+import commandHandler.clientEnginePortArguments
 import hmeadowSocket.HMeadowSocketServer
 import kotterSection
 import printLine
+import settingsManager.SettingsManager
 
-fun sendFilesExecution(inputTokens: List<String>) {
+fun sendCommandExecution(command: SendCommand, inputTokens: List<String>) {
     val clientEngine = HMeadowSocketServer.createServerAnyPort(startingPort = 10778) { port ->
-        startClientEngine(inputTokens = inputTokens + listOf("clientengineport=$port"))
+        startClientEngine(inputTokens = inputTokens + listOf("${clientEnginePortArguments.first()}=$port"))
     }
     while (true) {
         when (clientEngine.receiveString()) {
             ServerFlagsString.PRINT_LINE -> clientEngine.clientEnginePrintLine()
             ServerFlagsString.FILE_NAMES_TOO_LONG -> clientEngine.fileNamesTooLong()
             ServerFlagsString.SEND_FILES_COLLECTING -> clientEngine.sendFilesCollecting()
+            ServerFlagsString.ADD_DESTINATION -> clientEngine.addDestination(command = command)
             ServerFlagsString.DONE -> break
         }
     }
@@ -138,6 +144,24 @@ private fun HMeadowSocketServer.fileNamesTooLong() {
             FileTransfer.SHOW_ALL -> continue
             else -> throw IllegalStateException("kinda wack") // TODO
         }
+    }
+}
+
+private fun HMeadowSocketServer.addDestination(command: SendCommand) {
+    if (command is AddCommand) {
+        try {
+            SettingsManager.settingsManager.addDestination(
+                name = command.getName(),
+                ip = command.getIP(),
+                password = command.getPassword(),
+            )
+        } catch (e: FittoniaError) {
+            sendBoolean(false)
+            throw e
+        }
+        sendBoolean(true)
+    } else {
+        sendBoolean(false)
     }
 }
 

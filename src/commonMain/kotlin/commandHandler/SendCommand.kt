@@ -35,6 +35,9 @@ sealed class SendCommand : Command {
     }
 
     fun handleSendCommandArgument(argumentName: String, value: String): Boolean {
+        if (clientEnginePortArguments.contains(argumentName)) {
+            return true
+        }
         if (portArguments.contains(argumentName)) {
             requireNull(port)
             port = value.toInt()

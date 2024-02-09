@@ -20,7 +20,7 @@ import commandHandler.executeCommand.addExecution
 import commandHandler.executeCommand.dumpExecution
 import commandHandler.executeCommand.listDestinationsExecution
 import commandHandler.executeCommand.removeExecution
-import commandHandler.executeCommand.sendExecution.sendFilesExecution
+import commandHandler.executeCommand.sendExecution.sendCommandExecution
 import commandHandler.executeCommand.sendExecution.startClientEngine
 import commandHandler.executeCommand.serverExecution
 import commandHandler.executeCommand.serverPasswordExecution
@@ -56,12 +56,12 @@ fun main(args: Array<String>) = session {
 
 fun Session.handleArguments(inputTokens: List<String>) {
     when (val command = CommandHandler(args = inputTokens).getCommand()) {
-        is AddCommand -> addExecution(command = command)
+        is AddCommand -> addExecution(command = command, inputTokens = inputTokens)
         is RemoveCommand -> removeExecution(command = command)
         is ListDestinationsCommand -> listDestinationsExecution(command = command)
         is DumpCommand -> dumpExecution(command = command)
         is ServerCommand -> serverExecution(command = command)
-        is SendFilesCommand -> sendFilesExecution(inputTokens = inputTokens)
+        is SendFilesCommand -> sendCommandExecution(command = command, inputTokens = inputTokens)
         is SendMessageCommand -> startClientEngine(inputTokens = inputTokens)
         is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
         is ServerPasswordCommand -> serverPasswordExecution(command = command)

@@ -6,8 +6,8 @@ import commandHandler.SendFilesCommand
 import commandHandler.ServerFlagsString
 import commandHandler.executeCommand.sendExecution.foundFileNamesTooLong
 import commandHandler.executeCommand.sendExecution.helpers.SourceFileListManager
+import commandHandler.executeCommand.sendExecution.sendCommandExecution
 import commandHandler.executeCommand.sendExecution.sendFilesCollecting
-import commandHandler.executeCommand.sendExecution.sendFilesExecution
 import hmeadowSocket.HMeadowSocketServer
 import io.mockk.every
 import io.mockk.mockk
@@ -26,7 +26,7 @@ private class SendFilesClientToParentScriptTest : BaseSocketScriptTest() {
         serverBlock = {
             mockkObject(HMeadowSocketServer)
             every { HMeadowSocketServer.createServerAnyPort(any(), any(), any()) } returns generateServer()
-            sendFilesExecution(inputTokens = emptyList())
+            sendCommandExecution(command = mockk(relaxed = true), inputTokens = emptyList())
         },
     )
 
@@ -49,7 +49,7 @@ private class SendFilesClientToParentScriptTest : BaseSocketScriptTest() {
         serverBlock = {
             mockkObject(HMeadowSocketServer)
             every { HMeadowSocketServer.createServerAnyPort(any(), any(), any()) } returns generateServer()
-            sendFilesExecution(inputTokens = emptyList())
+            sendCommandExecution(command = mockk(relaxed = true), inputTokens = emptyList())
         },
     )
 
@@ -68,7 +68,7 @@ private class SendFilesClientToParentScriptTest : BaseSocketScriptTest() {
         serverBlock = {
             mockkObject(HMeadowSocketServer)
             every { HMeadowSocketServer.createServerAnyPort(any(), any(), any()) } returns generateServer()
-            sendFilesExecution(inputTokens = emptyList())
+            sendCommandExecution(command = mockk(relaxed = true), inputTokens = emptyList())
         },
     )
 }

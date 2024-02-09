@@ -1,8 +1,11 @@
 import com.varabyte.kotter.foundation.text.Color
+import commandHandler.AddCommand
 import commandHandler.CommandHandler
 import commandHandler.SendFilesCommand
 import commandHandler.SendMessageCommand
 import commandHandler.ServerFlagsString
+import commandHandler.clientEnginePortArguments
+import commandHandler.executeCommand.sendExecution.addExecutionClientEngine
 import commandHandler.executeCommand.sendExecution.sendFilesExecutionClientEngine
 import commandHandler.executeCommand.sendExecution.sendMessageExecutionClientEngine
 import hmeadowSocket.HMeadowSocket
@@ -11,7 +14,7 @@ import java.net.InetAddress
 
 fun main(args: Array<String>) {
     val port = args.find {
-        it.startsWith("clientengineport=")
+        it.startsWith("${clientEnginePortArguments.first()}=")
     }?.substringAfter('=')?.toIntOrNull() ?: throw IllegalArgumentException()
 
     val parent = HMeadowSocketClient(
@@ -23,6 +26,7 @@ fun main(args: Array<String>) {
         when (val command = CommandHandler(args = args.toList()).getCommand()) {
             is SendFilesCommand -> sendFilesExecutionClientEngine(command = command, parent = parent)
             is SendMessageCommand -> sendMessageExecutionClientEngine(command = command, parent = parent)
+            is AddCommand -> addExecutionClientEngine(command = command, parent = parent)
             else -> Unit
         }
     } catch (e: FittoniaError) {
