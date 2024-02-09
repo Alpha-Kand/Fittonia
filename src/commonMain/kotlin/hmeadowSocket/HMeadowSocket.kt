@@ -51,6 +51,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         try {
             return receive()
         } catch (e: Exception) {
+            this.close()
             throw FailedToReceiveException(e)
         }
     }
@@ -60,6 +61,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         try {
             send()
         } catch (e: Exception) {
+            this.close()
             throw FailedToSendException(e)
         }
     }
@@ -136,13 +138,20 @@ open class HMeadowSocketServer(
          * Creates a server on the given port or throws an error.
          */
         @Throws(CouldNotBindServerToGivenPort::class, ServerSetupException::class)
-        fun createServer(port: Int, timeoutMillis: Long = 0): HMeadowSocketServer {
+        fun createServer(
+            port: Int,
+            timeoutMillis: Long = 0,
+            socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
+        ): HMeadowSocketServer {
             val timeLimit = Instant.now().toEpochMilli() + timeoutMillis
             var exception: Exception
             do {
                 try {
                     val serverSocket = ServerSocket(port)
-                    val hmeadowSocketServer = HMeadowSocketServer(socket = serverSocket.accept())
+                    val hmeadowSocketServer = HMeadowSocketServer(
+                        socket = serverSocket.accept(),
+                        socketInterface = socketInterface,
+                    )
                     serverSocket.close()
                     return hmeadowSocketServer
                 } catch (e: IOException) {
@@ -183,6 +192,7 @@ open class HMeadowSocketServer(
         @Throws(CouldNotFindAvailablePort::class, ServerSetupException::class)
         fun createServerAnyPort(
             startingPort: Int,
+            socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
             onFindAvailablePort: (port: Int) -> Unit = {},
         ): HMeadowSocketServer {
             return HMeadowSocketServer(
@@ -190,6 +200,7 @@ open class HMeadowSocketServer(
                     startingPort = startingPort,
                     onFindAvailablePort = onFindAvailablePort,
                 ),
+                socketInterface = socketInterface,
             )
         }
 

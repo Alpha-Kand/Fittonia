@@ -15,6 +15,7 @@ import java.net.InetAddress
 import java.net.Socket
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
 abstract class BaseSocketScriptTest : BaseMockkTest() {
 
@@ -66,40 +67,52 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
     fun runSocketScriptTest(
         clientBlock: TestScope.() -> Unit,
         serverBlock: TestScope.() -> Unit,
-    ) = runTest {
+        setupBlock: TestScope.() -> Unit = {},
+    ) {
+        var throwException: Throwable? = null
         try {
-            val handler = CoroutineExceptionHandler { _, exception -> throw exception }
-            joinAll(
-                GlobalScope.launch(handler) { clientBlock() },
-                GlobalScope.launch(handler) { serverBlock() },
-            )
+            val handler = CoroutineExceptionHandler { _, exception ->
+                throwException = exception
+            }
+            runTest(timeout = 5.seconds) {
+                setupBlock()
+                joinAll(
+                    GlobalScope.launch(handler) { clientBlock() },
+                    GlobalScope.launch(handler) { serverBlock() },
+                )
+            }
         } finally {
             var k = 0
             if (clientList.isEmpty() || serverList.isEmpty()) {
                 clientList.forEach {
-                    println("$k. Client.${it.flag.name}")
+                    println("$k. Client.${it.flag.name} = \"${it.value}\"")
                     k++
                 }
                 serverList.forEach {
-                    println("$k. Server.${it.flag.name}")
+                    println("$k. Server.${it.flag.name} = \"${it.value}\"")
                     k++
                 }
             } else {
                 clientList.zip(serverList) { a, b ->
-                    println("$k. Client.${a.flag.name} - Server.${b.flag.name}")
+                    println("$k. Client.${a.flag.name} - Server.${b.flag.name} = \"${a.value}\"")
                     k++
                 }
                 clientList.forEachIndexed { index, communication ->
                     if (index > serverList.size - 1) {
-                        println("$index. Client.${communication.flag.name}")
+                        println("$index. Client.${communication.flag.name} = \"${communication.value}\"")
                     }
                 }
                 serverList.forEachIndexed { index, communication ->
                     if (index > clientList.size - 1) {
-                        println("$index. Server.${communication.flag.name}")
+                        val sb = StringBuilder("")
+                        sb.append("$index. ")
+                        ("CLIENT." + communication.flag.name).map { sb.append(' ') }
+                        sb.append(" - Server.${communication.flag.name} = \"${communication.value}\"")
+                        println(sb.toString())
                     }
                 }
             }
+            throwException?.let { throw it }
             Assertions.assertEquals(clientList.size, serverList.size)
             clientList.zip(serverList) { a, b ->
                 Assertions.assertEquals(a.flag.value, -(b.flag.value))
@@ -180,7 +193,11 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
                 } else {
                     throw Exception()
                 }
-            } ?: throw Exception()
+            } ?: run {
+                thisList.add(Communication(flag = flag, value = ""))
+                thingReceived("")
+                throw Exception()
+            }
         }
     }
 }

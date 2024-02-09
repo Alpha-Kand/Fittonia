@@ -61,5 +61,5 @@ fun HMeadowSocketServer.receivePassword(): Boolean {
 }
 
 fun HMeadowSocket.receiveConfirmation(): Boolean { //TODO replace with sending and receiving booleans.
-    return receiveInt() == ServerFlags.CONFIRM
+    return receiveString() == ServerFlagsString.CONFIRM
 }

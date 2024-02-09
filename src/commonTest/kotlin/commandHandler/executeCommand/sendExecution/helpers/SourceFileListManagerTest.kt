@@ -25,16 +25,9 @@ private class SourceFileListManagerTest : BaseMockkTest() {
 
     @UnitTest
     fun bufferedWriterWritesFilesCorrectly() = runTest {
-        every { FileOperations.FileOperationMock.exists } returns true
+        mockkFileOperationsFileExists(exists = true)
         every { FileOperations.FileOperationMock.isRegularFile } returns true
-        every { TempFileLines.fileLines } returns mutableListOf(
-            "0\n",
-            "F?ccc\n",
-            "/aaa/bbb/ccc\n",
-            "0\n",
-            "F?fff\n",
-            "/ddd/eee/fff\n",
-        )
+        mockkFittoniaTempFileMockFileLines()
         SourceFileListManager(
             userInputPaths = listOf("/aaa/bbb/ccc", "/ddd/eee/fff"),
             serverDestinationDirLength = 100,
@@ -47,19 +40,21 @@ private class SourceFileListManagerTest : BaseMockkTest() {
 
     @UnitTest
     fun bufferedWriterWritesDirectoriesCorrectly() = runTest {
-        every { FileOperations.FileOperationMock.exists } returns true
+        mockkFileOperationsFileExists(exists = true)
         every { FileOperations.FileOperationMock.isRegularFile } returns false
         every { FileOperations.FileOperationMock.paths } returns listOf(
             Path("/aaa/bbb/ccc/ggg"),
             Path("/aaa/bbb/ccc/hhh"),
         )
-        every { TempFileLines.fileLines } returns mutableListOf(
-            "0\n",
-            "D?ccc/ggg\n",
-            "/aaa/bbb/ccc/ggg\n",
-            "0\n",
-            "D?ccc/hhh\n",
-            "/aaa/bbb/ccc/hhh\n",
+        mockkFittoniaTempFileMockFileLines(
+            fileLines = mutableListOf(
+                "0\n",
+                "D?ccc/ggg\n",
+                "/aaa/bbb/ccc/ggg\n",
+                "0\n",
+                "D?ccc/hhh\n",
+                "/aaa/bbb/ccc/hhh\n",
+            ),
         )
         SourceFileListManager(
             userInputPaths = listOf("/aaa/bbb/ccc"),
@@ -73,7 +68,7 @@ private class SourceFileListManagerTest : BaseMockkTest() {
 
     @UnitTest
     fun userGivenPathsDontExist() = runTest {
-        every { FileOperations.FileOperationMock.exists } returns false
+        mockkFileOperationsFileExists(exists = false)
         SourceFileListManager(
             userInputPaths = listOf("/aaa/bbb/ccc", "/ddd/eee/fff"),
             serverDestinationDirLength = 100,
@@ -84,7 +79,7 @@ private class SourceFileListManagerTest : BaseMockkTest() {
 
     @UnitTest
     fun givenFilePathTooLongForServer() = runTest {
-        every { FileOperations.FileOperationMock.exists } returns true
+        mockkFileOperationsFileExists(exists = true)
         every { TempFileLines.fileLines } returns mutableListOf(
             "1\n",
             "F?ccc\n",
@@ -102,7 +97,7 @@ private class SourceFileListManagerTest : BaseMockkTest() {
 
     @UnitTest
     fun recordsFileNamesThatAreTooLong() = runTest {
-        every { FileOperations.FileOperationMock.exists } returns true
+        mockkFileOperationsFileExists(exists = true)
         val sourceFileListManager = SourceFileListManager(
             userInputPaths = listOf("/aaa/bbb/ccc", "ddd/eee/fff", "ggg/hhh/i"),
             serverDestinationDirLength = 126,
@@ -156,7 +151,7 @@ private class SourceFileListManagerTest : BaseMockkTest() {
 
     @UnitTest
     fun onFileFoundCallbackCalled() = runTest {
-        every { FileOperations.FileOperationMock.exists } returns true
+        mockkFileOperationsFileExists(exists = true)
         var onFileFoundCount = 0
         SourceFileListManager(
             userInputPaths = listOf("/aaa", "/bbb", "/ccc"),

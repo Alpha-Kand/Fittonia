@@ -20,7 +20,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkConstructor
-import io.mockk.mockkObject
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -33,15 +32,10 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
 
     @BeforeEach
     fun beforeEach() {
-        mockkObject(SettingsManager.settingsManager)
         every { SettingsManager.settingsManager.getAutoJobName() } returns "jobAutoName"
         every { SettingsManager.settingsManager.settings.dumpPath } returns "dumpPath"
 
-        mockkObject(FileOperations)
-        mockkObject(FileOperations.FileOperationMock)
         every { FileOperations.FileOperationMock.exists } returns false
-
-        mockkObject(FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines)
 
         mockkConstructor(FileZipper::class)
         every { anyConstructed<FileZipper>().zipItem(any()) } just Runs
@@ -61,7 +55,6 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
             assertEquals("dumpPath/job", jobPath)
         },
     )
-
 
     @UnitTest
     fun sendFilesSetupWithoutJobName() = runSocketScriptTest(
@@ -183,7 +176,7 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
             val server = generateServer()
             server.waitForItemCount()
             repeat(times = 2) {
-                server.receiveItem("", Path(""), { }, { })
+                server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
             }
         },
     )
@@ -214,7 +207,7 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
             val server = generateServer()
             server.waitForItemCount()
             repeat(times = 2) {
-                server.receiveItem("", Path(""), { }, { })
+                server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
             }
         },
     )
@@ -244,7 +237,7 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
         serverBlock = {
             val server = generateServer()
             val (_, count, _) = server.waitForItemCount()
-            server.receiveItem("", Path(""), { }, { })
+            server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
             assertEquals(1, count)
         },
     )
@@ -278,7 +271,7 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
             val server = generateServer()
             server.waitForItemCount()
             repeat(times = 3) {
-                server.receiveItem("", Path(""), { }, { })
+                server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
             }
         },
     )

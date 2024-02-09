@@ -35,6 +35,9 @@ sealed class SendCommand : Command {
     }
 
     fun handleSendCommandArgument(argumentName: String, value: String): Boolean {
+        if (clientEnginePortArguments.contains(argumentName)) {
+            return true
+        }
         if (portArguments.contains(argumentName)) {
             requireNull(port)
             port = value.toInt()
@@ -81,7 +84,7 @@ fun HMeadowSocketClient.communicateCommand(
     onPasswordRefused: () -> Unit,
     onFailure: () -> Unit,
 ): Boolean {
-    sendInt(message = commandFlag.ordinal)
+    sendString(message = commandFlag.text)
     return receiveApproval(
         onConfirm = {
             sendString(password)
@@ -115,15 +118,15 @@ fun canContinueSendCommand(command: SendCommand, client: HMeadowSocketClient, pa
         commandFlag = commandFlag,
         password = password,
         onSuccess = {
-            parent.sendInt(ServerFlags.HAS_MORE)
+            parent.sendString(ServerFlagsString.HAS_MORE)
             parent.sendString("Server accepted password.")
         },
         onPasswordRefused = {
-            parent.sendInt(ServerFlags.HAS_MORE)
+            parent.sendString(ServerFlagsString.HAS_MORE)
             parent.sendString("Server refused password.")
         },
         onFailure = {
-            parent.sendInt(ServerFlags.HAS_MORE)
+            parent.sendString(ServerFlagsString.HAS_MORE)
             parent.sendString("Connected, but request refused.")
         },
     )

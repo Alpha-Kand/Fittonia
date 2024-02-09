@@ -39,37 +39,34 @@ val oldArguments = listOf("--old")
 val jobArguments = listOf("--job", "-j")
 val messageArguments = listOf("--message", "--string")
 val sessionArguments = listOf("--session", "-s")
+val clientEnginePortArguments = listOf("--clientengineport")
 
-class ServerFlags {
+class ServerFlagsString {
     companion object {
-        const val CONFIRM = 50
-        const val DENY = 51
+        const val CONFIRM = "CONFIRM"
+        const val DENY = "DENY"
 
-        const val SEND_FILES = 100
-        const val SEND_MESSAGE = 101
-        const val ADD_DESTINATION = 102
+        const val HAVE_JOB_NAME = "HAVE_JOB_NAME"
 
-        const val HAVE_JOB_NAME = 103
-        const val NEED_JOB_NAME = 104
+        const val NEED_JOB_NAME = "NEED_JOB_NAME"
+        const val DONE = "DONE"
 
-        // ClientEngine -> Terminal Reporting
-        const val DONE = 105
-        const val HAS_MORE = 106
-        const val PRINT_LINE = 107
-        const val FILE_NAMES_TOO_LONG = 108
-        const val SEND_FILES_COLLECTING = 109
-        const val CANCEL_SEND_FILES = 110
+        const val HAS_MORE = "HAS_MORE"
+        const val PRINT_LINE = "PRINT_LINE"
+        const val FILE_NAMES_TOO_LONG = "FILE_NAMES_TOO_LONG"
+        const val SEND_FILES_COLLECTING = "SEND_FILES_COLLECTING"
+        const val ADD_DESTINATION = "ADD_DESTINATION"
     }
 }
 
-enum class ServerCommandFlag {
-    SEND_FILES,
-    SEND_MESSAGE,
-    ADD_DESTINATION,
+enum class ServerCommandFlag(val text: String) {
+    SEND_FILES(text = "SEND_FILES"),
+    SEND_MESSAGE(text = "SEND_MESSAGE"),
+    ADD_DESTINATION(text = "ADD_DESTINATION"),
     ;
 
     companion object {
-        fun Int.toCommandFlag() = entries[this]
+        fun String.toCommandFlag() = entries.find { it.text == this }
     }
 }
 
@@ -78,7 +75,7 @@ class FileTransfer {
         const val tempPrefix = "fittonia"
         const val tempSuffix = ".fittonia"
 
-        const val prefixLength = 2
+        private const val prefixLength = 2
         const val filePrefix = "F?"
         const val dirPrefix = "D?"
 
