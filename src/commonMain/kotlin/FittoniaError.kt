@@ -34,7 +34,7 @@ enum class FittoniaErrorType {
 }
 
 class FittoniaError(
-    val errorType: FittoniaErrorType,
+    private val errorType: FittoniaErrorType,
     error: Exception? = null,
     vararg values: Any,
 ) : Exception(error?.message) {
