@@ -44,7 +44,7 @@ class SettingsManager private constructor() {
         isMainProcess = true
     }
 
-    fun saveSettings() {
+    fun saveSettings() = synchronized(settings) {
         if (!isMainProcess) throw Exception("Attempting to save data in engine process!")
         val byteArrayOutputStream = ByteArrayOutputStream()
         jacksonObjectMapper().writeValue(byteArrayOutputStream, settings)
@@ -104,11 +104,11 @@ class SettingsManager private constructor() {
         return settings.serverPassword == password
     }
 
-    fun getAutoJobName(): String {
+    fun getAutoJobName(): String = synchronized(settings) {
         val jobName = settings.nextAutoJobName
         settings = settings.copy(nextAutoJobName = jobName + 1)
         saveSettings()
-        return jobName.toString()
+        jobName.toString()
     }
 
     fun findDestination(destinationName: String?): SettingsData.Destination? {
