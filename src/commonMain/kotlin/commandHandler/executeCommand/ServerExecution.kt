@@ -50,27 +50,7 @@ fun serverExecution(command: ServerCommand) {
                     NEED_JOB_NAME,
                     HAVE_JOB_NAME -> serverEngine.getJobName(flag = flag)
 
-                    RECEIVING_ITEM -> synchronized(mainServerSocket) {
-                        var relativePath by kotter.liveVarOf(value = "")
-                        var complete by kotter.liveVarOf(value = false)
-                        kotterSection(
-                            renderBlock = {
-                                text("$jobPath: ")
-                                if (relativePath.isBlank()) {
-                                    text("Receiving data from connection...")
-                                } else {
-                                    text("Receiving: $relativePath")
-                                }
-                                if (complete) green { textLine(text = " Done.") }
-                            },
-                            runBlock = {
-                                relativePath = serverEngine.receiveString()
-                                serverEngine.receiveContinue()
-                                complete = true
-                            },
-                        )
-                    }
-
+                    RECEIVING_ITEM -> serverEngine.printReceivingItem(lock = mainServerSocket, jobPath = jobPath)
                     SHARE_JOB_NAME -> {
                         jobPath = serverEngine.receiveString().split('/').last()
                     }
@@ -80,6 +60,29 @@ fun serverExecution(command: ServerCommand) {
             }
         }.start()
         if (Config.isMockking) return
+    }
+}
+
+private fun HMeadowSocketServer.printReceivingItem(lock: Any, jobPath: String) {
+    synchronized(lock) {
+        var relativePath by kotter.liveVarOf(value = "")
+        var complete by kotter.liveVarOf(value = false)
+        kotterSection(
+            renderBlock = {
+                text("$jobPath: ")
+                if (relativePath.isBlank()) {
+                    text("Receiving data from connection...")
+                } else {
+                    text("Receiving: $relativePath")
+                }
+                if (complete) green { textLine(text = " Done.") }
+            },
+            runBlock = {
+                relativePath = receiveString()
+                receiveContinue()
+                complete = true
+            },
+        )
     }
 }
 
