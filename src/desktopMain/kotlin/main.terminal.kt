@@ -31,7 +31,9 @@ import settingsManager.SettingsManager
 fun main(args: Array<String>) = session {
     KotterSession.kotter = this
     try {
-        SettingsManager.settingsManager.saveSettings()
+        val settings = SettingsManager.settingsManager
+        settings.registerAsMainProcess()
+        settings.saveSettings()
         if (args.isNotEmpty()) {
             handleArguments(args.toList())
         } else {

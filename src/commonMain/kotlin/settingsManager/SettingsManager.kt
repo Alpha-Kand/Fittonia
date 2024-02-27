@@ -28,6 +28,8 @@ class SettingsManager private constructor() {
     var defaultPort = settings.defaultPort
         private set
 
+    private var isMainProcess: Boolean = false
+
     private fun loadSettings(): SettingsData {
         val settingsFile = File(settingsPath)
         return if (settingsFile.isFile) {
@@ -38,7 +40,12 @@ class SettingsManager private constructor() {
         }
     }
 
+    fun registerAsMainProcess() {
+        isMainProcess = true
+    }
+
     fun saveSettings() {
+        if (!isMainProcess) throw Exception("Attempting to save data in engine process!")
         val byteArrayOutputStream = ByteArrayOutputStream()
         jacksonObjectMapper().writeValue(byteArrayOutputStream, settings)
 
