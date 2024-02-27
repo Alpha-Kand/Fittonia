@@ -64,7 +64,7 @@ sealed class SendCommand : Command {
 
 fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     val destination = SettingsManager.settingsManager.findDestination(command.getDestination())
-    return destination?.let {
+    val serverParent = destination?.let {
         HMeadowSocketClient(
             ipAddress = InetAddress.getByName(destination.ip),
             port = command.getPort(),
@@ -73,6 +73,13 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     } ?: HMeadowSocketClient(
         ipAddress = InetAddress.getByName(command.getIP()),
         port = command.getPort(),
+        timeoutMillis = 2000L,
+    )
+    val serverEnginePort = serverParent.receiveInt()
+    serverParent.close()
+    return HMeadowSocketClient(
+        ipAddress = InetAddress.getByName(command.getIP()),
+        port = serverEnginePort,
         timeoutMillis = 2000L,
     )
 }
