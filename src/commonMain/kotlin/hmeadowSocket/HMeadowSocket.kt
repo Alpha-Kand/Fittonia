@@ -134,6 +134,16 @@ open class HMeadowSocketServer(
 
     companion object {
 
+        fun createServerFromSocket(
+            serverSocket: ServerSocket,
+            socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
+        ): HMeadowSocketServer {
+            return HMeadowSocketServer(
+                socket = serverSocket.accept(),
+                socketInterface = socketInterface,
+            )
+        }
+
         /**
          * Creates a server on the given port or throws an error.
          */
