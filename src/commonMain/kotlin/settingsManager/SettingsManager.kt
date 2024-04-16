@@ -1,5 +1,6 @@
 package settingsManager
 
+import Config.OSMapper.settingsOSSpecificPath
 import FittoniaError
 import FittoniaErrorType
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -21,7 +22,7 @@ class SettingsManager private constructor() {
         private const val DEFAULT_PORT = 61113 // Randomly chosen.
     }
 
-    private val settingsPath = "/home/hunterneo/Desktop/TRANSFER/fittoniaSettings|3.xml" // TODO
+    private val settingsPath = settingsOSSpecificPath // TODO
     var settings = loadSettings()
         private set
 

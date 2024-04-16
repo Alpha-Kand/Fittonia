@@ -31,7 +31,7 @@ internal class SourceFileListManager(
         private const val MAX_PATH_CHAR_LENGTH = 127
     }
 
-    private val tempSourceListFile: FittoniaTempFileBase = if (Config.isMockking) {
+    private val tempSourceListFile: FittoniaTempFileBase = if (Config.IS_MOCKING) {
         FittoniaTempFileBase.FittoniaTempFileMock
     } else {
         FittoniaTempFileBase.FittoniaTempFile()

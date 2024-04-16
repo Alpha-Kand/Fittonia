@@ -106,7 +106,8 @@ compose.desktop {
         nativeDistributions {
             targetFormats(
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb,
-                org.jetbrains.compose.desktop.application.dsl.TargetFormat.AppImage,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
+                // [MacOS Bug] org.jetbrains.compose.desktop.application.dsl.TargetFormat.AppImage,
             )
             packageName = System.getenv("PACKAGENAME")
             packageVersion = "1.0"
