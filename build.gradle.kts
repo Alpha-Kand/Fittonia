@@ -144,3 +144,28 @@ android {
     }
     namespace = "org.huntersmeadow.fittonia"
 }
+
+val ktlint = configurations.create("ktlint")
+
+dependencies {
+    ktlint(libs.ktlintlib)
+}
+
+val ktlintOutputDir = "${project.buildDir}/reports/ktlint/"
+val ktlintInputFiles = project.fileTree(mapOf("dir" to "src", "include" to "**/*.kt"))
+
+val ktlintCheck by tasks.creating(JavaExec::class) {
+    inputs.files(ktlintInputFiles)
+    outputs.dir(ktlintOutputDir)
+
+    description = "Check Kotlin code style."
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+
+    args = listOf(
+        "src/**/*.kt",
+        "--reporter=plain",
+        "--reporter=html,output=$buildDir/ktlint.html",
+        "--baseline=ktlint-baseline.xml",
+    )
+}
