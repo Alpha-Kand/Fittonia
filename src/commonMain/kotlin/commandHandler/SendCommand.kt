@@ -2,6 +2,7 @@ package commandHandler
 
 import SessionManager
 import commandHandler.Command.Companion.verifyArgumentIsSet
+import decodeIpAddress
 import hmeadowSocket.HMeadowSocketClient
 import receiveApproval
 import requireNull
@@ -55,7 +56,11 @@ sealed class SendCommand : Command {
         }
         if (ipArguments.contains(argumentName)) {
             requireNull(ip)
-            ip = value
+            ip = try {
+                decodeIpAddress(value)
+            } catch (e: Exception) {
+                null
+            } ?: value
             return true
         }
         return false

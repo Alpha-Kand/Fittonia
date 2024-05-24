@@ -9,6 +9,8 @@ const val sendFilesCommand = "send"
 const val setDefaultPortCommand = "default-port"
 const val serverPasswordCommand = "server-password"
 const val sendMessageCommand = "send-message"
+const val ipCodeCommand = "ip-code"
+const val decodeIpCodeCommand = "decode-ip-code"
 const val exitCommand = "exit"
 const val sessionCommand = "session"
 
@@ -22,6 +24,8 @@ val commands = listOf(
     setDefaultPortCommand,
     serverPasswordCommand,
     sendMessageCommand,
+    ipCodeCommand,
+    decodeIpCodeCommand,
     exitCommand,
     sessionCommand,
 )
@@ -41,6 +45,8 @@ val messageArguments = listOf("--message", "--string")
 val sessionArguments = listOf("--session", "-s")
 val clientEnginePortArguments = listOf("--clientengineport")
 val serverEnginePortArguments = listOf("--serverengineport")
+val ipCodeArguments = listOf("--ipcode")
+val machineReadableOutputArguments = listOf("--ioformat", "-z")
 
 class ServerFlagsString {
     companion object {

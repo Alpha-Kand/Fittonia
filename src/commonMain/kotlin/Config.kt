@@ -1,5 +1,5 @@
 object Config {
-    const val IS_MOCKING = false
+    val IS_MOCKING = false
 
     object OSMapper {
         private enum class OSType {

@@ -4,6 +4,20 @@ import FittoniaError
 import FittoniaErrorType
 import hmeadowSocket.HMeadowSocket
 
+interface MachineReadableOutput {
+    var ioFormat: Boolean
+
+    fun machineReadableDefault() = false
+
+    fun handleMachineReadableOutputFlag(argumentName: String) =
+        if (machineReadableOutputArguments.contains(argumentName)) {
+            ioFormat = true
+            true
+        } else {
+            false
+        }
+}
+
 sealed interface Command {
 
     fun addArg(argumentName: String, value: String)
