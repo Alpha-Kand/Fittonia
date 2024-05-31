@@ -58,7 +58,7 @@ private fun HMeadowSocketServer.sendFilesCollecting() {
                     else -> Unit
                 }
             }
-        }
+        },
     )
 }
 

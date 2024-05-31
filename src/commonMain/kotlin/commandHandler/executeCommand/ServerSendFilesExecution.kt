@@ -29,7 +29,7 @@ fun HMeadowSocketServer.serverSendFilesExecution(serverParent: HMeadowSocketClie
 fun HMeadowSocketServer.receiveItemAndReport(
     jobPath: String,
     tempReceivingFolder: Path,
-    serverParent: HMeadowSocketClient
+    serverParent: HMeadowSocketClient,
 ) {
     serverParent.sendString(ServerFlagsString.RECEIVING_ITEM)
     receiveItem(
@@ -63,7 +63,7 @@ private fun HMeadowSocketServer.determineJobPath(serverParent: HMeadowSocketClie
             serverParent.receiveString()
         }
 
-        else -> throw Exception() //TODO
+        else -> throw Exception() // TODO
     }
 }
 
