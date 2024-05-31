@@ -4,20 +4,6 @@ import FittoniaError
 import FittoniaErrorType
 import hmeadowSocket.HMeadowSocket
 
-interface MachineReadableOutput {
-    var ioFormat: Boolean
-
-    fun machineReadableDefault() = false
-
-    fun handleMachineReadableOutputFlag(argumentName: String) =
-        if (machineReadableOutputArguments.contains(argumentName)) {
-            ioFormat = true
-            true
-        } else {
-            false
-        }
-}
-
 sealed interface Command {
 
     fun addArg(argumentName: String, value: String)
@@ -54,6 +40,6 @@ fun verifyPortNumber(port: Int?): Boolean {
     return false
 }
 
-fun HMeadowSocket.receiveConfirmation(): Boolean { //TODO replace with sending and receiving booleans.
+fun HMeadowSocket.receiveConfirmation(): Boolean { // TODO replace with sending and receiving booleans.
     return receiveString() == ServerFlagsString.CONFIRM
 }

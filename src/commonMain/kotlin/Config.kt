@@ -30,3 +30,17 @@ object Config {
         }
     }
 }
+
+data object OutputIO {
+    private val outputIO = mutableListOf<String>()
+
+    fun printlnIO(output: String) {
+        if (Config.IS_MOCKING) {
+            outputIO.add(output)
+        } else {
+            printLine(output)
+        }
+    }
+
+    fun flush(): List<String> = outputIO.toList().also { outputIO.clear() }
+}

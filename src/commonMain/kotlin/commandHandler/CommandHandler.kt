@@ -32,7 +32,7 @@ class CommandHandler(private val args: List<String>) {
                 setDefaultPortCommand -> SetDefaultPortCommand()
                 serverPasswordCommand -> ServerPasswordCommand()
                 sendMessageCommand -> SendMessageCommand()
-                ipCodeCommand -> IPCodeCommand
+                ipCodeCommand -> IPCodeCommand()
                 decodeIpCodeCommand -> DecodeIPCodeCommand()
                 exitCommand -> ExitCommand
                 sessionCommand -> SessionCommand

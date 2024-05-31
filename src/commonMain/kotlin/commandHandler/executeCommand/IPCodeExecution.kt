@@ -1,5 +1,6 @@
 package commandHandler.executeCommand
 
+import OutputIO.printlnIO
 import commandHandler.IPCodeCommand
 import encodeIpAddress
 import printLine
@@ -9,7 +10,7 @@ fun encodeIpCodeExecution(command: IPCodeCommand) {
     try {
         val address = Inet4Address.getLocalHost().hostAddress
         if (command.ioFormat) {
-            printLine(text = encodeIpAddress(address))
+            printlnIO(output = encodeIpAddress(address))
         } else {
             printLine(text = "Your IP address = $address")
             printLine(text = "IP address code = ${encodeIpAddress(address)}")

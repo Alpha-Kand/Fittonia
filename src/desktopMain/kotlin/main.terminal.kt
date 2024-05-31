@@ -67,6 +67,8 @@ fun Session.handleArguments(inputTokens: List<String>) {
         is SendMessageCommand -> startClientEngine(inputTokens = inputTokens)
         is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
         is ServerPasswordCommand -> serverPasswordExecution(command = command)
+        is IPCodeCommand -> encodeIpCodeExecution(command = command)
+        is DecodeIPCodeCommand -> decodeIpCodeExecution(command = command)
         is ExitCommand -> SessionManager.sessionActive = false
         is SessionCommand -> return
         else -> throw IllegalStateException("No valid command detected.")
