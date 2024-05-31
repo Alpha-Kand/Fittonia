@@ -1,9 +1,10 @@
 [versions]
 
 # SDK
-androidApplication = "8.2.1"
+androidApplication = "8.2.2"
 
 # Unit Tests
+ktlint = "0.47.1"
 mockk = "1.13.5"
 junit = "4.13.2"
 junitJupiterApi = "5.10.1"
@@ -13,13 +14,14 @@ kover = "0.7.5"
 jacksonModuleKotlin = "2.11.4"
 
 # Libraries
-activity-compose = "1.8.2"
+activity-compose = "1.9.0"
 appcompat = "1.6.1"
-kotlinx-coroutines-core = "1.7.3"
+kotlinx-coroutines-core = "1.8.0-RC"
 kotterJvm = "1.1.1"
 
 [libraries]
 
+ktlintlib = { module = "com.pinterest:ktlint", version.ref = "ktlint" }
 mockk-library = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 junit = { module = "junit:junit", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiterApi" }

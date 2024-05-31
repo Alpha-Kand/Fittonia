@@ -22,7 +22,7 @@ abstract class BaseMockkTest {
 
         // Config
         mockkObject(Config)
-        every { Config.isMockking } returns true
+        every { Config.IS_MOCKING } returns true
 
         // Kotter
         kotter = mockk(relaxed = true)

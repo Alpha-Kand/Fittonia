@@ -45,32 +45,46 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
     }
 
     @UnitTest
-    fun sendFilesSetupWithJobName() = runSocketScriptTest(
-        clientBlock = {
+    fun sendFilesSetupWithJobName() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             val serverDirLength = generateClient().sendFilesClientSetup(job = "job")
             assertEquals("dumpPath/job".length, serverDirLength)
         },
-        serverBlock = {
-            val jobPath = generateServer().sendFilesServerSetup()
+        {
+            val jobPath = generateServer().sendFilesServerSetup(serverParent = generateClient(key = "parent"))
             assertEquals("dumpPath/job", jobPath)
+        },
+        {
+            val parent = generateServer("parent")
+            parent.receiveString()
+            parent.receiveString()
+            parent.sendString("dumpPath/job")
         },
     )
 
     @UnitTest
-    fun sendFilesSetupWithoutJobName() = runSocketScriptTest(
-        clientBlock = {
+    fun sendFilesSetupWithoutJobName() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             val serverDirLength = generateClient().sendFilesClientSetup(job = null)
             assertEquals("dumpPath/jobAutoName".length, serverDirLength)
         },
-        serverBlock = {
-            val jobPath = generateServer().sendFilesServerSetup()
+        {
+            val jobPath = generateServer().sendFilesServerSetup(serverParent = generateClient(key = "parent"))
             assertEquals("dumpPath/jobAutoName", jobPath)
+        },
+        {
+            val parent = generateServer("parent")
+            parent.receiveString()
+            parent.sendString("dumpPath/jobAutoName")
         },
     )
 
     @UnitTest
-    fun sendItemFile() = runSocketScriptTest(
-        clientBlock = {
+    fun sendItemFile() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             generateClient().sendItem(
                 sendFileItemInfo = SendFileItemInfo(
                     absolutePath = "absolutePath",
@@ -80,7 +94,7 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
                 ),
             )
         },
-        serverBlock = {
+        {
             val onGetRelativePath = mockk<(String) -> Unit>(relaxed = true)
             val onDone = mockk<() -> Unit>(relaxed = true)
             generateServer().receiveItem(
@@ -98,8 +112,9 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
     )
 
     @UnitTest
-    fun sendItemDirectory() = runSocketScriptTest(
-        clientBlock = {
+    fun sendItemDirectory() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             generateClient().sendItem(
                 sendFileItemInfo = SendFileItemInfo(
                     absolutePath = "absolutePath",
@@ -109,7 +124,7 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
                 ),
             )
         },
-        serverBlock = {
+        {
             val onGetRelativePath = mockk<(String) -> Unit>(relaxed = true)
             val onDone = mockk<() -> Unit>(relaxed = true)
             generateServer().receiveItem(
@@ -127,11 +142,13 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
     )
 
     @UnitTest
-    fun sendClientInfoValid() = runSocketScriptTest(
-        clientBlock = {
-            generateClient().sendItemCount(itemCount = 5)
+    fun sendClientInfoValid() = runSocketScriptTest2(
+        setupBlock = {},
+        {
+            val client = generateClient()
+            client.sendItemCount(itemCount = 5)
         },
-        serverBlock = {
+        {
             val (dir, count, cancel) = generateServer().waitForItemCount()
             assertFalse(dir.toString().isEmpty())
             assertEquals(5, count)
@@ -139,23 +156,26 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
         },
     )
 
-
     @UnitTest
-    fun sendClientInfoEmpty() = runSocketScriptTest(
-        clientBlock = {
+    fun sendClientInfoEmpty() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             generateClient().sendItemCount(itemCount = null)
+            println("clientBlock done")
         },
-        serverBlock = {
+        {
             val (dir, count, cancel) = generateServer().waitForItemCount()
             assertTrue(dir.toString().isEmpty())
             assertEquals(-1, count)
             assertTrue(cancel)
+            println("serverBlock done")
         },
     )
 
     @UnitTest
-    fun sendFilesNormal() = runSocketScriptTest(
-        clientBlock = {
+    fun sendFilesNormal() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             every { FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines.fileLines } returns mutableListOf(
                 "0\n",
                 "F?ccc\n",
@@ -172,18 +192,23 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
                 ),
             )
         },
-        serverBlock = {
+        {
             val server = generateServer()
             server.waitForItemCount()
             repeat(times = 2) {
-                server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
+                server.receiveItemAndReport(
+                    jobPath = "job path",
+                    tempReceivingFolder = mockk(relaxed = true),
+                    serverParent = mockk(relaxed = true),
+                )
             }
         },
     )
 
     @UnitTest
-    fun sendFilesSkipInvalid() = runSocketScriptTest(
-        clientBlock = {
+    fun sendFilesSkipInvalid() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             every { FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines.fileLines } returns mutableListOf(
                 "0\n",
                 "F?ccc\n",
@@ -203,19 +228,23 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
                 ),
             )
         },
-        serverBlock = {
+        {
             val server = generateServer()
             server.waitForItemCount()
             repeat(times = 2) {
-                server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
+                server.receiveItemAndReport(
+                    jobPath = "job path",
+                    tempReceivingFolder = mockk(relaxed = true),
+                    serverParent = mockk(relaxed = true),
+                )
             }
         },
     )
 
-
     @UnitTest
-    fun sendFilesCompressEverything() = runSocketScriptTest(
-        clientBlock = {
+    fun sendFilesCompressEverything() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             every { FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines.fileLines } returns mutableListOf(
                 "0\n",
                 "F?ccc\n",
@@ -234,17 +263,22 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
             verify(exactly = 2) { anyConstructed<FileZipper>().zipItem(any()) }
             verify(exactly = 1) { anyConstructed<FileZipper>().finalize(any()) }
         },
-        serverBlock = {
+        {
             val server = generateServer()
             val (_, count, _) = server.waitForItemCount()
-            server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
+            server.receiveItemAndReport(
+                jobPath = "job path",
+                tempReceivingFolder = mockk(relaxed = true),
+                serverParent = mockk(relaxed = true),
+            )
             assertEquals(1, count)
         },
     )
 
     @UnitTest
-    fun sendFilesCompressInvalid() = runSocketScriptTest(
-        clientBlock = {
+    fun sendFilesCompressInvalid() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             every { FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines.fileLines } returns mutableListOf(
                 "0\n",
                 "F?ccc\n",
@@ -267,11 +301,15 @@ private class SendFilesClientToServerScriptTest : BaseSocketScriptTest() {
                 ),
             )
         },
-        serverBlock = {
+        {
             val server = generateServer()
             server.waitForItemCount()
             repeat(times = 3) {
-                server.receiveItemAndReport(jobPath = "job path", mockk(relaxed = true))
+                server.receiveItemAndReport(
+                    jobPath = "job path",
+                    tempReceivingFolder = mockk(relaxed = true),
+                    serverParent = mockk(relaxed = true),
+                )
             }
         },
     )

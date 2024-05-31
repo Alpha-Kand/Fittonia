@@ -1,5 +1,6 @@
 package settingsManager
 
+import Config.OSMapper.settingsOSSpecificPath
 import FittoniaError
 import FittoniaErrorType
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -21,12 +22,14 @@ class SettingsManager private constructor() {
         private const val DEFAULT_PORT = 61113 // Randomly chosen.
     }
 
-    private val settingsPath = "/home/hunterneo/Desktop/TRANSFER/fittoniaSettings|3.xml" // TODO
+    private val settingsPath = settingsOSSpecificPath // TODO
     var settings = loadSettings()
         private set
 
     var defaultPort = settings.defaultPort
         private set
+
+    private var isMainProcess: Boolean = false
 
     private fun loadSettings(): SettingsData {
         val settingsFile = File(settingsPath)
@@ -38,7 +41,12 @@ class SettingsManager private constructor() {
         }
     }
 
-    fun saveSettings() {
+    fun registerAsMainProcess() {
+        isMainProcess = true
+    }
+
+    fun saveSettings() = synchronized(settings) {
+        if (!isMainProcess) throw Exception("Attempting to save data in engine process!")
         val byteArrayOutputStream = ByteArrayOutputStream()
         jacksonObjectMapper().writeValue(byteArrayOutputStream, settings)
 
@@ -97,11 +105,11 @@ class SettingsManager private constructor() {
         return settings.serverPassword == password
     }
 
-    fun getAutoJobName(): String {
+    fun getAutoJobName(): String = synchronized(settings) {
         val jobName = settings.nextAutoJobName
         settings = settings.copy(nextAutoJobName = jobName + 1)
         saveSettings()
-        return jobName.toString()
+        jobName.toString()
     }
 
     fun findDestination(destinationName: String?): SettingsData.Destination? {

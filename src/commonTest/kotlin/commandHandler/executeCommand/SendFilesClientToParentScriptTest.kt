@@ -17,13 +17,14 @@ import reportTextLine
 private class SendFilesClientToParentScriptTest : BaseSocketScriptTest() {
 
     @UnitTest
-    fun reportTextLine() = runSocketScriptTest(
-        clientBlock = {
+    fun reportTextLine() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             val parent = generateClient()
             parent.reportTextLine(text = "text line")
             parent.sendString(ServerFlagsString.DONE)
         },
-        serverBlock = {
+        {
             mockkObject(HMeadowSocketServer)
             every { HMeadowSocketServer.createServerAnyPort(any(), any(), any()) } returns generateServer()
             sendCommandExecution(command = mockk(relaxed = true), inputTokens = emptyList())
@@ -31,8 +32,9 @@ private class SendFilesClientToParentScriptTest : BaseSocketScriptTest() {
     )
 
     @UnitTest
-    fun fileNamesTooLong() = runSocketScriptTest(
-        clientBlock = {
+    fun fileNamesTooLong() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             val sourceFileListManager = SourceFileListManager(
                 userInputPaths = listOf("/aaa/bbb/ccc", "/ddd/eee/fff"),
                 serverDestinationDirLength = 126,
@@ -46,7 +48,7 @@ private class SendFilesClientToParentScriptTest : BaseSocketScriptTest() {
             )
             parent.sendString(ServerFlagsString.DONE)
         },
-        serverBlock = {
+        {
             mockkObject(HMeadowSocketServer)
             every { HMeadowSocketServer.createServerAnyPort(any(), any(), any()) } returns generateServer()
             sendCommandExecution(command = mockk(relaxed = true), inputTokens = emptyList())
@@ -54,8 +56,9 @@ private class SendFilesClientToParentScriptTest : BaseSocketScriptTest() {
     )
 
     @UnitTest
-    fun sendFilesCollecting() = runSocketScriptTest(
-        clientBlock = {
+    fun sendFilesCollecting() = runSocketScriptTest2(
+        setupBlock = {},
+        {
             val parent = generateClient()
             parent.sendFilesCollecting(
                 command = mockk<SendFilesCommand> {
@@ -65,7 +68,7 @@ private class SendFilesClientToParentScriptTest : BaseSocketScriptTest() {
             )
             parent.sendString(ServerFlagsString.DONE)
         },
-        serverBlock = {
+        {
             mockkObject(HMeadowSocketServer)
             every { HMeadowSocketServer.createServerAnyPort(any(), any(), any()) } returns generateServer()
             sendCommandExecution(command = mockk(relaxed = true), inputTokens = emptyList())

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class TestTest {
+class TestTemplate {
 
     @BeforeEach
     fun beforeEach() {
@@ -21,7 +21,6 @@ class TestTest {
 
     @Test
     fun foo() = runTest {
-        val foo = mockk<Int>(relaxed = true)
-        Assertions.assertEquals(true, true)
+        Assertions.assertEquals(0, mockk<Int>(relaxed = true))
     }
 }

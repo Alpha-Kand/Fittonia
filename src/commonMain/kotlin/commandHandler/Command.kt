@@ -3,11 +3,6 @@ package commandHandler
 import FittoniaError
 import FittoniaErrorType
 import hmeadowSocket.HMeadowSocket
-import hmeadowSocket.HMeadowSocketClient
-import hmeadowSocket.HMeadowSocketServer
-import sendConfirmation
-import sendDeny
-import settingsManager.SettingsManager
 
 sealed interface Command {
 
@@ -45,21 +40,6 @@ fun verifyPortNumber(port: Int?): Boolean {
     return false
 }
 
-fun HMeadowSocketClient.sendPassword(password: String): Boolean {
-    sendString(password)
-    return receiveConfirmation()
-}
-
-fun HMeadowSocketServer.receivePassword(): Boolean {
-    return if (SettingsManager.settingsManager.checkPassword(receiveString())) {
-        sendConfirmation()
-        true
-    } else {
-        sendDeny()
-        false
-    }
-}
-
-fun HMeadowSocket.receiveConfirmation(): Boolean { //TODO replace with sending and receiving booleans.
+fun HMeadowSocket.receiveConfirmation(): Boolean { // TODO replace with sending and receiving booleans.
     return receiveString() == ServerFlagsString.CONFIRM
 }

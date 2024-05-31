@@ -106,7 +106,8 @@ compose.desktop {
         nativeDistributions {
             targetFormats(
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb,
-                org.jetbrains.compose.desktop.application.dsl.TargetFormat.AppImage,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
+                // [MacOS Bug] org.jetbrains.compose.desktop.application.dsl.TargetFormat.AppImage,
             )
             packageName = System.getenv("PACKAGENAME")
             packageVersion = "1.0"
@@ -142,4 +143,29 @@ android {
         }
     }
     namespace = "org.huntersmeadow.fittonia"
+}
+
+val ktlint = configurations.create("ktlint")
+
+dependencies {
+    ktlint(libs.ktlintlib)
+}
+
+val ktlintOutputDir = "${project.buildDir}/reports/ktlint/"
+val ktlintInputFiles = project.fileTree(mapOf("dir" to "src", "include" to "**/*.kt"))
+
+val ktlintCheck by tasks.creating(JavaExec::class) {
+    inputs.files(ktlintInputFiles)
+    outputs.dir(ktlintOutputDir)
+
+    description = "Check Kotlin code style."
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+
+    args = listOf(
+        "src/**/*.kt",
+        "--reporter=plain",
+        "--reporter=html,output=$buildDir/ktlint.html",
+        "--baseline=ktlint-baseline.xml",
+    )
 }

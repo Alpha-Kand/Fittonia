@@ -6,8 +6,10 @@ import com.varabyte.kotter.foundation.text.text
 import com.varabyte.kotter.runtime.Session
 import commandHandler.AddCommand
 import commandHandler.CommandHandler
+import commandHandler.DecodeIPCodeCommand
 import commandHandler.DumpCommand
 import commandHandler.ExitCommand
+import commandHandler.IPCodeCommand
 import commandHandler.ListDestinationsCommand
 import commandHandler.RemoveCommand
 import commandHandler.SendFilesCommand
@@ -17,11 +19,12 @@ import commandHandler.ServerPasswordCommand
 import commandHandler.SessionCommand
 import commandHandler.SetDefaultPortCommand
 import commandHandler.executeCommand.addExecution
+import commandHandler.executeCommand.decodeIpCodeExecution
 import commandHandler.executeCommand.dumpExecution
+import commandHandler.executeCommand.encodeIpCodeExecution
 import commandHandler.executeCommand.listDestinationsExecution
 import commandHandler.executeCommand.removeExecution
 import commandHandler.executeCommand.sendExecution.sendCommandExecution
-import commandHandler.executeCommand.sendExecution.startClientEngine
 import commandHandler.executeCommand.serverExecution
 import commandHandler.executeCommand.serverPasswordExecution
 import commandHandler.executeCommand.setDefaultPortExecution
@@ -31,7 +34,9 @@ import settingsManager.SettingsManager
 fun main(args: Array<String>) = session {
     KotterSession.kotter = this
     try {
-        SettingsManager.settingsManager.saveSettings()
+        val settings = SettingsManager.settingsManager
+        settings.registerAsMainProcess()
+        settings.saveSettings()
         if (args.isNotEmpty()) {
             handleArguments(args.toList())
         } else {
@@ -62,9 +67,11 @@ fun Session.handleArguments(inputTokens: List<String>) {
         is DumpCommand -> dumpExecution(command = command)
         is ServerCommand -> serverExecution(command = command)
         is SendFilesCommand -> sendCommandExecution(command = command, inputTokens = inputTokens)
-        is SendMessageCommand -> startClientEngine(inputTokens = inputTokens)
+        is SendMessageCommand -> sendCommandExecution(command = command, inputTokens = inputTokens)
         is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
         is ServerPasswordCommand -> serverPasswordExecution(command = command)
+        is IPCodeCommand -> encodeIpCodeExecution(command = command)
+        is DecodeIPCodeCommand -> decodeIpCodeExecution(command = command)
         is ExitCommand -> SessionManager.sessionActive = false
         is SessionCommand -> return
         else -> throw IllegalStateException("No valid command detected.")

@@ -84,7 +84,7 @@ fun kotterSection(
     runBlock: RunScope.() -> Unit = {},
     runType: KotterRunType = KotterRunType.RUN,
 ) {
-    if (Config.isMockking) {
+    if (Config.IS_MOCKING) {
         runBlock(RunScope(kotter.section {}, GlobalScope))
     } else {
         when (runType) {

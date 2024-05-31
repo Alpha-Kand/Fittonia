@@ -17,7 +17,9 @@ import printLine
 import settingsManager.SettingsManager
 
 fun sendCommandExecution(command: SendCommand, inputTokens: List<String>) {
+    // Create connection to client engine.
     val clientEngine = HMeadowSocketServer.createServerAnyPort(startingPort = 10778) { port ->
+        // Create client engine.
         startClientEngine(inputTokens = inputTokens + listOf("${clientEnginePortArguments.first()}=$port"))
     }
     while (true) {
@@ -56,7 +58,7 @@ private fun HMeadowSocketServer.sendFilesCollecting() {
                     else -> Unit
                 }
             }
-        }
+        },
     )
 }
 

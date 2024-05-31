@@ -32,6 +32,8 @@ class CommandHandler(private val args: List<String>) {
                 setDefaultPortCommand -> SetDefaultPortCommand()
                 serverPasswordCommand -> ServerPasswordCommand()
                 sendMessageCommand -> SendMessageCommand()
+                ipCodeCommand -> IPCodeCommand()
+                decodeIpCodeCommand -> DecodeIPCodeCommand()
                 exitCommand -> ExitCommand
                 sessionCommand -> SessionCommand
                 else -> throw IllegalArgumentException()

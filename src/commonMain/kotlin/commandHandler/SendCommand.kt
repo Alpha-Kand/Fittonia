@@ -2,6 +2,7 @@ package commandHandler
 
 import SessionManager
 import commandHandler.Command.Companion.verifyArgumentIsSet
+import decodeIpAddress
 import hmeadowSocket.HMeadowSocketClient
 import receiveApproval
 import requireNull
@@ -55,7 +56,11 @@ sealed class SendCommand : Command {
         }
         if (ipArguments.contains(argumentName)) {
             requireNull(ip)
-            ip = value
+            ip = try {
+                decodeIpAddress(value)
+            } catch (e: Exception) {
+                null
+            } ?: value
             return true
         }
         return false
@@ -64,7 +69,7 @@ sealed class SendCommand : Command {
 
 fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     val destination = SettingsManager.settingsManager.findDestination(command.getDestination())
-    return destination?.let {
+    val serverParent = destination?.let {
         HMeadowSocketClient(
             ipAddress = InetAddress.getByName(destination.ip),
             port = command.getPort(),
@@ -73,6 +78,13 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     } ?: HMeadowSocketClient(
         ipAddress = InetAddress.getByName(command.getIP()),
         port = command.getPort(),
+        timeoutMillis = 2000L,
+    )
+    val serverEnginePort = serverParent.receiveInt()
+    serverParent.close()
+    return HMeadowSocketClient(
+        ipAddress = InetAddress.getByName(command.getIP()),
+        port = serverEnginePort,
         timeoutMillis = 2000L,
     )
 }

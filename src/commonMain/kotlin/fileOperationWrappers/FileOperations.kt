@@ -15,7 +15,7 @@ internal object FileOperations {
     }
 
     fun exists(path: Path): Boolean {
-        return if (Config.isMockking) {
+        return if (Config.IS_MOCKING) {
             FileOperationMock.exists
         } else {
             Files.exists(path)
@@ -23,7 +23,7 @@ internal object FileOperations {
     }
 
     fun isRegularFile(path: Path): Boolean {
-        return if (Config.isMockking) {
+        return if (Config.IS_MOCKING) {
             FileOperationMock.isRegularFile
         } else {
             Files.isRegularFile(path)
@@ -31,7 +31,7 @@ internal object FileOperations {
     }
 
     fun recursiveDirSearch(startPath: Path, block: (Path, isFile: Boolean) -> Unit) {
-        return if (Config.isMockking) {
+        return if (Config.IS_MOCKING) {
             FileOperationMock.paths.forEach { path ->
                 block(path, FileOperationMock.isRegularFile)
             }
@@ -49,7 +49,7 @@ internal object FileOperations {
     }
 
     fun createDirectory(path: Path): Path {
-        return if (Config.isMockking) {
+        return if (Config.IS_MOCKING) {
             path
         } else {
             Files.createDirectory(path)
@@ -57,7 +57,7 @@ internal object FileOperations {
     }
 
     fun move(source: Path, destination: Path): Path {
-        return if (Config.isMockking) {
+        return if (Config.IS_MOCKING) {
             destination
         } else {
             Files.move(source, destination)
@@ -65,7 +65,7 @@ internal object FileOperations {
     }
 
     fun createTempDirectory(prefix: String): Path {
-        return if (Config.isMockking) {
+        return if (Config.IS_MOCKING) {
             Path(prefix)
         } else {
             Files.createTempDirectory(prefix)

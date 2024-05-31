@@ -51,6 +51,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         try {
             return receive()
         } catch (e: Exception) {
+            println(e.message)
             this.close()
             throw FailedToReceiveException(e)
         }
@@ -95,8 +96,8 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         )
     }
 
-    fun sendContinue() = socketInterface.sendContinue()
-    fun receiveContinue() = socketInterface.receiveContinue()
+    fun sendContinue() = sendErrorWrapper { socketInterface.sendContinue() }
+    fun receiveContinue() = receiveErrorWrapper { socketInterface.receiveContinue() }
 
     abstract fun close()
 
@@ -133,6 +134,16 @@ open class HMeadowSocketServer(
     override fun sendClose() = closeSocket(socket = socket)
 
     companion object {
+
+        fun createServerFromSocket(
+            serverSocket: ServerSocket,
+            socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
+        ): HMeadowSocketServer {
+            return HMeadowSocketServer(
+                socket = serverSocket.accept(),
+                socketInterface = socketInterface,
+            )
+        }
 
         /**
          * Creates a server on the given port or throws an error.
@@ -172,12 +183,10 @@ open class HMeadowSocketServer(
         /**
          * Creates a server socket on the given port or throws an error.
          */
-        @Throws(CouldNotBindServerToGivenPort::class, ServerSetupException::class)
-        fun createServerSocket(port: Int): Socket {
+        @Throws(CouldNotBindServerToGivenPort::class)
+        fun createServerSocket(port: Int): ServerSocket {
             try {
-                return ServerSocket(port).accept()
-            } catch (e: ServerSetupException) {
-                throw e
+                return ServerSocket(port)
             } catch (e: Exception) {
                 throw CouldNotBindServerToGivenPort(e)
             }

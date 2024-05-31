@@ -36,8 +36,14 @@ fun MainRenderScope.fileNamesTooLongRenderBlock(actionList: List<Int>) {
         when (action) {
             FileTransfer.CANCEL -> textLine(text = "$action. Cancel sending files.")
             FileTransfer.SKIP_INVALID -> textLine(text = "$action. Skip invalid files.")
-            FileTransfer.COMPRESS_EVERYTHING -> textLine(text = "$action. Compress all files and send as a single file.")
-            FileTransfer.COMPRESS_INVALID -> textLine(text = "$action. Compress invalid files only and send as a single file (relative file paths will be preserved).")
+            FileTransfer.COMPRESS_EVERYTHING -> textLine(
+                text = "$action. Compress all files and send as a single file.",
+            )
+
+            FileTransfer.COMPRESS_INVALID -> textLine(
+                text = "$action. Compress invalid files only and send as a single file (relative file paths will be preserved).",
+            )
+
             FileTransfer.SHOW_ALL -> textLine(text = "$action. Show all files and ask again.")
         }
     }

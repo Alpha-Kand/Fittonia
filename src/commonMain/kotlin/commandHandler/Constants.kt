@@ -9,6 +9,8 @@ const val sendFilesCommand = "send"
 const val setDefaultPortCommand = "default-port"
 const val serverPasswordCommand = "server-password"
 const val sendMessageCommand = "send-message"
+const val ipCodeCommand = "ip-code"
+const val decodeIpCodeCommand = "decode-ip-code"
 const val exitCommand = "exit"
 const val sessionCommand = "session"
 
@@ -22,6 +24,8 @@ val commands = listOf(
     setDefaultPortCommand,
     serverPasswordCommand,
     sendMessageCommand,
+    ipCodeCommand,
+    decodeIpCodeCommand,
     exitCommand,
     sessionCommand,
 )
@@ -40,14 +44,18 @@ val jobArguments = listOf("--job", "-j")
 val messageArguments = listOf("--message", "--string")
 val sessionArguments = listOf("--session", "-s")
 val clientEnginePortArguments = listOf("--clientengineport")
+val serverEnginePortArguments = listOf("--serverengineport")
+val ipCodeArguments = listOf("--ipcode")
+val machineReadableOutputArguments = listOf("--ioformat", "-z")
 
 class ServerFlagsString {
     companion object {
         const val CONFIRM = "CONFIRM"
         const val DENY = "DENY"
 
+        const val SHARE_JOB_NAME = "SHARE_JOB_NAME"
+        const val RECEIVING_ITEM = "RECEIVING_ITEM"
         const val HAVE_JOB_NAME = "HAVE_JOB_NAME"
-
         const val NEED_JOB_NAME = "NEED_JOB_NAME"
         const val DONE = "DONE"
 
