@@ -1,6 +1,6 @@
 package commandHandler.executeCommand
 
-import Config
+import Config.OSMapper.serverEngineJar
 import KotterSession.kotter
 import com.varabyte.kotter.foundation.liveVarOf
 import com.varabyte.kotter.foundation.text.green
@@ -16,6 +16,7 @@ import commandHandler.ServerFlagsString.Companion.RECEIVING_ITEM
 import commandHandler.ServerFlagsString.Companion.SHARE_JOB_NAME
 import commandHandler.serverEnginePortArguments
 import fileOperationWrappers.FileOperations
+import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
 import kotterSection
 import printLine
@@ -24,11 +25,10 @@ import sendConfirmation
 import sendDeny
 import settingsManager.SettingsManager
 import java.io.File
-import java.net.ServerSocket
 import kotlin.io.path.Path
 
 fun serverExecution(command: ServerCommand) {
-    val mainServerSocket = ServerSocket(command.getPort())
+    val mainServerSocket = HMeadowSocketServer.createServerSocket(command.getPort())
     printLine(text = "Server started.")
     while (true) {
         printLine(text = "⏳ Waiting for a client.")
@@ -43,23 +43,25 @@ fun serverExecution(command: ServerCommand) {
                 startServerEngine(listOf("${serverEnginePortArguments.first()}=$port"))
             }
             server.sendInt(serverEngine.receiveInt())
-            var jobPath = "???"
-
-            while (true) {
-                when (val flag = serverEngine.receiveString()) {
-                    NEED_JOB_NAME,
-                    HAVE_JOB_NAME -> serverEngine.getJobName(flag = flag)
-
-                    RECEIVING_ITEM -> serverEngine.printReceivingItem(lock = mainServerSocket, jobPath = jobPath)
-                    SHARE_JOB_NAME -> {
-                        jobPath = serverEngine.receiveString().split('/').last()
-                    }
-
-                    DONE -> {}
-                }
-            }
+            serverEngine.foo(lock = mainServerSocket)
         }.start()
-        if (Config.isMockking) return
+    }
+}
+
+fun HMeadowSocketServer.foo(lock: Any) {
+    var jobPath = "???"
+
+    while (true) {
+        when (val flag = receiveString()) {
+            NEED_JOB_NAME,
+            HAVE_JOB_NAME,
+            -> getJobName(flag = flag)
+
+            RECEIVING_ITEM -> printReceivingItem(lock = lock, jobPath = jobPath)
+            SHARE_JOB_NAME -> jobPath = receiveString().split('/').last()
+
+            DONE -> Unit
+        }
     }
 }
 
@@ -91,7 +93,7 @@ internal fun HMeadowSocketServer.getJobName(flag: String) {
     val autoJobName = when (flag) {
         NEED_JOB_NAME -> settingsManager.getAutoJobName()
         HAVE_JOB_NAME -> receiveString()
-        else -> throw Exception() //TODO
+        else -> throw Exception() // TODO
     }
     var nonConflictedJobName: String = autoJobName
 
@@ -100,13 +102,44 @@ internal fun HMeadowSocketServer.getJobName(flag: String) {
         nonConflictedJobName = autoJobName + "_" + settingsManager.getAutoJobName()
         i++
         if (i > 20) {
-            throw Exception() //TODO
+            throw Exception() // TODO
         }
     }
     sendString(settingsManager.settings.dumpPath + "/$nonConflictedJobName")
 }
 
 private fun HMeadowSocketServer.passwordIsValid() = SettingsManager.settingsManager.checkPassword(receiveString())
+
+fun HMeadowSocketServer.handleCommandServerEngine(serverParent: HMeadowSocketClient) {
+    handleCommand(
+        onSendFilesCommand = {
+            // TODO it
+            serverSendFilesExecution(serverParent = serverParent)
+        },
+        onSendMessageCommand = {
+            // TODO it
+            println("Received message from client.")
+            println(receiveString())
+            // printLine(text = "Received message from client.")
+            // printLine(receiveString(), color = 0xccc949) // Lightish yellow.
+        },
+        onAddDestination = {
+            // TODO it
+            if (!it) {
+                println("Client attempted to add this server as destination, password refused.") // todo
+            } else {
+                if (receiveBoolean()) {
+                    println("Client added this server as a destination.")
+                } else {
+                    println("Client failed to add this server as a destination.") // todo
+                }
+            }
+        },
+        onInvalidCommand = {
+            println("Received invalid server command from client.") // todo
+        },
+    )
+}
 
 fun HMeadowSocketServer.handleCommand(
     onSendFilesCommand: (Boolean) -> Unit,
@@ -135,7 +168,7 @@ fun HMeadowSocketServer.handleCommand(
 fun startServerEngine(inputTokens: List<String>) = Thread {
     val currentDirectory = System.getProperty("user.dir")
     val serverEngineCmdLine = StringBuilder()
-        .append("java -jar $currentDirectory/build/compose/jars/FittoniaServerEngine-linux-x64-1.0.jar")
+        .append("java -jar $currentDirectory/build/compose/jars/$serverEngineJar")
     inputTokens.forEach {
         serverEngineCmdLine.append(' ')
         serverEngineCmdLine.append(it)

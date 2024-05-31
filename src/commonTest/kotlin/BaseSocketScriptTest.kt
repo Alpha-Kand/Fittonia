@@ -3,13 +3,11 @@ import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketInterface
 import hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import java.net.InetAddress
 import java.net.Socket
@@ -37,6 +35,8 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
 
         SEND_LONG(value = 105),
         RECEIVE_LONG(value = -105),
+
+        DEBUG_CHECKPOINT(value = 106),
         ;
 
         companion object {
@@ -50,95 +50,171 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
 
     private data class Communication(val flag: TestFlags, val value: String)
 
-    private val clientQueue = LinkedBlockingQueue<Communication>()
-    private val serverQueue = LinkedBlockingQueue<Communication>()
-    private val clientList = mutableListOf<Communication>()
-    private val serverList = mutableListOf<Communication>()
+    private val clientQueues = mutableMapOf<String, LinkedBlockingQueue<Communication>>()
+    private val serverQueues = mutableMapOf<String, LinkedBlockingQueue<Communication>>()
+    private val clientLists = mutableMapOf<String, MutableList<Communication>>()
+    private val serverLists = mutableMapOf<String, MutableList<Communication>>()
 
     @BeforeEach
     fun beforeEachSocketScript() {
-        clientQueue.clear()
-        serverQueue.clear()
-        clientList.clear()
-        serverList.clear()
+        clientQueues.clear()
+        serverQueues.clear()
+        clientLists.clear()
+        serverLists.clear()
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    fun runSocketScriptTest(
-        clientBlock: TestScope.() -> Unit,
-        serverBlock: TestScope.() -> Unit,
+    fun runSocketScriptTest2(
         setupBlock: TestScope.() -> Unit = {},
+        vararg testBlocks: suspend TestScope.() -> Unit,
     ) {
+        val tempPrint: (String) -> Unit = ::println // TODO
         var throwException: Throwable? = null
         try {
             val handler = CoroutineExceptionHandler { _, exception ->
                 throwException = exception
             }
-            runTest(timeout = 5.seconds) {
+            runTest(timeout = 10.seconds) {
                 setupBlock()
                 joinAll(
-                    GlobalScope.launch(handler) { clientBlock() },
-                    GlobalScope.launch(handler) { serverBlock() },
+                    *testBlocks.map { block ->
+                        GlobalScope.launch(handler) { block() }
+                    }.toTypedArray(),
                 )
             }
         } finally {
-            var k = 0
-            if (clientList.isEmpty() || serverList.isEmpty()) {
-                clientList.forEach {
-                    println("$k. Client.${it.flag.name} = \"${it.value}\"")
-                    k++
+            // tempPrint("throwException $throwException")
+
+            println()
+            print("Clients: ${clientLists.size} -> ")
+            clientLists.forEach {
+                print("${it.key} [${it.value.size}], ")
+            }
+            println()
+            print("Servers: ${serverLists.size} -> ")
+            serverLists.forEach {
+                print("${it.key} [${it.value.size}], ")
+            }
+            println()
+
+            clientLists.toList().map { it.first }.forEach { key ->
+                val clientList = clientLists[key].orEmpty()
+                val serverList = serverLists[key].orEmpty()
+
+                println("Key (\"$key\")")
+
+                var k = 0
+                if (clientList.isEmpty() || serverList.isEmpty()) {
+                    clientList.forEach {
+                        println("$k. Client.${it.flag.name} = \"${it.value}\"")
+                        k++
+                    }
+                    serverList.forEach {
+                        println("$k. Server.${it.flag.name} = \"${it.value}\"")
+                        k++
+                    }
+                } else {
+                    var clientIndex = 0
+                    var serverIndex = 0
+                    var index = 1
+
+                    while (true) {
+                        if (clientIndex == clientList.size && serverIndex == serverList.size) break
+
+                        val clientCommunication = clientList[clientIndex]
+                        val serverCommunication = serverList[serverIndex]
+
+                        if (clientCommunication.flag == TestFlags.DEBUG_CHECKPOINT) {
+                            println("Client.${clientCommunication.flag.name} (\"${clientCommunication.value}\")")
+                            clientIndex++
+                            continue
+                        }
+
+                        if (serverCommunication.flag == TestFlags.DEBUG_CHECKPOINT) {
+                            println("Server.${clientCommunication.flag.name} (\"${clientCommunication.value}\")")
+                            serverIndex++
+                            continue
+                        }
+
+                        print("$index. ")
+                        println("Client.${clientCommunication.flag.name} (\"${clientCommunication.value}\") - Server.${clientCommunication.flag.name} (\"${clientCommunication.value}\")")
+
+                        index++
+                        clientIndex++
+                        serverIndex++
+                    }
+
+                    /*
+                    clientList.forEachIndexed { index, _ ->
+                        val clientCommunication = clientList[index]
+
+                        if(clientCommunication.flag == TestFlags.DEBUG_CHECKPOINT) {
+                            println("$index. Client.${clientCommunication.flag.name} (\"${clientCommunication.value}\")")
+                        }
+
+                        val serverCommunication = serverList[index - clientMinus]
+                        println("$index. Client.${ clientCommunication.flag.name} (\"${clientCommunication.value}\") - Server.${ serverCommunication.flag.name} (\"${ serverCommunication.value}\")")
+                    }
+
+                    clientList.zip(serverList) { a, b ->
+                        println("$k. Client.${a.flag.name} (\"${a.value}\") - Server.${b.flag.name} (\"${a.value}\")")
+                        k++
+                    }
+                    clientList.forEachIndexed { index, communication ->
+                        if (index > serverList.size - 1) {
+                            println("$index. Client.${communication.flag.name} (\"${communication.value}\")")
+                        }
+                    }
+                    serverList.forEachIndexed { index, communication ->
+                        if (index > clientList.size - 1) {
+                            val sb = StringBuilder("")
+                            sb.append("$index. ")
+                            ("CLIENT." + communication.flag.name).map { sb.append(' ') }
+                            sb.append(" - Server.${communication.flag.name} (\"${communication.value}\")")
+                            println(sb.toString())
+                        }
+                    }
+
+                     */
                 }
-                serverList.forEach {
-                    println("$k. Server.${it.flag.name} = \"${it.value}\"")
-                    k++
-                }
-            } else {
+                /*
+                throwException?.let { throw it }
+                Assertions.assertEquals(clientList.size, serverList.size)
                 clientList.zip(serverList) { a, b ->
-                    println("$k. Client.${a.flag.name} - Server.${b.flag.name} = \"${a.value}\"")
-                    k++
+                    Assertions.assertEquals(a.flag.value, -(b.flag.value))
                 }
-                clientList.forEachIndexed { index, communication ->
-                    if (index > serverList.size - 1) {
-                        println("$index. Client.${communication.flag.name} = \"${communication.value}\"")
-                    }
-                }
-                serverList.forEachIndexed { index, communication ->
-                    if (index > clientList.size - 1) {
-                        val sb = StringBuilder("")
-                        sb.append("$index. ")
-                        ("CLIENT." + communication.flag.name).map { sb.append(' ') }
-                        sb.append(" - Server.${communication.flag.name} = \"${communication.value}\"")
-                        println(sb.toString())
-                    }
-                }
+                */
+                println()
             }
+
             throwException?.let { throw it }
-            Assertions.assertEquals(clientList.size, serverList.size)
-            clientList.zip(serverList) { a, b ->
-                Assertions.assertEquals(a.flag.value, -(b.flag.value))
-            }
         }
     }
 
-    fun generateClient() = HMeadowSocketClient(
-        ipAddress = InetAddress.getByName("localhost"),
-        port = 0,
-        timeoutMillis = 0,
-        socketInterface = generateSocketInterface(
-            otherQueue = serverQueue,
-            thisQueue = clientQueue,
-            thisList = clientList,
-        ),
-    )
+    private object Lock
 
-    fun generateServer() = HMeadowSocketServer(
-        socket = Socket(),
-        socketInterface = generateSocketInterface(
-            otherQueue = clientQueue,
-            thisQueue = serverQueue,
-            thisList = serverList,
-        ),
-    )
+    fun generateClient(key: String = "default") = synchronized(Lock) {
+        HMeadowSocketClient(
+            ipAddress = InetAddress.getByName("localhost"),
+            port = 0,
+            timeoutMillis = 0,
+            socketInterface = generateSocketInterface(
+                otherQueue = serverQueues.getOrPut(key) { LinkedBlockingQueue<Communication>() },
+                thisQueue = clientQueues.getOrPut(key) { LinkedBlockingQueue<Communication>() },
+                thisList = clientLists.getOrPut(key) { mutableListOf() },
+            ),
+        )
+    }
+
+    fun generateServer(key: String = "default") = synchronized(Lock) {
+        HMeadowSocketServer(
+            socket = Socket(),
+            socketInterface = generateSocketInterface(
+                otherQueue = clientQueues.getOrPut(key) { LinkedBlockingQueue<Communication>() },
+                thisQueue = serverQueues.getOrPut(key) { LinkedBlockingQueue<Communication>() },
+                thisList = serverLists.getOrPut(key) { mutableListOf() },
+            ),
+        )
+    }
 
     private fun generateSocketInterface(
         otherQueue: LinkedBlockingQueue<Communication>,
@@ -178,8 +254,15 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
             rename: String,
         ) = send(flag = TestFlags.SEND_FILE, message = Pair(filePath, rename).toString())
 
+        /*
+        // TODO
+        override fun debugCheckpoint() {
+            thisList.add(Communication(flag = TestFlags.DEBUG_CHECKPOINT, value = "\uD83C\uDFF4\u200D☠\uFE0F"))
+        }
+        */
+
         private fun send(flag: TestFlags, message: String) {
-            Communication(flag = flag, value = message).let {
+            Communication(flag = flag, value = message.filter { it != '\n' }).let {
                 thisQueue.add(it)
                 thisList.add(it)
             }
