@@ -7,6 +7,7 @@ import ExitHelpDoc
 import HelpDoc
 import KotterSession.kotter
 import OutputIO.printlnIO
+import SetDefaultPortHelpDoc
 import com.varabyte.kotter.foundation.text.cyan
 import com.varabyte.kotter.foundation.text.textLine
 import commandHandler.HelpCommand
@@ -46,6 +47,7 @@ private val helpDocs = listOf(
     EncodeIpHelpDoc,
     DecodeIPCodeHelpDoc,
     DumpHelpDoc,
+    SetDefaultPortHelpDoc,
     ExitHelpDoc,
 )
 

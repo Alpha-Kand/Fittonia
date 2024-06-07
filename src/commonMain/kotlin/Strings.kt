@@ -1,5 +1,12 @@
+import commandHandler.decodeIpCodeCommand
+import commandHandler.dumpCommand
+import commandHandler.exitCommand
 import commandHandler.ipCodeArguments
+import commandHandler.ipCodeCommand
 import commandHandler.pathArguments
+import commandHandler.portArguments
+import commandHandler.quitCommand
+import commandHandler.setDefaultPortCommand
 
 // TODO: Use up to date kotlin multiplatform methods.
 
@@ -34,6 +41,9 @@ Made by Hunter Wiesman 'huntersmeadow@gmail.com'
 COMMANDS:
 """
 
+// SetDefaultPortCommand
+const val currentDefaultPortIsSetTo = "Current default port set to: %1\$s"
+
 interface HelpDoc {
     val title: String
     val description: String
@@ -44,35 +54,44 @@ interface HelpDoc {
 }
 
 data object DecodeIPCodeHelpDoc : HelpDoc {
-    override val title = "decode-ip-code"
+    override val title = decodeIpCodeCommand
     override val description = "Displays the IPv4 address associated with the provided IP 'code'."
-    override val format = "decode-ip-code <CODE>"
+    override val format = "$decodeIpCodeCommand <CODE>"
     override val arguments = listOf(
         ipCodeArguments to "Code in the format of WORD-WORD-NUMBER. e.g. cat-dog-12",
     )
 }
 
 data object DumpHelpDoc : HelpDoc {
-    override val title = "dump"
+    override val title = dumpCommand
     override val description =
         "Updates or prints the current 'dump' path. The dump path is where all the incoming files are put categorized by 'job'. e.g. /.../dumpPath/jobName/file.txt.\nRun without input to print the current dump path."
-    override val format = "dump <OPTIONAL PATH>"
+    override val format = "$dumpCommand <OPTIONAL PATH>"
     override val arguments = listOf(
         pathArguments to "Path to put incoming files and folders.",
     )
 }
 
 data object EncodeIpHelpDoc : HelpDoc {
-    override val title = "ip-code"
+    override val title = ipCodeCommand
     override val description =
         "Displays the current devices IPv4 address and its IP 'code'. This code is a human readable format intended to be shared and inputted on other devices instead of having to remember an entire IP address."
-    override val format = "ip-code"
+    override val format = ipCodeCommand
     override val arguments = null
 }
 
 data object ExitHelpDoc : HelpDoc {
-    override val title = "exit OR quit"
+    override val title = "$exitCommand OR $quitCommand"
     override val description = "Closes the program."
-    override val format = "exit"
+    override val format = exitCommand
     override val arguments = null
+}
+
+data object SetDefaultPortHelpDoc : HelpDoc {
+    override val title = setDefaultPortCommand
+    override val description = "Sets the default port to use for incoming connections."
+    override val format = "$setDefaultPortCommand <PORT>"
+    override val arguments = listOf(
+        portArguments to "Standardized port number. e.g. 8080",
+    )
 }

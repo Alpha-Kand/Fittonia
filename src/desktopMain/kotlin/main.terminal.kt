@@ -64,15 +64,15 @@ fun Session.handleArguments(inputTokens: List<String>) {
         is AddCommand -> addExecution(command = command, inputTokens = inputTokens)
         is RemoveCommand -> removeExecution(command = command)
         is ListDestinationsCommand -> listDestinationsExecution(command = command)
-        is DumpCommand -> dumpExecution(command = command)
+        /* Done */ is DumpCommand -> dumpExecution(command = command)
         is ServerCommand -> serverExecution(command = command)
         is SendFilesCommand -> sendCommandExecution(command = command, inputTokens = inputTokens)
         is SendMessageCommand -> sendCommandExecution(command = command, inputTokens = inputTokens)
-        is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
+        /* Done */ is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
         is ServerPasswordCommand -> serverPasswordExecution(command = command)
-        is IPCodeCommand -> encodeIpCodeExecution(command = command)
-        is DecodeIPCodeCommand -> decodeIpCodeExecution(command = command)
-        is ExitCommand -> SessionManager.sessionActive = false
+        /* Done */ is IPCodeCommand -> encodeIpCodeExecution(command = command)
+        /* Done */ is DecodeIPCodeCommand -> decodeIpCodeExecution(command = command)
+        /* Done */ is ExitCommand -> SessionManager.sessionActive = false
         is SessionCommand -> return
         else -> throw IllegalStateException("No valid command detected.")
     }
