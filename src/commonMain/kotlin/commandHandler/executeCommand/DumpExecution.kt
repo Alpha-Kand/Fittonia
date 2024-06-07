@@ -2,6 +2,12 @@ package commandHandler.executeCommand
 
 import OutputIO.printlnIO
 import commandHandler.DumpCommand
+import dumpPathCurrent
+import dumpPathDoesntExist
+import dumpPathNotEmptyWarning
+import dumpPathNotSet
+import dumpPathNotValidDirectory
+import dumpPathNotWritable
 import errorIO
 import settingsManager.SettingsManager
 import successIO
@@ -25,22 +31,22 @@ fun dumpExecution(command: DumpCommand) {
                     settingsManager.setDumpPath(dumpPath.toString())
                     if (Files.list(dumpPath).findFirst().isPresent) {
                         successIO()
-                        warningIO("New dump path is not empty.")
+                        warningIO(dumpPathNotEmptyWarning)
                     }
                 } else {
-                    errorIO("That directory is not writable. Check its permissions.")
+                    errorIO(dumpPathNotWritable)
                 }
             } else {
-                errorIO("Supplied path was not a valid directory.")
+                errorIO(dumpPathNotValidDirectory)
             }
         } else {
-            errorIO("Supplied path does not exist.")
+            errorIO(dumpPathDoesntExist)
         }
     } ?: run {
         if (settingsManager.settings.dumpPath.isEmpty()) {
-            printlnIO(output = "No dump path set.")
+            printlnIO(output = dumpPathNotSet)
         } else {
-            printlnIO(output = "Current dump path: " + settingsManager.settings.dumpPath)
+            printlnIO(output = dumpPathCurrent.format(settingsManager.settings.dumpPath))
         }
     }
 }

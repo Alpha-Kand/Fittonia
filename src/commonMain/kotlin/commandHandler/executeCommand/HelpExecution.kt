@@ -1,6 +1,7 @@
 package commandHandler.executeCommand
 
 import DecodeIPCodeHelpDoc
+import DumpHelpDoc
 import EncodeIpHelpDoc
 import ExitHelpDoc
 import HelpDoc
@@ -44,6 +45,7 @@ fun helpExecution(command: HelpCommand) {
 private val helpDocs = listOf(
     EncodeIpHelpDoc,
     DecodeIPCodeHelpDoc,
+    DumpHelpDoc,
     ExitHelpDoc,
 )
 
@@ -52,6 +54,9 @@ private fun printHelpSection(helpDoc: HelpDoc) {
         cyan { textLine(text = helpDoc.title) }
         textLine(text = helpDoc.description)
         textLine(text = formatLabel.format(helpDoc.format))
+        helpDoc.arguments?.forEach {
+            textLine("${it.first.joinToString(separator = ", ")}: ${it.second}")
+        }
         textLine()
     }.run()
 }
