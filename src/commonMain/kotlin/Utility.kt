@@ -21,6 +21,13 @@ fun <T> requireNull(value: T?) {
     }
 }
 
+inline fun Boolean.alsoIfTrue(block: () -> Unit): Boolean {
+    if (this) {
+        block()
+    }
+    return this
+}
+
 fun Session.reportHMSocketError(e: HMeadowSocket.HMeadowSocketError) = section {
     red { text("Error: ") }
     e.hmMessage?.let {

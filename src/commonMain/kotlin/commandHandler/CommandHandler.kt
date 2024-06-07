@@ -34,8 +34,12 @@ class CommandHandler(private val args: List<String>) {
                 sendMessageCommand -> SendMessageCommand()
                 ipCodeCommand -> IPCodeCommand()
                 decodeIpCodeCommand -> DecodeIPCodeCommand()
-                exitCommand -> ExitCommand
                 sessionCommand -> SessionCommand
+                helpCommand -> HelpCommand()
+                exitCommand,
+                quitCommand,
+                -> ExitCommand
+
                 else -> throw IllegalArgumentException()
             }
         } catch (_: Exception) {
