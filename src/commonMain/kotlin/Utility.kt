@@ -1,9 +1,7 @@
 import KotterSession.kotter
 import com.varabyte.kotter.foundation.input.runUntilInputEntered
 import com.varabyte.kotter.foundation.text.Color
-import com.varabyte.kotter.foundation.text.color
 import com.varabyte.kotter.foundation.text.red
-import com.varabyte.kotter.foundation.text.rgb
 import com.varabyte.kotter.foundation.text.text
 import com.varabyte.kotter.foundation.text.textLine
 import com.varabyte.kotter.runtime.MainRenderScope
@@ -37,10 +35,6 @@ fun Session.reportHMSocketError(e: HMeadowSocket.HMeadowSocketError) = section {
         textLine(text = "       $it")
     } ?: textLine(text = ".")
 }.run()
-
-fun printLine(text: String, color: Color = Color.WHITE) = kotter.section { color(color); textLine(text) }.run()
-fun printLine(text: String, color: Int) = kotter.section { rgb(color); textLine(text) }.run()
-fun printLine() = kotter.section { textLine() }.run()
 
 fun HMeadowSocketClient.reportTextLine(text: String, color: Color = Color.WHITE) {
     sendString(message = ServerFlagsString.PRINT_LINE)
