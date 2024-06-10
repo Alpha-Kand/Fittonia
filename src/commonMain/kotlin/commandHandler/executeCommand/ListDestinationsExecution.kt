@@ -1,31 +1,30 @@
 package commandHandler.executeCommand
 
-import com.varabyte.kotter.foundation.text.textLine
-import com.varabyte.kotter.runtime.Session
+import OutputIO.printlnIO
 import commandHandler.ListDestinationsCommand
+import destinationNotFound
+import ipOutput
+import nameOutput
+import noDestinationsRegistered
 import settingsManager.SettingsManager
 
-fun Session.listDestinationsExecution(command: ListDestinationsCommand) = section {
+fun listDestinationsExecution(command: ListDestinationsCommand) {
     val settingsManager = SettingsManager.settingsManager
     val printDestination: (SettingsManager.SettingsData.Destination) -> Unit = {
-        textLine(text = "Name: " + it.name)
-        textLine(text = "IP: " + it.ip)
-        textLine()
+        printlnIO(nameOutput.format(it.name))
+        printlnIO(ipOutput.format(it.ip))
     }
-    command.getName()?.let { searchName ->
-        settingsManager.settings.destinations.find { it.name == searchName }?.let {
-            printDestination(it)
+    if (settingsManager.settings.destinations.isEmpty()) {
+        printlnIO(noDestinationsRegistered)
+    } else {
+        command.getName()?.let { searchName ->
+            settingsManager.settings.destinations.find { it.name == searchName }?.let {
+                printDestination(it)
+            } ?: printlnIO(destinationNotFound)
         } ?: run {
-            textLine(text = "No destination found with that name.")
-            textLine()
-        }
-    } ?: run {
-        if (settingsManager.settings.destinations.isEmpty()) {
-            textLine(text = "No destinations registered. Register with the 'add' command.")
-        } else {
             settingsManager.settings.destinations.forEach {
                 printDestination(it)
             }
         }
     }
-}.run()
+}

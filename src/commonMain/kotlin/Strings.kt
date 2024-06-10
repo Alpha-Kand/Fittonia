@@ -3,6 +3,8 @@ import commandHandler.dumpCommand
 import commandHandler.exitCommand
 import commandHandler.ipCodeArguments
 import commandHandler.ipCodeCommand
+import commandHandler.listDestinationsCommand
+import commandHandler.nameArguments
 import commandHandler.pathArguments
 import commandHandler.portArguments
 import commandHandler.quitCommand
@@ -29,6 +31,12 @@ const val dumpPathCurrent = "Current dump path: %1\$s"
 const val yourIpAddress = "Your IP address = %1\$s"
 const val ipAddressCode = "IP address code = %1\$s"
 const val couldNotEncodeIp = "Could not encode IP address."
+
+// List
+const val nameOutput = "Name: %1\$s"
+const val ipOutput = "IP: %1\$s"
+const val destinationNotFound = "No destination found with that name."
+const val noDestinationsRegistered = "No destinations registered. Register new ones with the 'add' command."
 
 // HelpCommand
 const val searchHeader = "Commands containing \"%1\$s\":"
@@ -85,6 +93,16 @@ data object ExitHelpDoc : HelpDoc {
     override val description = "Closes the program."
     override val format = exitCommand
     override val arguments = null
+}
+
+data object ListHelpDoc : HelpDoc {
+    override val title = listDestinationsCommand
+    override val description =
+        "Prints out the list of registered destinations. Enter a name to search the list instead."
+    override val format = "$listDestinationsCommand <OPTIONAL NAME>"
+    override val arguments = listOf(
+        nameArguments to "Name of a specific destination to find.",
+    )
 }
 
 data object SetDefaultPortHelpDoc : HelpDoc {
