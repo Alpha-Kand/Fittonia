@@ -29,7 +29,8 @@ fun main(args: Array<String>) = session {
     var activeSession = true
     val settings = SettingsManager.settingsManager
     settings.registerAsMainProcess()
-    val previousInput = LinkedList<String>()
+    settings.saveSettings()
+    val previousInput = settings.previousCmdEntries
     while (activeSession) {
         var commandLine = ""
         section {
@@ -62,7 +63,10 @@ fun main(args: Array<String>) = session {
             when (val command = CommandHandler(args = commandLine.split(" ")).getCommand()) {
                 is DecodeIPCodeCommand -> decodeIpCodeExecution(command = command)
                 is DumpCommand -> dumpExecution(command = command)
-                is ExitCommand -> activeSession = false
+                is ExitCommand -> {
+                    activeSession = false
+                    settings.saveSettings()
+                }
                 is HelpCommand -> helpExecution(command = command)
                 is IPCodeCommand -> encodeIpCodeExecution(command = command)
                 is ListDestinationsCommand -> listDestinationsExecution(command = command)

@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.Base64
+import java.util.LinkedList
 import javax.crypto.Cipher
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.IvParameterSpec
@@ -121,12 +122,15 @@ class SettingsManager private constructor() {
         }
     }
 
+    val previousCmdEntries = settings.previousCmdEntries
+
     data class SettingsData(
         val destinations: List<Destination>,
         val dumpPath: String,
         val defaultPort: Int,
         val serverPassword: String,
         val nextAutoJobName: Long,
+        val previousCmdEntries: LinkedList<String>,
     ) {
         constructor() : this(
             destinations = emptyList(),
@@ -134,6 +138,7 @@ class SettingsManager private constructor() {
             defaultPort = DEFAULT_PORT,
             serverPassword = "",
             nextAutoJobName = 0,
+            previousCmdEntries = LinkedList(),
         )
 
         data class Destination(
