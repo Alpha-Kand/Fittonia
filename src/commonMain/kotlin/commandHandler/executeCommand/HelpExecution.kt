@@ -8,6 +8,7 @@ import HelpDoc
 import KotterSession.kotter
 import ListHelpDoc
 import OutputIO.printlnIO
+import ServerPasswordHelpDoc
 import SetDefaultPortHelpDoc
 import com.varabyte.kotter.foundation.text.cyan
 import com.varabyte.kotter.foundation.text.textLine
@@ -50,6 +51,7 @@ private val helpDocs = listOf(
     DumpHelpDoc,
     ListHelpDoc,
     SetDefaultPortHelpDoc,
+    ServerPasswordHelpDoc,
     ExitHelpDoc,
 )
 

@@ -5,9 +5,12 @@ import commandHandler.ipCodeArguments
 import commandHandler.ipCodeCommand
 import commandHandler.listDestinationsCommand
 import commandHandler.nameArguments
+import commandHandler.newArguments
+import commandHandler.oldArguments
 import commandHandler.pathArguments
 import commandHandler.portArguments
 import commandHandler.quitCommand
+import commandHandler.serverPasswordCommand
 import commandHandler.setDefaultPortCommand
 
 // TODO: Use up to date kotlin multiplatform methods.
@@ -38,13 +41,20 @@ const val ipOutput = "IP: %1\$s"
 const val destinationNotFound = "No destination found with that name."
 const val noDestinationsRegistered = "No destinations registered. Register new ones with the 'add' command."
 
+// ServerPassword
+const val noPreviousPasswordFound = "No previous password found. New password not saved."
+const val confirmPasswordUpdate = "Please provide current (old) password to confirm changes."
+const val confirmPasswordUpdateFailed = "Old password was incorrect, please try again."
+const val passwordSaved =
+    "Password saved. You will need to provide this new password if you want to change the default password again."
+
 // HelpCommand
 const val searchHeader = "Commands containing \"%1\$s\":"
 const val noCommandsFound = "No commands found."
 const val searchFailed = "Search term not found."
 const val formatLabel = "Format: %1\$s"
 const val helpIntro = """Fittonia v1.0
-Made by Hunter Wiesman 'huntersmeadow@gmail.com'
+By Hunter Wiesman 'huntersmeadow@gmail.com'
 
 COMMANDS:
 """
@@ -111,5 +121,15 @@ data object SetDefaultPortHelpDoc : HelpDoc {
     override val format = "$setDefaultPortCommand <PORT>"
     override val arguments = listOf(
         portArguments to "Standardized port number. e.g. 8080",
+    )
+}
+
+data object ServerPasswordHelpDoc : HelpDoc {
+    override val title = serverPasswordCommand
+    override val description = "Sets the server's password that incoming connections must provide to connect."
+    override val format = "$serverPasswordCommand <NEW PASSWORD> <OPTIONAL OLD PASSWORD>"
+    override val arguments = listOf(
+        newArguments to "The new server password.",
+        oldArguments to "Old password, if previously set.",
     )
 }

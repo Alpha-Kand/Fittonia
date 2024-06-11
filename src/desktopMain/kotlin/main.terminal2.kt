@@ -13,12 +13,14 @@ import commandHandler.DumpCommand
 import commandHandler.ExitCommand
 import commandHandler.HelpCommand
 import commandHandler.IPCodeCommand
+import commandHandler.ServerPasswordCommand
 import commandHandler.SetDefaultPortCommand
 import commandHandler.executeCommand.decodeIpCodeExecution
 import commandHandler.executeCommand.dumpExecution
 import commandHandler.executeCommand.encodeIpCodeExecution
 import commandHandler.executeCommand.helpExecution
 import commandHandler.executeCommand.listDestinationsExecution
+import commandHandler.executeCommand.serverPasswordExecution
 import commandHandler.executeCommand.setDefaultPortExecution
 import settingsManager.SettingsManager
 import java.util.LinkedList
@@ -70,6 +72,7 @@ fun main(args: Array<String>) = session {
                 is HelpCommand -> helpExecution(command = command)
                 is IPCodeCommand -> encodeIpCodeExecution(command = command)
                 is ListDestinationsCommand -> listDestinationsExecution(command = command)
+                is ServerPasswordCommand -> serverPasswordExecution(command = command)
                 is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
                 else -> printLine(text = noValidCommand)
             }
