@@ -106,6 +106,8 @@ class SettingsManager private constructor() {
         return settings.serverPassword == password
     }
 
+    fun hasServerPassword(): Boolean = settings.serverPassword != null
+
     fun getAutoJobName(): String = synchronized(settings) {
         val jobName = settings.nextAutoJobName
         settings = settings.copy(nextAutoJobName = jobName + 1)
@@ -128,7 +130,7 @@ class SettingsManager private constructor() {
         val destinations: List<Destination>,
         val dumpPath: String,
         val defaultPort: Int,
-        val serverPassword: String,
+        val serverPassword: String?,
         val nextAutoJobName: Long,
         val previousCmdEntries: LinkedList<String>,
     ) {
@@ -136,7 +138,7 @@ class SettingsManager private constructor() {
             destinations = emptyList(),
             dumpPath = "",
             defaultPort = DEFAULT_PORT,
-            serverPassword = "",
+            serverPassword = null,
             nextAutoJobName = 0,
             previousCmdEntries = LinkedList(),
         )

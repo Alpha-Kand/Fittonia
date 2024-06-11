@@ -7,23 +7,29 @@ import com.varabyte.kotter.foundation.input.setInput
 import com.varabyte.kotter.foundation.session
 import com.varabyte.kotter.foundation.text.rgb
 import com.varabyte.kotter.foundation.text.text
+import commandHandler.AddCommand
 import commandHandler.CommandHandler
 import commandHandler.DecodeIPCodeCommand
 import commandHandler.DumpCommand
 import commandHandler.ExitCommand
 import commandHandler.HelpCommand
 import commandHandler.IPCodeCommand
+import commandHandler.ListDestinationsCommand
+import commandHandler.LogsCommand
+import commandHandler.ServerCommand
 import commandHandler.ServerPasswordCommand
 import commandHandler.SetDefaultPortCommand
+import commandHandler.executeCommand.addExecution2
 import commandHandler.executeCommand.decodeIpCodeExecution
 import commandHandler.executeCommand.dumpExecution
 import commandHandler.executeCommand.encodeIpCodeExecution
 import commandHandler.executeCommand.helpExecution
 import commandHandler.executeCommand.listDestinationsExecution
+import commandHandler.executeCommand.logsExecution
+import commandHandler.executeCommand.serverExecution2
 import commandHandler.executeCommand.serverPasswordExecution
 import commandHandler.executeCommand.setDefaultPortExecution
 import settingsManager.SettingsManager
-import java.util.LinkedList
 
 fun main(args: Array<String>) = session {
     KotterSession.kotter = this
@@ -37,7 +43,11 @@ fun main(args: Array<String>) = session {
         var commandLine = ""
         section {
             rgb(value = 0x9EFFAB) {
-                text("> "); input()
+                val serverStatus = when (LocalServer.isActive()) {
+                    false -> ""
+                    true -> "⏳ "
+                }
+                text("$serverStatus> "); input()
             }
         }.runUntilInputEntered {
             onKeyPressed {
@@ -63,15 +73,19 @@ fun main(args: Array<String>) = session {
         }
         try {
             when (val command = CommandHandler(args = commandLine.split(" ")).getCommand()) {
+                is AddCommand -> addExecution2(command = command)
                 is DecodeIPCodeCommand -> decodeIpCodeExecution(command = command)
                 is DumpCommand -> dumpExecution(command = command)
                 is ExitCommand -> {
                     activeSession = false
                     settings.saveSettings()
                 }
+
                 is HelpCommand -> helpExecution(command = command)
                 is IPCodeCommand -> encodeIpCodeExecution(command = command)
                 is ListDestinationsCommand -> listDestinationsExecution(command = command)
+                is LogsCommand -> logsExecution()
+                is ServerCommand -> serverExecution2(command = command)
                 is ServerPasswordCommand -> serverPasswordExecution(command = command)
                 is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
                 else -> printLine(text = noValidCommand)

@@ -48,6 +48,9 @@ const val confirmPasswordUpdateFailed = "Old password was incorrect, please try 
 const val passwordSaved =
     "Password saved. You will need to provide this new password if you want to change the default password again."
 
+// Server
+const val todo = "todo"
+
 // HelpCommand
 const val searchHeader = "Commands containing \"%1\$s\":"
 const val noCommandsFound = "No commands found."

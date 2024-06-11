@@ -1,3 +1,5 @@
+import com.varabyte.kotter.foundation.text.Color
+
 object Config {
     val IS_MOCKING = false
 
@@ -34,11 +36,19 @@ object Config {
 data object OutputIO {
     private val outputIO = mutableListOf<String>()
 
-    fun printlnIO(output: String) {
+    fun printlnIO(output: String, color: Color = Color.WHITE) {
         if (Config.IS_MOCKING) {
             outputIO.add(output)
         } else {
-            printLine(output)
+            printLine(output, color)
+        }
+    }
+
+    fun printlnIO() {
+        if (Config.IS_MOCKING) {
+            outputIO.add("\n")
+        } else {
+            printLine("\n")
         }
     }
 

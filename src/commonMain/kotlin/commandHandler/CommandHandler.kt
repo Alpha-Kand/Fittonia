@@ -34,6 +34,7 @@ class CommandHandler(private val args: List<String>) {
                 sendMessageCommand -> SendMessageCommand()
                 ipCodeCommand -> IPCodeCommand()
                 decodeIpCodeCommand -> DecodeIPCodeCommand()
+                logsCommand -> LogsCommand()
                 sessionCommand -> SessionCommand
                 helpCommand -> HelpCommand()
                 exitCommand,

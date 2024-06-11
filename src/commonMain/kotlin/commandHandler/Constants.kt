@@ -14,6 +14,7 @@ const val decodeIpCodeCommand = "decode-ip-code"
 const val exitCommand = "exit"
 const val quitCommand = "quit"
 const val sessionCommand = "session"
+const val logsCommand = "logs"
 const val helpCommand = "help"
 
 val commands = listOf(
@@ -31,6 +32,7 @@ val commands = listOf(
     exitCommand,
     quitCommand,
     sessionCommand,
+    logsCommand,
     helpCommand,
 )
 

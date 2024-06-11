@@ -1,5 +1,6 @@
 package commandHandler
 
+import OutputIO.printlnIO
 import SessionManager
 import commandHandler.Command.Companion.verifyArgumentIsSet
 import decodeIpAddress
@@ -141,5 +142,22 @@ fun canContinueSendCommand(command: SendCommand, client: HMeadowSocketClient, pa
             parent.sendString(ServerFlagsString.HAS_MORE)
             parent.sendString("Connected, but request refused.")
         },
+    )
+}
+
+fun canContinueSendCommand2(command: SendCommand, client: HMeadowSocketClient): Boolean {
+    val destination = SettingsManager.settingsManager.findDestination(command.getDestination())
+    val password = destination?.password ?: command.getPassword()
+    val commandFlag = when (command) {
+        is SendFilesCommand -> ServerCommandFlag.SEND_FILES
+        is SendMessageCommand -> ServerCommandFlag.SEND_MESSAGE
+        is AddCommand -> ServerCommandFlag.ADD_DESTINATION
+    }
+    return client.communicateCommand(
+        commandFlag = commandFlag,
+        password = password,
+        onSuccess = { printlnIO("Server accepted password.") },
+        onPasswordRefused = { printlnIO("Server refused password.") },
+        onFailure = { printlnIO("Connected, but request refused.") },
     )
 }

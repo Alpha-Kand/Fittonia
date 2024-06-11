@@ -2,6 +2,8 @@ package commandHandler.executeCommand
 
 import Config.OSMapper.serverEngineJar
 import KotterSession.kotter
+import LocalServer
+import OutputIO.printlnIO
 import com.varabyte.kotter.foundation.liveVarOf
 import com.varabyte.kotter.foundation.text.green
 import com.varabyte.kotter.foundation.text.text
@@ -111,6 +113,7 @@ internal fun HMeadowSocketServer.getJobName(flag: String) {
 private fun HMeadowSocketServer.passwordIsValid() = SettingsManager.settingsManager.checkPassword(receiveString())
 
 fun HMeadowSocketServer.handleCommandServerEngine(serverParent: HMeadowSocketClient) {
+    /*
     handleCommand(
         onSendFilesCommand = {
             // TODO it
@@ -139,29 +142,31 @@ fun HMeadowSocketServer.handleCommandServerEngine(serverParent: HMeadowSocketCli
             println("Received invalid server command from client.") // todo
         },
     )
+     */
 }
 
 fun HMeadowSocketServer.handleCommand(
-    onSendFilesCommand: (Boolean) -> Unit,
-    onSendMessageCommand: (Boolean) -> Unit,
-    onAddDestination: (Boolean) -> Unit,
-    onInvalidCommand: () -> Unit,
+    onSendFilesCommand: (Boolean, HMeadowSocketServer) -> Unit,
+    onSendMessageCommand: (Boolean, HMeadowSocketServer) -> Unit,
+    onAddDestination: (Boolean, HMeadowSocketServer) -> Unit,
+    onInvalidCommand: (String) -> Unit,
 ) {
+    val receivedCommand = receiveString()
     val command: ServerCommandFlag
     try {
-        command = requireNotNull(receiveString().toCommandFlag())
+        command = requireNotNull(receivedCommand.toCommandFlag())
     } catch (e: Exception) {
         sendDeny()
-        onInvalidCommand()
+        onInvalidCommand(receivedCommand)
         return
     }
     sendConfirmation()
     val passwordIsValid = passwordIsValid()
     sendApproval(choice = passwordIsValid)
     when (command) {
-        ServerCommandFlag.SEND_FILES -> onSendFilesCommand(passwordIsValid)
-        ServerCommandFlag.SEND_MESSAGE -> onSendMessageCommand(passwordIsValid)
-        ServerCommandFlag.ADD_DESTINATION -> onAddDestination(passwordIsValid)
+        ServerCommandFlag.SEND_FILES -> onSendFilesCommand(passwordIsValid, this)
+        ServerCommandFlag.SEND_MESSAGE -> onSendMessageCommand(passwordIsValid, this)
+        ServerCommandFlag.ADD_DESTINATION -> onAddDestination(passwordIsValid, this)
     }
 }
 
@@ -180,3 +185,15 @@ fun startServerEngine(inputTokens: List<String>) = Thread {
         .redirectError(ProcessBuilder.Redirect.INHERIT)
         .start()
 }.start()
+
+fun serverExecution2(command: ServerCommand) {
+    if (SettingsManager.settingsManager.hasServerPassword()) {
+        if (LocalServer.init(port = command.getPort())) {
+            printlnIO("Server started. ⏳ Waiting for clients.")
+        } else {
+            printlnIO("Server already started.")
+        }
+    } else {
+        printlnIO("No server password set. Set it with the `server-password` command.")
+    }
+}
