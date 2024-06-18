@@ -1,5 +1,6 @@
 package settingsManager
 
+import Config
 import Config.OSMapper.settingsOSSpecificPath
 import FittoniaError
 import FittoniaErrorType
@@ -33,10 +34,14 @@ class SettingsManager private constructor() {
     private var isMainProcess: Boolean = false
 
     private fun loadSettings(): SettingsData {
-        val settingsFile = File(settingsPath)
-        return if (settingsFile.isFile) {
-            val decryptedText = AESEncyption.decrypt(settingsFile.readText())
-            decryptedText.let { jacksonObjectMapper().readValue<SettingsData>(it) }
+        return if (!Config.IS_MOCKING) {
+            val settingsFile = File(settingsPath)
+            if (settingsFile.isFile) {
+                val decryptedText = AESEncyption.decrypt(settingsFile.readText())
+                decryptedText.let { jacksonObjectMapper().readValue<SettingsData>(it) }
+            } else {
+                SettingsData()
+            }
         } else {
             SettingsData()
         }
@@ -47,6 +52,7 @@ class SettingsManager private constructor() {
     }
 
     fun saveSettings() = synchronized(settings) {
+        if (Config.IS_MOCKING) throw IllegalStateException("Attempting to save settings in mock mode.")
         if (!isMainProcess) throw Exception("Attempting to save data in engine process!")
         val byteArrayOutputStream = ByteArrayOutputStream()
         jacksonObjectMapper().writeValue(byteArrayOutputStream, settings)
@@ -59,6 +65,8 @@ class SettingsManager private constructor() {
         settings = settings.copy(dumpPath = dumpPath)
         saveSettings()
     }
+
+    fun hasDumpPath(): Boolean = settings.dumpPath.isNotEmpty()
 
     fun addDestination(
         name: String,
@@ -112,7 +120,7 @@ class SettingsManager private constructor() {
         val jobName = settings.nextAutoJobName
         settings = settings.copy(nextAutoJobName = jobName + 1)
         saveSettings()
-        jobName.toString()
+        "Job_$jobName"
     }
 
     fun findDestination(destinationName: String?): SettingsData.Destination? {

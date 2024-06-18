@@ -1,17 +1,6 @@
-import KotterSession.kotter
-import com.varabyte.kotter.foundation.input.runUntilInputEntered
-import com.varabyte.kotter.foundation.text.Color
-import com.varabyte.kotter.foundation.text.red
-import com.varabyte.kotter.foundation.text.text
-import com.varabyte.kotter.foundation.text.textLine
-import com.varabyte.kotter.runtime.MainRenderScope
-import com.varabyte.kotter.runtime.RunScope
 import com.varabyte.kotter.runtime.Session
 import commandHandler.ServerFlagsString
 import hmeadowSocket.HMeadowSocket
-import hmeadowSocket.HMeadowSocketClient
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 
 fun <T> requireNull(value: T?) {
     if (value != null) {
@@ -24,23 +13,6 @@ inline fun Boolean.alsoIfTrue(block: () -> Unit): Boolean {
         block()
     }
     return this
-}
-
-fun Session.reportHMSocketError(e: HMeadowSocket.HMeadowSocketError) = section {
-    red { text("Error: ") }
-    e.hmMessage?.let {
-        textLine(text = it)
-    }
-    e.message?.let {
-        textLine(text = "       $it")
-    } ?: textLine(text = ".")
-}.run()
-
-fun HMeadowSocketClient.reportTextLine(text: String, color: Color = Color.WHITE) {
-    sendString(message = ServerFlagsString.PRINT_LINE)
-    sendInt(message = color.ordinal)
-    sendString(message = text)
-    receiveContinue()
 }
 
 fun HMeadowSocket.sendApproval(choice: Boolean) {
@@ -72,25 +44,4 @@ fun HMeadowSocket.sendDeny() {
 
 object KotterSession {
     lateinit var kotter: Session
-}
-
-enum class KotterRunType {
-    RUN,
-    RUN_UNTIL_INPUT_ENTERED,
-}
-
-@OptIn(DelicateCoroutinesApi::class)
-fun kotterSection(
-    renderBlock: MainRenderScope.() -> Unit,
-    runBlock: RunScope.() -> Unit = {},
-    runType: KotterRunType = KotterRunType.RUN,
-) {
-    if (Config.IS_MOCKING) {
-        runBlock(RunScope(kotter.section {}, GlobalScope))
-    } else {
-        when (runType) {
-            KotterRunType.RUN -> kotter.section(renderBlock).run(runBlock)
-            KotterRunType.RUN_UNTIL_INPUT_ENTERED -> kotter.section(renderBlock).runUntilInputEntered(runBlock)
-        }
-    }
 }

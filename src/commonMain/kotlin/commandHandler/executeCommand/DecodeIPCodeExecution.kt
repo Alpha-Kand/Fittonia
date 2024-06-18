@@ -9,10 +9,10 @@ import decodeIpAddress
 
 fun decodeIpCodeExecution(command: DecodeIPCodeCommand) {
     try {
-        printlnIO(output = decodeIpAddress(ipAddress = command.getCode()))
+        printlnIO(text = decodeIpAddress(ipAddress = command.getCode()))
     } catch (e: FittoniaError) {
-        printlnIO(output = blankIpCode)
+        printlnIO(text = blankIpCode)
     } catch (e: Exception) {
-        printlnIO(output = couldNotDecodeIp)
+        printlnIO(text = couldNotDecodeIp)
     }
 }

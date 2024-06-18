@@ -15,6 +15,10 @@ import commandHandler.setDefaultPortCommand
 
 // TODO: Use up to date kotlin multiplatform methods.
 
+// FittoniaErrors
+const val errorAddDestinationAlreadyExists =
+    "A destination with that name is already registered. Delete the old one and try again."
+
 // COMMANDS
 const val noValidCommand = "No valid command detected."
 
@@ -49,7 +53,22 @@ const val passwordSaved =
     "Password saved. You will need to provide this new password if you want to change the default password again."
 
 // Server
-const val todo = "todo"
+const val serverInitCannotStartNoPassword =
+    "Cannot start server: No server password set. Set it with the `server-password` command."
+const val serverInitCannotStartNoDumpPath =
+    "Cannot start server: No dump path set (directory path to store files from clients). Set it with the `dump` command."
+const val serverInitServerStarted = "Server started. ⏳ Waiting for clients."
+const val serverInitServerAlreadyStarted = "Server already started."
+
+// SendFiles
+const val cannotSendFilePathTooLong =
+    "The destination cannot receive %1\$s file(s) because their total paths would be too long (> 127 characters):"
+const val sendFilesUserOptionCancel = "%1\$s. Cancel sending files."
+const val sendFilesUserOptionSkipInvalid = "%1\$s. Skip invalid files."
+const val sendFilesUserOptionCompressAll = "%1\$s. Compress all files and send as a single file."
+const val sendFilesUserOptionCompressInvalid =
+    "%1\$s. Compress invalid files only and send as a single file (relative file paths will be preserved)."
+const val sendFilesUserOptionShowAll = "%1\$s. Show all files and ask again."
 
 // HelpCommand
 const val searchHeader = "Commands containing \"%1\$s\":"

@@ -44,9 +44,9 @@ fun dumpExecution(command: DumpCommand) {
         }
     } ?: run {
         if (settingsManager.settings.dumpPath.isEmpty()) {
-            printlnIO(output = dumpPathNotSet)
+            printlnIO(text = dumpPathNotSet)
         } else {
-            printlnIO(output = dumpPathCurrent.format(settingsManager.settings.dumpPath))
+            printlnIO(text = dumpPathCurrent.format(settingsManager.settings.dumpPath))
         }
     }
 }

@@ -14,6 +14,6 @@ fun setDefaultPortExecution(command: SetDefaultPortCommand) {
         settingsManager.setDefaultPort(requireNotNull(command.getPort()))
         successIO()
     } else {
-        printlnIO(output = currentDefaultPortIsSetTo.format(settingsManager.defaultPort))
+        printlnIO(text = currentDefaultPortIsSetTo.format(settingsManager.defaultPort))
     }
 }

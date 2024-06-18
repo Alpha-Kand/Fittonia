@@ -49,6 +49,7 @@ abstract class BaseMockkTest {
     @AfterEach
     fun afterEachBaseMockk() {
         clearAllMocks()
+        OutputIO.flush()
     }
 
     fun mockkFileOperationsFileExists(exists: Boolean) {

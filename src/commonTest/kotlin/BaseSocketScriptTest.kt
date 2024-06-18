@@ -57,6 +57,7 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
 
     @BeforeEach
     fun beforeEachSocketScript() {
+        LocalServer.init(port = 0)
         clientQueues.clear()
         serverQueues.clear()
         clientLists.clear()
@@ -67,7 +68,6 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
         setupBlock: TestScope.() -> Unit = {},
         vararg testBlocks: suspend TestScope.() -> Unit,
     ) {
-        val tempPrint: (String) -> Unit = ::println // TODO
         var throwException: Throwable? = null
         try {
             val handler = CoroutineExceptionHandler { _, exception ->
@@ -82,8 +82,6 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
                 )
             }
         } finally {
-            // tempPrint("throwException $throwException")
-
             println()
             print("Clients: ${clientLists.size} -> ")
             clientLists.forEach {
@@ -120,69 +118,44 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
                     while (true) {
                         if (clientIndex == clientList.size && serverIndex == serverList.size) break
 
-                        val clientCommunication = clientList[clientIndex]
-                        val serverCommunication = serverList[serverIndex]
+                        when {
+                            clientIndex == clientList.size && serverIndex < serverList.size -> {
+                                val serverCommunication = serverList[serverIndex]
+                                print("$index. ")
+                                println("Server.${serverCommunication.flag.name} (\"${serverCommunication.value}\")")
+                                serverIndex++
+                            }
 
-                        if (clientCommunication.flag == TestFlags.DEBUG_CHECKPOINT) {
-                            println("Client.${clientCommunication.flag.name} (\"${clientCommunication.value}\")")
-                            clientIndex++
-                            continue
+                            serverIndex == serverList.size && clientIndex < clientList.size -> {
+                                val clientCommunication = clientList[clientIndex]
+                                print("$index. ")
+                                println("Client.${clientCommunication.flag.name} (\"${clientCommunication.value}\")")
+                                serverIndex++
+                            }
+
+                            clientIndex == serverIndex -> {
+                                val clientCommunication = clientList[clientIndex]
+                                val serverCommunication = serverList[serverIndex]
+                                print("$index. ")
+                                val reportLine = "Client.%1\$s (%2\$s) - Server.%3\$s (%4\$s)"
+                                println(
+                                    reportLine.format(
+                                        clientCommunication.flag.name,
+                                        clientCommunication.value,
+                                        serverCommunication.flag.name,
+                                        serverCommunication.value,
+                                    ),
+                                )
+                                clientIndex++
+                                serverIndex++
+                            }
                         }
-
-                        if (serverCommunication.flag == TestFlags.DEBUG_CHECKPOINT) {
-                            println("Server.${clientCommunication.flag.name} (\"${clientCommunication.value}\")")
-                            serverIndex++
-                            continue
-                        }
-
-                        print("$index. ")
-                        println("Client.${clientCommunication.flag.name} (\"${clientCommunication.value}\") - Server.${clientCommunication.flag.name} (\"${clientCommunication.value}\")")
-
                         index++
-                        clientIndex++
-                        serverIndex++
                     }
-
-                    /*
-                    clientList.forEachIndexed { index, _ ->
-                        val clientCommunication = clientList[index]
-
-                        if(clientCommunication.flag == TestFlags.DEBUG_CHECKPOINT) {
-                            println("$index. Client.${clientCommunication.flag.name} (\"${clientCommunication.value}\")")
-                        }
-
-                        val serverCommunication = serverList[index - clientMinus]
-                        println("$index. Client.${ clientCommunication.flag.name} (\"${clientCommunication.value}\") - Server.${ serverCommunication.flag.name} (\"${ serverCommunication.value}\")")
+                    if (clientIndex != serverIndex) {
+                        throw IllegalStateException("Unbalanced Client/Server communication.")
                     }
-
-                    clientList.zip(serverList) { a, b ->
-                        println("$k. Client.${a.flag.name} (\"${a.value}\") - Server.${b.flag.name} (\"${a.value}\")")
-                        k++
-                    }
-                    clientList.forEachIndexed { index, communication ->
-                        if (index > serverList.size - 1) {
-                            println("$index. Client.${communication.flag.name} (\"${communication.value}\")")
-                        }
-                    }
-                    serverList.forEachIndexed { index, communication ->
-                        if (index > clientList.size - 1) {
-                            val sb = StringBuilder("")
-                            sb.append("$index. ")
-                            ("CLIENT." + communication.flag.name).map { sb.append(' ') }
-                            sb.append(" - Server.${communication.flag.name} (\"${communication.value}\")")
-                            println(sb.toString())
-                        }
-                    }
-
-                     */
                 }
-                /*
-                throwException?.let { throw it }
-                Assertions.assertEquals(clientList.size, serverList.size)
-                clientList.zip(serverList) { a, b ->
-                    Assertions.assertEquals(a.flag.value, -(b.flag.value))
-                }
-                */
                 println()
             }
 
@@ -196,7 +169,7 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
         HMeadowSocketClient(
             ipAddress = InetAddress.getByName("localhost"),
             port = 0,
-            timeoutMillis = 0,
+            handshakeTimeoutMillis = 0,
             socketInterface = generateSocketInterface(
                 otherQueue = serverQueues.getOrPut(key) { LinkedBlockingQueue<Communication>() },
                 thisQueue = clientQueues.getOrPut(key) { LinkedBlockingQueue<Communication>() },

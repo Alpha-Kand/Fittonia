@@ -6,10 +6,16 @@ import com.varabyte.kotter.foundation.text.Color
 
 fun logsExecution() {
     LocalServer.instance().getLogs().forEach {
-        when (it.type) {
-            LocalServer.LogType.NORMAL -> printlnIO("${it.timeStamp}: ${it.message}")
-            LocalServer.LogType.WARNING -> printlnIO("${it.timeStamp}: ${it.message}", color = Color.YELLOW)
-            LocalServer.LogType.ERROR -> printlnIO("${it.timeStamp}: ${it.message}", color = Color.RED)
+        val color = when (it.type) {
+            LocalServer.LogType.NORMAL -> Color.WHITE
+            LocalServer.LogType.WARNING -> Color.YELLOW
+            LocalServer.LogType.ERROR -> Color.RED
+            LocalServer.LogType.DEBUG -> Color.BLUE
+        }
+        if (it.jobId != null) {
+            printlnIO("${it.timeStamp} (${it.jobId}): ${it.message}", color = color)
+        } else {
+            printlnIO("${it.timeStamp}: ${it.message}", color = color)
         }
     }
 }

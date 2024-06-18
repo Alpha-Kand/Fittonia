@@ -74,19 +74,36 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
         HMeadowSocketClient(
             ipAddress = InetAddress.getByName(destination.ip),
             port = command.getPort(),
-            timeoutMillis = 2000L,
+            handshakeTimeoutMillis = 2000L,
         )
     } ?: HMeadowSocketClient(
         ipAddress = InetAddress.getByName(command.getIP()),
         port = command.getPort(),
-        timeoutMillis = 2000L,
+        handshakeTimeoutMillis = 2000L,
     )
     val serverEnginePort = serverParent.receiveInt()
     serverParent.close()
     return HMeadowSocketClient(
         ipAddress = InetAddress.getByName(command.getIP()),
         port = serverEnginePort,
-        timeoutMillis = 2000L,
+        handshakeTimeoutMillis = 2000L,
+    )
+}
+
+fun setupSendCommandClient2(command: SendCommand): HMeadowSocketClient {
+    val destination = SettingsManager.settingsManager.findDestination(command.getDestination())
+    return destination?.let {
+        HMeadowSocketClient(
+            ipAddress = InetAddress.getByName(destination.ip),
+            port = command.getPort(),
+            operationTimeoutMillis = 2000,
+            handshakeTimeoutMillis = 2000L,
+        )
+    } ?: HMeadowSocketClient(
+        ipAddress = InetAddress.getByName(command.getIP()),
+        port = command.getPort(),
+        operationTimeoutMillis = 2000,
+        handshakeTimeoutMillis = 2000L,
     )
 }
 
@@ -119,10 +136,10 @@ fun HMeadowSocketClient.communicateCommand(
     )
 }
 
-fun canContinueSendCommand(command: SendCommand, client: HMeadowSocketClient, parent: HMeadowSocketClient): Boolean {
-    val destination = SettingsManager.settingsManager.findDestination(command.getDestination())
-    val password = destination?.password ?: command.getPassword()
-    val commandFlag = when (command) {
+fun SendCommand.canContinueSendCommand(client: HMeadowSocketClient): Boolean {
+    val destination = SettingsManager.settingsManager.findDestination(this.getDestination())
+    val password = destination?.password ?: this.getPassword()
+    val commandFlag = when (this) {
         is SendFilesCommand -> ServerCommandFlag.SEND_FILES
         is SendMessageCommand -> ServerCommandFlag.SEND_MESSAGE
         is AddCommand -> ServerCommandFlag.ADD_DESTINATION
@@ -130,33 +147,7 @@ fun canContinueSendCommand(command: SendCommand, client: HMeadowSocketClient, pa
     return client.communicateCommand(
         commandFlag = commandFlag,
         password = password,
-        onSuccess = {
-            parent.sendString(ServerFlagsString.HAS_MORE)
-            parent.sendString("Server accepted password.")
-        },
-        onPasswordRefused = {
-            parent.sendString(ServerFlagsString.HAS_MORE)
-            parent.sendString("Server refused password.")
-        },
-        onFailure = {
-            parent.sendString(ServerFlagsString.HAS_MORE)
-            parent.sendString("Connected, but request refused.")
-        },
-    )
-}
-
-fun canContinueSendCommand2(command: SendCommand, client: HMeadowSocketClient): Boolean {
-    val destination = SettingsManager.settingsManager.findDestination(command.getDestination())
-    val password = destination?.password ?: command.getPassword()
-    val commandFlag = when (command) {
-        is SendFilesCommand -> ServerCommandFlag.SEND_FILES
-        is SendMessageCommand -> ServerCommandFlag.SEND_MESSAGE
-        is AddCommand -> ServerCommandFlag.ADD_DESTINATION
-    }
-    return client.communicateCommand(
-        commandFlag = commandFlag,
-        password = password,
-        onSuccess = { printlnIO("Server accepted password.") },
+        onSuccess = { },
         onPasswordRefused = { printlnIO("Server refused password.") },
         onFailure = { printlnIO("Connected, but request refused.") },
     )

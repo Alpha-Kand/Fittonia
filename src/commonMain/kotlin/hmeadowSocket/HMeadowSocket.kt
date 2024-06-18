@@ -116,6 +116,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
 
 open class HMeadowSocketServer(
     private val socket: Socket,
+    operationTimeoutMillis: Int = 0,
     final override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
 ) : HMeadowSocket(socketInterface) {
     init {
@@ -124,6 +125,7 @@ open class HMeadowSocketServer(
         } catch (e: Exception) {
             throw ServerSetupException(e)
         }
+        socket.soTimeout = operationTimeoutMillis
     }
 
     override fun close() {
@@ -237,28 +239,32 @@ open class HMeadowSocketServer(
     }
 }
 
-open class HMeadowSocketClient @Throws(ClientSetupException::class) constructor(
+open class HMeadowSocketClient
+@Throws(ClientSetupException::class)
+constructor(
     ipAddress: InetAddress,
     port: Int,
-    timeoutMillis: Long = 0,
+    handshakeTimeoutMillis: Long = 0,
+    operationTimeoutMillis: Int = 0,
     final override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
 ) : HMeadowSocket(socketInterface) {
     private val socket: Socket
 
     init {
         socket = socketInterface.bindToSocket {
-            val timeLimit = Instant.now().toEpochMilli() + timeoutMillis
+            val timeLimit = Instant.now().toEpochMilli() + handshakeTimeoutMillis
             var trySocket: Socket? = null
             do {
                 try {
                     trySocket = Socket(ipAddress, port)
                     break
                 } catch (e: IOException) {
-                    sleep(timeoutMillis / 10)
+                    sleep(handshakeTimeoutMillis / 10)
                 }
             } while (Instant.now().toEpochMilli() < timeLimit)
             trySocket ?: throw ClientSetupException(Exception())
         }
+        socket.soTimeout = operationTimeoutMillis
     }
 
     override fun close() {

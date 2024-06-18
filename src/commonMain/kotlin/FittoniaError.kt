@@ -65,16 +65,11 @@ class FittoniaError(
         FittoniaErrorType.PORT_NUM_OUT_OF_RANGE -> "Given port out of range (%s-%s): %s"
         FittoniaErrorType.ENCRYPTION_ERROR -> "Error while encrypting: %s"
         FittoniaErrorType.DECRYPTION_ERROR -> "Error while decrypting: %s"
-        FittoniaErrorType.ADD_DESTINATION_ALREADY_EXISTS -> "A destination with that name is already registered. Delete the old one and try again."
+        FittoniaErrorType.ADD_DESTINATION_ALREADY_EXISTS -> errorAddDestinationAlreadyExists
         FittoniaErrorType.CANT_SEND_MESSAGE_TWICE -> "Tried to set message more than once."
         FittoniaErrorType.TOO_MANY_SEARCH_TERMS -> "Cannot search with both terms at the same time."
     }
 }
-
-fun Session.reportFittoniaError(e: FittoniaError, prefix: String) = section {
-    red { text("$prefix Error: ") }
-    textLine(e.getErrorMessage())
-}.run()
 
 fun Session.reportFittoniaError2(e: FittoniaError) = section {
     red { text("Error: ") }

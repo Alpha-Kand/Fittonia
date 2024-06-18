@@ -14,8 +14,6 @@ fun printLine(text: String, color: Color = Color.WHITE) = kotterSection {
     textLine(text)
 }
 
-fun printLine() = kotterSection { textLine() }
-
 fun errorIO(text: String) = kotterSection {
     red { text("Error: ") }
     textLine(text)

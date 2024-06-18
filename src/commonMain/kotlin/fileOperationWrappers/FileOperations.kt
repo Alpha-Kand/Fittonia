@@ -9,7 +9,7 @@ import kotlin.io.path.Path
 internal object FileOperations {
 
     object FileOperationMock {
-        val exists = true
+        var exists = true
         val isRegularFile = true
         val paths = emptyList<Path>()
     }

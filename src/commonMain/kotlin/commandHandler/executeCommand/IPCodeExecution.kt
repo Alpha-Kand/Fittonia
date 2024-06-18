@@ -13,7 +13,7 @@ fun encodeIpCodeExecution(command: IPCodeCommand) {
     try {
         val address = Inet4Address.getLocalHost().hostAddress
         if (command.ioFormat) {
-            printlnIO(output = encodeIpAddress(address))
+            printlnIO(text = encodeIpAddress(address))
         } else {
             printLine(text = yourIpAddress.format(address))
             printLine(text = ipAddressCode.format(encodeIpAddress(address)))

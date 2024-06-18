@@ -75,10 +75,16 @@ class CommandHandler(private val args: List<String>) {
             }
         }
         if (command is SendFilesCommand) {
+            if (trailingArgs.isEmpty()) {
+                throw FittoniaError(FittoniaErrorType.REQUIRED_ARGUMENT_NOT_FOUND, filesArguments.first())
+            }
             command.setFiles(trailingArgs.toList())
             SessionManager.setSessionParams(command = command)
         }
         if (command is SendMessageCommand) {
+            if (trailingArgs.isEmpty()) {
+                throw FittoniaError(FittoniaErrorType.REQUIRED_ARGUMENT_NOT_FOUND, messageArguments.first())
+            }
             command.setMessage(trailingArgs.joinToString(separator = " "))
             SessionManager.setSessionParams(command = command)
         }

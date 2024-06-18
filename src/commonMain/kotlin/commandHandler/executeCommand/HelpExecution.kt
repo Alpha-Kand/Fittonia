@@ -22,10 +22,10 @@ import searchHeader
 
 fun helpExecution(command: HelpCommand) {
     command.getCommandSearch()?.let { search ->
-        printlnIO(output = searchHeader.format(search))
+        printlnIO(text = searchHeader.format(search))
         commands.mapNotNull { it.takeIf { it.contains(search) } }.let {
             if (it.isEmpty()) {
-                printlnIO(output = noCommandsFound)
+                printlnIO(text = noCommandsFound)
             } else {
                 it.forEach(::printlnIO)
             }
@@ -35,12 +35,12 @@ fun helpExecution(command: HelpCommand) {
             it.search(term = search)
         }.also {
             if (it.isEmpty()) {
-                printlnIO(output = searchFailed)
+                printlnIO(text = searchFailed)
                 return
             }
         }.forEach(::printHelpSection)
     } ?: run {
-        printlnIO(output = helpIntro)
+        printlnIO(text = helpIntro)
         helpDocs.forEach(::printHelpSection)
     }
 }

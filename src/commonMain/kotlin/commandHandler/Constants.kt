@@ -110,6 +110,15 @@ class FileTransfer {
             COMPRESS_INVALID,
             SHOW_ALL,
         )
+        val Int.toName: String
+            get() = when (this) {
+                NORMAL -> "NORMAL"
+                CANCEL -> "CANCEL"
+                SKIP_INVALID -> "SKIP_INVALID"
+                COMPRESS_EVERYTHING -> "COMPRESS_EVERYTHING"
+                COMPRESS_INVALID -> "COMPRESS_INVALID"
+                else -> "ERROR"
+            }
 
         fun String.stripPrefix() = this.substring(startIndex = prefixLength)
         fun String.getPrefix() = this.substring(startIndex = 0, endIndex = prefixLength)
