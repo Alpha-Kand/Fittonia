@@ -10,6 +10,7 @@ import commandHandler.oldArguments
 import commandHandler.pathArguments
 import commandHandler.portArguments
 import commandHandler.quitCommand
+import commandHandler.removeCommand
 import commandHandler.searchArguments
 import commandHandler.serverPasswordCommand
 import commandHandler.setDefaultPortCommand
@@ -136,6 +137,15 @@ data object ListHelpDoc : HelpDoc {
     override val arguments = listOf(
         nameArguments to "Name of a specific destination to find. Must match exactly.",
         searchArguments to "Search term for destinations to find. Can be a sub-section of a name.",
+    )
+}
+
+data object RemoveHelpDoc : HelpDoc {
+    override val title = removeCommand
+    override val description = "Removes a specified registered destination."
+    override val format = "$removeCommand <NAME>"
+    override val arguments = listOf(
+        nameArguments to "Name of a specific destination to remove. Must match exactly.",
     )
 }
 

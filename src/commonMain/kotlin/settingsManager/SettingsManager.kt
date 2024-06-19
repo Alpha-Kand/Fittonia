@@ -88,14 +88,15 @@ class SettingsManager private constructor() {
         saveSettings()
     }
 
-    fun removeDestination(name: String) {
+    fun removeDestination(name: String): Boolean {
         if (settings.destinations.find { it.name == name } == null) {
-            throw IllegalArgumentException("Destination with that name not found.")
+            return false
         }
         settings = settings.copy(
             destinations = settings.destinations.filterNot { name == it.name },
         )
         saveSettings()
+        return true
     }
 
     fun setDefaultPort(port: Int) {

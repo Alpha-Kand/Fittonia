@@ -16,6 +16,7 @@ import commandHandler.HelpCommand
 import commandHandler.IPCodeCommand
 import commandHandler.ListDestinationsCommand
 import commandHandler.LogsCommand
+import commandHandler.RemoveCommand
 import commandHandler.SendFilesCommand
 import commandHandler.SendMessageCommand
 import commandHandler.ServerCommand
@@ -28,6 +29,7 @@ import commandHandler.executeCommand.encodeIpCodeExecution
 import commandHandler.executeCommand.helpExecution
 import commandHandler.executeCommand.listDestinationsExecution
 import commandHandler.executeCommand.logsExecution
+import commandHandler.executeCommand.removeExecution
 import commandHandler.executeCommand.sendExecution.sendFilesExecution
 import commandHandler.executeCommand.sendExecution.sendMessageExecution
 import commandHandler.executeCommand.serverExecution
@@ -88,6 +90,7 @@ fun main(args: Array<String>) = session {
                 is IPCodeCommand -> encodeIpCodeExecution(command = command)
                 is ListDestinationsCommand -> listDestinationsExecution(command = command)
                 is LogsCommand -> logsExecution()
+                is RemoveCommand -> removeExecution(command = command)
                 is SendFilesCommand -> sendFilesExecution(command = command)
                 is SendMessageCommand -> sendMessageExecution(command = command)
                 is ServerCommand -> serverExecution(command = command)
