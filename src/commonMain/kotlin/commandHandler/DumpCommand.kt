@@ -2,7 +2,8 @@ package commandHandler
 
 import requireNull
 
-class DumpCommand : Command {
+class DumpCommand : Command, HelpDocs {
+    override var hasHelped = defaultHelped()
     private var path: String? = null
 
     fun getDumpPath() = path
@@ -10,6 +11,7 @@ class DumpCommand : Command {
     override fun verify() {}
 
     override fun addArg(argumentName: String, value: String) = tryCatch(argumentName = argumentName, value = value) {
+        if (showHelp(argumentName, dumpCommand)) return@tryCatch true
         if (pathArguments.contains(argumentName)) {
             requireNull(path)
             path = value

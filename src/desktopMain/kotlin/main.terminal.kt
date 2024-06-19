@@ -12,7 +12,9 @@ import commandHandler.CommandHandler
 import commandHandler.DecodeIPCodeCommand
 import commandHandler.DumpCommand
 import commandHandler.ExitCommand
+import commandHandler.HasHelpedException
 import commandHandler.HelpCommand
+import commandHandler.HelpDocs
 import commandHandler.IPCodeCommand
 import commandHandler.ListDestinationsCommand
 import commandHandler.LogsCommand
@@ -77,7 +79,11 @@ fun main(args: Array<String>) = session {
             }
         }
         try {
-            when (val command = CommandHandler(args = commandLine.split(" ")).getCommand()) {
+            when (val command = CommandHandler(args = commandLine.split(" ")).getCommand().also {
+                if (it is HelpDocs && it.hasHelped) {
+                    throw HasHelpedException()
+                }
+            }) {
                 is AddCommand -> addExecution(command = command)
                 is DecodeIPCodeCommand -> decodeIpCodeExecution(command = command)
                 is DumpCommand -> dumpExecution(command = command)
@@ -98,6 +104,8 @@ fun main(args: Array<String>) = session {
                 is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
                 else -> printLine(text = noValidCommand)
             }
+        } catch (e: HasHelpedException) {
+            // Eat it.
         } catch (e: FittoniaError) {
             reportFittoniaError2(e)
         }

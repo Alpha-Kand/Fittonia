@@ -49,13 +49,11 @@ val oldArguments = listOf("--old")
 val jobArguments = listOf("--job", "-j")
 val messageArguments = listOf("--message", "--string")
 val sessionArguments = listOf("--session", "-e")
-val clientEnginePortArguments = listOf("--clientengineport")
-val serverEnginePortArguments = listOf("--serverengineport")
 val ipCodeArguments = listOf("--ipcode")
 val machineReadableOutputArguments = listOf("--ioformat", "-z")
-val forceArguments = listOf("--force", "-x")
 val searchCommandsArguments = listOf("--command", "-c")
 val searchArguments = listOf("--search", "-s")
+val helpArguments = listOf("--help", "-h")
 
 class ServerFlagsString {
     companion object {

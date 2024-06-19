@@ -2,7 +2,6 @@ package commandHandler
 
 import FittoniaError
 import FittoniaErrorType
-import OutputIO.printlnIO
 import alsoIfTrue
 import requireNull
 
@@ -15,8 +14,6 @@ class HelpCommand : Command {
 
     override fun verify() {
         if (commandSearch != null && search != null) {
-            printlnIO(commandSearch.toString())
-            printlnIO(search.toString())
             throw FittoniaError(FittoniaErrorType.TOO_MANY_SEARCH_TERMS)
         }
     }
