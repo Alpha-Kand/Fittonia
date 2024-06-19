@@ -21,6 +21,10 @@ fun listDestinationsExecution(command: ListDestinationsCommand) {
             settingsManager.settings.destinations.find { it.name == searchName }?.let {
                 printDestination(it)
             } ?: printlnIO(destinationNotFound)
+        } ?: command.getSearch()?.let { searchText ->
+            settingsManager.settings.destinations.find { it.name.contains(searchText) }?.let {
+                printDestination(it)
+            } ?: printlnIO(destinationNotFound)
         } ?: run {
             settingsManager.settings.destinations.forEach {
                 printDestination(it)

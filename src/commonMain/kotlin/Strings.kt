@@ -10,6 +10,7 @@ import commandHandler.oldArguments
 import commandHandler.pathArguments
 import commandHandler.portArguments
 import commandHandler.quitCommand
+import commandHandler.searchArguments
 import commandHandler.serverPasswordCommand
 import commandHandler.setDefaultPortCommand
 
@@ -130,10 +131,11 @@ data object ExitHelpDoc : HelpDoc {
 data object ListHelpDoc : HelpDoc {
     override val title = listDestinationsCommand
     override val description =
-        "Prints out the list of registered destinations. Enter a name to search the list instead."
-    override val format = "$listDestinationsCommand <OPTIONAL NAME>"
+        "Prints out the list of registered destinations. Enter a name or lookup term to search the list instead."
+    override val format = "$listDestinationsCommand <OPTIONAL NAME> <OPTIONAL SEARCH>"
     override val arguments = listOf(
-        nameArguments to "Name of a specific destination to find.",
+        nameArguments to "Name of a specific destination to find. Must match exactly.",
+        searchArguments to "Search term for destinations to find. Can be a sub-section of a name.",
     )
 }
 
