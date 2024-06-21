@@ -1,3 +1,5 @@
+import com.varabyte.kotter.foundation.text.Color
+
 object Config {
     val IS_MOCKING = false
 
@@ -9,23 +11,10 @@ object Config {
         }
 
         private val osType = OSType.MACOS
-        private const val VERSION = "1.0"
-
-        val clientEngineJar = when (osType) {
-            OSType.LINUX -> "FittoniaClientEngine-linux-x64-$VERSION.jar"
-            OSType.MACOS -> "FittoniaClientEngine-macos-arm64-$VERSION.jar"
-            OSType.WINDOWS -> ""
-        }
-
-        val serverEngineJar = when (osType) {
-            OSType.LINUX -> "FittoniaServerEngine-linux-x64-$VERSION.jar"
-            OSType.MACOS -> "FittoniaServerEngine-macos-arm64-$VERSION.jar"
-            OSType.WINDOWS -> ""
-        }
 
         val settingsOSSpecificPath = when (osType) {
-            OSType.LINUX -> "/home/hunterneo/Desktop/TRANSFER/fittoniaSettings|3.xml"
-            OSType.MACOS -> "/Users/hunter.wiesman/Desktop/FittoniaTRANSFER/fittoniaSettings|3.xml"
+            OSType.LINUX -> "/home/hunterneo/Desktop/TRANSFER/fittoniaSettings|4.xml"
+            OSType.MACOS -> "/Users/hunter.wiesman/Desktop/FittoniaTRANSFER/fittoniaSettings|4.xml"
             OSType.WINDOWS -> ""
         }
     }
@@ -34,11 +23,19 @@ object Config {
 data object OutputIO {
     private val outputIO = mutableListOf<String>()
 
-    fun printlnIO(output: String) {
+    fun printlnIO(text: String, color: Color = Color.WHITE) {
         if (Config.IS_MOCKING) {
-            outputIO.add(output)
+            outputIO.add(text)
         } else {
-            printLine(output)
+            printLine(text, color)
+        }
+    }
+
+    fun printlnIO() {
+        if (Config.IS_MOCKING) {
+            outputIO.add("\n")
+        } else {
+            printLine("\n")
         }
     }
 

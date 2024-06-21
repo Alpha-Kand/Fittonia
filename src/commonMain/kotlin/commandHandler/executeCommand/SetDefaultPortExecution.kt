@@ -1,17 +1,19 @@
 package commandHandler.executeCommand
 
-import com.varabyte.kotter.foundation.text.textLine
-import com.varabyte.kotter.runtime.Session
+import OutputIO.printlnIO
 import commandHandler.SetDefaultPortCommand
+import currentDefaultPortIsSetTo
 import settingsManager.SettingsManager
+import successIO
 
-fun Session.setDefaultPortExecution(command: SetDefaultPortCommand) = section {
+fun setDefaultPortExecution(command: SetDefaultPortCommand) {
     val settingsManager = SettingsManager.settingsManager
     if (command.getClear()) {
         settingsManager.clearDefaultPort()
     } else if (command.getPort() != null) {
         settingsManager.setDefaultPort(requireNotNull(command.getPort()))
+        successIO()
     } else {
-        textLine(text = "Current default port set to: ${settingsManager.defaultPort}")
+        printlnIO(text = currentDefaultPortIsSetTo.format(settingsManager.defaultPort))
     }
-}.run()
+}

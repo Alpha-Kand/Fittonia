@@ -34,8 +34,13 @@ class CommandHandler(private val args: List<String>) {
                 sendMessageCommand -> SendMessageCommand()
                 ipCodeCommand -> IPCodeCommand()
                 decodeIpCodeCommand -> DecodeIPCodeCommand()
-                exitCommand -> ExitCommand
+                logsCommand -> LogsCommand()
                 sessionCommand -> SessionCommand
+                helpCommand -> HelpCommand()
+                exitCommand,
+                quitCommand,
+                -> ExitCommand
+
                 else -> throw IllegalArgumentException()
             }
         } catch (_: Exception) {
@@ -70,10 +75,16 @@ class CommandHandler(private val args: List<String>) {
             }
         }
         if (command is SendFilesCommand) {
+            if (trailingArgs.isEmpty()) {
+                throw FittoniaError(FittoniaErrorType.REQUIRED_ARGUMENT_NOT_FOUND, filesArguments.first())
+            }
             command.setFiles(trailingArgs.toList())
             SessionManager.setSessionParams(command = command)
         }
         if (command is SendMessageCommand) {
+            if (trailingArgs.isEmpty()) {
+                throw FittoniaError(FittoniaErrorType.REQUIRED_ARGUMENT_NOT_FOUND, messageArguments.first())
+            }
             command.setMessage(trailingArgs.joinToString(separator = " "))
             SessionManager.setSessionParams(command = command)
         }

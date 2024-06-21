@@ -1,5 +1,6 @@
 package settingsManager
 
+import Config
 import Config.OSMapper.settingsOSSpecificPath
 import FittoniaError
 import FittoniaErrorType
@@ -9,6 +10,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.Base64
+import java.util.LinkedList
 import javax.crypto.Cipher
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.IvParameterSpec
@@ -32,10 +34,14 @@ class SettingsManager private constructor() {
     private var isMainProcess: Boolean = false
 
     private fun loadSettings(): SettingsData {
-        val settingsFile = File(settingsPath)
-        return if (settingsFile.isFile) {
-            val decryptedText = AESEncyption.decrypt(settingsFile.readText())
-            decryptedText.let { jacksonObjectMapper().readValue<SettingsData>(it) }
+        return if (!Config.IS_MOCKING) {
+            val settingsFile = File(settingsPath)
+            if (settingsFile.isFile) {
+                val decryptedText = AESEncyption.decrypt(settingsFile.readText())
+                decryptedText.let { jacksonObjectMapper().readValue<SettingsData>(it) }
+            } else {
+                SettingsData()
+            }
         } else {
             SettingsData()
         }
@@ -46,6 +52,7 @@ class SettingsManager private constructor() {
     }
 
     fun saveSettings() = synchronized(settings) {
+        if (Config.IS_MOCKING) throw IllegalStateException("Attempting to save settings in mock mode.")
         if (!isMainProcess) throw Exception("Attempting to save data in engine process!")
         val byteArrayOutputStream = ByteArrayOutputStream()
         jacksonObjectMapper().writeValue(byteArrayOutputStream, settings)
@@ -58,6 +65,8 @@ class SettingsManager private constructor() {
         settings = settings.copy(dumpPath = dumpPath)
         saveSettings()
     }
+
+    fun hasDumpPath(): Boolean = settings.dumpPath.isNotEmpty()
 
     fun addDestination(
         name: String,
@@ -79,14 +88,15 @@ class SettingsManager private constructor() {
         saveSettings()
     }
 
-    fun removeDestination(name: String) {
+    fun removeDestination(name: String): Boolean {
         if (settings.destinations.find { it.name == name } == null) {
-            throw IllegalArgumentException("Destination with that name not found.")
+            return false
         }
         settings = settings.copy(
             destinations = settings.destinations.filterNot { name == it.name },
         )
         saveSettings()
+        return true
     }
 
     fun setDefaultPort(port: Int) {
@@ -105,11 +115,13 @@ class SettingsManager private constructor() {
         return settings.serverPassword == password
     }
 
+    fun hasServerPassword(): Boolean = settings.serverPassword != null
+
     fun getAutoJobName(): String = synchronized(settings) {
         val jobName = settings.nextAutoJobName
         settings = settings.copy(nextAutoJobName = jobName + 1)
         saveSettings()
-        jobName.toString()
+        "Job_$jobName"
     }
 
     fun findDestination(destinationName: String?): SettingsData.Destination? {
@@ -121,19 +133,23 @@ class SettingsManager private constructor() {
         }
     }
 
+    val previousCmdEntries = settings.previousCmdEntries
+
     data class SettingsData(
         val destinations: List<Destination>,
         val dumpPath: String,
         val defaultPort: Int,
-        val serverPassword: String,
+        val serverPassword: String?,
         val nextAutoJobName: Long,
+        val previousCmdEntries: LinkedList<String>,
     ) {
         constructor() : this(
             destinations = emptyList(),
             dumpPath = "",
             defaultPort = DEFAULT_PORT,
-            serverPassword = "",
+            serverPassword = null,
             nextAutoJobName = 0,
+            previousCmdEntries = LinkedList(),
         )
 
         data class Destination(

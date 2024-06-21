@@ -1,79 +1,113 @@
+import com.varabyte.kotter.foundation.input.Keys
 import com.varabyte.kotter.foundation.input.input
 import com.varabyte.kotter.foundation.input.onInputEntered
+import com.varabyte.kotter.foundation.input.onKeyPressed
 import com.varabyte.kotter.foundation.input.runUntilInputEntered
+import com.varabyte.kotter.foundation.input.setInput
 import com.varabyte.kotter.foundation.session
+import com.varabyte.kotter.foundation.text.rgb
 import com.varabyte.kotter.foundation.text.text
-import com.varabyte.kotter.runtime.Session
 import commandHandler.AddCommand
 import commandHandler.CommandHandler
 import commandHandler.DecodeIPCodeCommand
 import commandHandler.DumpCommand
 import commandHandler.ExitCommand
+import commandHandler.HasHelpedException
+import commandHandler.HelpCommand
+import commandHandler.HelpDocs
 import commandHandler.IPCodeCommand
 import commandHandler.ListDestinationsCommand
+import commandHandler.LogsCommand
 import commandHandler.RemoveCommand
 import commandHandler.SendFilesCommand
 import commandHandler.SendMessageCommand
 import commandHandler.ServerCommand
 import commandHandler.ServerPasswordCommand
-import commandHandler.SessionCommand
 import commandHandler.SetDefaultPortCommand
 import commandHandler.executeCommand.addExecution
 import commandHandler.executeCommand.decodeIpCodeExecution
 import commandHandler.executeCommand.dumpExecution
 import commandHandler.executeCommand.encodeIpCodeExecution
+import commandHandler.executeCommand.helpExecution
 import commandHandler.executeCommand.listDestinationsExecution
+import commandHandler.executeCommand.logsExecution
 import commandHandler.executeCommand.removeExecution
-import commandHandler.executeCommand.sendExecution.sendCommandExecution
+import commandHandler.executeCommand.sendExecution.sendFilesExecution
+import commandHandler.executeCommand.sendExecution.sendMessageExecution
 import commandHandler.executeCommand.serverExecution
 import commandHandler.executeCommand.serverPasswordExecution
 import commandHandler.executeCommand.setDefaultPortExecution
-import hmeadowSocket.HMeadowSocket
 import settingsManager.SettingsManager
 
 fun main(args: Array<String>) = session {
     KotterSession.kotter = this
-    try {
-        val settings = SettingsManager.settingsManager
-        settings.registerAsMainProcess()
-        settings.saveSettings()
-        if (args.isNotEmpty()) {
-            handleArguments(args.toList())
-        } else {
-            // TODO show version & --version & --help.
-        }
-
-        while (SessionManager.sessionActive) {
-            var commandLine = ""
-            section {
-                text("> "); input()
-            }.runUntilInputEntered {
-                onInputEntered { commandLine = input }
+    var activeSession = true
+    val settings = SettingsManager.settingsManager
+    settings.registerAsMainProcess()
+    settings.saveSettings()
+    val previousInput = settings.previousCmdEntries
+    while (activeSession) {
+        var commandLine = ""
+        section {
+            rgb(value = 0x9EFFAB) {
+                val serverStatus = when (LocalServer.isActive()) {
+                    false -> ""
+                    true -> "⏳ "
+                }
+                text("$serverStatus> "); input()
             }
-            handleArguments(inputTokens = SessionManager.getSessionParams(commandLine.split(" ")))
-        }
-    } catch (e: FittoniaError) {
-        reportFittoniaError(e, prefix = "Terminal")
-    } catch (e: HMeadowSocket.HMeadowSocketError) {
-        reportHMSocketError(e)
-    }
-}
+        }.runUntilInputEntered {
+            onKeyPressed {
+                when (key) {
+                    Keys.UP -> {
+                        setInput(text = previousInput.last)
+                        previousInput.addFirst(previousInput.last)
+                        previousInput.removeLast()
+                    }
 
-fun Session.handleArguments(inputTokens: List<String>) {
-    when (val command = CommandHandler(args = inputTokens).getCommand()) {
-        is AddCommand -> addExecution(command = command, inputTokens = inputTokens)
-        is RemoveCommand -> removeExecution(command = command)
-        is ListDestinationsCommand -> listDestinationsExecution(command = command)
-        is DumpCommand -> dumpExecution(command = command)
-        is ServerCommand -> serverExecution(command = command)
-        is SendFilesCommand -> sendCommandExecution(command = command, inputTokens = inputTokens)
-        is SendMessageCommand -> sendCommandExecution(command = command, inputTokens = inputTokens)
-        is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
-        is ServerPasswordCommand -> serverPasswordExecution(command = command)
-        is IPCodeCommand -> encodeIpCodeExecution(command = command)
-        is DecodeIPCodeCommand -> decodeIpCodeExecution(command = command)
-        is ExitCommand -> SessionManager.sessionActive = false
-        is SessionCommand -> return
-        else -> throw IllegalStateException("No valid command detected.")
+                    Keys.DOWN -> {
+                        setInput(text = previousInput.first)
+                        previousInput.addLast(previousInput.first)
+                        previousInput.removeFirst()
+                    }
+                }
+            }
+
+            onInputEntered {
+                commandLine = input
+                previousInput.add(commandLine)
+            }
+        }
+        try {
+            when (val command = CommandHandler(args = commandLine.split(" ")).getCommand().also {
+                if (it is HelpDocs && it.hasHelped) {
+                    throw HasHelpedException()
+                }
+            }) {
+                is AddCommand -> addExecution(command = command)
+                is DecodeIPCodeCommand -> decodeIpCodeExecution(command = command)
+                is DumpCommand -> dumpExecution(command = command)
+                is ExitCommand -> {
+                    activeSession = false
+                    settings.saveSettings()
+                }
+
+                is HelpCommand -> helpExecution(command = command)
+                is IPCodeCommand -> encodeIpCodeExecution(command = command)
+                is ListDestinationsCommand -> listDestinationsExecution(command = command)
+                is LogsCommand -> logsExecution()
+                is RemoveCommand -> removeExecution(command = command)
+                is SendFilesCommand -> sendFilesExecution(command = command)
+                is SendMessageCommand -> sendMessageExecution(command = command)
+                is ServerCommand -> serverExecution(command = command)
+                is ServerPasswordCommand -> serverPasswordExecution(command = command)
+                is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
+                else -> printLine(text = noValidCommand)
+            }
+        } catch (e: HasHelpedException) {
+            // Eat it.
+        } catch (e: FittoniaError) {
+            reportFittoniaError2(e)
+        }
     }
 }

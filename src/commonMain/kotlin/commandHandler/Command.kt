@@ -41,5 +41,5 @@ fun verifyPortNumber(port: Int?): Boolean {
 }
 
 fun HMeadowSocket.receiveConfirmation(): Boolean { // TODO replace with sending and receiving booleans.
-    return receiveString() == ServerFlagsString.CONFIRM
+    return receiveString() == ServerFlagsString.CONFIRM && receiveBoolean()
 }

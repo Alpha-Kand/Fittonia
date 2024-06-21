@@ -3,8 +3,10 @@ package commandHandler.executeCommand
 import BaseMockkTest
 import OutputIO
 import UnitTest
+import blankIpCode
 import commandHandler.DecodeIPCodeCommand
 import commandHandler.ipCodeArguments
+import couldNotDecodeIp
 import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
 
@@ -25,7 +27,7 @@ private class DecodeIpCodeExecutionTest : BaseMockkTest() {
     }
 
     @UnitTest
-    fun error() = runTest {
+    fun errorInvalidCode() = runTest {
         decodeIpCodeExecution(
             command = DecodeIPCodeCommand().also {
                 it.ioFormat = true
@@ -33,7 +35,18 @@ private class DecodeIpCodeExecutionTest : BaseMockkTest() {
             },
         )
         TestCase.assertEquals(
-            listOf("Could not decode the IP code."),
+            listOf(couldNotDecodeIp),
+            OutputIO.flush(),
+        )
+    }
+
+    @UnitTest
+    fun errorEmptyCode() = runTest {
+        decodeIpCodeExecution(
+            command = DecodeIPCodeCommand().also { it.ioFormat = true },
+        )
+        TestCase.assertEquals(
+            listOf(blankIpCode),
             OutputIO.flush(),
         )
     }

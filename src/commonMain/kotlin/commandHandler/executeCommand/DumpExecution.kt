@@ -1,34 +1,52 @@
 package commandHandler.executeCommand
 
-import com.varabyte.kotter.foundation.text.textLine
-import com.varabyte.kotter.runtime.Session
+import OutputIO.printlnIO
 import commandHandler.DumpCommand
+import dumpPathCurrent
+import dumpPathDoesntExist
+import dumpPathNotEmptyWarning
+import dumpPathNotSet
+import dumpPathNotValidDirectory
+import dumpPathNotWritable
+import errorIO
 import settingsManager.SettingsManager
+import successIO
+import warningIO
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 
-fun Session.dumpExecution(command: DumpCommand) = section {
+fun dumpExecution(command: DumpCommand) {
     val settingsManager = SettingsManager.settingsManager
-    command.getDumpPath()?.let {
-        val path = Paths.get(it).toAbsolutePath()
-        if (Files.exists(path)) {
-            if (Files.isDirectory(path)) {
-                settingsManager.setDumpPath(path.toString())
-
-                if (Files.list(path).findFirst().isPresent) {
-                    textLine(text = "Warning: New dump path is not empty.")
+    command.getDumpPath()?.let { path ->
+        val expandedPath = if (path.startsWith("~" + File.separator)) {
+            System.getProperty("user.home") + File.separator + path.substring(2)
+        } else {
+            path
+        }
+        val dumpPath = Paths.get(expandedPath).toAbsolutePath()
+        if (Files.exists(dumpPath)) {
+            if (Files.isDirectory(dumpPath)) {
+                if (Files.isWritable(dumpPath)) {
+                    settingsManager.setDumpPath(dumpPath.toString())
+                    if (Files.list(dumpPath).findFirst().isPresent) {
+                        successIO()
+                        warningIO(dumpPathNotEmptyWarning)
+                    }
+                } else {
+                    errorIO(dumpPathNotWritable)
                 }
             } else {
-                textLine(text = "Supplied path was not a valid directory.")
+                errorIO(dumpPathNotValidDirectory)
             }
         } else {
-            textLine(text = "Supplied path does not exist.")
+            errorIO(dumpPathDoesntExist)
         }
     } ?: run {
         if (settingsManager.settings.dumpPath.isEmpty()) {
-            textLine(text = "No dump path set.")
+            printlnIO(text = dumpPathNotSet)
         } else {
-            textLine(text = "Current dump path: " + settingsManager.settings.dumpPath)
+            printlnIO(text = dumpPathCurrent.format(settingsManager.settings.dumpPath))
         }
     }
-}.run()
+}

@@ -1,81 +1,118 @@
 package commandHandler.executeCommand.sendExecution
 
-import FittoniaError
-import KotterRunType
 import KotterSession.kotter
+import OutputIO.printlnIO
+import cannotSendFilePathTooLong
 import com.varabyte.kotter.foundation.input.onInputEntered
+import com.varabyte.kotter.foundation.input.runUntilInputEntered
 import com.varabyte.kotter.foundation.liveVarOf
 import com.varabyte.kotter.foundation.text.Color
-import commandHandler.AddCommand
+import com.varabyte.kotter.foundation.text.text
 import commandHandler.FileTransfer
-import commandHandler.SendCommand
+import commandHandler.FileTransfer.Companion.toName
+import commandHandler.SendFilesCommand
 import commandHandler.ServerFlagsString
-import commandHandler.clientEnginePortArguments
-import hmeadowSocket.HMeadowSocketServer
-import kotterSection
-import printLine
-import settingsManager.SettingsManager
+import commandHandler.canContinueSendCommand
+import commandHandler.executeCommand.sendExecution.helpers.FileZipper
+import commandHandler.executeCommand.sendExecution.helpers.SendFileItemInfo
+import commandHandler.executeCommand.sendExecution.helpers.SourceFileListManager
+import commandHandler.setupSendCommandClient2
+import hmeadowSocket.HMeadowSocketClient
 
-fun sendCommandExecution(command: SendCommand, inputTokens: List<String>) {
-    // Create connection to client engine.
-    val clientEngine = HMeadowSocketServer.createServerAnyPort(startingPort = 10778) { port ->
-        // Create client engine.
-        startClientEngine(inputTokens = inputTokens + listOf("${clientEnginePortArguments.first()}=$port"))
-    }
-    while (true) {
-        when (clientEngine.receiveString()) {
-            ServerFlagsString.PRINT_LINE -> clientEngine.clientEnginePrintLine()
-            ServerFlagsString.FILE_NAMES_TOO_LONG -> clientEngine.fileNamesTooLong()
-            ServerFlagsString.SEND_FILES_COLLECTING -> clientEngine.sendFilesCollecting()
-            ServerFlagsString.ADD_DESTINATION -> clientEngine.addDestination(command = command)
-            ServerFlagsString.DONE -> break
+fun sendFilesExecution(command: SendFilesCommand) {
+    val client = setupSendCommandClient2(command = command)
+    if (command.canContinueSendCommand(client = client)) {
+        printlnIO("Sending files")
+        val serverDestinationDirLength = client.sendFilesClientSetup2(job = command.getJob())
+        printlnIO("Server destination dir length: $serverDestinationDirLength", color = Color.BLUE)
+        val sourceFileListManager = sendFilesCollecting(
+            command = command,
+            serverDestinationDirLength = serverDestinationDirLength,
+        )
+        val choice = fileNamesTooLong(
+            sourceFileListManager = sourceFileListManager,
+            serverDestinationDirLength = serverDestinationDirLength,
+        )
+        client.sendString(choice)
+        when (choice) {
+            FileTransfer.NORMAL.toName -> {
+                printlnIO(text = "Sending ${sourceFileListManager.totalItemCount} files.")
+                client.sendFilesNormal(sourceFileListManager = sourceFileListManager)
+                printlnIO(text = "Done")
+            }
+
+            FileTransfer.CANCEL.toName -> Unit
+
+            FileTransfer.SKIP_INVALID.toName -> {
+                printlnIO(text = "Sending ${sourceFileListManager.totalItemCount} files.")
+                client.sendFilesSkipInvalid(sourceFileListManager = sourceFileListManager)
+                printlnIO(text = "Done")
+            }
+
+            FileTransfer.COMPRESS_EVERYTHING.toName -> {
+                printlnIO(text = "Compressing and sending files...")
+                client.sendFilesCompressEverything(sourceFileListManager = sourceFileListManager)
+                printlnIO(text = "Done")
+                printlnIO(ServerFlagsString.DONE)
+            }
+
+            FileTransfer.COMPRESS_INVALID.toName -> {
+                printlnIO(text = "Sending & compressing files...")
+                client.sendFilesCompressInvalid(sourceFileListManager = sourceFileListManager)
+                printlnIO(text = "Done")
+                printlnIO(ServerFlagsString.DONE)
+            }
+
+            else -> {
+                printlnIO("send files else")
+            }
         }
     }
 }
 
-private fun HMeadowSocketServer.clientEnginePrintLine() {
-    val colourIndex = receiveInt()
-    val message = receiveString()
-    sendContinue()
-    kotterSection(renderBlock = { clientEnginePrintLineRenderBlock(colourIndex, message) })
-}
-
-private fun HMeadowSocketServer.sendFilesCollecting() {
+internal fun sendFilesCollecting(
+    command: SendFilesCommand,
+    serverDestinationDirLength: Int,
+): SourceFileListManager {
+    printlnIO("Finding files to send...\uD83D\uDD0E")
+    var sourceFileListManager: SourceFileListManager? = null
     var fileCount by kotter.liveVarOf(0)
-    kotterSection(
-        renderBlock = { sendFilesCollectingRenderBlock(fileCount) },
-        runBlock = {
-            while (true) {
-                when (receiveString()) {
-                    ServerFlagsString.HAS_MORE -> {
-                        fileCount = receiveInt()
-                    }
-
-                    ServerFlagsString.DONE -> {
-                        break
-                    }
-
-                    else -> Unit
-                }
-            }
-        },
-    )
-}
-
-private fun HMeadowSocketServer.fileNamesTooLong() {
-    val serverDestinationDirLength = receiveInt()
-    val filePaths = mutableListOf<String>()
-    while (receiveString() == ServerFlagsString.HAS_MORE) {
-        filePaths.add(receiveString())
+    kotter.section {
+        text(text = "Total files found: ")
+        text(text = fileCount.toString())
+    }.run {
+        sourceFileListManager = SourceFileListManager(
+            userInputPaths = command.getFiles(),
+            serverDestinationDirLength = serverDestinationDirLength,
+            onItemFound = {
+                fileCount = it
+            },
+        )
     }
 
-    val pathCount = filePaths.size
+    return sourceFileListManager!!
+}
 
-    printLine(
-        text = "The destination cannot receive $pathCount file(s) because their total paths would be too long (> 127 characters):",
+fun HMeadowSocketClient.sendFilesClientSetup2(job: String?): Int {
+    job?.let { jobName ->
+        sendString(ServerFlagsString.HAVE_JOB_NAME)
+        sendString(jobName)
+    } ?: sendString(ServerFlagsString.NEED_JOB_NAME)
+    return receiveInt()
+}
+
+internal fun fileNamesTooLong(
+    serverDestinationDirLength: Int,
+    sourceFileListManager: SourceFileListManager,
+): String {
+    if (!sourceFileListManager.foundItemNameTooLong) return FileTransfer.NORMAL.toName
+    val pathCount = sourceFileListManager.filesNameTooLong.size
+
+    printlnIO(
+        text = cannotSendFilePathTooLong.format(pathCount),
         color = Color.YELLOW,
     )
-    printLine()
+    printlnIO()
 
     val previewLimit = 10
     val pathCountOverCutoff = pathCount > previewLimit
@@ -84,9 +121,9 @@ private fun HMeadowSocketServer.fileNamesTooLong() {
     while (true) {
         val previewCutoff = pathCountOverCutoff && userInput != FileTransfer.SHOW_ALL
         if (previewCutoff) {
-            filePaths.subList(0, previewLimit)
+            sourceFileListManager.filesNameTooLong.subList(0, previewLimit)
         } else {
-            filePaths
+            sourceFileListManager.filesNameTooLong
         }.forEachIndexed { index, path ->
             renderCutoffPath(
                 path = path,
@@ -96,11 +133,11 @@ private fun HMeadowSocketServer.fileNamesTooLong() {
         }
 
         if (previewCutoff) {
-            printLine(text = "...")
+            printlnIO("...")
             renderCutoffPath(
-                path = filePaths.last(),
+                path = sourceFileListManager.filesNameTooLong.last(),
                 serverDestinationDirLength = serverDestinationDirLength,
-                index = filePaths.lastIndex,
+                index = sourceFileListManager.filesNameTooLong.lastIndex,
             )
         }
 
@@ -109,28 +146,25 @@ private fun HMeadowSocketServer.fileNamesTooLong() {
         } else {
             FileTransfer.defaultActionList.filter { it != FileTransfer.SHOW_ALL }
         }
-        kotterSection(
-            renderBlock = { fileNamesTooLongRenderBlock(actionList) },
-            runBlock = {
-                onInputEntered {
-                    val availableActionRange = IntRange(
-                        start = 1,
-                        endInclusive = actionList.size,
-                    )
-                    try {
-                        if (input.toInt() in availableActionRange) {
-                            userInput = input.toInt()
-                        } else {
-                            rejectInput()
-                        }
-                    } catch (e: NumberFormatException) {
+        kotter.section { fileNamesTooLongRenderBlock(actionList) }.runUntilInputEntered {
+            onInputEntered {
+                val availableActionRange = IntRange(
+                    start = 1,
+                    endInclusive = actionList.size,
+                )
+                try {
+                    if (input.toInt() in availableActionRange) {
+                        userInput = input.toInt()
+                    } else {
                         rejectInput()
                     }
+                } catch (e: NumberFormatException) {
+                    rejectInput()
                 }
-            },
-            runType = KotterRunType.RUN_UNTIL_INPUT_ENTERED,
-        )
-        printLine()
+            }
+        }
+
+        printlnIO()
 
         when (userInput) {
             FileTransfer.NORMAL,
@@ -138,10 +172,7 @@ private fun HMeadowSocketServer.fileNamesTooLong() {
             FileTransfer.SKIP_INVALID,
             FileTransfer.COMPRESS_EVERYTHING,
             FileTransfer.COMPRESS_INVALID,
-            -> {
-                sendInt(userInput)
-                break
-            }
+            -> return userInput.toName
 
             FileTransfer.SHOW_ALL -> continue
             else -> throw IllegalStateException("kinda wack") // TODO
@@ -149,25 +180,65 @@ private fun HMeadowSocketServer.fileNamesTooLong() {
     }
 }
 
-private fun HMeadowSocketServer.addDestination(command: SendCommand) {
-    if (command is AddCommand) {
-        try {
-            SettingsManager.settingsManager.addDestination(
-                name = command.getName(),
-                ip = command.getIP(),
-                password = command.getPassword(),
-            )
-        } catch (e: FittoniaError) {
-            sendBoolean(false)
-            throw e
-        }
-        sendBoolean(true)
-    } else {
-        sendBoolean(false)
+private fun renderCutoffPath(path: String, serverDestinationDirLength: Int, index: Int) {
+    val cutoff = path.length - ((serverDestinationDirLength + path.length) - 127)
+    kotter.section {
+        renderCutoffPath(index, path, cutoff)
+    }.run()
+}
+
+internal fun HMeadowSocketClient.sendItem(sendFileItemInfo: SendFileItemInfo) {
+    sendString(sendFileItemInfo.relativePath)
+    sendBoolean(sendFileItemInfo.isFile)
+    if (sendFileItemInfo.isFile) {
+        sendFile(filePath = sendFileItemInfo.absolutePath)
+    }
+    receiveContinue()
+}
+
+internal fun HMeadowSocketClient.sendFilesNormal(sourceFileListManager: SourceFileListManager) {
+    sendInt(sourceFileListManager.totalItemCount)
+    sourceFileListManager.forEachItem { fileInfo ->
+        sendItem(sendFileItemInfo = fileInfo)
     }
 }
 
-private fun renderCutoffPath(path: String, serverDestinationDirLength: Int, index: Int) {
-    val cutoff = path.length - ((serverDestinationDirLength + path.length) - 127)
-    kotterSection(renderBlock = { renderCutoffPath(index, path, cutoff) })
+internal fun HMeadowSocketClient.sendFilesSkipInvalid(sourceFileListManager: SourceFileListManager) {
+    sendInt(sourceFileListManager.validItemCount)
+    sourceFileListManager.forEachItem { fileInfo ->
+        if (!fileInfo.nameIsTooLong) {
+            sendItem(sendFileItemInfo = fileInfo)
+        }
+    }
+}
+
+internal fun HMeadowSocketClient.sendFilesCompressEverything(sourceFileListManager: SourceFileListManager) {
+    sendInt(1)
+    val fileZipper = FileZipper()
+    sourceFileListManager.forEachItem { fileInfo ->
+        fileZipper.zipItem(fileInfo)
+    }
+    finalizeFileZipper(fileZipper = fileZipper)
+}
+
+internal fun HMeadowSocketClient.sendFilesCompressInvalid(sourceFileListManager: SourceFileListManager) {
+    sendInt(sourceFileListManager.validItemCount + 1)
+    val fileZipper = FileZipper()
+    sourceFileListManager.forEachItem { fileInfo ->
+        if (fileInfo.nameIsTooLong) {
+            fileZipper.zipItem(fileInfo)
+        } else {
+            sendItem(sendFileItemInfo = fileInfo)
+        }
+    }
+    finalizeFileZipper(fileZipper = fileZipper)
+}
+
+private fun HMeadowSocketClient.finalizeFileZipper(fileZipper: FileZipper) {
+    fileZipper.finalize { zipFilePath ->
+        sendString("compressed.zip")
+        sendBoolean(true) // compressed.zip is a file.
+        sendFile(filePath = zipFilePath)
+        receiveContinue()
+    }
 }

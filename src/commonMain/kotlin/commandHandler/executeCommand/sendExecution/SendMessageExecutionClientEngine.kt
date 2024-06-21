@@ -1,13 +1,19 @@
 package commandHandler.executeCommand.sendExecution
 
+import OutputIO.printlnIO
 import commandHandler.SendMessageCommand
 import commandHandler.canContinueSendCommand
-import commandHandler.setupSendCommandClient
-import hmeadowSocket.HMeadowSocketClient
+import commandHandler.receiveConfirmation
+import commandHandler.setupSendCommandClient2
 
-fun sendMessageExecutionClientEngine(command: SendMessageCommand, parent: HMeadowSocketClient) {
-    val client = setupSendCommandClient(command = command)
-    if (canContinueSendCommand(command = command, client = client, parent = parent)) {
+fun sendMessageExecution(command: SendMessageCommand) {
+    val client = setupSendCommandClient2(command = command)
+    if (command.canContinueSendCommand(client = client)) {
         client.sendString(command.getMessage())
+        if (client.receiveConfirmation()) {
+            printlnIO("Message sent successfully.")
+        } else {
+            printlnIO("Something went wrong. Message may not have been sent.")
+        }
     }
 }

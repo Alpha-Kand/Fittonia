@@ -12,7 +12,10 @@ const val sendMessageCommand = "send-message"
 const val ipCodeCommand = "ip-code"
 const val decodeIpCodeCommand = "decode-ip-code"
 const val exitCommand = "exit"
+const val quitCommand = "quit"
 const val sessionCommand = "session"
+const val logsCommand = "logs"
+const val helpCommand = "help"
 
 val commands = listOf(
     addCommand,
@@ -27,7 +30,10 @@ val commands = listOf(
     ipCodeCommand,
     decodeIpCodeCommand,
     exitCommand,
+    quitCommand,
     sessionCommand,
+    logsCommand,
+    helpCommand,
 )
 
 val nameArguments = listOf("--name", "-n")
@@ -42,11 +48,12 @@ val newArguments = listOf("--new")
 val oldArguments = listOf("--old")
 val jobArguments = listOf("--job", "-j")
 val messageArguments = listOf("--message", "--string")
-val sessionArguments = listOf("--session", "-s")
-val clientEnginePortArguments = listOf("--clientengineport")
-val serverEnginePortArguments = listOf("--serverengineport")
+val sessionArguments = listOf("--session", "-e")
 val ipCodeArguments = listOf("--ipcode")
 val machineReadableOutputArguments = listOf("--ioformat", "-z")
+val searchCommandsArguments = listOf("--command", "-c")
+val searchArguments = listOf("--search", "-s")
+val helpArguments = listOf("--help", "-h")
 
 class ServerFlagsString {
     companion object {
@@ -101,6 +108,15 @@ class FileTransfer {
             COMPRESS_INVALID,
             SHOW_ALL,
         )
+        val Int.toName: String
+            get() = when (this) {
+                NORMAL -> "NORMAL"
+                CANCEL -> "CANCEL"
+                SKIP_INVALID -> "SKIP_INVALID"
+                COMPRESS_EVERYTHING -> "COMPRESS_EVERYTHING"
+                COMPRESS_INVALID -> "COMPRESS_INVALID"
+                else -> "ERROR"
+            }
 
         fun String.stripPrefix() = this.substring(startIndex = prefixLength)
         fun String.getPrefix() = this.substring(startIndex = 0, endIndex = prefixLength)
