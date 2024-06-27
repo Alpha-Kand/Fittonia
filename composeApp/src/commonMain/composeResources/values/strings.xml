@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ~~~~~~~~~~ DESKTOP ~~~~~~~~~~ -->
+
+    <!-- FittoniaErrors -->
+    <string name="error_add_destination_already_exists">A destination with that name is already registered. Delete the old one and try again.</string>
+
+    <!-- COMMANDS -->
+    <string name="no_valid_command">No valid command detected.</string>
+
+    <!-- DecodeIpCode -->
+    <string name="blank_ip_code">No IP code provided.</string>
+    <string name="could_not_decode_ip">Could not decode the IP code.</string>
+    <string name="decode_ip_code_help_description">Displays the IPv4 address associated with the provided IP 'code'.</string>
+    <string name="decode_ip_code_help_format">%1$s &lt;CODE&gt;</string>
+    <string name="decode_ip_code_help_arguments_ip">Code in the format of WORD-WORD-NUMBER. e.g. cat-dog-12</string>
+
+    <!-- Dump -->
+    <string name="dump_path_not_empty_warning">New dump path is not empty.</string>
+    <string name="dump_path_not_writable">That directory is not writable. Check its permissions.</string>
+    <string name="dump_path_not_valid_directory">Supplied path was not a valid directory.</string>
+    <string name="dump_path_doesnt_exist">Supplied path does not exist.</string>
+    <string name="dump_path_not_set">No dump path set.</string>
+    <string name="dump_path_current">Current dump path: %1$s</string>
+    <string name="dump_path_help_description">Updates or prints the current 'dump' path. The dump path is where all the incoming files are put categorized by 'job'. e.g. /.../dumpPath/jobName/file.txt.\nRun without input to print the current dump path.</string>
+    <string name="dump_path_help_format">%1$s &lt;OPTIONAL PATH&gt;</string>
+    <string name="dump_path_help_arguments_path">Path to put incoming files and folders.</string>
+
+    <!-- EncodeIp_code -->
+    <string name="your_ip_address">Your IP address = %1$s</string>
+    <string name="ip_address_code">IP address code = %1$s</string>
+    <string name="could_not_encode_ip">Could not encode IP address.</string>
+    <string name="encode_ip_code_help_description">Displays the current devices IPv4 address and its IP 'code'. This code is a human readable format intended to be shared and inputted on other devices instead of having to remember an entire IP address.</string>
+
+    <!-- List -->
+    <string name="name_output">Name: %1$s</string>
+    <string name="ip_output">IP: %1$s</string>
+    <string name="destination_not_found">No destination found with that name.</string>
+    <string name="no_destinations_registered">No destinations registered. Register new ones with the 'add' command.</string>
+    <string name="list_help_description">Prints out the list of registered destinations. Enter a name or lookup term to search the list instead.</string>
+    <string name="list_help_format">%1$s &lt;OPTIONAL NAME&gt; &lt;OPTIONAL SEARCH&gt;</string>
+    <string name="list_help_arguments_name">Name of a specific destination to find. Must match exactly.</string>
+    <string name="list_help_arguments_search">Search term for destinations to find. Can be a subsection of a name.</string>
+
+    <!-- Remove -->
+    <string name="remove_help_description">Removes a specified registered destination.</string>
+    <string name="remove_help_format">%1$s &lt;NAME&gt;</string>
+    <string name="remove_help_arguments_name">Name of a specific destination to remove. Must match exactly.</string>
+
+    <!-- ServerPassword -->
+    <string name="no_previous_password_found">No previous password found. New password not saved.</string>
+    <string name="confirm_password_update">Please provide current (old) password to confirm changes.</string>
+    <string name="confirm_password_update_failed">Old password was incorrect, please try again.</string>
+    <string name="password_saved">Password saved. You will need to provide this new password if you want to change the default password again.</string>
+    <string name="server_password_help_description">Sets the server's password that incoming connections must provide to connect.</string>
+    <string name="server_password_help_format">%1$s &lt;NEW PASSWORD&gt; &lt;OPTIONAL OLD PASSWORD&gt;</string>
+    <string name="server_password_help_arguments_new">The new server password.</string>
+    <string name="server_password_help_arguments_old">Old password, if previously set.</string>
+
+    <!-- Server -->
+    <string name="server_init_cannot_start_no_password">Cannot start server: _no server password set. Set it with the `server-password` command.</string>
+    <string name="server_init_cannot_start_no_dump_path">Cannot start server: No dump path set (directory path to store files from clients). Set it with the `dump` command.</string>
+    <string name="server_init_server_started">Server started. ⏳ Waiting for clients.</string>
+    <string name="server_init_server_already_started">Server already started.</string>
+    <string name="server_init_help_description">TODO</string>
+    <string name="server_init_help_format">TODO</string>
+    <string name="server_init_help_arguments_port">TODO</string>
+
+    <!-- Send Files -->
+    <string name="cannot_send_file_path_too_long">The destination cannot receive %1$s file(s) because their total paths would be too long (> 127 characters):</string>
+    <string name="send_files_user_option_cancel">%1$s. Cancel sending files.</string>
+    <string name="send_files_user_option_skip_invalid">%1$s. Skip invalid files.</string>
+    <string name="send_files_user_option_compress_all">%1$s. Compress all files and send as a single file.</string>
+    <string name="send_files_user_option_compress_invalid">%1$s. Compress invalid files only and send as a single file (relative file paths will be preserved).</string>
+    <string name="send_files_user_option_show_all">%1$s. Show all files and ask again.</string>
+    <string name="send_files_help_description">TODO</string>
+    <string name="send_files_help_format">TODO</string>
+    <string name="send_files_help_arguments_ip">TODO</string>
+
+    <!-- Send Message -->
+    <string name="send_message_help_description">TODO</string>
+    <string name="send_message_help_format">TODO</string>
+    <string name="send_message_help_arguments_ip">TODO</string>
+
+    <!-- SetDefaultPortCommand -->
+    <string name="current_default_port_is_set_to">Current default port set to: %1$s</string>
+    <string name="set_default_port_help_description">Sets the default port to use for incoming connections.</string>
+    <string name="set_default_port_help_format">%1$s &lt;PORT&gt;</string>
+    <string name="set_default_port_help_arguments_port">Standardized port number. e.g. 8080</string>
+
+    <!-- ExitCommand -->
+    <string name="exit_help_title">%1$s OR %2$s</string>
+    <string name="exit_help_description">Closes the program.</string>
+
+    <!-- HelpCommand -->
+    <string name="search_header">Commands containing \"%1$s\":</string>
+    <string name="no_commands_found">No commands found.</string>
+    <string name="search_failed">Search term not found.</string>
+    <string name="format_label">Format: %1$s</string>
+    <string name="help_intro">Fittonia v1.0\nBy Hunter Wiesman 'huntersmeadow@gmail.com'\n\nCOMMANDS:</string>
+    <string name="help_help_description">TODO</string>
+    <string name="help_help_format">TODO</string>
+    <string name="help_help_arguments_search">TODO</string>
+</resources>
