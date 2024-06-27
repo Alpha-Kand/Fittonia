@@ -1,9 +1,0 @@
-~~~JAR~~~
-
-gradle -> `compose desktop` -> `packageReleaseUberJarForCurrentOS`
-Jar is in ~/FITTONIA/build/compose/jars
-
-~~~AppImage~~~
-
-gradle -> `compose desktop` -> `packageReleaseAppImage`
-AppImage is in ~/FITTONIA/build/compose/binaries/main-release/app/FittoniaDesktop
