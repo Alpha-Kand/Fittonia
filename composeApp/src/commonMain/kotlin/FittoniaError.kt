@@ -73,12 +73,3 @@ class FittoniaError(
         FittoniaErrorType.TOO_MANY_SEARCH_TERMS -> "Cannot search with both terms at the same time."
     }
 }
-
-suspend fun Session.reportFittoniaError2(e: FittoniaError) {
-    e.getErrorMessage().let {
-        section {
-            red { text("Error: ") }
-            textLine(it)
-        }.run()
-    }
-}
