@@ -145,7 +145,7 @@ class DesktopServer private constructor(port: Int) {
         fun init(port: Int): Boolean {
             return if (instance == null) {
                 instance = DesktopServer(port)
-                if (!Config.IS_MOCKING) {
+                if (!MockConfig.IS_MOCKING) {
                     instance().start()
                 }
                 true
@@ -173,7 +173,7 @@ class DesktopServer private constructor(port: Int) {
 }
 
 private fun HMeadowSocketServer.getJobName2(flag: String, jobId: Int): String {
-    val settingsManager = SettingsManager.settingsManager
+    val settingsManager = SettingsManagerDesktop.settingsManager
     val autoJobName = when (flag) {
         ServerFlagsString.NEED_JOB_NAME -> settingsManager.getAutoJobName().also {
             DesktopServer.log("Server generated job name: $it", jobId = jobId)
@@ -238,7 +238,7 @@ fun HMeadowSocketServer.receiveItem(
     onDone()
 }
 
-private fun HMeadowSocketServer.passwordIsValid() = SettingsManager.settingsManager.checkPassword(receiveString())
+private fun HMeadowSocketServer.passwordIsValid() = SettingsManagerDesktop.settingsManager.checkPassword(receiveString())
 
 fun HMeadowSocketServer.handleCommand(
     onSendFilesCommand: (Boolean, HMeadowSocketServer, Int) -> Unit,

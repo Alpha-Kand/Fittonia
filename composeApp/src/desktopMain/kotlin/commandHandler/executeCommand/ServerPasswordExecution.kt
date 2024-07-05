@@ -1,7 +1,7 @@
 package commandHandler.executeCommand
 
 import OutputIO.printlnIO
-import SettingsManager
+import SettingsManagerDesktop
 import commandHandler.ServerPasswordCommand
 import fittonia.composeapp.generated.resources.Res
 import fittonia.composeapp.generated.resources.confirm_password_update
@@ -10,7 +10,7 @@ import fittonia.composeapp.generated.resources.no_previous_password_found
 import fittonia.composeapp.generated.resources.password_saved
 
 suspend fun serverPasswordExecution(command: ServerPasswordCommand) {
-    val settingsManager = SettingsManager.settingsManager
+    val settingsManager = SettingsManagerDesktop.settingsManager
     if (settingsManager.settings.serverPassword.isNullOrEmpty()) {
         if (command.getOldPassword() != null) {
             printlnIO(Res.string.no_previous_password_found)

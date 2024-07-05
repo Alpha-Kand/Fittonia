@@ -20,7 +20,7 @@ data object OutputIO {
     private val outputIO = mutableListOf<String>()
 
     fun printlnIO(text: String, color: Color = Color.WHITE) {
-        if (Config.IS_MOCKING) {
+        if (MockConfig.IS_MOCKING) {
             outputIO.add(text)
         } else {
             printLine(text, color)
@@ -28,7 +28,7 @@ data object OutputIO {
     }
 
     fun printlnIO() {
-        if (Config.IS_MOCKING) {
+        if (MockConfig.IS_MOCKING) {
             outputIO.add("\n")
         } else {
             printLine("\n")
@@ -37,7 +37,7 @@ data object OutputIO {
 
     suspend fun printlnIO(resource: StringResource, color: Color = Color.WHITE, vararg params: Any) {
         val text = getString(resource, *params)
-        if (Config.IS_MOCKING) {
+        if (MockConfig.IS_MOCKING) {
             outputIO.add(text)
         } else {
             printLine(text, color)
@@ -46,7 +46,7 @@ data object OutputIO {
 
     suspend fun printlnIO(resource: StringResource, vararg params: Any) {
         val text = getString(resource, *params)
-        if (Config.IS_MOCKING) {
+        if (MockConfig.IS_MOCKING) {
             outputIO.add(text)
         } else {
             printLine(text, Color.WHITE)
@@ -55,7 +55,7 @@ data object OutputIO {
 
     suspend fun warningIO(resource: StringResource) {
         val text = getString(resource)
-        if (Config.IS_MOCKING) {
+        if (MockConfig.IS_MOCKING) {
             outputIO.add(text)
         } else {
             kotterSection {
@@ -67,7 +67,7 @@ data object OutputIO {
 
     suspend fun errorIO(resource: StringResource) {
         val text = getString(resource)
-        if (Config.IS_MOCKING) {
+        if (MockConfig.IS_MOCKING) {
             outputIO.add(text)
         } else {
             kotterSection {
@@ -79,7 +79,7 @@ data object OutputIO {
 
     suspend fun successIO(resource: StringResource? = null) {
         val text = resource?.let { getString(resource) } ?: ""
-        if (Config.IS_MOCKING) {
+        if (MockConfig.IS_MOCKING) {
             outputIO.add(text)
         } else {
             kotterSection {

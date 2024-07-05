@@ -2,6 +2,7 @@ package commandHandler.executeCommand
 
 import OutputIO.printlnIO
 import SettingsManager
+import SettingsManagerDesktop
 import commandHandler.ListDestinationsCommand
 import fittonia.composeapp.generated.resources.Res
 import fittonia.composeapp.generated.resources.destination_not_found
@@ -10,8 +11,8 @@ import fittonia.composeapp.generated.resources.name_output
 import fittonia.composeapp.generated.resources.no_destinations_registered
 
 suspend fun listDestinationsExecution(command: ListDestinationsCommand) {
-    val settingsManager = SettingsManager.settingsManager
-    val printDestination: suspend (SettingsManager.SettingsData.Destination) -> Unit = {
+    val settingsManager = SettingsManagerDesktop.settingsManager
+    val printDestination: suspend (SettingsManager.Destination) -> Unit = {
         printlnIO(Res.string.name_output, it.name)
         printlnIO(Res.string.ip_output, it.ip)
     }

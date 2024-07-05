@@ -47,8 +47,7 @@ fun terminalMain() = session {
     kotter = this
     runBlocking {
         var activeSession = true
-        val settings = SettingsManager.settingsManager
-        settings.registerAsMainProcess()
+        val settings = SettingsManagerDesktop.settingsManager
         settings.saveSettings()
         HelpDocLoader.init()
         val previousInput = settings.previousCmdEntries

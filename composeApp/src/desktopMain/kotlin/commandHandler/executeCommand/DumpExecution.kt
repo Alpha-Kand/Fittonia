@@ -4,7 +4,7 @@ import OutputIO.errorIO
 import OutputIO.printlnIO
 import OutputIO.successIO
 import OutputIO.warningIO
-import SettingsManager
+import SettingsManagerDesktop
 import commandHandler.DumpCommand
 import fittonia.composeapp.generated.resources.Res
 import fittonia.composeapp.generated.resources.dump_path_current
@@ -18,7 +18,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 suspend fun dumpExecution(command: DumpCommand) {
-    val settingsManager = SettingsManager.settingsManager
+    val settingsManager = SettingsManagerDesktop.settingsManager
     command.getDumpPath()?.let { path ->
         val expandedPath = if (path.startsWith("~" + File.separator)) {
             System.getProperty("user.home") + File.separator + path.substring(2)
