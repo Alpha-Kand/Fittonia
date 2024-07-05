@@ -1,28 +1,31 @@
 package org.hmeadow.fittonia
 
-import App
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import fittonia.composeapp.generated.resources.Res
-import fittonia.composeapp.generated.resources.blank_ip_code
-import org.jetbrains.compose.resources.stringResource
+import androidx.datastore.dataStore
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+
+val Context.dataStore by dataStore("fittonia.json", SettingsDataAndroidSerializer)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setContent {
-            App()
-        }
+        val viewModel = getViewModel()
+        setContent(
+            content = {},
+        )
     }
-}
 
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    App()
-    println(stringResource(resource = Res.string.blank_ip_code))
+    private fun getViewModel() = ViewModelProvider(
+        owner = this,
+        factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return MainViewModel(dataStore = dataStore) as T
+            }
+        },
+    )[MainViewModel::class.java]
 }
