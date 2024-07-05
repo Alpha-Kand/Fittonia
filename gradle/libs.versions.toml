@@ -9,6 +9,14 @@ kotlin = "2.0.0"
 androidx-activityCompose = "1.9.0"
 compose-plugin = "1.6.10"
 
+# Shared
+kotlinSerialization = "2.0.0"
+kotlinxCollectionsImmutable = "0.3.5"
+kotlinxSerializationJson = "1.6.3"
+
+# Android
+datastore = "1.1.1"
+
 # Unit Tests
 ktlint = "0.47.1"
 mockk = "1.13.5"
@@ -29,6 +37,14 @@ securityCryptoKtx = "1.0.0"
 
 # Core
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+
+# Shared
+kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlinSerialization" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+
+# Android
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 
 # Unit Tests
 ktlintlib = { module = "com.pinterest:ktlint", version.ref = "ktlint" }
@@ -57,6 +73,7 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin"}
 
 # Unit Tests
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
