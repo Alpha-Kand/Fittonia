@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.screens.WelcomeScreen
 
 class Navigator(viewModel: MainViewModel) {
 
@@ -31,7 +32,16 @@ class Navigator(viewModel: MainViewModel) {
         }
     }
 
-    private val welcomeScreen = Screen { data, viewModel -> }
+    private val welcomeScreen = Screen { data, viewModel ->
+        WelcomeScreen(
+            data = data,
+            onContinue = { password, port ->
+                viewModel.updateServerPassword(password)
+                viewModel.updateServerPort(port)
+                push(mainScreen)
+            },
+        )
+    }
 
     private val mainScreen = Screen { data, viewModel -> }
 

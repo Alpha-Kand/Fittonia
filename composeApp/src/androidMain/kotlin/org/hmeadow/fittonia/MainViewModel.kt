@@ -21,4 +21,10 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
             it.copy(defaultPort = port)
         }
     }
+
+    fun updateDumpPath(dumpPath:String) = launch {
+        dataStore.updateData {
+            it.copy(dumpPath = dumpPath)
+        }
+    }
 }
