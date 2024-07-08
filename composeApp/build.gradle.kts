@@ -21,7 +21,7 @@ kotlin {
         }
     }
 
-    jvm("desktop"){
+    jvm("desktop") {
         attributes.attribute(testAttribute, "desktop")
     }
 
@@ -35,6 +35,8 @@ kotlin {
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlin.serialization)
+            implementation(libs.androidx.activity.ktx)
+            implementation(libs.androidx.fragment.ktx)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -52,7 +54,7 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.jackson.module.kotlin)
         }
-        desktopTest.dependencies{
+        desktopTest.dependencies {
             koverReport {
                 defaults {
                     mergeWith("release")
@@ -104,6 +106,12 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            isDebuggable = false
+        }
+        getByName("debug") {
+            isMinifyEnabled = false
+            isDebuggable = true
+            buildConfigField("boolean", "ENABLE_CRASHLYTICS", "false")
         }
     }
     compileOptions {
@@ -112,6 +120,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     dependencies {
         debugImplementation(compose.uiTooling)
@@ -156,7 +165,7 @@ val ktlintCheck by tasks.creating(JavaExec::class) {
     args = listOf(
         "src/**/*.kt",
         "--reporter=plain",
-        "--reporter=html,output=$buildDir/ktlint.html",
+        "--reporter=html,output=${project.layout.buildDirectory}/ktlint.html",
         "--baseline=ktlint-baseline.xml",
     )
 }

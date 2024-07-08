@@ -13,18 +13,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.screens.DebugScreen
+import org.hmeadow.fittonia.screens.MainScreen
+import org.hmeadow.fittonia.screens.SendFilesScreen
+import org.hmeadow.fittonia.screens.TransferDetailsScreen
 import org.hmeadow.fittonia.screens.WelcomeScreen
 
-class Navigator(viewModel: MainViewModel) {
+class Navigator(private val viewModel: MainViewModel) {
 
     data class Screen(
         val compose: @Composable (SettingsDataAndroid, MainViewModel) -> Unit,
     )
 
     private val loadingScreen = Screen { _, _ ->
-        Box(modifier = Modifier
-            .background(Color.Cyan)
-            .fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .background(Color.Cyan)
+                .fillMaxSize(),
+        ) {
             Text(
                 modifier = Modifier.align(Alignment.Center),
                 text = "Loading...",
@@ -43,16 +49,34 @@ class Navigator(viewModel: MainViewModel) {
         )
     }
 
-    private val mainScreen = Screen { data, viewModel -> }
+    private val mainScreen = Screen { data, viewModel ->
+        MainScreen(
+            sendFiles = {
+                push(sendFilesScreen)
+            },
+        )
+    }
 
-    private val sendFilesScreen = Screen { data, viewModel -> }
+    private val sendFilesScreen = Screen { data, viewModel ->
+        SendFilesScreen(
+            onBackClicked = {
+                pop()
+            },
+            onConfirmClicked = {
+                pop()
+            },
+        )
+    }
 
-    private val transferDetailsScreen = Screen { data, viewModel -> }
+    private val transferDetailsScreen = Screen { data, viewModel ->
+        TransferDetailsScreen()
+    }
 
     private var currentScreen by mutableStateOf(loadingScreen) // TODO default splash screen?
     private val screenStack = mutableListOf<Screen>()
 
     init {
+        instance = this
         viewModel.launch {
             viewModel.dataStore.data.first().let {
                 if (it.defaultPort != 0 && it.serverPassword != null) {
@@ -79,5 +103,19 @@ class Navigator(viewModel: MainViewModel) {
     @Composable
     fun Render(settingsDataAndroid: SettingsDataAndroid, viewModel: MainViewModel) {
         currentScreen.compose.invoke(settingsDataAndroid, viewModel)
+    }
+
+    companion object {
+        private lateinit var instance: Navigator
+        fun goToDebugScreen() {
+            instance.push(
+                Screen { data, _ ->
+                    DebugScreen(
+                        data = data,
+                        onBackClicked = instance::pop,
+                    )
+                },
+            )
+        }
     }
 }
