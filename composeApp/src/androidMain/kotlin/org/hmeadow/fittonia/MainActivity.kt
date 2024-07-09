@@ -47,13 +47,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         mainActivity = this
         val viewModel = getViewModel()
-        val navigator = Navigator(viewModel = viewModel)
+        val navigator = Navigator(viewModelMain = viewModel)
         initWindowInsetsListener()
         setContent(
             content = {
                 navigator.Render(
                     settingsDataAndroid = dataStore.data.collectAsState(initial = SettingsDataAndroid()).value,
-                    viewModel = viewModel,
                 )
             },
         )

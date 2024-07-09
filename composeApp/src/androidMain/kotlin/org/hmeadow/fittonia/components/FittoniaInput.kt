@@ -12,13 +12,16 @@ import androidx.compose.foundation.text2.TextFieldDecorator
 import androidx.compose.foundation.text2.input.TextFieldState
 import androidx.compose.foundation.text2.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.MutableStateFlow
 
+@Deprecated("")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FittoniaTextInput(
@@ -32,6 +35,7 @@ fun FittoniaTextInput(
     )
 }
 
+@Deprecated("")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FittoniaNumberInput(
@@ -45,6 +49,39 @@ fun FittoniaNumberInput(
     )
 }
 
+class InputFlow(initial: String) : MutableStateFlow<String> by MutableStateFlow(initial)
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun FittoniaTextInput(
+    modifier: Modifier = Modifier,
+    inputFlow: InputFlow,
+) {
+    BasicTextField2(
+        modifier = modifier,
+        value = inputFlow.collectAsState().value,
+        onValueChange = { inputFlow.value = it },
+        decorator = inputDecorator,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun FittoniaNumberInput(
+    modifier: Modifier = Modifier,
+    inputFlow: InputFlow,
+) {
+    BasicTextField2(
+        modifier = modifier,
+        value = inputFlow.collectAsState().value,
+        onValueChange = { inputFlow.value = it },
+        decorator = inputDecorator,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+    )
+}
+
+@Deprecated("")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FittoniaInput(

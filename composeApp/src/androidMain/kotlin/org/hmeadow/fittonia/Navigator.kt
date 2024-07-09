@@ -18,14 +18,25 @@ import org.hmeadow.fittonia.screens.MainScreen
 import org.hmeadow.fittonia.screens.SendFilesScreen
 import org.hmeadow.fittonia.screens.TransferDetailsScreen
 import org.hmeadow.fittonia.screens.WelcomeScreen
+import org.hmeadow.fittonia.screens.WelcomeScreenViewModel
 
-class Navigator(private val viewModel: MainViewModel) {
+class Navigator(private val viewModelMain: MainViewModel) {
 
-    data class Screen(
-        val compose: @Composable (SettingsDataAndroid, MainViewModel) -> Unit,
-    )
+    data class Screen<T : BaseViewModel>(
+        private val viewModel: T,
+        private val compose: @Composable (SettingsDataAndroid, T) -> Unit,
+    ) {
+        @Composable
+        fun Render(data: SettingsDataAndroid) {
+            compose(data, viewModel)
+        }
+    }
 
-    private val loadingScreen = Screen { _, _ ->
+    class LoadingScreenViewModel : BaseViewModel
+
+    private fun loadingScreen() = Screen(
+        viewModel = LoadingScreenViewModel(),
+    ) { _, _ ->
         Box(
             modifier = Modifier
                 .background(Color.Cyan)
@@ -38,59 +49,66 @@ class Navigator(private val viewModel: MainViewModel) {
         }
     }
 
-    private val welcomeScreen = Screen { data, viewModel ->
-        WelcomeScreen(
-            data = data,
-            onContinue = { password, port ->
-                viewModel.updateServerPassword(password)
-                viewModel.updateServerPort(port)
-                push(mainScreen)
+    private fun welcomeScreen() = Screen(
+        viewModel = WelcomeScreenViewModel(
+            mainViewModel = viewModelMain,
+            onContinueCallback = { password, port ->
+                viewModelMain.updateServerPassword(password)
+                viewModelMain.updateServerPort(port)
+                push(mainScreen())
             },
+        ),
+    ) { data, viewModel ->
+        WelcomeScreen(
+            viewModel = viewModel,
+            data = data,
+            onClearDumpPath = { this.viewModelMain.updateDumpPath("") },
         )
     }
 
-    private val mainScreen = Screen { data, viewModel ->
+    class MainScreenViewModel : BaseViewModel
+
+    private fun mainScreen() = Screen(viewModel = MainScreenViewModel()) { data, viewModel ->
         MainScreen(
             sendFiles = {
-                push(sendFilesScreen)
+                push(sendFilesScreen())
             },
         )
     }
 
-    private val sendFilesScreen = Screen { data, viewModel ->
+    class SendFilesScreenViewModel : BaseViewModel
+
+    private fun sendFilesScreen() = Screen(viewModel = SendFilesScreenViewModel()) { data, viewModel ->
         SendFilesScreen(
-            onBackClicked = {
-                pop()
-            },
-            onConfirmClicked = {
-                pop()
-            },
+            onBackClicked = ::pop,
+            onConfirmClicked = ::pop,
         )
     }
 
-    private val transferDetailsScreen = Screen { data, viewModel ->
+    class TransferDetailsScreenViewModel : BaseViewModel
+
+    private val transferDetailsScreen = Screen(viewModel = TransferDetailsScreenViewModel()) { data, viewModel ->
         TransferDetailsScreen()
     }
 
-    private var currentScreen by mutableStateOf(loadingScreen) // TODO default splash screen?
-    private val screenStack = mutableListOf<Screen>()
+    // TODO default splash screen?
+    private var currentScreen by mutableStateOf<Screen<out BaseViewModel>>(loadingScreen())
+    private val screenStack = mutableListOf<Screen<out BaseViewModel>>()
 
     init {
         instance = this
-        viewModel.launch {
-            viewModel.dataStore.data.first().let {
+        viewModelMain.launch {
+            viewModelMain.dataStore.data.first().let {
                 if (it.defaultPort != 0 && it.serverPassword != null) {
-                    push(mainScreen)
+                    push(mainScreen())
                 } else {
-                    push(welcomeScreen)
+                    push(welcomeScreen())
                 }
             }
         }
-
-        screenStack.add(welcomeScreen)
     }
 
-    private fun push(screen: Screen) {
+    private fun push(screen: Screen<out BaseViewModel>) {
         screenStack.add(screen)
         currentScreen = screen
     }
@@ -101,15 +119,18 @@ class Navigator(private val viewModel: MainViewModel) {
     }
 
     @Composable
-    fun Render(settingsDataAndroid: SettingsDataAndroid, viewModel: MainViewModel) {
-        currentScreen.compose.invoke(settingsDataAndroid, viewModel)
+    fun Render(settingsDataAndroid: SettingsDataAndroid) {
+        currentScreen.Render(settingsDataAndroid)
     }
 
     companion object {
         private lateinit var instance: Navigator
+
+        private class DebugScreenViewModel : BaseViewModel
+
         fun goToDebugScreen() {
             instance.push(
-                Screen { data, _ ->
+                Screen(viewModel = DebugScreenViewModel()) { data, _ ->
                     DebugScreen(
                         data = data,
                         onBackClicked = instance::pop,
