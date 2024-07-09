@@ -238,7 +238,9 @@ fun HMeadowSocketServer.receiveItem(
     onDone()
 }
 
-private fun HMeadowSocketServer.passwordIsValid() = SettingsManagerDesktop.settingsManager.checkPassword(receiveString())
+private fun HMeadowSocketServer.passwordIsValid(): Boolean {
+    return SettingsManagerDesktop.settingsManager.checkPassword(receiveString())
+}
 
 fun HMeadowSocketServer.handleCommand(
     onSendFilesCommand: (Boolean, HMeadowSocketServer, Int) -> Unit,

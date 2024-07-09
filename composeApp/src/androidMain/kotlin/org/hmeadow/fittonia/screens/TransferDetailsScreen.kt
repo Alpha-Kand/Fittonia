@@ -131,9 +131,10 @@ fun TransferDetailsScreen() {
                         TransferStatus.Receiving -> "received"
                         else -> ""
                     }
+                    val bbb = "${rememberPercentageFormat(transfer.progress)} - 4 out of ${transfer.items} items $aaa."
                     Row {
                         Text(
-                            text = "${rememberPercentageFormat(transfer.progress)} - 4 out of ${transfer.items} items $aaa.",
+                            text = bbb,
                         )
                     }
                 }
@@ -191,7 +192,11 @@ fun TransferDetailsScreen() {
                                     )
                                 }
                                 FittoniaIcon(
-                                    drawableRes = if (fooState) R.drawable.ic_chevron_up else R.drawable.ic_chevron_down,
+                                    drawableRes = if (fooState) {
+                                        R.drawable.ic_chevron_up
+                                    } else {
+                                        R.drawable.ic_chevron_down
+                                    },
                                     tint = Color(0xFF222222),
                                 )
                             }

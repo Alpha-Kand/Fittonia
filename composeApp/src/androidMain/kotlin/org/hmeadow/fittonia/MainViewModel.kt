@@ -22,7 +22,7 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         }
     }
 
-    fun updateDumpPath(dumpPath:String) = launch {
+    fun updateDumpPath(dumpPath: String) = launch {
         dataStore.updateData {
             it.copy(dumpPath = dumpPath)
         }

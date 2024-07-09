@@ -269,13 +269,11 @@ fun MainScreen(sendFiles: () -> Unit) {
                         onClick = sendFiles,
                         content = { ButtonText(text = "Send files") },
                     )
-                    //Spacer(modifier = Modifier.weight(1.0f))
                     HMSpacerWidth(20)
                     FittoniaComingSoon(
                         modifier = Modifier.weight(1.0f),
                     ) {
                         FittoniaButton(
-                            //modifier = Modifier.weight(1.0f),
                             onClick = { /*TODO*/ },
                             content = { ButtonText(text = "Send Message") },
                         )

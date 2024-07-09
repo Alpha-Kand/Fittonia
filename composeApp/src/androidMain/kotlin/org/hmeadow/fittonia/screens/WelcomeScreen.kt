@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.MainActivity
@@ -63,7 +64,7 @@ fun WelcomeScreen(
                 HMSpacerHeight(height = 40)
 
                 Text(
-                    text = "To get started, you just need a new server password, server socket port, and a place to put incoming files.",
+                    text = stringResource(R.string.welcome_screen_body),
                     style = paragraphStyle,
                 )
                 HMSpacerHeight(height = 3)

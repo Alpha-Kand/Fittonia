@@ -1,7 +1,3 @@
-import com.varabyte.kotter.foundation.text.red
-import com.varabyte.kotter.foundation.text.text
-import com.varabyte.kotter.foundation.text.textLine
-import com.varabyte.kotter.runtime.Session
 import fittonia.composeapp.generated.resources.Res
 import fittonia.composeapp.generated.resources.error_add_destination_already_exists
 import org.jetbrains.compose.resources.getString

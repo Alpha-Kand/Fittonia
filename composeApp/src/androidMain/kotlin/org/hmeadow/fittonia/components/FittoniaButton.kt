@@ -120,7 +120,7 @@ sealed interface FittoniaButtonType {
         override val contentColour: Color = Color(0xFFFFCCFF)
         override val disabledContentColor: Color = contentColour
         override val borderColour: Color = Color(0xFF550022)
-        override val disabledBorderColour: Color = borderColour.copy(alpha = 0.40f)
+        override val disabledBorderColour: Color = borderColour.copy(alpha = 0.00f)
     }
 
     data object Secondary : FittoniaButtonType {
@@ -129,7 +129,7 @@ sealed interface FittoniaButtonType {
         override val contentColour: Color = Color(0xFF331133)
         override val disabledContentColor: Color = contentColour.copy(alpha = 0.5f)
         override val borderColour: Color = Color(0xFF550022)
-        override val disabledBorderColour: Color = borderColour.copy(alpha = 0.40f)
+        override val disabledBorderColour: Color = borderColour.copy(alpha = 0.00f)
     }
 }
 

@@ -110,10 +110,13 @@ fun FittoniaBackground(
                 footerPlaceables.let { footer ->
                     footer.place(
                         x = 0,
-                        y = (constraints.maxHeight - footer.height + navBarHeightLocal.value) - if (imeHeightLocal.value > 0) {
-                            imeHeightLocal.value
-                        } else {
-                            navBarHeightLocal.value
+                        y = run {
+                            val systemBottomHeight = if (imeHeightLocal.value > 0) {
+                                imeHeightLocal.value
+                            } else {
+                                navBarHeightLocal.value
+                            }
+                            (constraints.maxHeight - footer.height + navBarHeightLocal.value) - systemBottomHeight
                         },
                         zIndex = 1f,
                     )

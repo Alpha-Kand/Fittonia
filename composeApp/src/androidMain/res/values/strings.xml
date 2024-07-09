@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Fittonia</string>
+
+    <!-- Welcome Screen -->
+    <string name="welcome_screen_body">To get started, you just need a new server password, server socket port, and a place to put incoming files.</string>
 </resources>
