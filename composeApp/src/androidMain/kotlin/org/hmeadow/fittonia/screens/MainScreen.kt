@@ -18,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -27,7 +26,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
@@ -77,8 +75,8 @@ data class TransferJob(
     val progress: Double,
     val status: TransferStatus,
     val direction: Direction,
-){
-    enum class Direction{
+) {
+    enum class Direction {
         INCOMING,
         OUTGOING,
     }
@@ -139,11 +137,7 @@ fun MainScreen(sendFiles: () -> Unit) {
     var aboutState by remember { mutableStateOf(false) }
     FittoniaBackground(
         content = {
-            Column(
-                modifier = Modifier
-                    .align(alignment = Alignment.TopStart)
-                    .padding(all = 16.dp),
-            ) {
+            Column(modifier = Modifier.padding(all = 16.dp)) {
                 Row {
                     Text(
                         text = "Ongoing transfers",
@@ -255,7 +249,9 @@ fun MainScreen(sendFiles: () -> Unit) {
                             }
                             VerticalLine()
                             FittoniaIcon(
-                                modifier = Modifier.requiredWidth(20.dp).padding(3.dp),
+                                modifier = Modifier
+                                    .requiredWidth(20.dp)
+                                    .padding(3.dp),
                                 drawableRes = R.drawable.ic_chevron_right,
                             )
                         }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text2.input.rememberTextFieldState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -26,7 +25,6 @@ import org.hmeadow.fittonia.components.FittoniaNumberInput
 import org.hmeadow.fittonia.components.FittoniaTextInput
 import org.hmeadow.fittonia.components.Footer
 import org.hmeadow.fittonia.components.HMSpacerHeight
-import org.hmeadow.fittonia.components.HMSpacerWeightColumn
 import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.headingLStyle
 import org.hmeadow.fittonia.components.inputLabelStyle
@@ -50,17 +48,13 @@ fun WelcomeScreen(
                     FittoniaIcon(
                         modifier = Modifier.clickable(onClick = Navigator::goToDebugScreen),
                         drawableRes = R.drawable.ic_debug,
-                        tint = Color.Cyan
+                        tint = Color.Cyan,
                     )
                 }
             }
         },
         content = {
-            Column(
-                modifier = Modifier
-                    .align(alignment = Alignment.TopStart)
-                    .padding(all = 16.dp),
-            ) {
+            Column(modifier = Modifier.padding(all = 16.dp)) {
                 Text(
                     text = "Welcome!",
                     style = headingLStyle,
@@ -122,8 +116,6 @@ fun WelcomeScreen(
                         ButtonText(text = "Select folder")
                     },
                 )
-
-                HMSpacerWeightColumn()
             }
         },
         footer = {

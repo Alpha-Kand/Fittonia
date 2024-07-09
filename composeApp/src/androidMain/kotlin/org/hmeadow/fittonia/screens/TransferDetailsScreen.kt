@@ -13,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,11 +44,7 @@ val transfer = TransferJob(
 fun TransferDetailsScreen() {
     FittoniaBackground(
         content = {
-            Column(
-                modifier = Modifier
-                    .align(alignment = Alignment.TopStart)
-                    .padding(all = 16.dp),
-            ) {
+            Column(modifier = Modifier.padding(all = 16.dp)) {
                 Text(
                     text = transfer.description,
                     style = headingLStyle,

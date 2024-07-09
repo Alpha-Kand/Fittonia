@@ -11,15 +11,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,11 +54,10 @@ val destinations = listOf(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SendFilesScreen(
-    onBackClicked:() -> Unit,
-    onConfirmClicked:() -> Unit,
+    onBackClicked: () -> Unit,
+    onConfirmClicked: () -> Unit,
 ) {
     var fileList by remember { mutableStateOf<List<String>>(emptyList()) }
-    val scrollState = rememberScrollState()
     var destinationPickerActive by remember { mutableStateOf(false) }
     var destinationState by remember { mutableStateOf("Select destination...") }
     FittoniaBackground(
@@ -83,14 +79,8 @@ fun SendFilesScreen(
                 }
             }
         },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .align(alignment = Alignment.TopStart)
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(scrollState),
-            ) {
+        content = {
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 HMSpacerHeight(height = 40)
                 Text(
                     text = "1. Select files/folders to send.",
@@ -278,7 +268,7 @@ fun SendFilesScreen(
 
 @Composable
 @Preview
-private fun Preview(){
+private fun Preview() {
     SendFilesScreen(
         onBackClicked = { },
         onConfirmClicked = { },

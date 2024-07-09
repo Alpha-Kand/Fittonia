@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -48,11 +47,7 @@ fun DebugScreen(
             }
         },
         content = {
-            Column(
-                modifier = Modifier
-                    .align(alignment = Alignment.TopStart)
-                    .padding(all = 16.dp),
-            ) {
+            Column(modifier = Modifier.padding(all = 16.dp)) {
                 Row {
                     Column {
                         Text(text = "Default Server Port:")
@@ -75,14 +70,4 @@ fun DebugScreen(
             }
         },
     )
-}
-
-@Composable
-private fun SettingsLine(tag: String, value: String) {
-    Row {
-        Text(text = tag)
-        HMSpacerWeightRow()
-        //HMSpacerWidth(width = 10)
-        Text(text = value)
-    }
 }
