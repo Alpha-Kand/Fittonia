@@ -136,25 +136,16 @@ fun OverviewScreen(sendFiles: () -> Unit) {
     var optionsState by remember { mutableStateOf(false) }
     var aboutState by remember { mutableStateOf(false) }
     FittoniaBackground(
+        header = {
+            FittoniaHeader(
+                headerText = "Ongoing transfers",
+                onOptionsClicked = { optionsState = true },
+            )
+        },
         content = {
             Column(modifier = Modifier.padding(all = 16.dp)) {
-                Row {
-                    Text(
-                        text = "Ongoing transfers",
-                        style = headingLStyle,
-                    )
-                    HMSpacerWeightRow()
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .border(1.dp, FittoniaButtonType.Primary.borderColour, CircleShape)
-                            .background(FittoniaButtonType.Primary.backgroundColor, CircleShape)
-                            .clickable(onClick = { optionsState = true }),
-                        contentAlignment = Center,
-                    ) { Text("•••", color = FittoniaButtonType.Primary.contentColour) }
-                }
 
-                HMSpacerHeight(height = 40)
+                HMSpacerHeight(height = 15)
 
                 Column(
                     modifier = Modifier

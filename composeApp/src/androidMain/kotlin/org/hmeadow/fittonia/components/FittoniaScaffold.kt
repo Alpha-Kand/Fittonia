@@ -59,11 +59,11 @@ fun FittoniaBackground(
         SubcomposeLayout(modifier = Modifier) { constraints ->
             val headerPlaceables = subcompose(ScaffoldSectionsEnum.HEADER) {
                 header?.let {
-                    Column(modifier = Modifier.background(color = Color(0xFF448844))) {
+                    Column(modifier = Modifier.background(color = Color(0xAA448844))) {
                         Spacer(modifier = Modifier.requiredHeight(statusBarsHeightLocal.value.toDp()))
                         Box(
                             modifier = Modifier
-                                .requiredHeight(40.dp)
+                                .requiredHeight(50.dp)
                                 .fillMaxWidth(),
                         ) {
                             header()

@@ -92,13 +92,17 @@ fun WelcomeScreen(
                     text = stringResource(R.string.welcome_screen_body),
                     style = paragraphStyle,
                 )
+
                 HMSpacerHeight(height = 3)
+
                 Text(
                     text = stringResource(id = R.string.welcome_screen_you_can_change_these_later),
                     style = psstStyle,
                     color = psstColour,
                 )
+
                 HMSpacerHeight(height = 15)
+
                 Row {
                     Text(
                         text = stringResource(id = R.string.welcome_screen_new_server_password_label),
@@ -106,6 +110,7 @@ fun WelcomeScreen(
                     )
                     // TODO: Help Icon
                 }
+
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
                     inputFlow = viewModel.serverPasswordState,
