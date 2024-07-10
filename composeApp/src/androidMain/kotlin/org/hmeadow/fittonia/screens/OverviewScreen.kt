@@ -10,15 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -31,17 +28,16 @@ import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.FittoniaBackground
 import org.hmeadow.fittonia.components.FittoniaButton
-import org.hmeadow.fittonia.components.FittoniaButtonType
 import org.hmeadow.fittonia.components.FittoniaComingSoon
+import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaModal
+import org.hmeadow.fittonia.components.Footer
 import org.hmeadow.fittonia.components.HMSpacerHeight
-import org.hmeadow.fittonia.components.HMSpacerWeightColumn
 import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.HorizontalLine
 import org.hmeadow.fittonia.components.VerticalLine
-import org.hmeadow.fittonia.components.headingLStyle
 import org.hmeadow.fittonia.components.headingSStyle
 import org.hmeadow.fittonia.components.paragraphStyle
 import java.text.NumberFormat
@@ -144,7 +140,6 @@ fun OverviewScreen(sendFiles: () -> Unit) {
         },
         content = {
             Column(modifier = Modifier.padding(all = 16.dp)) {
-
                 HMSpacerHeight(height = 15)
 
                 Column(
@@ -251,9 +246,10 @@ fun OverviewScreen(sendFiles: () -> Unit) {
                         }
                     }
                 }
-
-                HMSpacerWeightColumn()
-
+            }
+        },
+        footer = {
+            Footer {
                 Row {
                     FittoniaButton(
                         modifier = Modifier.weight(1.0f),
