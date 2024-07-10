@@ -30,7 +30,7 @@ private enum class ScaffoldSectionsEnum {
 }
 
 @Composable
-fun FittoniaBackground(
+fun FittoniaScaffold(
     content: @Composable ColumnScope.() -> Unit,
     header: (@Composable BoxScope.() -> Unit)? = null,
     footer: (@Composable BoxScope.() -> Unit)? = null,

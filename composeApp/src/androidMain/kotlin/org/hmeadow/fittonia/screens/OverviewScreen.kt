@@ -26,7 +26,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
-import org.hmeadow.fittonia.components.FittoniaBackground
+import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaComingSoon
 import org.hmeadow.fittonia.components.FittoniaHeader
@@ -131,7 +131,7 @@ fun measureTextWidth(text: String, style: TextStyle): Dp {
 fun OverviewScreen(sendFiles: () -> Unit) {
     var optionsState by remember { mutableStateOf(false) }
     var aboutState by remember { mutableStateOf(false) }
-    FittoniaBackground(
+    FittoniaScaffold(
         header = {
             FittoniaHeader(
                 headerText = "Ongoing transfers",

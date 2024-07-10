@@ -21,7 +21,7 @@ import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.Navigator
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
-import org.hmeadow.fittonia.components.FittoniaBackground
+import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaNumberInput
@@ -66,7 +66,7 @@ fun WelcomeScreen(
     data: SettingsDataAndroid,
     onClearDumpPath: () -> Unit,
 ) {
-    FittoniaBackground(
+    FittoniaScaffold(
         header = {
             Row {
                 if (BuildConfig.DEBUG) {

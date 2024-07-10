@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
-import org.hmeadow.fittonia.components.FittoniaBackground
+import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.HMSpacerHeight
@@ -42,7 +42,7 @@ val transfer = TransferJob(
 @Composable
 @Preview
 fun TransferDetailsScreen() {
-    FittoniaBackground(
+    FittoniaScaffold(
         content = {
             Column(modifier = Modifier.padding(all = 16.dp)) {
                 Text(

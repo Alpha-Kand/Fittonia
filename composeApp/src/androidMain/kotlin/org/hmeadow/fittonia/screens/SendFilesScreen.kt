@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import org.hmeadow.fittonia.R
-import org.hmeadow.fittonia.components.FittoniaBackground
+import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaButtonType
 import org.hmeadow.fittonia.components.FittoniaComingSoon
@@ -60,7 +60,7 @@ fun SendFilesScreen(
     var fileList by remember { mutableStateOf<List<String>>(emptyList()) }
     var destinationPickerActive by remember { mutableStateOf(false) }
     var destinationState by remember { mutableStateOf("Select destination...") }
-    FittoniaBackground(
+    FittoniaScaffold(
         header = {
             Box {
                 FittoniaIcon(
