@@ -7,8 +7,10 @@ import com.varabyte.kotter.foundation.input.onKeyPressed
 import com.varabyte.kotter.foundation.input.runUntilInputEntered
 import com.varabyte.kotter.foundation.input.setInput
 import com.varabyte.kotter.foundation.session
+import com.varabyte.kotter.foundation.text.red
 import com.varabyte.kotter.foundation.text.rgb
 import com.varabyte.kotter.foundation.text.text
+import com.varabyte.kotter.foundation.text.textLine
 import commandHandler.AddCommand
 import commandHandler.CommandHandler
 import commandHandler.DecodeIPCodeCommand
@@ -47,8 +49,7 @@ fun terminalMain() = session {
     kotter = this
     runBlocking {
         var activeSession = true
-        val settings = SettingsManager.settingsManager
-        settings.registerAsMainProcess()
+        val settings = SettingsManagerDesktop.settingsManager
         settings.saveSettings()
         HelpDocLoader.init()
         val previousInput = settings.previousCmdEntries
@@ -114,7 +115,12 @@ fun terminalMain() = session {
             } catch (e: HasHelpedException) {
                 // Eat it.
             } catch (e: FittoniaError) {
-                reportFittoniaError2(e)
+                e.getErrorMessage().let {
+                    section {
+                        red { text("Error: ") }
+                        textLine(it)
+                    }.run()
+                }
             }
         }
     }

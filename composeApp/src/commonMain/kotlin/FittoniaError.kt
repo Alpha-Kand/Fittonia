@@ -1,7 +1,3 @@
-import com.varabyte.kotter.foundation.text.red
-import com.varabyte.kotter.foundation.text.text
-import com.varabyte.kotter.foundation.text.textLine
-import com.varabyte.kotter.runtime.Session
 import fittonia.composeapp.generated.resources.Res
 import fittonia.composeapp.generated.resources.error_add_destination_already_exists
 import org.jetbrains.compose.resources.getString
@@ -71,14 +67,5 @@ class FittoniaError(
         FittoniaErrorType.ADD_DESTINATION_ALREADY_EXISTS -> getString(Res.string.error_add_destination_already_exists)
         FittoniaErrorType.CANT_SEND_MESSAGE_TWICE -> "Tried to set message more than once."
         FittoniaErrorType.TOO_MANY_SEARCH_TERMS -> "Cannot search with both terms at the same time."
-    }
-}
-
-suspend fun Session.reportFittoniaError2(e: FittoniaError) {
-    e.getErrorMessage().let {
-        section {
-            red { text("Error: ") }
-            textLine(it)
-        }.run()
     }
 }

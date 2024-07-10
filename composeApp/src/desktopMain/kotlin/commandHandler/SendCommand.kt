@@ -1,13 +1,13 @@
 package commandHandler
 
 import OutputIO.printlnIO
-import SettingsManager
+import SettingsManagerDesktop
 import hmeadowSocket.HMeadowSocketClient
 import receiveApproval
 import java.net.InetAddress
 
 fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
-    val destination = SettingsManager.settingsManager.findDestination(command.getDestination())
+    val destination = SettingsManagerDesktop.settingsManager.findDestination(command.getDestination())
     return destination?.let {
         HMeadowSocketClient(
             ipAddress = InetAddress.getByName(destination.ip),
@@ -53,7 +53,7 @@ fun HMeadowSocketClient.communicateCommand(
 }
 
 fun SendCommand.canContinueSendCommand(client: HMeadowSocketClient): Boolean {
-    val destination = SettingsManager.settingsManager.findDestination(this.getDestination())
+    val destination = SettingsManagerDesktop.settingsManager.findDestination(this.getDestination())
     val password = destination?.password ?: this.getPassword()
     val commandFlag = when (this) {
         is SendFilesCommand -> ServerCommandFlag.SEND_FILES

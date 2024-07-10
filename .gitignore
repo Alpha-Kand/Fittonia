@@ -1,6 +1,6 @@
 local.properties
 .idea
 .fleet
-composeApp/build*
+composeApp/build/*
 .gradle/*
 *gradle-wrapper.jar

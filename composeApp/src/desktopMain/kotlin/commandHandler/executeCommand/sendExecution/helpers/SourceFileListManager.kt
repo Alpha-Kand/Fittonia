@@ -1,6 +1,6 @@
 package commandHandler.executeCommand.sendExecution.helpers
 
-import Config
+import MockConfig
 import commandHandler.FileTransfer
 import commandHandler.FileTransfer.Companion.getPrefix
 import commandHandler.FileTransfer.Companion.stripPrefix
@@ -31,7 +31,7 @@ internal class SourceFileListManager(
         private const val MAX_PATH_CHAR_LENGTH = 127
     }
 
-    private val tempSourceListFile: FittoniaTempFileBase = if (Config.IS_MOCKING) {
+    private val tempSourceListFile: FittoniaTempFileBase = if (MockConfig.IS_MOCKING) {
         FittoniaTempFileBase.FittoniaTempFileMock
     } else {
         FittoniaTempFileBase.FittoniaTempFile()

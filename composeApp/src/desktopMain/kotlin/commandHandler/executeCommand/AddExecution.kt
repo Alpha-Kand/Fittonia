@@ -2,6 +2,7 @@ package commandHandler.executeCommand
 
 import KotterSession.kotter
 import OutputIO.printlnIO
+import SettingsManagerDesktop
 import com.varabyte.kotter.foundation.input.input
 import com.varabyte.kotter.foundation.input.onInputEntered
 import com.varabyte.kotter.foundation.input.runUntilInputEntered
@@ -14,7 +15,7 @@ import commandHandler.canContinueSendCommand
 import commandHandler.setupSendCommandClient
 
 fun addExecution(command: AddCommand) {
-    val settingsManager = SettingsManager.settingsManager
+    val settingsManager = SettingsManagerDesktop.settingsManager
     if (settingsManager.settings.destinations.find { it.ip == command.getIP() } != null) {
         var userInput = ""
         kotter.section {
@@ -32,7 +33,7 @@ fun addExecution(command: AddCommand) {
     }
     val client = setupSendCommandClient(command = command)
     if (command.canContinueSendCommand(client = client)) {
-        SettingsManager.settingsManager.addDestination(
+        SettingsManagerDesktop.settingsManager.addDestination(
             name = command.getName(),
             ip = command.getIP(),
             password = command.getPassword(),
