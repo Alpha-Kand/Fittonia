@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterEnd
+import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -23,9 +24,19 @@ import org.hmeadow.fittonia.R
 @Composable
 fun FittoniaHeader(
     headerText: String,
-    onOptionsClicked: (() -> Unit)?,
+    onBackClicked: (() -> Unit)? = null,
+    onOptionsClicked: (() -> Unit)? = null,
 ) {
     Box(modifier = Modifier.padding(all = 5.dp)) {
+        onBackClicked?.let {
+            FittoniaIcon(
+                modifier = Modifier
+                    .align(CenterStart)
+                    .padding(5.dp)
+                    .clickable(onClick = onBackClicked),
+                drawableRes = R.drawable.ic_back_arrow,
+            )
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()

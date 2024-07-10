@@ -62,22 +62,10 @@ fun SendFilesScreen(
     var destinationState by remember { mutableStateOf("Select destination...") }
     FittoniaScaffold(
         header = {
-            Box {
-                FittoniaIcon(
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .clickable(onClick = onBackClicked),
-                    drawableRes = R.drawable.ic_back_arrow,
-                )
-                Row(Modifier.fillMaxWidth()) {
-                    HMSpacerWeightRow()
-                    Text(
-                        text = "Send files",
-                        style = headingLStyle,
-                    )
-                    HMSpacerWeightRow()
-                }
-            }
+            FittoniaHeader(
+                headerText = "Send files",
+                onBackClicked = onBackClicked,
+            )
         },
         content = {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
