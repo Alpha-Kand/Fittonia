@@ -4,16 +4,35 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.hmeadow.fittonia.R
+
+private val firaSansFont = FontFamily(
+    Font(
+        resId = R.font.fira_sans_medium,
+        style = FontStyle.Normal,
+    ),
+)
+
+val headerStyle = TextStyle(
+    fontSize = 25.sp,
+    lineHeight = 33.sp,
+    letterSpacing = (-0.2f).sp,
+    fontWeight = FontWeight(weight = 500),
+    fontFamily = firaSansFont,
+)
 
 val headingLStyle = TextStyle(
     fontSize = 30.sp,
     lineHeight = 38.sp,
     letterSpacing = (-0.2f).sp,
     fontWeight = FontWeight(weight = 500),
+    fontFamily = firaSansFont,
 )
 
 val headingMStyle = TextStyle(
@@ -21,6 +40,7 @@ val headingMStyle = TextStyle(
     lineHeight = 38.sp,
     letterSpacing = (-0.2f).sp,
     fontWeight = FontWeight(weight = 450),
+    fontFamily = firaSansFont,
 )
 
 val headingSStyle = TextStyle(
@@ -28,6 +48,7 @@ val headingSStyle = TextStyle(
     lineHeight = 38.sp,
     letterSpacing = (-0.2f).sp,
     fontWeight = FontWeight(weight = 500),
+    fontFamily = firaSansFont,
 )
 
 val paragraphStyle = TextStyle(
@@ -35,6 +56,7 @@ val paragraphStyle = TextStyle(
     lineHeight = 23.sp,
     letterSpacing = (-0.2f).sp,
     fontWeight = FontWeight(weight = 400),
+    fontFamily = firaSansFont,
 )
 
 val psstStyle = TextStyle(
@@ -42,6 +64,7 @@ val psstStyle = TextStyle(
     lineHeight = 23.sp,
     letterSpacing = (-0.2f).sp,
     fontWeight = FontWeight(weight = 300),
+    fontFamily = firaSansFont,
 )
 
 val psstColour = Color(0xFF222222)
@@ -52,6 +75,7 @@ val inputLabelStyle = TextStyle(
     letterSpacing = (-0.2f).sp,
     fontWeight = FontWeight(weight = 500),
     fontStyle = FontStyle.Italic,
+    fontFamily = firaSansFont,
 )
 
 val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
