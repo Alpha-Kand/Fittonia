@@ -132,7 +132,7 @@ fun measureTextWidth(text: String, style: TextStyle): Dp {
 }
 
 @Composable
-fun MainScreen(sendFiles: () -> Unit) {
+fun OverviewScreen(sendFiles: () -> Unit) {
     var optionsState by remember { mutableStateOf(false) }
     var aboutState by remember { mutableStateOf(false) }
     FittoniaBackground(

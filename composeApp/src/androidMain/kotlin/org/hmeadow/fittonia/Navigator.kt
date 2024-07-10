@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.screens.DebugScreen
-import org.hmeadow.fittonia.screens.MainScreen
+import org.hmeadow.fittonia.screens.OverviewScreen
 import org.hmeadow.fittonia.screens.SendFilesScreen
 import org.hmeadow.fittonia.screens.TransferDetailsScreen
 import org.hmeadow.fittonia.screens.WelcomeScreen
@@ -55,7 +55,7 @@ class Navigator(private val viewModelMain: MainViewModel) {
             onContinueCallback = { password, port ->
                 viewModelMain.updateServerPassword(password)
                 viewModelMain.updateServerPort(port)
-                push(mainScreen())
+                push(overviewScreen())
             },
         ),
     ) { data, viewModel ->
@@ -66,10 +66,10 @@ class Navigator(private val viewModelMain: MainViewModel) {
         )
     }
 
-    class MainScreenViewModel : BaseViewModel
+    class OverviewScreenViewModel : BaseViewModel
 
-    private fun mainScreen() = Screen(viewModel = MainScreenViewModel()) { data, viewModel ->
-        MainScreen(
+    private fun overviewScreen() = Screen(viewModel = OverviewScreenViewModel()) { data, viewModel ->
+        OverviewScreen(
             sendFiles = {
                 push(sendFilesScreen())
             },
@@ -100,7 +100,7 @@ class Navigator(private val viewModelMain: MainViewModel) {
         viewModelMain.launch {
             viewModelMain.dataStore.data.first().let {
                 if (it.defaultPort != 0 && it.serverPassword != null) {
-                    push(mainScreen())
+                    push(overviewScreen())
                 } else {
                     push(welcomeScreen())
                 }
