@@ -27,4 +27,10 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
             it.copy(dumpPath = dumpPath)
         }
     }
+
+    fun resetSettings() = launch {
+        dataStore.updateData {
+            SettingsDataAndroid()
+        }
+    }
 }

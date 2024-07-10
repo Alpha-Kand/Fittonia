@@ -133,6 +133,7 @@ class Navigator(private val viewModelMain: MainViewModel) {
                 Screen(viewModel = DebugScreenViewModel()) { data, _ ->
                     DebugScreen(
                         data = data,
+                        onResetSettingsClicked = instance.viewModelMain::resetSettings,
                         onBackClicked = instance::pop,
                     )
                 },

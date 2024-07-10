@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.components.FittoniaBackground
+import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
@@ -25,6 +26,7 @@ import org.hmeadow.fittonia.components.headingLStyle
 @Composable
 fun DebugScreen(
     data: SettingsDataAndroid,
+    onResetSettingsClicked: () -> Unit,
     onBackClicked: () -> Unit,
 ) {
     FittoniaBackground(
@@ -66,6 +68,9 @@ fun DebugScreen(
                             Text(text = data.dumpPath)
                         }
                     }
+                }
+                FittoniaButton(onClick = onResetSettingsClicked) {
+                    ButtonText(text = "Reset Settings")
                 }
             }
         },
