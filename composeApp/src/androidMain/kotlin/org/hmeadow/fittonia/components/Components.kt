@@ -106,9 +106,9 @@ fun FittoniaModal(
 }
 
 @Composable
-fun VerticalLine() {
+fun VerticalLine(modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .background(Color(0xFFAAAAAA))
             .requiredWidth(1.dp)
             .fillMaxHeight(),
@@ -116,9 +116,9 @@ fun VerticalLine() {
 }
 
 @Composable
-fun HorizontalLine() {
+fun HorizontalLine(modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .background(Color(0xFFAAAAAA))
             .requiredHeight(1.dp)
             .fillMaxWidth(),
