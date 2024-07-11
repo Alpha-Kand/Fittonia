@@ -1,6 +1,6 @@
 package org.hmeadow.fittonia.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import SettingsManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material3.Checkbox
@@ -22,17 +21,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import org.hmeadow.fittonia.BaseViewModel
-import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.components.FittoniaButton
@@ -83,7 +78,7 @@ class SendFilesScreenViewModel(
         itemList.isNotEmpty() && ip.isNotEmpty() && password.isNotEmpty() && port.isNotEmpty()
     }
 
-    fun onSaveOneTimeDestinationClicked(){
+    fun onSaveOneTimeDestinationClicked() {
         onSaveOneTimeDestinationCallback(oneTimeIpAddressState.value, oneTimePasswordState.value)
     }
 }
@@ -149,7 +144,8 @@ fun SendFilesScreen(
                     FittoniaButton(
                         onClick = {
                             val alphabetRange = ('A'..'Z') + ('a'..'z')
-                            viewModel.itemListState.value += (1..10).map { alphabetRange.random() }.joinToString(separator = "")
+                            viewModel.itemListState.value += (1..10).map { alphabetRange.random() }
+                                .joinToString(separator = "")
                         },
                         type = FittoniaButtonType.Secondary,
                         content = {
@@ -218,8 +214,7 @@ fun SendFilesScreen(
                             .background(color = Color(0xFFDDFFEE))
                             .padding(5.dp)
                             .clickable(onClick = { destinationPickerActive = true }),
-
-                        ) {
+                    ) {
                         val foo = viewModel.selectedDestinationState.collectAsState()
                         Row(
                             verticalAlignment = CenterVertically,
@@ -330,7 +325,6 @@ fun SendFilesScreen(
                         onClick = {},
                     ),
                 ).fastForEach {
-
                     data.destinations.forEachIndexed { index, destination ->
                         Row(
                             modifier = Modifier.clickable {
@@ -358,7 +352,6 @@ fun SendFilesScreen(
                         if (index != data.destinations.lastIndex) {
                             HorizontalLine()
                         }
-
                     }
                 }
             }

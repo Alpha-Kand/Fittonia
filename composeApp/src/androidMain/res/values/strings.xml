@@ -10,4 +10,7 @@
     <string name="welcome_screen_new_destination_folder_label">Destination folder</string>
     <string name="welcome_screen_new_destination_select_folder_button">Select folder</string>
     <string name="welcome_screen_continue_button">Continue</string>
+
+    <!-- New Destination Screen -->
+    <string name="new_destination_screen_body">If you plan on sending files/messages to a remote device often, saving it as a destination can save you having to remember its details.</string>
 </resources>

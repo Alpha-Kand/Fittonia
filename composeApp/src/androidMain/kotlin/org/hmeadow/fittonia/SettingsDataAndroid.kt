@@ -3,7 +3,6 @@ package org.hmeadow.fittonia
 import SettingsManager
 import SettingsManager.Companion.DEFAULT_PORT
 import androidx.datastore.core.Serializer
-import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException

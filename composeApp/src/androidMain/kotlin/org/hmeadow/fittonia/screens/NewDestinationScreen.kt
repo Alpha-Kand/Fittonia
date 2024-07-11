@@ -1,7 +1,6 @@
 package org.hmeadow.fittonia.screens
 
 import SettingsManager
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.combine
@@ -71,7 +71,7 @@ fun NewDestinationScreen(
                 HMSpacerHeight(height = 15)
 
                 Text(
-                    text = "If you plan on sending files/messages to a remote device often, saving it as a destination can save you having to remember its details.",
+                    text = stringResource(R.string.new_destination_screen_body),
                     style = paragraphStyle,
                 )
 
