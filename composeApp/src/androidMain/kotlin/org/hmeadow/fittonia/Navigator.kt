@@ -14,8 +14,11 @@ import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.screens.DebugScreen
+import org.hmeadow.fittonia.screens.NewDestinationScreen
+import org.hmeadow.fittonia.screens.NewDestinationScreenViewModel
 import org.hmeadow.fittonia.screens.OverviewScreen
 import org.hmeadow.fittonia.screens.SendFilesScreen
+import org.hmeadow.fittonia.screens.SendFilesScreenViewModel
 import org.hmeadow.fittonia.screens.TransferDetailsScreen
 import org.hmeadow.fittonia.screens.WelcomeScreen
 import org.hmeadow.fittonia.screens.WelcomeScreenViewModel
@@ -76,12 +79,45 @@ class Navigator(private val mainViewModel: MainViewModel) {
         )
     }
 
-    class SendFilesScreenViewModel : BaseViewModel
-
-    private fun sendFilesScreen() = Screen(viewModel = SendFilesScreenViewModel()) { data, viewModel ->
+    private fun sendFilesScreen() = Screen(
+        viewModel = SendFilesScreenViewModel(
+            onSaveOneTimeDestinationCallback = { oneTimeIp, oneTimePassword ->
+                push(
+                    newDestinationScreen(
+                        oneTimeIp = oneTimeIp,
+                        oneTimePassword = oneTimePassword,
+                    ),
+                )
+            },
+        ),
+    ) { data, viewModel ->
         SendFilesScreen(
+            viewModel = viewModel,
+            data = data,
             onBackClicked = ::pop,
             onConfirmClicked = ::pop,
+            onAddNewDestinationClicked = {
+                push(newDestinationScreen())
+            },
+        )
+    }
+
+    private fun newDestinationScreen(
+        oneTimeIp: String? = null,
+        oneTimePassword: String? = null,
+    ) = Screen(
+        viewModel = NewDestinationScreenViewModel(
+            oneTimeIp = oneTimeIp,
+            oneTimePassword = oneTimePassword,
+            onSaveNewDestinationCallback = {
+                mainViewModel.addDestination(it)
+                pop()
+            },
+        ),
+    ) { data, viewModel ->
+        NewDestinationScreen(
+            viewModel = viewModel,
+            onBackClicked = ::pop,
         )
     }
 

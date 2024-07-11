@@ -59,6 +59,22 @@ val paragraphStyle = TextStyle(
     fontFamily = firaSansFont,
 )
 
+val readOnlyStyle = TextStyle(
+    fontSize = 17.sp,
+    lineHeight = 23.sp,
+    letterSpacing = (-0.2f).sp,
+    fontWeight = FontWeight(weight = 200),
+    fontFamily = firaSansFont,
+)
+
+val readOnlyLightStyle = TextStyle(
+    fontSize = 15.sp,
+    lineHeight = 20.sp,
+    letterSpacing = (-0.2f).sp,
+    fontWeight = FontWeight(weight = 100),
+    fontFamily = firaSansFont,
+)
+
 val psstStyle = TextStyle(
     fontSize = 14.sp,
     lineHeight = 23.sp,

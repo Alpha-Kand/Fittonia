@@ -39,7 +39,7 @@ object SettingsDataAndroidSerializer : Serializer<SettingsDataAndroid> {
 
 @Serializable
 data class SettingsDataAndroid(
-    val destinations: PersistentList<SettingsManager.Destination> = persistentListOf(),
+    val destinations: List<SettingsManager.Destination> = persistentListOf(),
     val dumpPath: String = "",
     val defaultPort: Int = DEFAULT_PORT,
     val serverPassword: String? = null,

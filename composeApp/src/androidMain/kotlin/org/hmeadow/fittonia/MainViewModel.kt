@@ -28,6 +28,12 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         }
     }
 
+    fun addDestination(destination: SettingsManager.Destination) = launch {
+        dataStore.updateData {
+            it.copy(destinations = it.destinations + destination)
+        }
+    }
+
     fun resetSettings() = launch {
         dataStore.updateData {
             SettingsDataAndroid()
