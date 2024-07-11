@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
@@ -335,4 +336,10 @@ fun OverviewScreen(sendFiles: () -> Unit) {
             }
         },
     )
+}
+
+@Composable
+@Preview
+private fun Preview() {
+    OverviewScreen { }
 }
