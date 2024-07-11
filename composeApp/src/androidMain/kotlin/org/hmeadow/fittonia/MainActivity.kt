@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         mainActivity = this
         val viewModel = getViewModel()
-        val navigator = Navigator(viewModelMain = viewModel)
+        val navigator = Navigator(mainViewModel = viewModel)
         initWindowInsetsListener()
         setContent(
             content = {

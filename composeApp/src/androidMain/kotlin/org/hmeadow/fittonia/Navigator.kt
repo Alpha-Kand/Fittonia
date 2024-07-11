@@ -20,7 +20,7 @@ import org.hmeadow.fittonia.screens.TransferDetailsScreen
 import org.hmeadow.fittonia.screens.WelcomeScreen
 import org.hmeadow.fittonia.screens.WelcomeScreenViewModel
 
-class Navigator(private val viewModelMain: MainViewModel) {
+class Navigator(private val mainViewModel: MainViewModel) {
 
     data class Screen<T : BaseViewModel>(
         private val viewModel: T,
@@ -51,10 +51,10 @@ class Navigator(private val viewModelMain: MainViewModel) {
 
     private fun welcomeScreen() = Screen(
         viewModel = WelcomeScreenViewModel(
-            mainViewModel = viewModelMain,
+            mainViewModel = mainViewModel,
             onContinueCallback = { password, port ->
-                viewModelMain.updateServerPassword(password)
-                viewModelMain.updateServerPort(port)
+                mainViewModel.updateServerPassword(password)
+                mainViewModel.updateServerPort(port)
                 push(overviewScreen())
             },
         ),
@@ -62,7 +62,7 @@ class Navigator(private val viewModelMain: MainViewModel) {
         WelcomeScreen(
             viewModel = viewModel,
             data = data,
-            onClearDumpPath = { this.viewModelMain.updateDumpPath("") },
+            onClearDumpPath = { this.mainViewModel.updateDumpPath("") },
         )
     }
 
@@ -97,8 +97,8 @@ class Navigator(private val viewModelMain: MainViewModel) {
 
     init {
         instance = this
-        viewModelMain.launch {
-            viewModelMain.dataStore.data.first().let {
+        mainViewModel.launch {
+            mainViewModel.dataStore.data.first().let {
                 if (it.defaultPort != 0 && it.serverPassword != null) {
                     push(overviewScreen())
                 } else {
@@ -133,7 +133,7 @@ class Navigator(private val viewModelMain: MainViewModel) {
                 Screen(viewModel = DebugScreenViewModel()) { data, _ ->
                     DebugScreen(
                         data = data,
-                        onResetSettingsClicked = instance.viewModelMain::resetSettings,
+                        onResetSettingsClicked = instance.mainViewModel::resetSettings,
                         onBackClicked = instance::pop,
                     )
                 },
