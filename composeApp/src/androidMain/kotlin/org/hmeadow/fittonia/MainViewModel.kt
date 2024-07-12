@@ -1,5 +1,6 @@
 package org.hmeadow.fittonia
 
+import android.net.Uri
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -22,9 +23,15 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         }
     }
 
-    fun updateDumpPath(dumpPath: String) = launch {
+    fun clearDumpPath() = launch{
         dataStore.updateData {
-            it.copy(dumpPath = dumpPath)
+            it.copy(dumpPath = SettingsDataAndroid.DumpPath())
+        }
+    }
+
+    fun updateDumpPath(uri: Uri) = launch {
+        dataStore.updateData {
+            it.copy(dumpPath = SettingsDataAndroid.DumpPath(uri = uri))
         }
     }
 

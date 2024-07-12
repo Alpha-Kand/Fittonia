@@ -65,7 +65,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
         WelcomeScreen(
             viewModel = viewModel,
             data = data,
-            onClearDumpPath = { this.mainViewModel.updateDumpPath("") },
+            onClearDumpPath = { this.mainViewModel.clearDumpPath() },
         )
     }
 

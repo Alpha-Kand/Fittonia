@@ -24,10 +24,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
+import androidx.documentfile.provider.DocumentFile
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import org.hmeadow.fittonia.BaseViewModel
+import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.components.FittoniaButton
@@ -80,6 +82,14 @@ class SendFilesScreenViewModel(
 
     fun onSaveOneTimeDestinationClicked() {
         onSaveOneTimeDestinationCallback(oneTimeIpAddressState.value, oneTimePasswordState.value)
+    }
+
+    fun onUserSelectItem() {
+        MainActivity.mainActivity.openFilePicker {
+            DocumentFile.fromSingleUri(MainActivity.mainActivity, it)?.name?.let { name ->
+                itemListState.value += name
+            }
+        }
     }
 }
 
@@ -142,11 +152,7 @@ fun SendFilesScreen(
                 HMSpacerHeight(height = 5)
                 Row {
                     FittoniaButton(
-                        onClick = {
-                            val alphabetRange = ('A'..'Z') + ('a'..'z')
-                            viewModel.itemListState.value += (1..10).map { alphabetRange.random() }
-                                .joinToString(separator = "")
-                        },
+                        onClick = viewModel::onUserSelectItem,
                         type = FittoniaButtonType.Secondary,
                         content = {
                             ButtonText(text = "Add")

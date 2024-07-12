@@ -1,12 +1,15 @@
 package org.hmeadow.fittonia
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.collectAsState
 import androidx.core.view.ViewCompat
@@ -19,10 +22,35 @@ import kotlinx.coroutines.flow.MutableStateFlow
 val Context.dataStore by dataStore("fittonia.json", SettingsDataAndroidSerializer)
 
 class MainActivity : ComponentActivity() {
-    val openDumpPicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            result.data?.data?.path?.let {
-                getViewModel().updateDumpPath(it)
+    private lateinit var fileFolderPickerIntent: ActivityResultLauncher<Intent>
+    private var onUriPicked: (Uri) -> Unit = {}
+
+    fun openFilePicker(onSelectItem: (Uri) -> Unit) {
+        onUriPicked = onSelectItem
+        fileFolderPickerIntent.launch(
+            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_DEFAULT)
+                type = "*/*"
+            },
+        )
+    }
+
+    fun openFolderPicker(onSelectItem: (Uri) -> Unit) {
+        onUriPicked = onSelectItem
+        fileFolderPickerIntent.launch(
+            Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addCategory(Intent.CATEGORY_DEFAULT)
+            },
+        )
+    }
+
+    private fun initFileFolderPickerIntent() {
+        fileFolderPickerIntent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                result.data?.data?.let {
+                    onUriPicked(it)
+                }
             }
         }
     }
@@ -49,6 +77,7 @@ class MainActivity : ComponentActivity() {
         val viewModel = getViewModel()
         val navigator = Navigator(mainViewModel = viewModel)
         initWindowInsetsListener()
+        initFileFolderPickerIntent()
         setContent(
             content = {
                 navigator.Render(

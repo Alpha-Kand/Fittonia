@@ -144,6 +144,7 @@ val ktlint = configurations.create("ktlint")
 dependencies {
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.documentfile)
     ktlint(libs.ktlintlib)
     implementation(libs.androidx.datastore)
     implementation(libs.kotlinx.collections.immutable)

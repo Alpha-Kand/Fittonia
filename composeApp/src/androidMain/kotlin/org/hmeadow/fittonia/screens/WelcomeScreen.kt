@@ -1,6 +1,6 @@
 package org.hmeadow.fittonia.screens
 
-import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,7 +38,7 @@ import org.hmeadow.fittonia.components.psstColour
 import org.hmeadow.fittonia.components.psstStyle
 
 class WelcomeScreenViewModel(
-    mainViewModel: MainViewModel,
+    private val mainViewModel: MainViewModel,
     private val onContinueCallback: (password: String, port: Int) -> Unit,
 ) : BaseViewModel {
     val serverPasswordState = InputFlow(initial = "")
@@ -49,7 +49,7 @@ class WelcomeScreenViewModel(
         portFieldState,
         mainViewModel.dataStore.data,
     ) { passwordState, portState, dumpPathState ->
-        passwordState.isNotEmpty() && portState.isNotEmpty() && dumpPathState.dumpPath.isNotEmpty()
+        passwordState.isNotEmpty() && portState.isNotEmpty() && dumpPathState.dumpPath.dumpPathUri.isNotEmpty()
     }
 
     fun onContinue() {
@@ -57,6 +57,10 @@ class WelcomeScreenViewModel(
             serverPasswordState.value,
             portFieldState.value.toInt(),
         )
+    }
+
+    fun onDumpPathPicked(path: Uri) {
+        mainViewModel.updateDumpPath(path)
     }
 }
 
@@ -140,14 +144,12 @@ fun WelcomeScreen(
                     // TODO: Help Icon
                 }
                 ReadOnlyEntries(
-                    entries = listOf(data.dumpPath),
+                    entries = listOf(data.dumpPath.dumpPathReadable),
                     onEntryClearClicked = { onClearDumpPath() },
                     expandOnClick = true,
                 )
                 FittoniaButton(
-                    onClick = {
-                        MainActivity.mainActivity.openDumpPicker.launch(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE))
-                    },
+                    onClick = { MainActivity.mainActivity.openFolderPicker(viewModel::onDumpPathPicked) },
                     content = {
                         ButtonText(
                             text = stringResource(id = R.string.welcome_screen_new_destination_select_folder_button),

@@ -65,7 +65,14 @@ fun DebugScreen(
                                 .horizontalScroll(rememberScrollState())
                                 .background(Color.LightGray),
                         ) {
-                            Text(text = data.dumpPath)
+                            Text(text = data.dumpPath.dumpPathUri)
+                        }
+                        Row(
+                            modifier = Modifier
+                                .horizontalScroll(rememberScrollState())
+                                .background(Color.LightGray),
+                        ) {
+                            Text(text = data.dumpPath.dumpPathReadable)
                         }
                     }
                 }

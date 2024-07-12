@@ -17,6 +17,7 @@ kotlinxSerializationJson = "1.6.3"
 datastore = "1.1.1"
 fragmentKtx = "1.8.1"
 androidx-activityCompose = "1.9.0"
+documentfile = "1.0.1"
 
 # Unit Tests
 ktlint = "0.47.1"
@@ -48,6 +49,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activityCompose" }
+androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 
 # Unit Tests
 ktlintlib = { module = "com.pinterest:ktlint", version.ref = "ktlint" }
