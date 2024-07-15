@@ -139,7 +139,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
         instance = this
         mainViewModel.launch {
             mainViewModel.dataStore.data.first().let {
-                if (it.defaultPort != 0 && it.serverPassword != null) {
+                if (it.defaultPort != 0 && it.serverPassword != null && it.dumpPath.isSet) {
                     push(overviewScreen())
                 } else {
                     push(welcomeScreen())
@@ -174,6 +174,8 @@ class Navigator(private val mainViewModel: MainViewModel) {
                     DebugScreen(
                         data = data,
                         onResetSettingsClicked = instance.mainViewModel::resetSettings,
+                        onClearDumpPath = instance.mainViewModel::clearDumpPath,
+                        onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
                         onBackClicked = instance::pop,
                     )
                 },

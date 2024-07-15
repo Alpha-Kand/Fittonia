@@ -42,6 +42,12 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         }
     }
 
+    fun removeDestination(destination: SettingsManager.Destination) = launch {
+        dataStore.updateData { data ->
+            data.copy(destinations = data.destinations.filter { it != destination })
+        }
+    }
+
     fun resetSettings() = launch {
         dataStore.updateData {
             SettingsDataAndroid()

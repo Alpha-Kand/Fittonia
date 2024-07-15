@@ -52,6 +52,8 @@ data class SettingsDataAndroid(
         val dumpPathUri: String = "",
         val dumpPathReadable: String = "",
     ) {
+        val isSet = dumpPathUri.isNotEmpty() && dumpPathReadable.isNotEmpty()
+
         constructor(uri: Uri) : this(
             dumpPathUri = uri.path ?: "Error",
             dumpPathReadable = queryName(uri) ?: "Error",
