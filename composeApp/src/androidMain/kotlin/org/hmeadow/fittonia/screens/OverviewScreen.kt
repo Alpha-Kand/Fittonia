@@ -129,7 +129,7 @@ fun measureTextWidth(text: String, style: TextStyle): Dp {
 }
 
 @Composable
-fun OverviewScreen(sendFiles: () -> Unit) {
+fun OverviewScreen(onSendFilesClicked: () -> Unit) {
     var optionsState by remember { mutableStateOf(false) }
     var aboutState by remember { mutableStateOf(false) }
     FittoniaScaffold(
@@ -254,7 +254,7 @@ fun OverviewScreen(sendFiles: () -> Unit) {
                 Row {
                     FittoniaButton(
                         modifier = Modifier.weight(1.0f),
-                        onClick = sendFiles,
+                        onClick = onSendFilesClicked,
                         content = { ButtonText(text = "Send files") },
                     )
                     HMSpacerWidth(20)
@@ -341,5 +341,7 @@ fun OverviewScreen(sendFiles: () -> Unit) {
 @Composable
 @Preview
 private fun Preview() {
-    OverviewScreen { }
+    OverviewScreen(
+        onSendFilesClicked = {},
+    )
 }

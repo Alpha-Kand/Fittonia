@@ -1,5 +1,7 @@
 package org.hmeadow.fittonia
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -78,6 +80,7 @@ class MainActivity : ComponentActivity() {
         val navigator = Navigator(mainViewModel = viewModel)
         initWindowInsetsListener()
         initFileFolderPickerIntent()
+        initNotificationChannels()
         setContent(
             content = {
                 navigator.Render(
@@ -92,6 +95,17 @@ class MainActivity : ComponentActivity() {
             gestureDetector.onTouchEvent(ev)
             super.dispatchTouchEvent(ev)
         } ?: false
+    }
+
+    private fun initNotificationChannels() {
+        val channel = NotificationChannel(
+            getString(R.string.send_receive_channel_id),
+            getString(R.string.send_receive_channel_name),
+            NotificationManager.IMPORTANCE_LOW,
+        ).apply {
+            description = getString(R.string.send_receive_channel_description)
+        }
+        (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
     }
 
     private fun initWindowInsetsListener() {

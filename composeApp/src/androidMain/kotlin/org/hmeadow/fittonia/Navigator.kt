@@ -1,6 +1,7 @@
 package org.hmeadow.fittonia
 
 import SettingsManager
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -74,7 +75,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
 
     private fun overviewScreen() = Screen(viewModel = OverviewScreenViewModel()) { data, viewModel ->
         OverviewScreen(
-            sendFiles = {
+            onSendFilesClicked = {
                 push(sendFilesScreen())
             },
         )
@@ -177,6 +178,14 @@ class Navigator(private val mainViewModel: MainViewModel) {
                         onClearDumpPath = instance.mainViewModel::clearDumpPath,
                         onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
                         onBackClicked = instance::pop,
+                        debugStartAndroidServer = {
+                            MainActivity.mainActivity.startForegroundService(
+                                Intent(
+                                    MainActivity.mainActivity,
+                                    AndroidServer::class.java,
+                                ),
+                            )
+                        },
                     )
                 },
             )

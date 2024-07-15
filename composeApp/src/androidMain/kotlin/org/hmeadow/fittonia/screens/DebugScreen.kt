@@ -36,6 +36,7 @@ fun DebugScreen(
     onClearDumpPath: () -> Unit,
     onRemoveDestinationClicked: (SettingsManager.Destination) -> Unit,
     onBackClicked: () -> Unit,
+    debugStartAndroidServer: () -> Unit,
 ) {
     FittoniaScaffold(
         header = {
@@ -123,11 +124,19 @@ fun DebugScreen(
         },
         footer = {
             Footer {
-                FittoniaButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = onResetSettingsClicked,
-                ) {
-                    ButtonText(text = "Reset Settings")
+                Column {
+                    FittoniaButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = debugStartAndroidServer,
+                    ) {
+                        ButtonText(text = "Debug Start AndroidServer")
+                    }
+                    FittoniaButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = onResetSettingsClicked,
+                    ) {
+                        ButtonText(text = "Reset Settings")
+                    }
                 }
             }
         },

@@ -2,7 +2,7 @@
 
 # Core
 android-compileSdk = "34"
-android-minSdk = "24"
+android-minSdk = "29"
 android-targetSdk = "34"
 agp = "8.2.0"
 kotlin = "2.0.0"
