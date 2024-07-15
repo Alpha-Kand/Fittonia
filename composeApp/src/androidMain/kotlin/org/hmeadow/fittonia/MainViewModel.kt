@@ -1,5 +1,6 @@
 package org.hmeadow.fittonia
 
+import SettingsManager
 import android.net.Uri
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
@@ -23,7 +24,7 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         }
     }
 
-    fun clearDumpPath() = launch{
+    fun clearDumpPath() = launch {
         dataStore.updateData {
             it.copy(dumpPath = SettingsDataAndroid.DumpPath())
         }

@@ -53,7 +53,12 @@ import org.hmeadow.fittonia.components.readOnlyLightStyle
 import org.hmeadow.fittonia.components.readOnlyStyle
 
 class SendFilesScreenViewModel(
-    private val onSaveOneTimeDestinationCallback: (String, String) -> Unit,
+    private val onSaveOneTimeDestinationCallback: (
+        ip: String,
+        password: String,
+        onFinish: (newDestination: SettingsManager.Destination) -> Unit,
+    ) -> Unit,
+    private val onAddNewDestinationCallback: (onFinish: (newDestination: SettingsManager.Destination) -> Unit) -> Unit,
 ) : BaseViewModel {
     val itemListState = MutableStateFlow<List<String>>(emptyList())
     val selectedDestinationState = MutableStateFlow<SettingsManager.Destination?>(null)
@@ -81,7 +86,15 @@ class SendFilesScreenViewModel(
     }
 
     fun onSaveOneTimeDestinationClicked() {
-        onSaveOneTimeDestinationCallback(oneTimeIpAddressState.value, oneTimePasswordState.value)
+        onSaveOneTimeDestinationCallback(oneTimeIpAddressState.value, oneTimePasswordState.value) { newDestination ->
+            selectedDestinationState.value = newDestination
+        }
+    }
+
+    fun onAddNewDestinationClicked() {
+        onAddNewDestinationCallback { newDestination ->
+            selectedDestinationState.value = newDestination
+        }
     }
 
     fun onUserSelectItem() {
@@ -99,7 +112,6 @@ fun SendFilesScreen(
     data: SettingsDataAndroid,
     onBackClicked: () -> Unit,
     onConfirmClicked: () -> Unit,
-    onAddNewDestinationClicked: () -> Unit,
 ) {
     var destinationPickerActive by remember { mutableStateOf(false) }
     var destinationState by remember { mutableStateOf("Select destination...") }
@@ -266,7 +278,7 @@ fun SendFilesScreen(
                 } else {
                     FittoniaButton(
                         type = FittoniaButtonType.Secondary,
-                        onClick = onAddNewDestinationClicked,
+                        onClick = viewModel::onAddNewDestinationClicked,
                     ) {
                         ButtonText(text = "Add new destination")
                     }
@@ -370,7 +382,8 @@ fun SendFilesScreen(
 private fun Preview() {
     SendFilesScreen(
         viewModel = SendFilesScreenViewModel(
-            onSaveOneTimeDestinationCallback = { _, _ -> },
+            onSaveOneTimeDestinationCallback = { _, _, _ -> },
+            onAddNewDestinationCallback = { _ -> },
         ),
         data = SettingsDataAndroid(
             destinations = persistentListOf(
@@ -393,6 +406,5 @@ private fun Preview() {
         ),
         onBackClicked = { },
         onConfirmClicked = { },
-        onAddNewDestinationClicked = { },
     )
 }

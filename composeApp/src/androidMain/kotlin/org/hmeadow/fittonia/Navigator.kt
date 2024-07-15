@@ -1,5 +1,6 @@
 package org.hmeadow.fittonia
 
+import SettingsManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -81,13 +82,17 @@ class Navigator(private val mainViewModel: MainViewModel) {
 
     private fun sendFilesScreen() = Screen(
         viewModel = SendFilesScreenViewModel(
-            onSaveOneTimeDestinationCallback = { oneTimeIp, oneTimePassword ->
+            onSaveOneTimeDestinationCallback = { oneTimeIp, oneTimePassword, onFinish ->
                 push(
                     newDestinationScreen(
                         oneTimeIp = oneTimeIp,
                         oneTimePassword = oneTimePassword,
+                        onFinish = onFinish,
                     ),
                 )
+            },
+            onAddNewDestinationCallback = { onFinish ->
+                push(newDestinationScreen(onFinish = onFinish))
             },
         ),
     ) { data, viewModel ->
@@ -96,21 +101,20 @@ class Navigator(private val mainViewModel: MainViewModel) {
             data = data,
             onBackClicked = ::pop,
             onConfirmClicked = ::pop,
-            onAddNewDestinationClicked = {
-                push(newDestinationScreen())
-            },
         )
     }
 
     private fun newDestinationScreen(
         oneTimeIp: String? = null,
         oneTimePassword: String? = null,
+        onFinish: (SettingsManager.Destination) -> Unit,
     ) = Screen(
         viewModel = NewDestinationScreenViewModel(
             oneTimeIp = oneTimeIp,
             oneTimePassword = oneTimePassword,
-            onSaveNewDestinationCallback = {
-                mainViewModel.addDestination(it)
+            onSaveNewDestinationCallback = { newDestination ->
+                mainViewModel.addDestination(newDestination)
+                onFinish(newDestination)
                 pop()
             },
         ),
