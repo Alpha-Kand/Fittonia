@@ -1,7 +1,6 @@
 package org.hmeadow.fittonia
 
 import SettingsManager
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.AndroidServer.Companion.startThread
 import org.hmeadow.fittonia.screens.DebugScreen
 import org.hmeadow.fittonia.screens.NewDestinationScreen
 import org.hmeadow.fittonia.screens.NewDestinationScreenViewModel
@@ -178,14 +178,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                         onClearDumpPath = instance.mainViewModel::clearDumpPath,
                         onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
                         onBackClicked = instance::pop,
-                        debugStartAndroidServer = {
-                            MainActivity.mainActivity.startForegroundService(
-                                Intent(
-                                    MainActivity.mainActivity,
-                                    AndroidServer::class.java,
-                                ),
-                            )
-                        },
+                        debugNewThread = { startThread() },
                     )
                 },
             )

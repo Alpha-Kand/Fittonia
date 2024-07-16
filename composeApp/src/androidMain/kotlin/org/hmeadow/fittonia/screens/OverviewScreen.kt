@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.hmeadow.fittonia.AndroidServer
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaComingSoon
@@ -43,6 +45,7 @@ import org.hmeadow.fittonia.components.headingSStyle
 import org.hmeadow.fittonia.components.paragraphStyle
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.math.min
 
 @Composable
 fun rememberPercentageFormat(
@@ -66,13 +69,17 @@ class Options(
 )
 
 data class TransferJob(
+    val id: Int,
     val description: String,
     val destination: String,
-    val items: Int,
-    val progress: Double,
+    val totalItems: Int,
+    val currentItem: Int = 1,
     val status: TransferStatus,
     val direction: Direction,
 ) {
+    val progressPercentage: Double = currentItem / totalItems.toDouble()
+    val nextItem: Int = min(currentItem + 1, totalItems)
+
     enum class Direction {
         INCOMING,
         OUTGOING,
@@ -85,41 +92,6 @@ enum class TransferStatus {
     Error,
     Done,
 }
-
-val transferJobs = listOf(
-    TransferJob(
-        description = "Job 1",
-        destination = "Home Computer",
-        items = 36,
-        progress = 0.30,
-        status = TransferStatus.Sending,
-        direction = TransferJob.Direction.OUTGOING,
-    ),
-    TransferJob(
-        description = "PDFs",
-        destination = "Bob at Work",
-        items = 5,
-        progress = 0.05,
-        status = TransferStatus.Receiving,
-        direction = TransferJob.Direction.INCOMING,
-    ),
-    TransferJob(
-        description = "Problem",
-        destination = "TOP SECRET",
-        items = 1,
-        progress = 0.05,
-        status = TransferStatus.Error,
-        direction = TransferJob.Direction.INCOMING,
-    ),
-    TransferJob(
-        description = "Foo",
-        destination = "192.56.43.01",
-        items = 1,
-        progress = 1.0,
-        status = TransferStatus.Done,
-        direction = TransferJob.Direction.INCOMING,
-    ),
-)
 
 @Composable
 fun measureTextWidth(text: String, style: TextStyle): Dp {
@@ -189,6 +161,8 @@ fun OverviewScreen(onSendFilesClicked: () -> Unit) {
                             .fillMaxWidth(),
                     ) {}
 
+                    val androidServer = AndroidServer.server.collectAsState().value
+                    val transferJobs = androidServer?.transferJobs?.collectAsState()?.value ?: emptyList()
                     transferJobs.forEachIndexed { index, job ->
                         Row(
                             modifier = Modifier
@@ -208,7 +182,7 @@ fun OverviewScreen(onSendFilesClicked: () -> Unit) {
                                 horizontalAlignment = CenterHorizontally,
                             ) {
                                 Text(
-                                    text = rememberPercentageFormat(job.progress),
+                                    text = rememberPercentageFormat(job.progressPercentage),
                                 )
                             }
                             VerticalLine()

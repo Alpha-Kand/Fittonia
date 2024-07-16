@@ -31,10 +31,10 @@ import org.hmeadow.fittonia.components.headingMStyle
 import kotlin.random.Random
 
 val transfer = TransferJob(
+    id = 5,
     description = "Foo",
     destination = "192.56.43.01",
-    items = 36,
-    progress = 0.5,
+    totalItems = 36,
     status = TransferStatus.Sending,
     direction = TransferJob.Direction.OUTGOING,
 )
@@ -131,7 +131,7 @@ fun TransferDetailsScreen() {
                         TransferStatus.Receiving -> "received"
                         else -> ""
                     }
-                    val bbb = "${rememberPercentageFormat(transfer.progress)} - 4 out of ${transfer.items} items $aaa."
+                    val bbb = "2% - 4 out of 10 items $aaa."
                     Row {
                         Text(
                             text = bbb,

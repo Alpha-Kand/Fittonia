@@ -36,7 +36,7 @@ fun DebugScreen(
     onClearDumpPath: () -> Unit,
     onRemoveDestinationClicked: (SettingsManager.Destination) -> Unit,
     onBackClicked: () -> Unit,
-    debugStartAndroidServer: () -> Unit,
+    debugNewThread: () -> Unit,
 ) {
     FittoniaScaffold(
         header = {
@@ -127,9 +127,9 @@ fun DebugScreen(
                 Column {
                     FittoniaButton(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = debugStartAndroidServer,
+                        onClick = debugNewThread,
                     ) {
-                        ButtonText(text = "Debug Start AndroidServer")
+                        ButtonText(text = "New Thread")
                     }
                     FittoniaButton(
                         modifier = Modifier.fillMaxWidth(),

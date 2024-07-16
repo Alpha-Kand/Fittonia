@@ -5,59 +5,64 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+import android.os.Binder
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.screens.TransferJob
+import org.hmeadow.fittonia.screens.TransferStatus
 import kotlin.coroutines.CoroutineContext
+import kotlin.math.abs
+import kotlin.random.Random
 
 class AndroidServer : Service(), CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.IO
+    private val binder = AndroidServerBinder()
 
-    override fun onBind(intent: Intent?): IBinder? {
-        println("onBind")
-        return null
+    inner class AndroidServerBinder : Binder() {
+        fun getService(): AndroidServer = this@AndroidServer
+    }
+
+    var transferJobs = MutableStateFlow<List<TransferJob>>(emptyList())
+        private set
+
+    override fun onBind(intent: Intent): IBinder {
+        return binder
     }
 
     override fun onCreate() {
         super.onCreate()
-        println("onCreate")
+        server.value = this
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         ServiceCompat.startForeground(
             this,
             NOTIFICATION_ID,
-            constructNotification(current = 0, total = 10),
+            constructNotification(transferJobsActive = transferJobs.value.size),
             FOREGROUND_SERVICE_TYPE_DATA_SYNC,
         )
-        println("onStartCommand")
-        this.launch {
-            startThread()
-        }
         return START_STICKY // If the service is killed, it will be automatically restarted.
     }
 
-    private fun startThread() {
-        repeat(10) {
-            Thread.sleep(2000)
-            updateNotification(current = it)
-            println("Thread progress $it")
-        }
-    }
-
-    private fun constructNotification(current: Int, total: Int) = Notification
+    private fun constructNotification(transferJobsActive: Int) = Notification
         .Builder(this, getString(R.string.send_receive_channel_id))
         .setSmallIcon(R.mipmap.ic_launcher)
         .setOnlyAlertOnce(true)
-        .setContentTitle(getString(R.string.send_receive_foreground_service_notification_title))
-        .setContentText(getString(R.string.send_receive_foreground_service_notification_content, current, total))
+        .setContentText(getString(R.string.send_receive_foreground_service_notification_content, transferJobsActive))
         .build()
 
-    private fun updateNotification(current: Int) {
+    private fun updateNotification() {
         val notificationManager = (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
-        notificationManager.notify(NOTIFICATION_ID, constructNotification(current = current, total = 10))
+        synchronized(notificationManager) {
+            notificationManager.notify(
+                NOTIFICATION_ID,
+                constructNotification(transferJobsActive = transferJobs.value.size),
+            )
+        }
     }
 
     override fun onDestroy() {
@@ -65,7 +70,40 @@ class AndroidServer : Service(), CoroutineScope {
         println("onDestroy")
     }
 
+    private fun updateTransferJob(job: TransferJob) {
+        synchronized(transferJobs) {
+            transferJobs.value = (transferJobs.value.filterNot { it.id == job.id } + job).sortedBy { it.id }
+        }
+    }
+
     companion object {
         const val NOTIFICATION_ID = 455
+
+        var server: MutableStateFlow<AndroidServer?> = MutableStateFlow(null)
+
+        fun startThread() {
+            server.value?.run {
+                val newJob = TransferJob(
+                    id = Random.nextInt(),
+                    description = "Job ${Random.nextInt()}",
+                    destination = "Destination ${Random.nextInt()}",
+                    totalItems = abs(Random.nextInt() % 100),
+                    currentItem = 0,
+                    status = TransferStatus.Sending,
+                    direction = TransferJob.Direction.OUTGOING,
+                )
+                updateTransferJob(job = newJob)
+                updateNotification()
+                launch {
+                    repeat(newJob.totalItems) {
+                        transferJobs.value.find { it.id == newJob.id }?.let { currentJob ->
+                            Thread.sleep(abs(Random.nextLong() % 2000))
+                            updateTransferJob(job = currentJob.copy(currentItem = currentJob.nextItem))
+                        }
+                    }
+                    updateNotification()
+                }
+            }
+        }
     }
 }
