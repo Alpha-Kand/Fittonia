@@ -1,5 +1,7 @@
 package org.hmeadow.fittonia.screens
 
+import SettingsManager
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -71,14 +73,21 @@ class Options(
 data class TransferJob(
     val id: Int,
     val description: String,
-    val destination: String,
-    val totalItems: Int,
+    val destination: SettingsManager.Destination,
+    val items: List<Item>,
     val currentItem: Int = 1,
+    val port: Int,
     val status: TransferStatus,
     val direction: Direction,
 ) {
+    val totalItems = items.size
     val progressPercentage: Double = currentItem / totalItems.toDouble()
     val nextItem: Int = min(currentItem + 1, totalItems)
+
+    data class Item(
+        val name: String,
+        val uri: Uri,
+    )
 
     enum class Direction {
         INCOMING,

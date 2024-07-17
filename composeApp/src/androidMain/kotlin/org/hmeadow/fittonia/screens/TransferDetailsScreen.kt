@@ -31,10 +31,15 @@ import org.hmeadow.fittonia.components.headingMStyle
 import kotlin.random.Random
 
 val transfer = TransferJob(
-    id = 5,
-    description = "Foo",
-    destination = "192.56.43.01",
-    totalItems = 36,
+    id = Random.nextInt(),
+    description = "Job ${Random.nextInt()}",
+    destination = SettingsManager.Destination(
+        name = "Destination ${Random.nextInt()}",
+        ip = "192.168.1.1",
+        password = "Password",
+    ),
+    items = emptyList(),
+    port = 5556,
     status = TransferStatus.Sending,
     direction = TransferJob.Direction.OUTGOING,
 )
@@ -66,7 +71,7 @@ fun TransferDetailsScreen() {
                         .padding(5.dp),
                 ) {
                     Text(
-                        text = transfer.destination,
+                        text = transfer.destination.name,
                     )
                 }
                 HMSpacerHeight(height = 30)

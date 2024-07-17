@@ -51,6 +51,7 @@ import org.hmeadow.fittonia.components.paragraphStyle
 import org.hmeadow.fittonia.components.psstStyle
 import org.hmeadow.fittonia.components.readOnlyLightStyle
 import org.hmeadow.fittonia.components.readOnlyStyle
+import kotlin.random.Random
 
 class SendFilesScreenViewModel(
     private val onSaveOneTimeDestinationCallback: (
@@ -59,8 +60,9 @@ class SendFilesScreenViewModel(
         onFinish: (newDestination: SettingsManager.Destination) -> Unit,
     ) -> Unit,
     private val onAddNewDestinationCallback: (onFinish: (newDestination: SettingsManager.Destination) -> Unit) -> Unit,
+    private val onConfirmCallback: (TransferJob) -> Unit,
 ) : BaseViewModel {
-    val itemListState = MutableStateFlow<List<String>>(emptyList())
+    val itemListState = MutableStateFlow<List<TransferJob.Item>>(emptyList())
     val selectedDestinationState = MutableStateFlow<SettingsManager.Destination?>(null)
     val portState = InputFlow(initial = "")
     val descriptionState = InputFlow(initial = "")
@@ -98,11 +100,34 @@ class SendFilesScreenViewModel(
     }
 
     fun onUserSelectItem() {
-        MainActivity.mainActivity.openFilePicker {
-            DocumentFile.fromSingleUri(MainActivity.mainActivity, it)?.name?.let { name ->
-                itemListState.value += name
+        MainActivity.mainActivity.openFilePicker { selectedUri ->
+            DocumentFile.fromSingleUri(MainActivity.mainActivity, selectedUri)?.let { docUri ->
+                docUri.name?.let { name ->
+                    itemListState.value += TransferJob.Item(
+                        name = name,
+                        uri = docUri.uri,
+                    )
+                } ?: run { /*TODO*/ }
             }
         }
+    }
+
+    fun onConfirmClicked() {
+        onConfirmCallback(
+            TransferJob(
+                id = -1,
+                description = descriptionState.value.takeIf { it.isNotEmpty() } ?: "Job ${Random.nextInt()}", // TODO
+                destination = selectedDestinationState.value ?: SettingsManager.Destination(
+                    name = "-",
+                    ip = oneTimeIpAddressState.value,
+                    password = oneTimePasswordState.value,
+                ), // TODO
+                items = itemListState.value,
+                port = portState.value.toInt(),
+                status = TransferStatus.Sending,
+                direction = TransferJob.Direction.OUTGOING,
+            ),
+        )
     }
 }
 
@@ -111,7 +136,6 @@ fun SendFilesScreen(
     viewModel: SendFilesScreenViewModel,
     data: SettingsDataAndroid,
     onBackClicked: () -> Unit,
-    onConfirmClicked: () -> Unit,
 ) {
     var destinationPickerActive by remember { mutableStateOf(false) }
     var destinationState by remember { mutableStateOf("Select destination...") }
@@ -144,7 +168,7 @@ fun SendFilesScreen(
                             modifier = Modifier.padding(all = 5.dp),
                             verticalAlignment = CenterVertically,
                         ) {
-                            Text(text = file)
+                            Text(text = file.name)
                             HMSpacerWeightRow()
                             FittoniaIcon(
                                 modifier = Modifier
@@ -329,7 +353,7 @@ fun SendFilesScreen(
                     viewModel.canContinue.collectAsState(initial = false).value
                 },
                 content = { ButtonText(text = "Confirm") },
-                onClick = onConfirmClicked,
+                onClick = viewModel::onConfirmClicked,
             )
         },
         overlay = {
@@ -384,6 +408,7 @@ private fun Preview() {
         viewModel = SendFilesScreenViewModel(
             onSaveOneTimeDestinationCallback = { _, _, _ -> },
             onAddNewDestinationCallback = { _ -> },
+            onConfirmCallback = { },
         ),
         data = SettingsDataAndroid(
             destinations = persistentListOf(
@@ -405,6 +430,5 @@ private fun Preview() {
             ),
         ),
         onBackClicked = { },
-        onConfirmClicked = { },
     )
 }

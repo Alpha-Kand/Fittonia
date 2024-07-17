@@ -38,7 +38,7 @@ class AndroidServer : Service(), CoroutineScope {
         server.value = this
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         ServiceCompat.startForeground(
             this,
             NOTIFICATION_ID,
@@ -60,7 +60,11 @@ class AndroidServer : Service(), CoroutineScope {
         synchronized(notificationManager) {
             notificationManager.notify(
                 NOTIFICATION_ID,
-                constructNotification(transferJobsActive = transferJobs.value.size),
+                constructNotification(
+                    transferJobsActive = transferJobs.value.filter {
+                        it.status == TransferStatus.Sending || it.status == TransferStatus.Receiving
+                    }.size,
+                ),
             )
         }
     }
@@ -70,9 +74,37 @@ class AndroidServer : Service(), CoroutineScope {
         println("onDestroy")
     }
 
+    /* MUST BE IN SYNCHRONIZED */
     private fun updateTransferJob(job: TransferJob) {
+        transferJobs.value = (transferJobs.value.filterNot { it.id == job.id } + job).sortedBy { it.id }
+    }
+
+    private fun findJob(job: TransferJob): TransferJob? = transferJobs.value.find { it.id == job.id }
+
+    private fun addTransferJob(job: TransferJob) {
         synchronized(transferJobs) {
-            transferJobs.value = (transferJobs.value.filterNot { it.id == job.id } + job).sortedBy { it.id }
+            updateTransferJob(job = job)
+        }
+    }
+
+    private fun updateTransferJobCurrentItem(job: TransferJob) {
+        synchronized(transferJobs) {
+            findJob(job)?.let { job ->
+                updateTransferJob(job.copy(currentItem = job.nextItem))
+            }
+        }
+    }
+
+    private fun finishTransferJob(job: TransferJob) {
+        synchronized(transferJobs) {
+            findJob(job)?.let { job ->
+                updateTransferJob(
+                    job.copy(
+                        currentItem = job.totalItems,
+                        status = TransferStatus.Done,
+                    ),
+                )
+            }
         }
     }
 
@@ -81,26 +113,18 @@ class AndroidServer : Service(), CoroutineScope {
 
         var server: MutableStateFlow<AndroidServer?> = MutableStateFlow(null)
 
-        fun startThread() {
+        fun startThread(newJob: TransferJob) {
             server.value?.run {
-                val newJob = TransferJob(
-                    id = Random.nextInt(),
-                    description = "Job ${Random.nextInt()}",
-                    destination = "Destination ${Random.nextInt()}",
-                    totalItems = abs(Random.nextInt() % 100),
-                    currentItem = 0,
-                    status = TransferStatus.Sending,
-                    direction = TransferJob.Direction.OUTGOING,
-                )
-                updateTransferJob(job = newJob)
+                addTransferJob(newJob)
                 updateNotification()
                 launch {
                     repeat(newJob.totalItems) {
                         transferJobs.value.find { it.id == newJob.id }?.let { currentJob ->
                             Thread.sleep(abs(Random.nextLong() % 2000))
-                            updateTransferJob(job = currentJob.copy(currentItem = currentJob.nextItem))
+                            updateTransferJobCurrentItem(job = currentJob)
                         }
                     }
+                    finishTransferJob(newJob)
                     updateNotification()
                 }
             }

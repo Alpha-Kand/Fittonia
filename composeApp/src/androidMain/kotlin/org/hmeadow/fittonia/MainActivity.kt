@@ -31,11 +31,16 @@ class MainActivity : ComponentActivity() {
     private var onUriPicked: (Uri) -> Unit = {}
 
     private val serverConnection = object : ServiceConnection {
+        var isConnected = false
+
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            isConnected = true
             AndroidServer.server.value = (service as AndroidServer.AndroidServerBinder).getService()
         }
 
-        override fun onServiceDisconnected(name: ComponentName?) {}
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isConnected = false
+        }
     }
 
     fun openFilePicker(onSelectItem: (Uri) -> Unit) {
@@ -104,7 +109,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        unbindService(serverConnection)
+        if(serverConnection.isConnected) {
+            unbindService(serverConnection)
+        }
     }
 
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {

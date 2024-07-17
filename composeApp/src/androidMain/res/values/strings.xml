@@ -7,7 +7,7 @@
     <string name="send_receive_channel_description">Shows progress and status of active incoming/outgoing transfers.</string>
 
     <!-- Send/Receive Foreground Service -->
-    <string name="send_receive_foreground_service_notification_content">%1$d transfers active</string>
+    <string name="send_receive_foreground_service_notification_content">%1$d transfers active.</string>
 
     <!-- Welcome Screen -->
     <string name="welcome_screen_title">Welcome!</string>

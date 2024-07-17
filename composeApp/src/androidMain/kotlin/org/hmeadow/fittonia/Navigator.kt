@@ -1,6 +1,7 @@
 package org.hmeadow.fittonia
 
 import SettingsManager
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,8 +23,12 @@ import org.hmeadow.fittonia.screens.OverviewScreen
 import org.hmeadow.fittonia.screens.SendFilesScreen
 import org.hmeadow.fittonia.screens.SendFilesScreenViewModel
 import org.hmeadow.fittonia.screens.TransferDetailsScreen
+import org.hmeadow.fittonia.screens.TransferJob
+import org.hmeadow.fittonia.screens.TransferStatus
 import org.hmeadow.fittonia.screens.WelcomeScreen
 import org.hmeadow.fittonia.screens.WelcomeScreenViewModel
+import kotlin.math.abs
+import kotlin.random.Random
 
 class Navigator(private val mainViewModel: MainViewModel) {
 
@@ -95,13 +100,16 @@ class Navigator(private val mainViewModel: MainViewModel) {
             onAddNewDestinationCallback = { onFinish ->
                 push(newDestinationScreen(onFinish = onFinish))
             },
+            onConfirmCallback = { newJob ->
+                startThread(newJob = newJob)
+                pop()
+            },
         ),
     ) { data, viewModel ->
         SendFilesScreen(
             viewModel = viewModel,
             data = data,
             onBackClicked = ::pop,
-            onConfirmClicked = ::pop,
         )
     }
 
@@ -178,7 +186,28 @@ class Navigator(private val mainViewModel: MainViewModel) {
                         onClearDumpPath = instance.mainViewModel::clearDumpPath,
                         onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
                         onBackClicked = instance::pop,
-                        debugNewThread = { startThread() },
+                        debugNewThread = {
+                            startThread(
+                                TransferJob(
+                                    id = Random.nextInt(),
+                                    description = "Job ${Random.nextInt()}",
+                                    destination = SettingsManager.Destination(
+                                        name = "Destination ${Random.nextInt()}",
+                                        ip = "192.168.1.1",
+                                        password = "Password",
+                                    ),
+                                    items = (0..abs(Random.nextInt() % 100)).map{
+                                        TransferJob.Item(
+                                            name = "File ${Random.nextInt()}",
+                                            uri = Uri.parse("https://www.google.com"),
+                                        )
+                                    },
+                                    port = 5556,
+                                    status = TransferStatus.Sending,
+                                    direction = TransferJob.Direction.OUTGOING,
+                                ),
+                            )
+                        },
                     )
                 },
             )
