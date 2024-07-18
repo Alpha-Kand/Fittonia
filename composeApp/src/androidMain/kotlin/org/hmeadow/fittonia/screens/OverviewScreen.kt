@@ -43,8 +43,8 @@ import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.HorizontalLine
 import org.hmeadow.fittonia.components.VerticalLine
-import org.hmeadow.fittonia.components.headingSStyle
-import org.hmeadow.fittonia.components.paragraphStyle
+import org.hmeadow.fittonia.design.fonts.headingSStyle
+import org.hmeadow.fittonia.design.fonts.paragraphStyle
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.min

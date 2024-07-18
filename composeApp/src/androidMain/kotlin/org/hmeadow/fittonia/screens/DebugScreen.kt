@@ -36,6 +36,7 @@ fun DebugScreen(
     onRemoveDestinationClicked: (SettingsManager.Destination) -> Unit,
     onBackClicked: () -> Unit,
     debugNewThread: () -> Unit,
+    debugNewDestination: () -> Unit,
 ) {
     FittoniaScaffold(
         header = {
@@ -112,11 +113,14 @@ fun DebugScreen(
         footer = {
             Footer {
                 Column {
-                    FittoniaButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = debugNewThread,
-                    ) {
-                        ButtonText(text = "New Thread")
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        FittoniaButton(onClick = debugNewThread) {
+                            ButtonText(text = "New Thread")
+                        }
+                        HMSpacerWeightRow()
+                        FittoniaButton(onClick = debugNewDestination) {
+                            ButtonText(text = "New Destination")
+                        }
                     }
                     FittoniaButton(
                         modifier = Modifier.fillMaxWidth(),

@@ -1,5 +1,6 @@
 package org.hmeadow.fittonia.screens
 
+import SettingsManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.FittoniaButton
+import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.HMSpacerHeight
@@ -26,8 +28,8 @@ import org.hmeadow.fittonia.components.HMSpacerWeightColumn
 import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.HorizontalLine
-import org.hmeadow.fittonia.components.headingLStyle
-import org.hmeadow.fittonia.components.headingMStyle
+import org.hmeadow.fittonia.design.fonts.headingLStyle
+import org.hmeadow.fittonia.design.fonts.headingMStyle
 import kotlin.random.Random
 
 val transfer = TransferJob(
@@ -50,7 +52,7 @@ fun TransferDetailsScreen() {
     FittoniaScaffold(
         header = {
             FittoniaHeader(
-                onBackClicked = onBackClicked,
+                onBackClicked = {}, // onBackClicked,
             )
         },
         content = {

@@ -51,9 +51,6 @@ import org.hmeadow.fittonia.design.fonts.paragraphStyle
 import org.hmeadow.fittonia.design.fonts.psstStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyLightStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyStyle
-import org.hmeadow.fittonia.screens.overviewScreen.Options
-import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
-import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
 import kotlin.random.Random
 
 class SendFilesScreenViewModel(

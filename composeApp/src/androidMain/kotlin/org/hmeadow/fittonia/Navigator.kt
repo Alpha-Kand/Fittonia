@@ -196,7 +196,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                                         ip = "192.168.1.1",
                                         password = "Password",
                                     ),
-                                    items = (0..abs(Random.nextInt() % 100)).map{
+                                    items = (0..abs(Random.nextInt() % 100)).map {
                                         TransferJob.Item(
                                             name = "File ${Random.nextInt()}",
                                             uri = Uri.parse("https://www.google.com"),
@@ -205,6 +205,16 @@ class Navigator(private val mainViewModel: MainViewModel) {
                                     port = 5556,
                                     status = TransferStatus.Sending,
                                     direction = TransferJob.Direction.OUTGOING,
+                                ),
+                            )
+                        },
+                        debugNewDestination = {
+                            val getIpNum = { abs(Random.nextInt() % 256) }
+                            instance.mainViewModel.addDestination(
+                                destination = SettingsManager.Destination(
+                                    name = "Destination ${abs(Random.nextInt() % 100)}",
+                                    ip = "${getIpNum()}.${getIpNum()}.${getIpNum()}.${getIpNum()}",
+                                    password = "Password",
                                 ),
                             )
                         },

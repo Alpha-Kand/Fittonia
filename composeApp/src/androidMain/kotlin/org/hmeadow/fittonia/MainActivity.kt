@@ -109,7 +109,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        if(serverConnection.isConnected) {
+        if (serverConnection.isConnected) {
             unbindService(serverConnection)
         }
     }
