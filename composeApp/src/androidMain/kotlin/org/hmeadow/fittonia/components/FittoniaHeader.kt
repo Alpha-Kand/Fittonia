@@ -21,7 +21,7 @@ import headerBackgroundColour
 import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.Navigator
 import org.hmeadow.fittonia.R
-import org.hmeadow.fittonia.utility.applyIf
+import org.hmeadow.fittonia.design.fonts.headerStyle
 
 @Composable
 fun FittoniaHeader(

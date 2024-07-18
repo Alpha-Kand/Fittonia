@@ -45,12 +45,15 @@ import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.HorizontalLine
 import org.hmeadow.fittonia.components.InputFlow
-import org.hmeadow.fittonia.components.headingMStyle
-import org.hmeadow.fittonia.components.inputLabelStyle
-import org.hmeadow.fittonia.components.paragraphStyle
-import org.hmeadow.fittonia.components.psstStyle
-import org.hmeadow.fittonia.components.readOnlyLightStyle
-import org.hmeadow.fittonia.components.readOnlyStyle
+import org.hmeadow.fittonia.design.fonts.headingMStyle
+import org.hmeadow.fittonia.design.fonts.inputLabelStyle
+import org.hmeadow.fittonia.design.fonts.paragraphStyle
+import org.hmeadow.fittonia.design.fonts.psstStyle
+import org.hmeadow.fittonia.design.fonts.readOnlyLightStyle
+import org.hmeadow.fittonia.design.fonts.readOnlyStyle
+import org.hmeadow.fittonia.screens.overviewScreen.Options
+import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
+import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
 import kotlin.random.Random
 
 class SendFilesScreenViewModel(

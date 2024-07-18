@@ -4,7 +4,6 @@ import SettingsManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +26,7 @@ import org.hmeadow.fittonia.components.Footer
 import org.hmeadow.fittonia.components.HMSpacerHeight
 import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
-import org.hmeadow.fittonia.components.headingLStyle
-import org.hmeadow.fittonia.components.headingSStyle
+import org.hmeadow.fittonia.design.fonts.headingSStyle
 
 @Composable
 fun DebugScreen(

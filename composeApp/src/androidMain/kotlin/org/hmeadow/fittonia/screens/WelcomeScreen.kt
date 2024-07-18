@@ -31,11 +31,11 @@ import org.hmeadow.fittonia.components.HMSpacerHeight
 import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.components.ReadOnlyEntries
-import org.hmeadow.fittonia.components.headingLStyle
-import org.hmeadow.fittonia.components.inputLabelStyle
-import org.hmeadow.fittonia.components.paragraphStyle
-import org.hmeadow.fittonia.components.psstColour
-import org.hmeadow.fittonia.components.psstStyle
+import org.hmeadow.fittonia.design.fonts.headingLStyle
+import org.hmeadow.fittonia.design.fonts.inputLabelStyle
+import org.hmeadow.fittonia.design.fonts.paragraphStyle
+import org.hmeadow.fittonia.design.fonts.psstStyle
+import psstColour
 
 class WelcomeScreenViewModel(
     private val mainViewModel: MainViewModel,

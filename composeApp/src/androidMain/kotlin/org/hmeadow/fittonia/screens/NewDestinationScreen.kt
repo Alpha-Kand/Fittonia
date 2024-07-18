@@ -23,8 +23,8 @@ import org.hmeadow.fittonia.components.Footer
 import org.hmeadow.fittonia.components.HMSpacerHeight
 import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.InputFlow
-import org.hmeadow.fittonia.components.headingMStyle
-import org.hmeadow.fittonia.components.paragraphStyle
+import org.hmeadow.fittonia.design.fonts.headingMStyle
+import org.hmeadow.fittonia.design.fonts.paragraphStyle
 
 class NewDestinationScreenViewModel(
     oneTimeIp: String?,
