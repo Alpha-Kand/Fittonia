@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.components.FittoniaButton
+import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.Footer
@@ -40,22 +41,10 @@ fun DebugScreen(
 ) {
     FittoniaScaffold(
         header = {
-            Box {
-                FittoniaIcon(
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .clickable(onClick = onBackClicked),
-                    drawableRes = R.drawable.ic_back_arrow,
-                )
-                Row(Modifier.fillMaxWidth()) {
-                    HMSpacerWeightRow()
-                    Text(
-                        text = "Debug Screen",
-                        style = headingLStyle,
-                    )
-                    HMSpacerWeightRow()
-                }
-            }
+            FittoniaHeader(
+                headerText = "Debug Screen",
+                onBackClicked = onBackClicked,
+            )
         },
         content = {
             Column(modifier = Modifier.padding(all = 16.dp)) {

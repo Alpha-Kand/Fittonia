@@ -95,7 +95,3 @@ val inputLabelStyle = TextStyle(
 )
 
 val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
-
-val layer0Colour = Color(0xFF77AA77)
-val layer1Colour = Color(0xFF88AA88)
-val layer2Colour = Color(0xFF99AA99)

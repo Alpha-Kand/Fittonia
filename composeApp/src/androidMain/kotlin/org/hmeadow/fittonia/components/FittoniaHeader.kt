@@ -17,17 +17,24 @@ import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import headerBackgroundColour
 import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.Navigator
 import org.hmeadow.fittonia.R
+import org.hmeadow.fittonia.utility.applyIf
 
 @Composable
 fun FittoniaHeader(
-    headerText: String,
+    headerText: String? = null,
     onBackClicked: (() -> Unit)? = null,
     onOptionsClicked: (() -> Unit)? = null,
 ) {
-    Box(modifier = Modifier.padding(all = 5.dp)) {
+    Box(
+        modifier = Modifier
+            .background(color = headerBackgroundColour)
+            .padding(all = 5.dp),
+        contentAlignment = Center,
+    ) {
         onBackClicked?.let {
             FittoniaIcon(
                 modifier = Modifier
@@ -43,11 +50,13 @@ fun FittoniaHeader(
                 .align(Center),
         ) {
             HMSpacerWeightRow()
-            Text(
-                text = headerText,
-                style = headerStyle,
-            )
-            HMSpacerWeightRow()
+            headerText?.let {
+                Text(
+                    text = headerText,
+                    style = headerStyle,
+                )
+                HMSpacerWeightRow()
+            }
         }
         Row(modifier = Modifier.align(CenterEnd)) {
             onOptionsClicked?.let {

@@ -48,6 +48,11 @@ val transfer = TransferJob(
 @Preview
 fun TransferDetailsScreen() {
     FittoniaScaffold(
+        header = {
+            FittoniaHeader(
+                onBackClicked = onBackClicked,
+            )
+        },
         content = {
             Column(modifier = Modifier.padding(all = 16.dp)) {
                 Text(
