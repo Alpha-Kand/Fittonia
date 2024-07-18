@@ -1,25 +1,17 @@
-package org.hmeadow.fittonia.screens
+package org.hmeadow.fittonia.screens.overviewScreen
 
 import SettingsManager
 import android.net.Uri
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,7 +21,6 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.hmeadow.fittonia.AndroidServer
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaComingSoon
@@ -41,9 +32,6 @@ import org.hmeadow.fittonia.components.Footer
 import org.hmeadow.fittonia.components.HMSpacerHeight
 import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
-import org.hmeadow.fittonia.components.HorizontalLine
-import org.hmeadow.fittonia.components.VerticalLine
-import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
 import java.text.NumberFormat
 import java.util.Locale
@@ -110,7 +98,10 @@ fun measureTextWidth(text: String, style: TextStyle): Dp {
 }
 
 @Composable
-fun OverviewScreen(onSendFilesClicked: () -> Unit) {
+fun OverviewScreen(
+    onSendFilesClicked: () -> Unit,
+    onTransferJobClicked: (TransferJob) -> Unit,
+) {
     var optionsState by remember { mutableStateOf(false) }
     var aboutState by remember { mutableStateOf(false) }
     FittoniaScaffold(
@@ -124,112 +115,7 @@ fun OverviewScreen(onSendFilesClicked: () -> Unit) {
             Column(modifier = Modifier.padding(all = 16.dp)) {
                 HMSpacerHeight(height = 15)
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(width = 2.dp, color = Color(0xFF446644))
-                        .background(color = Color(0xFFDDFFEE)),
-                ) {
-                    val progressWidth = measureTextWidth(text = "100%", style = headingSStyle)
-                    val statusWidth = measureTextWidth(text = "Status", style = headingSStyle)
-
-                    Row(
-                        modifier = Modifier
-                            .requiredHeight(30.dp)
-                            .padding(horizontal = 5.dp),
-                        verticalAlignment = CenterVertically,
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1.0f),
-                            style = headingSStyle,
-                            text = "Transfer",
-                        )
-                        VerticalLine()
-                        FittoniaIcon(
-                            modifier = Modifier
-                                .padding(horizontal = 5.dp)
-                                .requiredWidth(progressWidth),
-                            drawableRes = R.drawable.ic_send,
-                        )
-                        VerticalLine()
-                        Text(
-                            modifier = Modifier
-                                .padding(horizontal = 5.dp)
-                                .requiredWidth(statusWidth),
-                            style = headingSStyle,
-                            text = "Status",
-                        )
-                        VerticalLine()
-                        HMSpacerWidth(width = 20)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .background(Color(0xFF999999))
-                            .requiredHeight(2.dp)
-                            .fillMaxWidth(),
-                    ) {}
-
-                    val androidServer = AndroidServer.server.collectAsState().value
-                    val transferJobs = androidServer?.transferJobs?.collectAsState()?.value ?: emptyList()
-                    transferJobs.forEachIndexed { index, job ->
-                        Row(
-                            modifier = Modifier
-                                .requiredHeight(30.dp)
-                                .padding(horizontal = 5.dp),
-                            verticalAlignment = CenterVertically,
-                        ) {
-                            Text(
-                                modifier = Modifier.weight(1.0f),
-                                text = job.description,
-                            )
-                            VerticalLine()
-                            Column(
-                                modifier = Modifier
-                                    .padding(horizontal = 5.dp)
-                                    .requiredWidth(progressWidth),
-                                horizontalAlignment = CenterHorizontally,
-                            ) {
-                                Text(
-                                    text = rememberPercentageFormat(job.progressPercentage),
-                                )
-                            }
-                            VerticalLine()
-                            Column(
-                                modifier = Modifier
-                                    .padding(horizontal = 5.dp)
-                                    .requiredWidth(statusWidth),
-                                horizontalAlignment = CenterHorizontally,
-                            ) {
-                                FittoniaIcon(
-                                    modifier = Modifier.padding(3.dp),
-                                    drawableRes = when (job.status) {
-                                        TransferStatus.Sending -> R.drawable.ic_arrow_send
-                                        TransferStatus.Receiving -> R.drawable.ic_arrow_receive
-                                        TransferStatus.Error -> R.drawable.ic_alert
-                                        TransferStatus.Done -> R.drawable.ic_checkmark
-                                    },
-                                    tint = when (job.status) {
-                                        TransferStatus.Sending -> Color(0xFF0000FF)
-                                        TransferStatus.Receiving -> Color(0xFF0000FF)
-                                        TransferStatus.Error -> Color(0xFFFFCC44)
-                                        TransferStatus.Done -> Color(0xFF00FF00)
-                                    },
-                                )
-                            }
-                            VerticalLine()
-                            FittoniaIcon(
-                                modifier = Modifier
-                                    .requiredWidth(20.dp)
-                                    .padding(3.dp),
-                                drawableRes = R.drawable.ic_chevron_right,
-                            )
-                        }
-                        if (index != transferJobs.lastIndex) {
-                            HorizontalLine()
-                        }
-                    }
-                }
+                TransferList(onTransferJobClicked = onTransferJobClicked)
             }
         },
         footer = {
@@ -326,5 +212,6 @@ fun OverviewScreen(onSendFilesClicked: () -> Unit) {
 private fun Preview() {
     OverviewScreen(
         onSendFilesClicked = {},
+        onTransferJobClicked = {},
     )
 }

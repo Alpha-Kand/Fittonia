@@ -21,4 +21,8 @@
 
     <!-- New Destination Screen -->
     <string name="new_destination_screen_body">If you plan on sending files/messages to a remote device often, saving it as a destination can save you having to remember its details.</string>
+
+    <!-- Transfer Details Screen -->
+    <string name="transfer_details_screen_progress">%1$s - %2$d out of %3$d items %4$s.</string>
+    <string name="transfer_details_screen_item_transfer_status">%1$s : %2$s</string>
 </resources>

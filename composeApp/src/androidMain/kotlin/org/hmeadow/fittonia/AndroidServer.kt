@@ -12,8 +12,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.hmeadow.fittonia.screens.TransferJob
-import org.hmeadow.fittonia.screens.TransferStatus
+import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
+import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.abs
 import kotlin.random.Random

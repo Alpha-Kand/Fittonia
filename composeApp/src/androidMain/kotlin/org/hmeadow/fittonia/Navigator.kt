@@ -19,14 +19,14 @@ import org.hmeadow.fittonia.AndroidServer.Companion.startThread
 import org.hmeadow.fittonia.screens.DebugScreen
 import org.hmeadow.fittonia.screens.NewDestinationScreen
 import org.hmeadow.fittonia.screens.NewDestinationScreenViewModel
-import org.hmeadow.fittonia.screens.OverviewScreen
 import org.hmeadow.fittonia.screens.SendFilesScreen
 import org.hmeadow.fittonia.screens.SendFilesScreenViewModel
 import org.hmeadow.fittonia.screens.TransferDetailsScreen
-import org.hmeadow.fittonia.screens.TransferJob
-import org.hmeadow.fittonia.screens.TransferStatus
 import org.hmeadow.fittonia.screens.WelcomeScreen
 import org.hmeadow.fittonia.screens.WelcomeScreenViewModel
+import org.hmeadow.fittonia.screens.overviewScreen.OverviewScreen
+import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
+import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -83,6 +83,9 @@ class Navigator(private val mainViewModel: MainViewModel) {
             onSendFilesClicked = {
                 push(sendFilesScreen())
             },
+            onTransferJobClicked = { job ->
+                push(transferDetailsScreen(transferJob = job))
+            },
         )
     }
 
@@ -136,8 +139,13 @@ class Navigator(private val mainViewModel: MainViewModel) {
 
     class TransferDetailsScreenViewModel : BaseViewModel
 
-    private val transferDetailsScreen = Screen(viewModel = TransferDetailsScreenViewModel()) { data, viewModel ->
-        TransferDetailsScreen()
+    private fun transferDetailsScreen(
+        transferJob: TransferJob,
+    ) = Screen(viewModel = TransferDetailsScreenViewModel()) { data, viewModel ->
+        TransferDetailsScreen(
+            transferJob = transferJob,
+            onBackClicked = ::pop,
+        )
     }
 
     // TODO default splash screen?
@@ -190,15 +198,15 @@ class Navigator(private val mainViewModel: MainViewModel) {
                             startThread(
                                 TransferJob(
                                     id = Random.nextInt(),
-                                    description = "Job ${Random.nextInt()}",
+                                    description = "Sending PDFs to bob (${abs(Random.nextInt() % 100)})",
                                     destination = SettingsManager.Destination(
-                                        name = "Destination ${Random.nextInt()}",
+                                        name = "Bob's PC (${abs(Random.nextInt() % 100)})",
                                         ip = "192.168.1.1",
                                         password = "Password",
                                     ),
                                     items = (0..abs(Random.nextInt() % 100)).map {
                                         TransferJob.Item(
-                                            name = "File ${Random.nextInt()}",
+                                            name = "File_${abs(Random.nextInt() % 100)}.pdf",
                                             uri = Uri.parse("https://www.google.com"),
                                         )
                                     },

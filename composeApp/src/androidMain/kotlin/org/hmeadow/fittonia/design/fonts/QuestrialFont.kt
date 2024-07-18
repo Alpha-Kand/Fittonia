@@ -16,9 +16,17 @@ private val questrialFont = FontFamily(
 )
 
 val readOnlyFieldTextStyle = TextStyle(
-    fontSize = 15.sp,
-    lineHeight = 30.sp,
+    fontSize = 20.sp,
+    lineHeight = 35.sp,
     letterSpacing = (-0.1f).sp,
     fontWeight = FontWeight(weight = 400),
+    fontFamily = questrialFont,
+)
+
+val readOnlyFieldLightTextStyle = TextStyle(
+    fontSize = 15.sp,
+    lineHeight = 25.sp,
+    letterSpacing = (-0.1f).sp,
+    fontWeight = FontWeight(weight = 100),
     fontFamily = questrialFont,
 )
