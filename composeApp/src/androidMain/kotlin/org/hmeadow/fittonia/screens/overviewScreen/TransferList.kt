@@ -17,6 +17,8 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.AndroidServer
@@ -26,6 +28,7 @@ import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.HorizontalLine
 import org.hmeadow.fittonia.components.VerticalLine
 import org.hmeadow.fittonia.design.fonts.headingSStyle
+import org.hmeadow.fittonia.design.fonts.readOnlyFieldSmallTextStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
 
 @Composable
@@ -39,8 +42,8 @@ fun TransferList(
             .border(width = 2.dp, color = Color(0xFF446644))
             .background(color = Color(0xFFDDFFEE)),
     ) {
-        val maxProgressWidth = measureTextWidth(text = "100%", style = headingSStyle)
-        val maxStatusWidth = measureTextWidth(text = "Status", style = headingSStyle)
+        val maxProgressWidth = measureTextWidth(text = "100.0%", style = readOnlyFieldTextStyle)
+        val maxStatusWidth = measureTextWidth(text = "Status", style = readOnlyFieldTextStyle)
 
         HeaderRow(
             maxProgressWidth = maxProgressWidth,
@@ -60,7 +63,9 @@ fun TransferList(
                 Text(
                     modifier = Modifier.weight(1.0f),
                     text = job.description,
-                    style = readOnlyFieldTextStyle,
+                    style = readOnlyFieldSmallTextStyle,
+                    textAlign = TextAlign.Center,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 VerticalLine()
                 Column(
@@ -70,7 +75,7 @@ fun TransferList(
                     horizontalAlignment = CenterHorizontally,
                 ) {
                     Text(
-                        text = rememberPercentageFormat(job.progressPercentage),
+                        text = rememberPercentageFormat(job.progressPercentage, minFraction = 1, maxFraction = 1),
                         style = readOnlyFieldTextStyle,
                     )
                 }
