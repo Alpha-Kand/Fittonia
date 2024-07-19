@@ -11,3 +11,8 @@ val backgroundLayer2Colour = Color(0xFF99AA99)
 
 // Fonts
 val psstColour = Color(0xFF222222)
+
+// Read-only Field
+val readOnlyBorderColour = Color(0xFF446644)
+val readOnlyBackgroundColour = Color(0xFFDDFFEE)
+val readOnlyClearIconColour = Color(0xFF222222)

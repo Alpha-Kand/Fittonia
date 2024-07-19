@@ -1,7 +1,5 @@
 package org.hmeadow.fittonia.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +29,7 @@ import org.hmeadow.fittonia.components.HMSpacerHeight
 import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.HorizontalLine
+import org.hmeadow.fittonia.components.ReadOnlyEntries
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
@@ -69,18 +68,10 @@ fun TransferDetailsScreen(
                 )
 
                 HMSpacerHeight(height = 5)
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(width = 2.dp, color = Color(0xFF446644))
-                        .background(color = Color(0xFFDDFFEE))
-                        .padding(5.dp),
-                ) {
-                    Text(
-                        text = activeTransferJob.destination.name,
-                        style = readOnlyFieldTextStyle,
-                    )
-                }
+                ReadOnlyEntries(
+                    entries = listOf(activeTransferJob.destination.name),
+                    textStyle = readOnlyFieldTextStyle,
+                )
                 HMSpacerHeight(height = 30)
 
                 Text(
@@ -89,13 +80,8 @@ fun TransferDetailsScreen(
                 )
 
                 HMSpacerHeight(height = 5)
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(width = 2.dp, color = Color(0xFF446644))
-                        .background(color = Color(0xFFDDFFEE))
-                        .padding(5.dp),
-                ) {
+
+                val statusComposable: @Composable () -> Unit = {
                     Row(
                         modifier = Modifier.requiredHeight(30.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -127,6 +113,9 @@ fun TransferDetailsScreen(
                         )
                     }
                 }
+
+                ReadOnlyEntries(entries = listOf(statusComposable))
+
                 HMSpacerHeight(height = 30)
 
                 Text(
@@ -136,34 +125,25 @@ fun TransferDetailsScreen(
 
                 HMSpacerHeight(height = 5)
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(width = 2.dp, color = Color(0xFF446644))
-                        .background(color = Color(0xFFDDFFEE))
-                        .padding(5.dp),
-                ) {
-                    val aaa = when (activeTransferJob.status) {
-                        TransferStatus.Sending -> "sent"
-                        TransferStatus.Receiving -> "received"
-                        else -> ""
-                    }
-                    Row {
-                        Text(
-                            text = stringResource(
-                                id = R.string.transfer_details_screen_progress,
-                                rememberPercentageFormat(
-                                    percentage = activeTransferJob.progressPercentage,
-                                    maxFraction = 2,
-                                ),
-                                activeTransferJob.currentItem,
-                                activeTransferJob.totalItems,
-                                aaa,
-                            ),
-                            style = readOnlyFieldTextStyle,
-                        )
-                    }
+                val aaa = when (activeTransferJob.status) {
+                    TransferStatus.Sending -> "sent"
+                    TransferStatus.Receiving -> "received"
+                    else -> ""
                 }
+                ReadOnlyEntries(
+                    entries = listOf(
+                        stringResource(
+                            id = R.string.transfer_details_screen_progress,
+                            rememberPercentageFormat(
+                                percentage = activeTransferJob.progressPercentage,
+                                maxFraction = 2,
+                            ),
+                            activeTransferJob.currentItem,
+                            activeTransferJob.totalItems,
+                            aaa,
+                        ),
+                    ),
+                )
 
                 HMSpacerHeight(height = 30)
 
@@ -174,80 +154,77 @@ fun TransferDetailsScreen(
 
                 HMSpacerHeight(height = 5)
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(width = 2.dp, color = Color(0xFF446644))
-                        .background(color = Color(0xFFDDFFEE))
-                        .padding(5.dp),
-                ) {
-                    activeTransferJob.items.forEachIndexed { index, file ->
-                        var pathExpandedState by remember { mutableStateOf(false) }
+                ReadOnlyEntries(
+                    entries = activeTransferJob.items.mapIndexed { index, file ->
+                        val composable = @Composable {
+                            var pathExpandedState by remember { mutableStateOf(false) }
 
-                        Column(
-                            modifier = Modifier
-                                .defaultMinSize(minHeight = 30.dp)
-                                .clickable { pathExpandedState = !pathExpandedState }
-                                .fillMaxWidth(),
-                        ) {
-                            val transferStatus = when (activeTransferJob.status) {
-                                TransferStatus.Sending -> ""
-                                TransferStatus.Receiving -> ""
-                                TransferStatus.Error -> " Error"
-                                TransferStatus.Done -> " Done"
-                            }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
+                            Column(
+                                modifier = Modifier
+                                    .defaultMinSize(minHeight = 30.dp)
+                                    .clickable { pathExpandedState = !pathExpandedState }
+                                    .fillMaxWidth(),
                             ) {
-                                if (pathExpandedState) {
-                                    Text(
-                                        text = file.name + " todo long path?",
-                                    )
-                                    HMSpacerWeightRow()
-                                } else {
-                                    Text(
-                                        text = stringResource(
-                                            id = R.string.transfer_details_screen_item_transfer_status,
-                                            file.name,
-                                            transferStatus,
-                                        ),
-                                        style = readOnlyFieldTextStyle,
-                                    )
-                                    HMSpacerWeightRow()
-                                    Text(
-                                        text = rememberPercentageFormat(Random.nextDouble(1.0)),
-                                        style = readOnlyFieldTextStyle,
-                                    )
+                                val transferStatus = when (activeTransferJob.status) {
+                                    TransferStatus.Sending -> ""
+                                    TransferStatus.Receiving -> ""
+                                    TransferStatus.Error -> " Error"
+                                    TransferStatus.Done -> " Done"
                                 }
-                                FittoniaIcon(
-                                    modifier = Modifier.requiredHeight(20.dp),
-                                    drawableRes = if (pathExpandedState) {
-                                        R.drawable.ic_chevron_up
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    if (pathExpandedState) {
+                                        Text(
+                                            text = file.name + " todo long path?",
+                                        )
+                                        HMSpacerWeightRow()
                                     } else {
-                                        R.drawable.ic_chevron_down
-                                    },
-                                    tint = Color(0xFF222222),
-                                )
-                            }
-                            if (pathExpandedState) {
-                                Row {
-                                    Text(
-                                        text = "$transferStatus${0.0}",
-                                        style = readOnlyFieldTextStyle,
-                                    )
-                                    HMSpacerWeightRow()
-                                    Text(
-                                        text = "${1000}b/${2000}b",
-                                        style = readOnlyFieldTextStyle,
+                                        Text(
+                                            text = stringResource(
+                                                id = R.string.transfer_details_screen_item_transfer_status,
+                                                file.name,
+                                                transferStatus,
+                                            ),
+                                            style = readOnlyFieldTextStyle,
+                                        )
+                                        HMSpacerWeightRow()
+                                        Text(
+                                            text = rememberPercentageFormat(Random.nextDouble(1.0)),
+                                            style = readOnlyFieldTextStyle,
+                                        )
+                                    }
+                                    FittoniaIcon(
+                                        modifier = Modifier.requiredHeight(20.dp),
+                                        drawableRes = if (pathExpandedState) {
+                                            R.drawable.ic_chevron_up
+                                        } else {
+                                            R.drawable.ic_chevron_down
+                                        },
+                                        tint = Color(0xFF222222),
                                     )
                                 }
+                                if (pathExpandedState) {
+                                    Row {
+                                        Text(
+                                            text = "$transferStatus${0.0}",
+                                            style = readOnlyFieldTextStyle,
+                                        )
+                                        HMSpacerWeightRow()
+                                        Text(
+                                            text = "${1000}b/${2000}b",
+                                            style = readOnlyFieldTextStyle,
+                                        )
+                                    }
+                                }
+                            }
+                            if (index != activeTransferJob.items.lastIndex) {
+                                HorizontalLine()
                             }
                         }
-                        if (index != activeTransferJob.items.lastIndex) {
-                            HorizontalLine()
-                        }
-                    }
-                }
+                        composable
+                    },
+                )
             }
         },
         footer = {
