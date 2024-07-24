@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
@@ -61,6 +62,18 @@ class MainActivity : ComponentActivity() {
                 addCategory(Intent.CATEGORY_DEFAULT)
             },
         )
+    }
+
+    fun getDeviceIpAddress(): String? {
+        return (getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager)?.let { conman ->
+            conman.getLinkProperties(conman.activeNetwork)?.let { addresses ->
+                addresses
+                    .linkAddresses
+                    .find { it.toString().contains('.') }
+                    .toString()
+                    .substringBefore('/')
+            }
+        }
     }
 
     private fun initFileFolderPickerIntent() {

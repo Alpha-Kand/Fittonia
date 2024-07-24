@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.AndroidServer.Companion.startThread
 import org.hmeadow.fittonia.screens.DebugScreen
+import org.hmeadow.fittonia.screens.DebugScreenViewModel
 import org.hmeadow.fittonia.screens.NewDestinationScreen
 import org.hmeadow.fittonia.screens.NewDestinationScreenViewModel
 import org.hmeadow.fittonia.screens.SendFilesScreen
@@ -183,12 +184,11 @@ class Navigator(private val mainViewModel: MainViewModel) {
     companion object {
         private lateinit var instance: Navigator
 
-        private class DebugScreenViewModel : BaseViewModel
-
         fun goToDebugScreen() {
             instance.push(
-                Screen(viewModel = DebugScreenViewModel()) { data, _ ->
+                Screen(viewModel = DebugScreenViewModel()) { data, viewModel ->
                     DebugScreen(
+                        viewModel = viewModel,
                         data = data,
                         onResetSettingsClicked = instance.mainViewModel::resetSettings,
                         onClearDumpPath = instance.mainViewModel::clearDumpPath,

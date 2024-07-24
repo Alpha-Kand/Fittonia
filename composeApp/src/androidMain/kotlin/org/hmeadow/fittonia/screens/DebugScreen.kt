@@ -12,10 +12,14 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.hmeadow.fittonia.BaseViewModel
+import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.components.FittoniaButton
@@ -28,8 +32,21 @@ import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 
+class DebugScreenViewModel : BaseViewModel {
+    val deviceIp = MutableStateFlow("Unknown")
+
+    init {
+        refreshIp()
+    }
+
+    fun refreshIp() {
+        deviceIp.value = MainActivity.mainActivity.getDeviceIpAddress() ?: "Unknown"
+    }
+}
+
 @Composable
 fun DebugScreen(
+    viewModel: DebugScreenViewModel,
     data: SettingsDataAndroid,
     onResetSettingsClicked: () -> Unit,
     onClearDumpPath: () -> Unit,
@@ -49,12 +66,22 @@ fun DebugScreen(
             Column(modifier = Modifier.padding(all = 16.dp)) {
                 Row {
                     Column {
+                        Text(text = "Current device IP:")
                         Text(text = "Default Server Port:")
                         Text(text = "Server Password:")
                         Text(text = "Dump Path:")
                     }
                     HMSpacerWidth(width = 10)
                     Column {
+                        Row {
+                            Text(text = viewModel.deviceIp.collectAsState().value)
+                            HMSpacerWidth(width = 10)
+                            Text(
+                                modifier = Modifier.clickable(onClick = viewModel::refreshIp),
+                                text = "Refresh",
+                                color = Color.Cyan,
+                            )
+                        }
                         Text(text = data.defaultPort.toString())
                         Text(text = data.serverPassword.toString())
                         Row(
