@@ -9,11 +9,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.nio.file.Path
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import kotlin.io.path.Path
 
-class DesktopServer private constructor(port: Int) {
+class DesktopServer private constructor(port: Int) : ServerLogs {
 
     private var jobId: Int = 100
 
@@ -23,36 +21,8 @@ class DesktopServer private constructor(port: Int) {
         },
     )
 
-    enum class LogType {
-        NORMAL,
-        WARNING,
-        ERROR,
-        DEBUG,
-    }
-
-    class Log(
-        private val time: ZonedDateTime,
-        val message: String,
-        val type: LogType,
-        val jobId: Int?,
-    ) {
-        val timeStamp: String = "%1\$s %2\$sh %3\$sm %4\$ss".format(
-            time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            time.format(DateTimeFormatter.ofPattern("HH")),
-            time.format(DateTimeFormatter.ofPattern("mm")),
-            time.format(DateTimeFormatter.ofPattern("ss")),
-        )
-
-        constructor(message: String, type: LogType = LogType.NORMAL, jobId: Int? = null) : this(
-            time = ZonedDateTime.now(),
-            message = message,
-            type = type,
-            jobId = jobId,
-        )
-    }
-
     private val mainServerSocket = HMeadowSocketServer.createServerSocket(port)
-    private val mLogs = mutableListOf<Log>()
+    override val mLogs = mutableListOf<Log>()
     fun getLogs(): List<Log> = mLogs.toList()
 
     private fun start() {
@@ -154,21 +124,10 @@ class DesktopServer private constructor(port: Int) {
             }
         }
 
-        fun log(log: String, jobId: Int? = null) = synchronized(instance().mLogs) {
-            instance().mLogs.add(Log(log, LogType.NORMAL, jobId))
-        }
-
-        fun logWarning(log: String, jobId: Int? = null) = synchronized(instance().mLogs) {
-            instance().mLogs.add(Log(log, LogType.WARNING, jobId))
-        }
-
-        fun logError(log: String, jobId: Int? = null) = synchronized(instance().mLogs) {
-            instance().mLogs.add(Log(log, LogType.ERROR, jobId))
-        }
-
-        fun logDebug(log: String, jobId: Int? = null) = synchronized(instance().mLogs) {
-            instance().mLogs.add(Log(log, LogType.DEBUG, jobId))
-        }
+        fun log(log: String, jobId: Int? = null) = instance().log(log, jobId)
+        fun logWarning(log: String, jobId: Int? = null) = instance().logWarning(log, jobId)
+        fun logError(log: String, jobId: Int? = null) = instance().logError(log, jobId)
+        fun logDebug(log: String, jobId: Int? = null) = instance().logDebug(log, jobId)
     }
 }
 

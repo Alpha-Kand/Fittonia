@@ -18,7 +18,8 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.math.abs
 import kotlin.random.Random
 
-class AndroidServer : Service(), CoroutineScope {
+class AndroidServer : Service(), CoroutineScope, ServerLogs {
+    override val mLogs = mutableListOf<Log>()
     override val coroutineContext: CoroutineContext = Dispatchers.IO
     private val binder = AndroidServerBinder()
 
