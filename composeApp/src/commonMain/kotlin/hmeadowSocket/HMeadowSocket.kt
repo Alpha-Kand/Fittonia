@@ -8,7 +8,6 @@ import hmeadowSocket.HMeadowSocket.HMeadowSocketError.FailedToSendException
 import hmeadowSocket.HMeadowSocket.HMeadowSocketError.ServerSetupException
 import java.io.IOException
 import java.lang.Thread.sleep
-import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.time.Instant
@@ -242,28 +241,27 @@ open class HMeadowSocketServer(
 open class HMeadowSocketClient
 @Throws(ClientSetupException::class)
 constructor(
-    ipAddress: InetAddress,
+    ipAddress: String,
     port: Int,
     handshakeTimeoutMillis: Long = 0,
     operationTimeoutMillis: Int = 0,
     final override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
 ) : HMeadowSocket(socketInterface) {
-    private val socket: Socket
+    private val socket: Socket = socketInterface.bindToSocket {
+        val timeLimit = Instant.now().toEpochMilli() + handshakeTimeoutMillis
+        var trySocket: Socket? = null
+        do {
+            try {
+                trySocket = Socket(ipAddress, port)
+                break
+            } catch (e: IOException) {
+                sleep(handshakeTimeoutMillis / 10)
+            }
+        } while (Instant.now().toEpochMilli() < timeLimit)
+        trySocket ?: throw ClientSetupException(Exception())
+    }
 
     init {
-        socket = socketInterface.bindToSocket {
-            val timeLimit = Instant.now().toEpochMilli() + handshakeTimeoutMillis
-            var trySocket: Socket? = null
-            do {
-                try {
-                    trySocket = Socket(ipAddress, port)
-                    break
-                } catch (e: IOException) {
-                    sleep(handshakeTimeoutMillis / 10)
-                }
-            } while (Instant.now().toEpochMilli() < timeLimit)
-            trySocket ?: throw ClientSetupException(Exception())
-        }
         socket.soTimeout = operationTimeoutMillis
     }
 

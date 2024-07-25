@@ -10,13 +10,13 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     val destination = SettingsManagerDesktop.settingsManager.findDestination(command.getDestination())
     return destination?.let {
         HMeadowSocketClient(
-            ipAddress = InetAddress.getByName(destination.ip),
+            ipAddress = destination.ip,
             port = command.getPort(),
             operationTimeoutMillis = 2000,
             handshakeTimeoutMillis = 2000L,
         )
     } ?: HMeadowSocketClient(
-        ipAddress = InetAddress.getByName(command.getIP()),
+        ipAddress = command.getIP(),
         port = command.getPort(),
         operationTimeoutMillis = 2000,
         handshakeTimeoutMillis = 2000L,
