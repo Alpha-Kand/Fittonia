@@ -120,8 +120,8 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onDestroy() {
+        super.onDestroy()
         if (serverConnection.isConnected) {
             unbindService(serverConnection)
         }
@@ -159,11 +159,7 @@ class MainActivity : ComponentActivity() {
             Intent(mainActivity, AndroidServer::class.java),
             serverConnection,
             0,
-        ).also { bindSuccessful ->
-            if (!bindSuccessful) {
-                unbindService(serverConnection)
-            }
-        }
+        )
         startForegroundService(Intent(this, AndroidServer::class.java))
     }
 
