@@ -1,5 +1,7 @@
 package org.hmeadow.fittonia
 
+import Log
+import ServerLogs
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.Service

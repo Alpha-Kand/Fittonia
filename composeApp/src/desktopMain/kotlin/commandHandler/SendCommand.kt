@@ -1,10 +1,10 @@
 package commandHandler
 
 import OutputIO.printlnIO
+import ServerCommandFlag
 import SettingsManagerDesktop
 import hmeadowSocket.HMeadowSocketClient
 import receiveApproval
-import java.net.InetAddress
 
 fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     val destination = SettingsManagerDesktop.settingsManager.findDestination(command.getDestination())
