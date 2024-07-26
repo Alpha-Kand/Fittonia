@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.hmeadow.fittonia.AndroidServer.Companion.startThread
+import org.hmeadow.fittonia.AndroidServer.Companion.startSending
 import org.hmeadow.fittonia.screens.DebugScreen
 import org.hmeadow.fittonia.screens.DebugScreenViewModel
 import org.hmeadow.fittonia.screens.NewDestinationScreen
@@ -106,7 +106,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                 push(newDestinationScreen(onFinish = onFinish))
             },
             onConfirmCallback = { newJob ->
-                startThread(newJob = newJob)
+                startSending(job = newJob)
                 pop()
             },
         ),
@@ -196,8 +196,8 @@ class Navigator(private val mainViewModel: MainViewModel) {
                         onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
                         onBackClicked = instance::pop,
                         debugNewThread = {
-                            startThread(
-                                TransferJob(
+                            startSending(
+                                job = TransferJob(
                                     id = Random.nextInt(),
                                     description = "Sending PDFs to bob (${abs(Random.nextInt() % 100)})",
                                     destination = SettingsManager.Destination(

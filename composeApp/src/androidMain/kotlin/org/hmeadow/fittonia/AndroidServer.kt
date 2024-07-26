@@ -2,6 +2,7 @@ package org.hmeadow.fittonia
 
 import Log
 import Server
+import ServerCommandFlag
 import ServerLogs
 import android.app.Notification
 import android.app.NotificationManager
@@ -11,6 +12,9 @@ import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 import android.os.Binder
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
+import communicateCommand
+import hmeadowSocket.HMeadowSocket
+import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,8 +24,6 @@ import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
 import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
 import java.net.ServerSocket
 import kotlin.coroutines.CoroutineContext
-import kotlin.math.abs
-import kotlin.random.Random
 
 class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
@@ -56,6 +58,16 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
             constructNotification(transferJobsActive = transferJobs.value.size),
             FOREGROUND_SERVICE_TYPE_DATA_SYNC,
         )
+        launch {
+            while (true) {
+                HMeadowSocketServer.createServerFromSocket(serverSocket).let { server ->
+                    launch {
+                        log("Connected to client.")
+                        handleCommand(server = server, jobId = jobId)
+                    }
+                }
+            }
+        }
         return START_STICKY // If the service is killed, it will be automatically restarted.
     }
 
@@ -161,18 +173,36 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
         var server: MutableStateFlow<AndroidServer?> = MutableStateFlow(null)
 
-        fun startThread(newJob: TransferJob) {
+        fun startSending(job: TransferJob) {
             server.value?.run {
-                addTransferJob(newJob)
+                addTransferJob(job)
                 updateNotification()
                 launch {
-                    repeat(newJob.totalItems) {
-                        transferJobs.value.find { it.id == newJob.id }?.let { currentJob ->
-                            Thread.sleep(abs(Random.nextLong() % 2000))
-                            updateTransferJobCurrentItem(job = currentJob)
+                    try {
+                        val client = HMeadowSocketClient(
+                            ipAddress = job.destination.ip,
+                            port = job.port,
+                            operationTimeoutMillis = 2000,
+                            handshakeTimeoutMillis = 2000L,
+                        )
+                        if (client.communicateCommand(
+                                commandFlag = ServerCommandFlag.SEND_FILES,
+                                password = job.destination.password,
+                                onSuccess = { },
+                                onPasswordRefused = { logError("Server refused password.") },
+                                onFailure = { logError("Connected, but request refused.") },
+                            )
+                        ) {
+                            log("Password accepted")
+                        } else {
+                            logError("Password refused")
                         }
+                        updateTransferJobCurrentItem(job = job)
+                    } catch (e: HMeadowSocket.HMeadowSocketError) { // TODO Better error handling & messaging.
+                        e.hmMessage?.let { logError(it) }
+                        e.message?.let { logError(it) }
                     }
-                    finishTransferJob(newJob)
+                    finishTransferJob(job)
                     updateNotification()
                 }
             }
