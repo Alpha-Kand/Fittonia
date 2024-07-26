@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 val Context.dataStore by dataStore("fittonia.json", SettingsDataAndroidSerializer)
 
 class MainActivity : ComponentActivity() {
+    private lateinit var viewModel: MainViewModel
     private lateinit var fileFolderPickerIntent: ActivityResultLauncher<Intent>
     private var onUriPicked: (Uri) -> Unit = {}
 
@@ -102,15 +103,17 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    fun attemptStartServer() = viewModel.attemptAndroidServerWithPort(::initAndroidServer)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainActivity = this
-        val viewModel = getViewModel()
+        viewModel = getViewModel()
         val navigator = Navigator(mainViewModel = viewModel)
         initWindowInsetsListener()
         initFileFolderPickerIntent()
         initNotificationChannels()
-        initAndroidServer()
+        attemptStartServer()
         setContent(
             content = {
                 navigator.Render(
@@ -154,13 +157,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun initAndroidServer() {
+    private fun initAndroidServer(port: Int) {
+        val intent = Intent(mainActivity, AndroidServer::class.java).apply {
+            this.putExtra("org.hmeadow.fittonia.port", port)
+        }
         bindService(
-            Intent(mainActivity, AndroidServer::class.java),
+            intent,
             serverConnection,
             0,
         )
-        startForegroundService(Intent(this, AndroidServer::class.java))
+        startForegroundService(intent)
     }
 
     private fun getViewModel() = ViewModelProvider(

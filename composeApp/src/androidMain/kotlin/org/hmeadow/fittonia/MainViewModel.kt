@@ -12,6 +12,16 @@ import kotlin.coroutines.CoroutineContext
 class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel(), CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.IO
 
+    fun attemptAndroidServerWithPort(initServer: (Int) -> Unit)= launch{
+        dataStore.data.collect{data ->
+            data.defaultPort.let {
+                if(it in 1025..49999) { // TODO better validation.
+                    initServer(it)
+                }
+            }
+        }
+    }
+
     fun updateServerPassword(password: String) = launch {
         dataStore.updateData {
             it.copy(serverPassword = password)

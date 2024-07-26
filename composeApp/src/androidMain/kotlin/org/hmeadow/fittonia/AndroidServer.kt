@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
 import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
+import java.net.ServerSocket
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.abs
 import kotlin.random.Random
@@ -26,6 +27,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
     override val coroutineContext: CoroutineContext = Dispatchers.IO
     private val binder = AndroidServerBinder()
+    private lateinit var serverSocket: ServerSocket
 
     inner class AndroidServerBinder : Binder() {
         fun getService(): AndroidServer = this@AndroidServer
@@ -44,6 +46,9 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        intent?.let {
+            serverSocket = ServerSocket(it.getIntExtra("org.hmeadow.fittonia.port", 0))
+        }
         ServiceCompat.startForeground(
             this,
             NOTIFICATION_ID,
@@ -79,7 +84,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         println("onDestroy")
     }
 
-    /* MUST BE IN SYNCHRONIZED */
+    /* MUST BE IN 'SYNCHRONIZED' */
     private fun updateTransferJob(job: TransferJob) {
         transferJobs.value = (transferJobs.value.filterNot { it.id == job.id } + job).sortedBy { it.id }
     }

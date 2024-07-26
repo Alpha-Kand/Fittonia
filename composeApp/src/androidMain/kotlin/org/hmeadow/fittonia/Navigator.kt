@@ -66,6 +66,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
             onContinueCallback = { password, port ->
                 mainViewModel.updateServerPassword(password)
                 mainViewModel.updateServerPort(port)
+                MainActivity.mainActivity.attemptStartServer()
                 push(overviewScreen())
             },
         ),
