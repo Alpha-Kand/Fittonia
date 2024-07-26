@@ -9,8 +9,7 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 class DesktopServer private constructor(port: Int) : ServerLogs, Server {
-
-    private var jobId: Int = 100
+    override var jobId: Int = 100
 
     private val serverCoroutineScope = CoroutineScope(
         context = Dispatchers.IO + CoroutineExceptionHandler { _, e ->
@@ -40,17 +39,7 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         }
     }
 
-    fun handleCommand(server: HMeadowSocketServer, jobId: Int) {
-        server.handleCommand(
-            onAddDestination = ::onAddDestination,
-            onSendFilesCommand = ::onSendFiles,
-            onSendMessageCommand = ::onSendMessage,
-            onInvalidCommand = ::onInvalidCommand,
-            jobId = jobId,
-        )
-    }
-
-    private fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+    override fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to add this server as destination, password refused.", jobId = jobId)
         } else {
@@ -62,7 +51,7 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         }
     }
 
-    private fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+    override fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to send files to this server, password refused.", jobId = jobId)
         } else {
@@ -87,7 +76,7 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         }
     }
 
-    private fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+    override fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to send a message, password refused.", jobId = jobId)
         } else {
@@ -96,7 +85,7 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         }
     }
 
-    private fun onInvalidCommand(unknownCommand: String) {
+    override fun onInvalidCommand(unknownCommand: String) {
         logWarning("Received invalid server command from client: $unknownCommand", jobId = jobId)
     }
 

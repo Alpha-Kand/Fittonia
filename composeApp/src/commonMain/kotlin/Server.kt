@@ -4,6 +4,8 @@ import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
 
 interface Server {
+    var jobId: Int
+
     fun HMeadowSocketServer.passwordIsValid(): Boolean
 
     fun HMeadowSocketServer.handleCommand(
@@ -49,8 +51,22 @@ interface Server {
             sendDeny()
         }
     }
-}
 
+    fun handleCommand(server: HMeadowSocketServer, jobId: Int) {
+        server.handleCommand(
+            onAddDestination = ::onAddDestination,
+            onSendFilesCommand = ::onSendFiles,
+            onSendMessageCommand = ::onSendMessage,
+            onInvalidCommand = ::onInvalidCommand,
+            jobId = jobId,
+        )
+    }
+
+    fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    fun onInvalidCommand(unknownCommand: String)
+}
 
 // TODO Sending files should be handled in Server.
 fun <T> HMeadowSocket.receiveApproval(onConfirm: () -> T, onDeny: () -> T): T {

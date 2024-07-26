@@ -26,6 +26,7 @@ import kotlin.random.Random
 class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
     override val coroutineContext: CoroutineContext = Dispatchers.IO
+    override var jobId: Int = 100
     private val binder = AndroidServerBinder()
     private lateinit var serverSocket: ServerSocket
 
@@ -120,6 +121,39 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     override fun HMeadowSocketServer.passwordIsValid(): Boolean {
         return true // TODO
+    }
+
+    override fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientPasswordSuccess) {
+            logWarning("Client attempted to add this server as destination, password refused.", jobId = jobId)
+        } else {
+            if (server.receiveBoolean()) {
+                log("Client added this server as a destination.", jobId = jobId)
+            } else {
+                logWarning("Client failed to add this server as a destination.", jobId = jobId)
+            }
+        }
+    }
+
+    override fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientPasswordSuccess) {
+            logWarning("Client attempted to send files to this server, password refused.", jobId = jobId)
+        } else {
+            log("Client attempting to send files.", jobId = jobId)
+        }
+    }
+
+    override fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientPasswordSuccess) {
+            logWarning("Client attempted to send a message, password refused.", jobId = jobId)
+        } else {
+            log("Client message: ${server.receiveString()}", jobId = jobId)
+            server.sendConfirmation()
+        }
+    }
+
+    override fun onInvalidCommand(unknownCommand: String) {
+        logWarning("Received invalid server command from client: $unknownCommand", jobId = jobId)
     }
 
     companion object {
