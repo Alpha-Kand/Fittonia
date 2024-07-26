@@ -1,5 +1,7 @@
 package org.hmeadow.fittonia
 
+import SettingsManager
+import android.net.Uri
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -9,6 +11,16 @@ import kotlin.coroutines.CoroutineContext
 
 class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel(), CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.IO
+
+    fun attemptAndroidServerWithPort(initServer: (Int) -> Unit) = launch {
+        dataStore.data.collect { data ->
+            data.defaultPort.let {
+                if (it in 1025..49999) {
+                    initServer(it)
+                }
+            }
+        }
+    }
 
     fun updateServerPassword(password: String) = launch {
         dataStore.updateData {
@@ -22,9 +34,27 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         }
     }
 
-    fun updateDumpPath(dumpPath: String) = launch {
+    fun clearDumpPath() = launch {
         dataStore.updateData {
-            it.copy(dumpPath = dumpPath)
+            it.copy(dumpPath = SettingsDataAndroid.DumpPath())
+        }
+    }
+
+    fun updateDumpPath(uri: Uri) = launch {
+        dataStore.updateData {
+            it.copy(dumpPath = SettingsDataAndroid.DumpPath(uri = uri))
+        }
+    }
+
+    fun addDestination(destination: SettingsManager.Destination) = launch {
+        dataStore.updateData {
+            it.copy(destinations = it.destinations + destination)
+        }
+    }
+
+    fun removeDestination(destination: SettingsManager.Destination) = launch {
+        dataStore.updateData { data ->
+            data.copy(destinations = data.destinations.filter { it != destination })
         }
     }
 

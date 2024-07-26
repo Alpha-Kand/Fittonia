@@ -1,14 +1,10 @@
-package org.hmeadow.fittonia.components
+package org.hmeadow.fittonia.design.fonts
 
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.hmeadow.fittonia.R
 
@@ -59,6 +55,22 @@ val paragraphStyle = TextStyle(
     fontFamily = firaSansFont,
 )
 
+val readOnlyStyle = TextStyle(
+    fontSize = 17.sp,
+    lineHeight = 23.sp,
+    letterSpacing = (-0.2f).sp,
+    fontWeight = FontWeight(weight = 200),
+    fontFamily = firaSansFont,
+)
+
+val readOnlyLightStyle = TextStyle(
+    fontSize = 15.sp,
+    lineHeight = 20.sp,
+    letterSpacing = (-0.2f).sp,
+    fontWeight = FontWeight(weight = 100),
+    fontFamily = firaSansFont,
+)
+
 val psstStyle = TextStyle(
     fontSize = 14.sp,
     lineHeight = 23.sp,
@@ -66,8 +78,6 @@ val psstStyle = TextStyle(
     fontWeight = FontWeight(weight = 300),
     fontFamily = firaSansFont,
 )
-
-val psstColour = Color(0xFF222222)
 
 val inputLabelStyle = TextStyle(
     fontSize = 17.sp,
@@ -77,9 +87,3 @@ val inputLabelStyle = TextStyle(
     fontStyle = FontStyle.Italic,
     fontFamily = firaSansFont,
 )
-
-val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
-
-val layer0Colour = Color(0xFF77AA77)
-val layer1Colour = Color(0xFF88AA88)
-val layer2Colour = Color(0xFF99AA99)

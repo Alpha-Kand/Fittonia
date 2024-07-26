@@ -1,12 +1,21 @@
 package org.hmeadow.fittonia
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Bundle
+import android.os.IBinder
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.collectAsState
 import androidx.core.view.ViewCompat
@@ -19,10 +28,61 @@ import kotlinx.coroutines.flow.MutableStateFlow
 val Context.dataStore by dataStore("fittonia.json", SettingsDataAndroidSerializer)
 
 class MainActivity : ComponentActivity() {
-    val openDumpPicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            result.data?.data?.path?.let {
-                getViewModel().updateDumpPath(it)
+    private lateinit var viewModel: MainViewModel
+    private lateinit var fileFolderPickerIntent: ActivityResultLauncher<Intent>
+    private var onUriPicked: (Uri) -> Unit = {}
+
+    private val serverConnection = object : ServiceConnection {
+        var isConnected = false
+
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            isConnected = true
+            AndroidServer.server.value = (service as AndroidServer.AndroidServerBinder).getService()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isConnected = false
+        }
+    }
+
+    fun openFilePicker(onSelectItem: (Uri) -> Unit) {
+        onUriPicked = onSelectItem
+        fileFolderPickerIntent.launch(
+            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_DEFAULT)
+                type = "*/*"
+            },
+        )
+    }
+
+    fun openFolderPicker(onSelectItem: (Uri) -> Unit) {
+        onUriPicked = onSelectItem
+        fileFolderPickerIntent.launch(
+            Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addCategory(Intent.CATEGORY_DEFAULT)
+            },
+        )
+    }
+
+    fun getDeviceIpAddress(): String? {
+        return (getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager)?.let { conman ->
+            conman.getLinkProperties(conman.activeNetwork)?.let { addresses ->
+                addresses
+                    .linkAddresses
+                    .find { it.toString().contains('.') }
+                    .toString()
+                    .substringBefore('/')
+            }
+        }
+    }
+
+    private fun initFileFolderPickerIntent() {
+        fileFolderPickerIntent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                result.data?.data?.let {
+                    onUriPicked(it)
+                }
             }
         }
     }
@@ -43,12 +103,17 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    fun attemptStartServer() = viewModel.attemptAndroidServerWithPort(::initAndroidServer)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainActivity = this
-        val viewModel = getViewModel()
-        val navigator = Navigator(viewModelMain = viewModel)
+        viewModel = getViewModel()
+        val navigator = Navigator(mainViewModel = viewModel)
         initWindowInsetsListener()
+        initFileFolderPickerIntent()
+        initNotificationChannels()
+        attemptStartServer()
         setContent(
             content = {
                 navigator.Render(
@@ -58,11 +123,29 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        return ev?.let {
-            gestureDetector.onTouchEvent(ev)
-            super.dispatchTouchEvent(ev)
+    override fun onDestroy() {
+        super.onDestroy()
+        if (serverConnection.isConnected) {
+            unbindService(serverConnection)
+        }
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
+        return event?.let {
+            gestureDetector.onTouchEvent(event)
+            super.dispatchTouchEvent(event)
         } ?: false
+    }
+
+    private fun initNotificationChannels() {
+        val channel = NotificationChannel(
+            getString(R.string.send_receive_channel_id),
+            getString(R.string.send_receive_channel_name),
+            NotificationManager.IMPORTANCE_LOW,
+        ).apply {
+            description = getString(R.string.send_receive_channel_description)
+        }
+        (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
     }
 
     private fun initWindowInsetsListener() {
@@ -72,6 +155,18 @@ class MainActivity : ComponentActivity() {
             statusBarsHeight.value = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
             WindowInsetsCompat.CONSUMED
         }
+    }
+
+    private fun initAndroidServer(port: Int) {
+        val intent = Intent(mainActivity, AndroidServer::class.java).apply {
+            this.putExtra("org.hmeadow.fittonia.port", port)
+        }
+        bindService(
+            intent,
+            serverConnection,
+            0,
+        )
+        startForegroundService(intent)
     }
 
     private fun getViewModel() = ViewModelProvider(

@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">Fittonia</string>
 
+    <!-- Send/Receive Files Channel -->
+    <string name="send_receive_channel_id">send-receive-channel-id</string>
+    <string name="send_receive_channel_name">Active Transfers</string>
+    <string name="send_receive_channel_description">Shows progress and status of active incoming/outgoing transfers.</string>
+
+    <!-- Send/Receive Foreground Service -->
+    <string name="send_receive_foreground_service_notification_content">%1$d transfers active.</string>
+
     <!-- Welcome Screen -->
     <string name="welcome_screen_title">Welcome!</string>
     <string name="welcome_screen_body">To get started, you just need a new server password, server socket port, and a place to put incoming files.</string>
@@ -10,4 +18,11 @@
     <string name="welcome_screen_new_destination_folder_label">Destination folder</string>
     <string name="welcome_screen_new_destination_select_folder_button">Select folder</string>
     <string name="welcome_screen_continue_button">Continue</string>
+
+    <!-- New Destination Screen -->
+    <string name="new_destination_screen_body">If you plan on sending files/messages to a remote device often, saving it as a destination can save you having to remember its details.</string>
+
+    <!-- Transfer Details Screen -->
+    <string name="transfer_details_screen_progress">%1$s - %2$d out of %3$d items %4$s.</string>
+    <string name="transfer_details_screen_item_transfer_status">%1$s : %2$s</string>
 </resources>

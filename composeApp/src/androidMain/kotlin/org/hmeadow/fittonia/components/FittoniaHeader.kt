@@ -13,30 +13,50 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterEnd
+import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import headerBackgroundColour
 import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.Navigator
 import org.hmeadow.fittonia.R
+import org.hmeadow.fittonia.design.fonts.headerStyle
 
 @Composable
 fun FittoniaHeader(
-    headerText: String,
-    onOptionsClicked: (() -> Unit)?,
+    headerText: String? = null,
+    onBackClicked: (() -> Unit)? = null,
+    onOptionsClicked: (() -> Unit)? = null,
 ) {
-    Box(modifier = Modifier.padding(all = 5.dp)) {
+    Box(
+        modifier = Modifier
+            .background(color = headerBackgroundColour)
+            .padding(all = 5.dp),
+        contentAlignment = Center,
+    ) {
+        onBackClicked?.let {
+            FittoniaIcon(
+                modifier = Modifier
+                    .align(CenterStart)
+                    .padding(5.dp)
+                    .clickable(onClick = onBackClicked),
+                drawableRes = R.drawable.ic_back_arrow,
+            )
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Center),
         ) {
             HMSpacerWeightRow()
-            Text(
-                text = headerText,
-                style = headerStyle,
-            )
-            HMSpacerWeightRow()
+            headerText?.let {
+                Text(
+                    text = headerText,
+                    style = headerStyle,
+                )
+                HMSpacerWeightRow()
+            }
         }
         Row(modifier = Modifier.align(CenterEnd)) {
             onOptionsClicked?.let {

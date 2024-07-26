@@ -6,6 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text2.BasicTextField2
 import androidx.compose.foundation.text2.TextFieldDecorator
@@ -20,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
+
+private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
 
 @Deprecated("")
 @OptIn(ExperimentalFoundationApi::class)

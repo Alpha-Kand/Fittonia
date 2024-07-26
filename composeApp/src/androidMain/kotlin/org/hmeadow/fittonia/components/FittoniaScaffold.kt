@@ -21,16 +21,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.dp
+import backgroundLayer0Colour
+import backgroundLayer1Colour
+import backgroundLayer2Colour
 import org.hmeadow.fittonia.MainActivity.Companion.imeHeight
 import org.hmeadow.fittonia.MainActivity.Companion.navBarHeight
 import org.hmeadow.fittonia.MainActivity.Companion.statusBarsHeight
+import statusBarColour
 
 private enum class ScaffoldSectionsEnum {
     HEADER, FOOTER, CONTENT, OVERLAY,
 }
 
 @Composable
-fun FittoniaBackground(
+fun FittoniaScaffold(
     content: @Composable ColumnScope.() -> Unit,
     header: (@Composable BoxScope.() -> Unit)? = null,
     footer: (@Composable BoxScope.() -> Unit)? = null,
@@ -39,14 +43,14 @@ fun FittoniaBackground(
     val imeHeightLocal = imeHeight.collectAsState(initial = 0)
     val navBarHeightLocal = navBarHeight.collectAsState(initial = 0)
     val statusBarsHeightLocal = statusBarsHeight.collectAsState(initial = 0)
-    Box(modifier = Modifier.background(layer0Colour)) {
+    Box(modifier = Modifier.background(backgroundLayer0Colour)) {
         Box(
             modifier = Modifier
                 .align(alignment = Alignment.BottomEnd)
                 .padding(top = 100.dp, start = 100.dp)
                 .clip(RoundedCornerShape(topStart = 500.dp))
                 .fillMaxSize()
-                .background(layer1Colour),
+                .background(backgroundLayer1Colour),
         ) {}
         Box(
             modifier = Modifier
@@ -54,13 +58,18 @@ fun FittoniaBackground(
                 .padding(top = 200.dp, start = 200.dp)
                 .clip(RoundedCornerShape(topStart = 500.dp))
                 .fillMaxSize()
-                .background(layer2Colour),
+                .background(backgroundLayer2Colour),
         ) {}
         SubcomposeLayout(modifier = Modifier) { constraints ->
             val headerPlaceables = subcompose(ScaffoldSectionsEnum.HEADER) {
                 header?.let {
-                    Column(modifier = Modifier.background(color = Color(0xAA448844))) {
-                        Spacer(modifier = Modifier.requiredHeight(statusBarsHeightLocal.value.toDp()))
+                    Column {
+                        Box(
+                            modifier = Modifier
+                                .requiredHeight(statusBarsHeightLocal.value.toDp())
+                                .fillMaxWidth()
+                                .background(color = statusBarColour),
+                        )
                         Box(
                             modifier = Modifier
                                 .requiredHeight(50.dp)

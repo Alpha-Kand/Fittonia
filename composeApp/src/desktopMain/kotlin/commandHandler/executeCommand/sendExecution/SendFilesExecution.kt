@@ -10,7 +10,6 @@ import com.varabyte.kotter.foundation.text.text
 import commandHandler.FileTransfer
 import commandHandler.FileTransfer.Companion.toName
 import commandHandler.SendFilesCommand
-import commandHandler.ServerFlagsString
 import commandHandler.canContinueSendCommand
 import commandHandler.executeCommand.sendExecution.helpers.FileZipper
 import commandHandler.executeCommand.sendExecution.helpers.SendFileItemInfo

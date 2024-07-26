@@ -1,7 +1,4 @@
 import commandHandler.FileTransfer
-import commandHandler.ServerCommandFlag
-import commandHandler.ServerCommandFlag.Companion.toCommandFlag
-import commandHandler.ServerFlagsString
 import fileOperations.FileOperations
 import hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -9,13 +6,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.nio.file.Path
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import kotlin.io.path.Path
 
-class DesktopServer private constructor(port: Int) {
-
-    private var jobId: Int = 100
+class DesktopServer private constructor(port: Int) : ServerLogs, Server {
+    override var jobId: Int = 100
 
     private val serverCoroutineScope = CoroutineScope(
         context = Dispatchers.IO + CoroutineExceptionHandler { _, e ->
@@ -23,36 +17,8 @@ class DesktopServer private constructor(port: Int) {
         },
     )
 
-    enum class LogType {
-        NORMAL,
-        WARNING,
-        ERROR,
-        DEBUG,
-    }
-
-    class Log(
-        private val time: ZonedDateTime,
-        val message: String,
-        val type: LogType,
-        val jobId: Int?,
-    ) {
-        val timeStamp: String = "%1\$s %2\$sh %3\$sm %4\$ss".format(
-            time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-            time.format(DateTimeFormatter.ofPattern("HH")),
-            time.format(DateTimeFormatter.ofPattern("mm")),
-            time.format(DateTimeFormatter.ofPattern("ss")),
-        )
-
-        constructor(message: String, type: LogType = LogType.NORMAL, jobId: Int? = null) : this(
-            time = ZonedDateTime.now(),
-            message = message,
-            type = type,
-            jobId = jobId,
-        )
-    }
-
     private val mainServerSocket = HMeadowSocketServer.createServerSocket(port)
-    private val mLogs = mutableListOf<Log>()
+    override val mLogs = mutableListOf<Log>()
     fun getLogs(): List<Log> = mLogs.toList()
 
     private fun start() {
@@ -73,17 +39,7 @@ class DesktopServer private constructor(port: Int) {
         }
     }
 
-    fun handleCommand(server: HMeadowSocketServer, jobId: Int) {
-        server.handleCommand(
-            onAddDestination = ::onAddDestination,
-            onSendFilesCommand = ::onSendFiles,
-            onSendMessageCommand = ::onSendMessage,
-            onInvalidCommand = ::onInvalidCommand,
-            jobId = jobId,
-        )
-    }
-
-    private fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+    override fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to add this server as destination, password refused.", jobId = jobId)
         } else {
@@ -95,7 +51,7 @@ class DesktopServer private constructor(port: Int) {
         }
     }
 
-    private fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+    override fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to send files to this server, password refused.", jobId = jobId)
         } else {
@@ -120,7 +76,7 @@ class DesktopServer private constructor(port: Int) {
         }
     }
 
-    private fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+    override fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to send a message, password refused.", jobId = jobId)
         } else {
@@ -129,12 +85,16 @@ class DesktopServer private constructor(port: Int) {
         }
     }
 
-    private fun onInvalidCommand(unknownCommand: String) {
+    override fun onInvalidCommand(unknownCommand: String) {
         logWarning("Received invalid server command from client: $unknownCommand", jobId = jobId)
     }
 
     private fun waitForClient(block: (HMeadowSocketServer) -> Unit) {
         block(HMeadowSocketServer.createServerFromSocket(serverSocket = mainServerSocket))
+    }
+
+    override fun HMeadowSocketServer.passwordIsValid(): Boolean {
+        return SettingsManagerDesktop.settingsManager.checkPassword(receiveString())
     }
 
     companion object {
@@ -154,21 +114,10 @@ class DesktopServer private constructor(port: Int) {
             }
         }
 
-        fun log(log: String, jobId: Int? = null) = synchronized(instance().mLogs) {
-            instance().mLogs.add(Log(log, LogType.NORMAL, jobId))
-        }
-
-        fun logWarning(log: String, jobId: Int? = null) = synchronized(instance().mLogs) {
-            instance().mLogs.add(Log(log, LogType.WARNING, jobId))
-        }
-
-        fun logError(log: String, jobId: Int? = null) = synchronized(instance().mLogs) {
-            instance().mLogs.add(Log(log, LogType.ERROR, jobId))
-        }
-
-        fun logDebug(log: String, jobId: Int? = null) = synchronized(instance().mLogs) {
-            instance().mLogs.add(Log(log, LogType.DEBUG, jobId))
-        }
+        fun log(log: String, jobId: Int? = null) = instance().log(log, jobId)
+        fun logWarning(log: String, jobId: Int? = null) = instance().logWarning(log, jobId)
+        fun logError(log: String, jobId: Int? = null) = instance().logError(log, jobId)
+        fun logDebug(log: String, jobId: Int? = null) = instance().logDebug(log, jobId)
     }
 }
 
@@ -236,34 +185,4 @@ fun HMeadowSocketServer.receiveItem(
     }
     sendContinue()
     onDone()
-}
-
-private fun HMeadowSocketServer.passwordIsValid(): Boolean {
-    return SettingsManagerDesktop.settingsManager.checkPassword(receiveString())
-}
-
-fun HMeadowSocketServer.handleCommand(
-    onSendFilesCommand: (Boolean, HMeadowSocketServer, Int) -> Unit,
-    onSendMessageCommand: (Boolean, HMeadowSocketServer, Int) -> Unit,
-    onAddDestination: (Boolean, HMeadowSocketServer, Int) -> Unit,
-    onInvalidCommand: (String) -> Unit,
-    jobId: Int,
-) {
-    val receivedCommand = receiveString()
-    val command: ServerCommandFlag
-    try {
-        command = requireNotNull(receivedCommand.toCommandFlag())
-    } catch (e: Exception) {
-        sendDeny()
-        onInvalidCommand(receivedCommand)
-        return
-    }
-    sendConfirmation()
-    val passwordIsValid = passwordIsValid()
-    sendApproval(choice = passwordIsValid)
-    when (command) {
-        ServerCommandFlag.SEND_FILES -> onSendFilesCommand(passwordIsValid, this, jobId)
-        ServerCommandFlag.SEND_MESSAGE -> onSendMessageCommand(passwordIsValid, this, jobId)
-        ServerCommandFlag.ADD_DESTINATION -> onAddDestination(passwordIsValid, this, jobId)
-    }
 }

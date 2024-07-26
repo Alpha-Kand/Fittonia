@@ -1,57 +1,29 @@
 package commandHandler
 
 import OutputIO.printlnIO
+import ServerCommandFlag
 import SettingsManagerDesktop
+import communicateCommand
 import hmeadowSocket.HMeadowSocketClient
-import receiveApproval
-import java.net.InetAddress
 
 fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     val destination = SettingsManagerDesktop.settingsManager.findDestination(command.getDestination())
     return destination?.let {
         HMeadowSocketClient(
-            ipAddress = InetAddress.getByName(destination.ip),
+            ipAddress = destination.ip,
             port = command.getPort(),
             operationTimeoutMillis = 2000,
             handshakeTimeoutMillis = 2000L,
         )
     } ?: HMeadowSocketClient(
-        ipAddress = InetAddress.getByName(command.getIP()),
+        ipAddress = command.getIP(),
         port = command.getPort(),
         operationTimeoutMillis = 2000,
         handshakeTimeoutMillis = 2000L,
     )
 }
 
-fun HMeadowSocketClient.communicateCommand(
-    commandFlag: ServerCommandFlag,
-    password: String,
-    onSuccess: () -> Unit,
-    onPasswordRefused: () -> Unit,
-    onFailure: () -> Unit,
-): Boolean {
-    sendString(message = commandFlag.text)
-    return receiveApproval(
-        onConfirm = {
-            sendString(password)
-            receiveApproval(
-                onConfirm = {
-                    onSuccess()
-                    true
-                },
-                onDeny = {
-                    onPasswordRefused()
-                    false
-                },
-            )
-        },
-        onDeny = {
-            onFailure()
-            false
-        },
-    )
-}
-
+// TODO Sending files should be handled in DesktopServer.
 fun SendCommand.canContinueSendCommand(client: HMeadowSocketClient): Boolean {
     val destination = SettingsManagerDesktop.settingsManager.findDestination(this.getDestination())
     val password = destination?.password ?: this.getPassword()

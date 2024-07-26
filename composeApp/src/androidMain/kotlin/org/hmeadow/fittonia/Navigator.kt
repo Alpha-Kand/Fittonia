@@ -1,5 +1,7 @@
 package org.hmeadow.fittonia
 
+import SettingsManager
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,14 +15,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.AndroidServer.Companion.startSending
 import org.hmeadow.fittonia.screens.DebugScreen
-import org.hmeadow.fittonia.screens.OverviewScreen
+import org.hmeadow.fittonia.screens.DebugScreenViewModel
+import org.hmeadow.fittonia.screens.NewDestinationScreen
+import org.hmeadow.fittonia.screens.NewDestinationScreenViewModel
 import org.hmeadow.fittonia.screens.SendFilesScreen
+import org.hmeadow.fittonia.screens.SendFilesScreenViewModel
 import org.hmeadow.fittonia.screens.TransferDetailsScreen
 import org.hmeadow.fittonia.screens.WelcomeScreen
 import org.hmeadow.fittonia.screens.WelcomeScreenViewModel
+import org.hmeadow.fittonia.screens.overviewScreen.OverviewScreen
+import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
+import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
+import kotlin.math.abs
+import kotlin.random.Random
 
-class Navigator(private val viewModelMain: MainViewModel) {
+class Navigator(private val mainViewModel: MainViewModel) {
 
     data class Screen<T : BaseViewModel>(
         private val viewModel: T,
@@ -51,10 +62,11 @@ class Navigator(private val viewModelMain: MainViewModel) {
 
     private fun welcomeScreen() = Screen(
         viewModel = WelcomeScreenViewModel(
-            mainViewModel = viewModelMain,
+            mainViewModel = mainViewModel,
             onContinueCallback = { password, port ->
-                viewModelMain.updateServerPassword(password)
-                viewModelMain.updateServerPort(port)
+                mainViewModel.updateServerPassword(password)
+                mainViewModel.updateServerPort(port)
+                MainActivity.mainActivity.attemptStartServer()
                 push(overviewScreen())
             },
         ),
@@ -62,7 +74,7 @@ class Navigator(private val viewModelMain: MainViewModel) {
         WelcomeScreen(
             viewModel = viewModel,
             data = data,
-            onClearDumpPath = { this.viewModelMain.updateDumpPath("") },
+            onClearDumpPath = { this.mainViewModel.clearDumpPath() },
         )
     }
 
@@ -70,25 +82,72 @@ class Navigator(private val viewModelMain: MainViewModel) {
 
     private fun overviewScreen() = Screen(viewModel = OverviewScreenViewModel()) { data, viewModel ->
         OverviewScreen(
-            sendFiles = {
+            onSendFilesClicked = {
                 push(sendFilesScreen())
+            },
+            onTransferJobClicked = { job ->
+                push(transferDetailsScreen(transferJob = job))
             },
         )
     }
 
-    class SendFilesScreenViewModel : BaseViewModel
-
-    private fun sendFilesScreen() = Screen(viewModel = SendFilesScreenViewModel()) { data, viewModel ->
+    private fun sendFilesScreen() = Screen(
+        viewModel = SendFilesScreenViewModel(
+            onSaveOneTimeDestinationCallback = { oneTimeIp, oneTimePassword, onFinish ->
+                push(
+                    newDestinationScreen(
+                        oneTimeIp = oneTimeIp,
+                        oneTimePassword = oneTimePassword,
+                        onFinish = onFinish,
+                    ),
+                )
+            },
+            onAddNewDestinationCallback = { onFinish ->
+                push(newDestinationScreen(onFinish = onFinish))
+            },
+            onConfirmCallback = { newJob ->
+                startSending(job = newJob)
+                pop()
+            },
+        ),
+    ) { data, viewModel ->
         SendFilesScreen(
+            viewModel = viewModel,
+            data = data,
             onBackClicked = ::pop,
-            onConfirmClicked = ::pop,
+        )
+    }
+
+    private fun newDestinationScreen(
+        oneTimeIp: String? = null,
+        oneTimePassword: String? = null,
+        onFinish: (SettingsManager.Destination) -> Unit,
+    ) = Screen(
+        viewModel = NewDestinationScreenViewModel(
+            oneTimeIp = oneTimeIp,
+            oneTimePassword = oneTimePassword,
+            onSaveNewDestinationCallback = { newDestination ->
+                mainViewModel.addDestination(newDestination)
+                onFinish(newDestination)
+                pop()
+            },
+        ),
+    ) { data, viewModel ->
+        NewDestinationScreen(
+            viewModel = viewModel,
+            onBackClicked = ::pop,
         )
     }
 
     class TransferDetailsScreenViewModel : BaseViewModel
 
-    private val transferDetailsScreen = Screen(viewModel = TransferDetailsScreenViewModel()) { data, viewModel ->
-        TransferDetailsScreen()
+    private fun transferDetailsScreen(
+        transferJob: TransferJob,
+    ) = Screen(viewModel = TransferDetailsScreenViewModel()) { data, viewModel ->
+        TransferDetailsScreen(
+            transferJob = transferJob,
+            onBackClicked = ::pop,
+        )
     }
 
     // TODO default splash screen?
@@ -97,9 +156,9 @@ class Navigator(private val viewModelMain: MainViewModel) {
 
     init {
         instance = this
-        viewModelMain.launch {
-            viewModelMain.dataStore.data.first().let {
-                if (it.defaultPort != 0 && it.serverPassword != null) {
+        mainViewModel.launch {
+            mainViewModel.dataStore.data.first().let {
+                if (it.defaultPort != 0 && it.serverPassword != null && it.dumpPath.isSet) {
                     push(overviewScreen())
                 } else {
                     push(welcomeScreen())
@@ -126,15 +185,48 @@ class Navigator(private val viewModelMain: MainViewModel) {
     companion object {
         private lateinit var instance: Navigator
 
-        private class DebugScreenViewModel : BaseViewModel
-
         fun goToDebugScreen() {
             instance.push(
-                Screen(viewModel = DebugScreenViewModel()) { data, _ ->
+                Screen(viewModel = DebugScreenViewModel()) { data, viewModel ->
                     DebugScreen(
+                        viewModel = viewModel,
                         data = data,
-                        onResetSettingsClicked = instance.viewModelMain::resetSettings,
+                        onResetSettingsClicked = instance.mainViewModel::resetSettings,
+                        onClearDumpPath = instance.mainViewModel::clearDumpPath,
+                        onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
                         onBackClicked = instance::pop,
+                        debugNewThread = {
+                            startSending(
+                                job = TransferJob(
+                                    id = Random.nextInt(),
+                                    description = "Sending PDFs to bob (${abs(Random.nextInt() % 100)})",
+                                    destination = SettingsManager.Destination(
+                                        name = "Bob's PC (${abs(Random.nextInt() % 100)})",
+                                        ip = "192.168.1.1",
+                                        password = "Password",
+                                    ),
+                                    items = (0..abs(Random.nextInt() % 100)).map {
+                                        TransferJob.Item(
+                                            name = "File_${abs(Random.nextInt() % 100)}.pdf",
+                                            uri = Uri.parse("https://www.google.com"),
+                                        )
+                                    },
+                                    port = 5556,
+                                    status = TransferStatus.Sending,
+                                    direction = TransferJob.Direction.OUTGOING,
+                                ),
+                            )
+                        },
+                        debugNewDestination = {
+                            val getIpNum = { abs(Random.nextInt() % 256) }
+                            instance.mainViewModel.addDestination(
+                                destination = SettingsManager.Destination(
+                                    name = "Destination ${abs(Random.nextInt() % 100)}",
+                                    ip = "${getIpNum()}.${getIpNum()}.${getIpNum()}.${getIpNum()}",
+                                    password = "Password",
+                                ),
+                            )
+                        },
                     )
                 },
             )

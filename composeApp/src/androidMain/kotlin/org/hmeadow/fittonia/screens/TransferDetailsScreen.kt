@@ -1,52 +1,62 @@
 package org.hmeadow.fittonia.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.hmeadow.fittonia.AndroidServer
 import org.hmeadow.fittonia.R
-import org.hmeadow.fittonia.components.FittoniaBackground
 import org.hmeadow.fittonia.components.FittoniaButton
+import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
+import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.HMSpacerHeight
-import org.hmeadow.fittonia.components.HMSpacerWeightColumn
 import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.HorizontalLine
-import org.hmeadow.fittonia.components.headingLStyle
-import org.hmeadow.fittonia.components.headingMStyle
+import org.hmeadow.fittonia.components.ReadOnlyEntries
+import org.hmeadow.fittonia.design.fonts.headingLStyle
+import org.hmeadow.fittonia.design.fonts.headingMStyle
+import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
+import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
+import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
+import org.hmeadow.fittonia.screens.overviewScreen.rememberPercentageFormat
 import kotlin.random.Random
 
-val transfer = TransferJob(
-    description = "Foo",
-    destination = "192.56.43.01",
-    items = 36,
-    progress = 0.5,
-    status = TransferStatus.Sending,
-    direction = TransferJob.Direction.OUTGOING,
-)
-
 @Composable
-@Preview
-fun TransferDetailsScreen() {
-    FittoniaBackground(
+fun TransferDetailsScreen(
+    transferJob: TransferJob,
+    onBackClicked: () -> Unit,
+) {
+    val androidServer = AndroidServer.server.collectAsState().value
+    val transferJobs = androidServer?.transferJobs?.collectAsState()?.value ?: emptyList()
+    val activeTransferJob = transferJobs.first { it.id == transferJob.id }
+
+    FittoniaScaffold(
+        header = {
+            FittoniaHeader(
+                onBackClicked = onBackClicked,
+            )
+        },
         content = {
             Column(modifier = Modifier.padding(all = 16.dp)) {
                 Text(
-                    text = transfer.description,
+                    text = activeTransferJob.description,
                     style = headingLStyle,
                 )
 
@@ -58,17 +68,10 @@ fun TransferDetailsScreen() {
                 )
 
                 HMSpacerHeight(height = 5)
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(width = 2.dp, color = Color(0xFF446644))
-                        .background(color = Color(0xFFDDFFEE))
-                        .padding(5.dp),
-                ) {
-                    Text(
-                        text = transfer.destination,
-                    )
-                }
+                ReadOnlyEntries(
+                    entries = listOf(activeTransferJob.destination.name),
+                    textStyle = readOnlyFieldTextStyle,
+                )
                 HMSpacerHeight(height = 30)
 
                 Text(
@@ -77,39 +80,42 @@ fun TransferDetailsScreen() {
                 )
 
                 HMSpacerHeight(height = 5)
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(width = 2.dp, color = Color(0xFF446644))
-                        .background(color = Color(0xFFDDFFEE))
-                        .padding(5.dp),
-                ) {
-                    Row {
+
+                val statusComposable: @Composable () -> Unit = {
+                    Row(
+                        modifier = Modifier.requiredHeight(30.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         FittoniaIcon(
-                            drawableRes = when (transfer.status) {
+                            drawableRes = when (activeTransferJob.status) {
                                 TransferStatus.Sending -> R.drawable.ic_arrow_send
                                 TransferStatus.Receiving -> R.drawable.ic_arrow_receive
                                 TransferStatus.Error -> R.drawable.ic_alert
                                 TransferStatus.Done -> R.drawable.ic_checkmark
                             },
-                            tint = when (transfer.status) {
+                            tint = when (activeTransferJob.status) {
                                 TransferStatus.Sending -> Color(0xFF0000FF)
                                 TransferStatus.Receiving -> Color(0xFF0000FF)
                                 TransferStatus.Error -> Color(0xFFFFFF00)
                                 TransferStatus.Done -> Color(0xFF00FF00)
                             },
                         )
+                        HMSpacerWidth(width = 10)
 
                         Text(
-                            text = when (transfer.status) {
+                            text = when (activeTransferJob.status) {
                                 TransferStatus.Sending -> "Sending"
                                 TransferStatus.Receiving -> "Receiving"
                                 TransferStatus.Error -> "Error"
                                 TransferStatus.Done -> "Done!"
                             },
+                            style = readOnlyFieldTextStyle,
                         )
                     }
                 }
+
+                ReadOnlyEntries(entries = listOf(statusComposable))
+
                 HMSpacerHeight(height = 30)
 
                 Text(
@@ -119,25 +125,25 @@ fun TransferDetailsScreen() {
 
                 HMSpacerHeight(height = 5)
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(width = 2.dp, color = Color(0xFF446644))
-                        .background(color = Color(0xFFDDFFEE))
-                        .padding(5.dp),
-                ) {
-                    val aaa = when (transfer.status) {
-                        TransferStatus.Sending -> "sent"
-                        TransferStatus.Receiving -> "received"
-                        else -> ""
-                    }
-                    val bbb = "${rememberPercentageFormat(transfer.progress)} - 4 out of ${transfer.items} items $aaa."
-                    Row {
-                        Text(
-                            text = bbb,
-                        )
-                    }
+                val aaa = when (activeTransferJob.status) {
+                    TransferStatus.Sending -> "sent"
+                    TransferStatus.Receiving -> "received"
+                    else -> ""
                 }
+                ReadOnlyEntries(
+                    entries = listOf(
+                        stringResource(
+                            id = R.string.transfer_details_screen_progress,
+                            rememberPercentageFormat(
+                                percentage = activeTransferJob.progressPercentage,
+                                maxFraction = 2,
+                            ),
+                            activeTransferJob.currentItem,
+                            activeTransferJob.totalItems,
+                            aaa,
+                        ),
+                    ),
+                )
 
                 HMSpacerHeight(height = 30)
 
@@ -148,102 +154,108 @@ fun TransferDetailsScreen() {
 
                 HMSpacerHeight(height = 5)
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(width = 2.dp, color = Color(0xFF446644))
-                        .background(color = Color(0xFFDDFFEE))
-                        .padding(5.dp),
-                ) {
-                    val fileList = listOf(
-                        "File.txt" to "aaa/bbb/ccc/File.txt",
-                        "video.mp4" to "funniest home videos/video.mp4",
-                        "song.mp3" to "guns and roses/music/song.mp3",
-                    )
-                    fileList.forEachIndexed { index, file ->
-                        var fooState by remember { mutableStateOf(false) }
+                ReadOnlyEntries(
+                    entries = activeTransferJob.items.mapIndexed { index, file ->
+                        val composable = @Composable {
+                            var pathExpandedState by remember { mutableStateOf(false) }
 
-                        Column(
-                            modifier = Modifier
-                                .clickable {
-                                    fooState = !fooState
+                            Column(
+                                modifier = Modifier
+                                    .defaultMinSize(minHeight = 30.dp)
+                                    .clickable { pathExpandedState = !pathExpandedState }
+                                    .fillMaxWidth(),
+                            ) {
+                                val transferStatus = when (activeTransferJob.status) {
+                                    TransferStatus.Sending -> ""
+                                    TransferStatus.Receiving -> ""
+                                    TransferStatus.Error -> " Error"
+                                    TransferStatus.Done -> " Done"
                                 }
-                                .fillMaxWidth(),
-                        ) {
-                            val foo = when (transfer.status) {
-                                TransferStatus.Sending -> ""
-                                TransferStatus.Receiving -> ""
-                                TransferStatus.Error -> "Error "
-                                TransferStatus.Done -> "Done "
-                            }
-                            Row {
-                                if (fooState) {
-                                    Text(
-                                        text = file.second,
-                                    )
-                                    HMSpacerWeightRow()
-                                } else {
-                                    Text(
-                                        text = "${file.first} : $foo",
-                                    )
-                                    HMSpacerWeightRow()
-                                    Text(
-                                        text = rememberPercentageFormat(Random.nextDouble(1.0)),
-                                    )
-                                }
-                                FittoniaIcon(
-                                    drawableRes = if (fooState) {
-                                        R.drawable.ic_chevron_up
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    if (pathExpandedState) {
+                                        Text(
+                                            text = file.name + " todo long path?",
+                                        )
+                                        HMSpacerWeightRow()
                                     } else {
-                                        R.drawable.ic_chevron_down
-                                    },
-                                    tint = Color(0xFF222222),
-                                )
-                            }
-                            if (fooState) {
-                                val x = Random.nextInt(4096)
-                                val y = Random.nextInt(100) * x
-                                Row {
-                                    Text(
-                                        text = "$foo${rememberPercentageFormat(Random.nextDouble(1.0))}",
-                                    )
-                                    HMSpacerWeightRow()
-                                    Text(
-                                        text = "${x}b/${y}b",
+                                        Text(
+                                            text = stringResource(
+                                                id = R.string.transfer_details_screen_item_transfer_status,
+                                                file.name,
+                                                transferStatus,
+                                            ),
+                                            style = readOnlyFieldTextStyle,
+                                        )
+                                        HMSpacerWeightRow()
+                                        Text(
+                                            text = rememberPercentageFormat(Random.nextDouble(1.0)),
+                                            style = readOnlyFieldTextStyle,
+                                        )
+                                    }
+                                    FittoniaIcon(
+                                        modifier = Modifier.requiredHeight(20.dp),
+                                        drawableRes = if (pathExpandedState) {
+                                            R.drawable.ic_chevron_up
+                                        } else {
+                                            R.drawable.ic_chevron_down
+                                        },
+                                        tint = Color(0xFF222222),
                                     )
                                 }
+                                if (pathExpandedState) {
+                                    Row {
+                                        Text(
+                                            text = "$transferStatus${0.0}",
+                                            style = readOnlyFieldTextStyle,
+                                        )
+                                        HMSpacerWeightRow()
+                                        Text(
+                                            text = "${1000}b/${2000}b",
+                                            style = readOnlyFieldTextStyle,
+                                        )
+                                    }
+                                }
+                            }
+                            if (index != activeTransferJob.items.lastIndex) {
+                                HorizontalLine()
                             }
                         }
-                        if (index != fileList.lastIndex) {
-                            HorizontalLine()
-                        }
-                    }
-                }
-
-                HMSpacerWeightColumn()
-
-                Row {
-                    FittoniaButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = { /*TODO*/ },
-                    ) {
-                        ButtonText(text = "Queue \uD83D\uDD03")
-                    }
-                    HMSpacerWidth(width = 5)
-                    FittoniaButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = { /*TODO*/ },
-                    ) {
-                        ButtonText(text = "Cancel ❌")
-                    }
-                }
-                FittoniaButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { /*TODO*/ },
-                ) {
-                    ButtonText(text = "Pause ⏸\uFE0F")
-                }
+                        composable
+                    },
+                )
             }
         },
+        footer = {
+            // TODO TranferDetailsFooter()
+        },
     )
+}
+
+@Composable
+private fun TranferDetailsFooter() {
+    Column {
+        Row {
+            FittoniaButton(
+                modifier = Modifier.weight(1f),
+                onClick = { /*TODO*/ },
+            ) {
+                ButtonText(text = "Queue \uD83D\uDD03")
+            }
+            HMSpacerWidth(width = 5)
+            FittoniaButton(
+                modifier = Modifier.weight(1f),
+                onClick = { /*TODO*/ },
+            ) {
+                ButtonText(text = "Cancel ❌")
+            }
+        }
+        FittoniaButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { /*TODO*/ },
+        ) {
+            ButtonText(text = "Pause ⏸\uFE0F")
+        }
+    }
 }
