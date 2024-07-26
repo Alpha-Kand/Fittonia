@@ -1,6 +1,7 @@
 package org.hmeadow.fittonia
 
 import Log
+import Server
 import ServerLogs
 import android.app.Notification
 import android.app.NotificationManager
@@ -10,6 +11,7 @@ import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 import android.os.Binder
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
+import hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +22,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.math.abs
 import kotlin.random.Random
 
-class AndroidServer : Service(), CoroutineScope, ServerLogs {
+class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
     override val coroutineContext: CoroutineContext = Dispatchers.IO
     private val binder = AndroidServerBinder()
@@ -109,6 +111,10 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs {
                 )
             }
         }
+    }
+
+    override fun HMeadowSocketServer.passwordIsValid(): Boolean {
+        return true // TODO
     }
 
     companion object {

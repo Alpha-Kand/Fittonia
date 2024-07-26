@@ -1,4 +1,3 @@
-import ServerCommandFlag.Companion.toCommandFlag
 import commandHandler.FileTransfer
 import fileOperations.FileOperations
 import hmeadowSocket.HMeadowSocketServer
@@ -9,7 +8,7 @@ import kotlinx.coroutines.launch
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-class DesktopServer private constructor(port: Int) : ServerLogs {
+class DesktopServer private constructor(port: Int) : ServerLogs, Server {
 
     private var jobId: Int = 100
 
@@ -105,6 +104,10 @@ class DesktopServer private constructor(port: Int) : ServerLogs {
         block(HMeadowSocketServer.createServerFromSocket(serverSocket = mainServerSocket))
     }
 
+    override fun HMeadowSocketServer.passwordIsValid(): Boolean {
+        return SettingsManagerDesktop.settingsManager.checkPassword(receiveString())
+    }
+
     companion object {
         private var instance: DesktopServer? = null
 
@@ -193,34 +196,4 @@ fun HMeadowSocketServer.receiveItem(
     }
     sendContinue()
     onDone()
-}
-
-private fun HMeadowSocketServer.passwordIsValid(): Boolean {
-    return SettingsManagerDesktop.settingsManager.checkPassword(receiveString())
-}
-
-fun HMeadowSocketServer.handleCommand(
-    onSendFilesCommand: (Boolean, HMeadowSocketServer, Int) -> Unit,
-    onSendMessageCommand: (Boolean, HMeadowSocketServer, Int) -> Unit,
-    onAddDestination: (Boolean, HMeadowSocketServer, Int) -> Unit,
-    onInvalidCommand: (String) -> Unit,
-    jobId: Int,
-) {
-    val receivedCommand = receiveString()
-    val command: ServerCommandFlag
-    try {
-        command = requireNotNull(receivedCommand.toCommandFlag())
-    } catch (e: Exception) {
-        sendDeny()
-        onInvalidCommand(receivedCommand)
-        return
-    }
-    sendConfirmation()
-    val passwordIsValid = passwordIsValid()
-    sendApproval(choice = passwordIsValid)
-    when (command) {
-        ServerCommandFlag.SEND_FILES -> onSendFilesCommand(passwordIsValid, this, jobId)
-        ServerCommandFlag.SEND_MESSAGE -> onSendMessageCommand(passwordIsValid, this, jobId)
-        ServerCommandFlag.ADD_DESTINATION -> onAddDestination(passwordIsValid, this, jobId)
-    }
 }
