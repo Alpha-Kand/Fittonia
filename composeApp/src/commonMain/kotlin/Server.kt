@@ -1,5 +1,6 @@
 import ServerCommandFlag.Companion.toCommandFlag
 import hmeadowSocket.HMeadowSocket
+import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
 
 interface Server {
@@ -48,4 +49,44 @@ interface Server {
             sendDeny()
         }
     }
+}
+
+
+// TODO Sending files should be handled in Server.
+fun <T> HMeadowSocket.receiveApproval(onConfirm: () -> T, onDeny: () -> T): T {
+    receiveString()
+    return when (receiveBoolean()) {
+        true -> onConfirm()
+        false -> onDeny()
+    }
+}
+
+// TODO Sending files should be handled in Server.
+fun HMeadowSocketClient.communicateCommand(
+    commandFlag: ServerCommandFlag,
+    password: String,
+    onSuccess: () -> Unit,
+    onPasswordRefused: () -> Unit,
+    onFailure: () -> Unit,
+): Boolean {
+    sendString(message = commandFlag.text)
+    return receiveApproval(
+        onConfirm = {
+            sendString(password)
+            receiveApproval(
+                onConfirm = {
+                    onSuccess()
+                    true
+                },
+                onDeny = {
+                    onPasswordRefused()
+                    false
+                },
+            )
+        },
+        onDeny = {
+            onFailure()
+            false
+        },
+    )
 }

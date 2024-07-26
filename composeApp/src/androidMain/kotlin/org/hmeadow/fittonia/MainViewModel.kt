@@ -15,7 +15,7 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
     fun attemptAndroidServerWithPort(initServer: (Int) -> Unit)= launch{
         dataStore.data.collect{data ->
             data.defaultPort.let {
-                if(it in 1025..49999) { // TODO better validation.
+                if(it in 1025..49999) {
                     initServer(it)
                 }
             }

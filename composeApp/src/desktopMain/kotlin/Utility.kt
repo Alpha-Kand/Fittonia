@@ -1,4 +1,3 @@
-import hmeadowSocket.HMeadowSocket
 import kotlinx.coroutines.runBlocking
 
 fun <T> requireNull(value: T?) {
@@ -20,12 +19,4 @@ inline fun Boolean.alsoIfTrue(block: () -> Unit): Boolean {
         block()
     }
     return this
-}
-
-fun <T> HMeadowSocket.receiveApproval(onConfirm: () -> T, onDeny: () -> T): T {
-    receiveString()
-    return when (receiveBoolean()) {
-        true -> onConfirm()
-        false -> onDeny()
-    }
 }
