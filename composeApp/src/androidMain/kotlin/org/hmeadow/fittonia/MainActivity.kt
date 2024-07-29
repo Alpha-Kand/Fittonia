@@ -108,6 +108,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainActivity = this
+        mainActivityForServer = this
         viewModel = getViewModel()
         val navigator = Navigator(mainViewModel = viewModel)
         initWindowInsetsListener()
@@ -128,6 +129,7 @@ class MainActivity : ComponentActivity() {
         if (serverConnection.isConnected) {
             unbindService(serverConnection)
         }
+        mainActivityForServer = null
     }
 
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
@@ -157,9 +159,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun initAndroidServer(port: Int) {
+    private fun initAndroidServer(port: Int, password: String) {
         val intent = Intent(mainActivity, AndroidServer::class.java).apply {
             this.putExtra("org.hmeadow.fittonia.port", port)
+            this.putExtra("org.hmeadow.fittonia.password", password)
         }
         bindService(
             intent,
@@ -181,6 +184,8 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         lateinit var mainActivity: MainActivity
+
+        var mainActivityForServer: MainActivity? = null
 
         val imeHeight: MutableStateFlow<Int> = MutableStateFlow(0)
         val navBarHeight: MutableStateFlow<Int> = MutableStateFlow(0)

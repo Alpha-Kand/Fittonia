@@ -12,11 +12,13 @@ import kotlin.coroutines.CoroutineContext
 class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel(), CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.IO
 
-    fun attemptAndroidServerWithPort(initServer: (Int) -> Unit) = launch {
+    fun attemptAndroidServerWithPort(initServer: (port: Int, password: String) -> Unit) = launch {
         dataStore.data.collect { data ->
-            data.defaultPort.let {
-                if (it in 1025..49999) {
-                    initServer(it)
+            data.defaultPort.let { port ->
+                data.serverPassword?.let { password ->
+                    if (port in 1025..49999) {
+                        initServer(port, password)
+                    }
                 }
             }
         }

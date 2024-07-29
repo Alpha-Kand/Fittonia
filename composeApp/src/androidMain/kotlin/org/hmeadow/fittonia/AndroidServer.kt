@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
 import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
+import java.net.BindException
 import java.net.ServerSocket
 import kotlin.coroutines.CoroutineContext
 
@@ -31,6 +32,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override var jobId: Int = 100
     private val binder = AndroidServerBinder()
     private lateinit var serverSocket: ServerSocket
+    private lateinit var password: String
 
     inner class AndroidServerBinder : Binder() {
         fun getService(): AndroidServer = this@AndroidServer
@@ -50,7 +52,22 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.let {
-            serverSocket = ServerSocket(it.getIntExtra("org.hmeadow.fittonia.port", 0))
+            it.getIntExtra("org.hmeadow.fittonia.port", 0).let { port ->
+                if (port == 0) throw Exception("No port provided")
+                try {
+                    serverSocket = ServerSocket(port)
+                } catch (e: BindException) {
+                    if (e.message?.contains("Address already in use") == true) {
+                        MainActivity.mainActivityForServer?.let {
+                            // TODO Alert user.
+                        }
+                    } else {
+                        throw e
+                    }
+                }
+            }
+            password = it.getStringExtra("org.hmeadow.fittonia.password")
+                ?: throw Exception("No password provided") // TODO
         }
         ServiceCompat.startForeground(
             this,
@@ -95,6 +112,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override fun onDestroy() {
         super.onDestroy()
         println("onDestroy")
+        serverSocket.close()
     }
 
     /* MUST BE IN 'SYNCHRONIZED' */
@@ -132,7 +150,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     override fun HMeadowSocketServer.passwordIsValid(): Boolean {
-        return true // TODO
+        return password == receiveString()
     }
 
     override fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
