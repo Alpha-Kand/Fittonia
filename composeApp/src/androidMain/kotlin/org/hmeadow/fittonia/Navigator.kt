@@ -5,7 +5,7 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +20,8 @@ import org.hmeadow.fittonia.screens.DebugScreen
 import org.hmeadow.fittonia.screens.DebugScreenViewModel
 import org.hmeadow.fittonia.screens.NewDestinationScreen
 import org.hmeadow.fittonia.screens.NewDestinationScreenViewModel
+import org.hmeadow.fittonia.screens.AlertsScreen
+import org.hmeadow.fittonia.screens.AlertsScreenViewModel
 import org.hmeadow.fittonia.screens.SendFilesScreen
 import org.hmeadow.fittonia.screens.SendFilesScreenViewModel
 import org.hmeadow.fittonia.screens.TransferDetailsScreen
@@ -80,13 +82,16 @@ class Navigator(private val mainViewModel: MainViewModel) {
 
     class OverviewScreenViewModel : BaseViewModel
 
-    private fun overviewScreen() = Screen(viewModel = OverviewScreenViewModel()) { data, viewModel ->
+    private fun overviewScreen() = Screen(viewModel = OverviewScreenViewModel()) { _, _ ->
         OverviewScreen(
             onSendFilesClicked = {
                 push(sendFilesScreen())
             },
             onTransferJobClicked = { job ->
                 push(transferDetailsScreen(transferJob = job))
+            },
+            onAlertsClicked = {
+                push(notificationsScreen())
             },
         )
     }
@@ -132,7 +137,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                 pop()
             },
         ),
-    ) { data, viewModel ->
+    ) { _, viewModel ->
         NewDestinationScreen(
             viewModel = viewModel,
             onBackClicked = ::pop,
@@ -143,9 +148,29 @@ class Navigator(private val mainViewModel: MainViewModel) {
 
     private fun transferDetailsScreen(
         transferJob: TransferJob,
-    ) = Screen(viewModel = TransferDetailsScreenViewModel()) { data, viewModel ->
+    ) = Screen(viewModel = TransferDetailsScreenViewModel()) { _, _ ->
         TransferDetailsScreen(
             transferJob = transferJob,
+            onBackClicked = ::pop,
+        )
+    }
+
+    private fun notificationsScreen() = Screen(
+        viewModel = AlertsScreenViewModel(
+            onTemporaryPortAcceptedCallback = { newPort ->
+                mainViewModel.updateTemporaryPort(newPort)
+                MainActivity.mainActivity.unAlert(UserAlert.PortInUse::class.java)
+                MainActivity.mainActivity.attemptStartServer()
+            },
+            onNewDefaultPortAcceptedCallback = { newPort ->
+                mainViewModel.updateServerPort(newPort)
+                MainActivity.mainActivity.unAlert(UserAlert.PortInUse::class.java)
+                MainActivity.mainActivity.attemptStartServer()
+            },
+        ),
+    ) { _, viewModel ->
+        AlertsScreen(
+            viewModel = viewModel,
             onBackClicked = ::pop,
         )
     }

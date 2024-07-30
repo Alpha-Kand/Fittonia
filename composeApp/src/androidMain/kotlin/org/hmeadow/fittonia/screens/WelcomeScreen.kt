@@ -102,7 +102,7 @@ fun WelcomeScreen(
                             )
                             // TODO: Help Icon
                         }
-                    }
+                    },
                 )
 
                 HMSpacerHeight(height = 15)

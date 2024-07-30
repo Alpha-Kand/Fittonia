@@ -14,7 +14,13 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
 
     fun attemptAndroidServerWithPort(initServer: (port: Int, password: String) -> Unit) = launch {
         dataStore.data.collect { data ->
-            data.defaultPort.let { port ->
+            data.temporaryPort?.let { port ->
+                data.serverPassword?.let { password ->
+                    if (port in 1025..49999) {
+                        initServer(port, password)
+                    }
+                }
+            } ?: data.defaultPort.let { port ->
                 data.serverPassword?.let { password ->
                     if (port in 1025..49999) {
                         initServer(port, password)
@@ -22,6 +28,7 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
                 }
             }
         }
+        updateTemporaryPort(port = null)
     }
 
     fun updateServerPassword(password: String) = launch {
@@ -33,6 +40,12 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
     fun updateServerPort(port: Int) = launch {
         dataStore.updateData {
             it.copy(defaultPort = port)
+        }
+    }
+
+    fun updateTemporaryPort(port: Int?) = launch {
+        dataStore.updateData {
+            it.copy(temporaryPort = port)
         }
     }
 

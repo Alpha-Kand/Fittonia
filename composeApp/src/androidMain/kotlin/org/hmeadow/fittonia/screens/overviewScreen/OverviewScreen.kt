@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
+import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaComingSoon
 import org.hmeadow.fittonia.components.FittoniaHeader
@@ -101,6 +103,7 @@ fun measureTextWidth(text: String, style: TextStyle): Dp {
 fun OverviewScreen(
     onSendFilesClicked: () -> Unit,
     onTransferJobClicked: (TransferJob) -> Unit,
+    onAlertsClicked: () -> Unit,
 ) {
     var optionsState by remember { mutableStateOf(false) }
     var aboutState by remember { mutableStateOf(false) }
@@ -109,6 +112,9 @@ fun OverviewScreen(
             FittoniaHeader(
                 headerText = "Ongoing transfers",
                 onOptionsClicked = { optionsState = true },
+                onAlertsClicked = onAlertsClicked.takeIf {
+                    UserAlert.hasAlerts.collectAsState(false).value
+                },
             )
         },
         content = {
@@ -213,5 +219,6 @@ private fun Preview() {
     OverviewScreen(
         onSendFilesClicked = {},
         onTransferJobClicked = {},
+        onAlertsClicked = {},
     )
 }

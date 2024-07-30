@@ -25,4 +25,8 @@
     <!-- Transfer Details Screen -->
     <string name="transfer_details_screen_progress">%1$s - %2$d out of %3$d items %4$s.</string>
     <string name="transfer_details_screen_item_transfer_status">%1$s : %2$s</string>
+
+    <!-- Notifications -->
+    <string name="notification_default_port_in_use_title">Default port unavailable</string>
+    <string name="notification_default_port_in_use_description">The default port you set for the server (%1$d) is already in use by some other application. You can either choose a new temporary port or select a new default port.</string>
 </resources>

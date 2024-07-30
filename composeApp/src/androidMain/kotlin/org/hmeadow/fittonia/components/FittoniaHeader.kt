@@ -1,5 +1,6 @@
 package org.hmeadow.fittonia.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import headerBackgroundColour
 import org.hmeadow.fittonia.BuildConfig
@@ -28,6 +30,7 @@ fun FittoniaHeader(
     headerText: String? = null,
     onBackClicked: (() -> Unit)? = null,
     onOptionsClicked: (() -> Unit)? = null,
+    onAlertsClicked: (() -> Unit)? = null,
 ) {
     Box(
         modifier = Modifier
@@ -68,6 +71,13 @@ fun FittoniaHeader(
                         .clickable(onClick = onOptionsClicked),
                     contentAlignment = Center,
                 ) { Text("•••", color = FittoniaButtonType.Primary.contentColour) }
+            }
+            onAlertsClicked?.let {
+                Image(
+                    modifier = Modifier.clickable(onClick = onAlertsClicked),
+                    painter = painterResource(id = R.drawable.ic_warning_yellow),
+                    contentDescription = "", // TODO
+                )
             }
             if (BuildConfig.DEBUG) {
                 HMSpacerWidth(width = 5)

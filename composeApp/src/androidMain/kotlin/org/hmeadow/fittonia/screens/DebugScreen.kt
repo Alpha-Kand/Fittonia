@@ -68,6 +68,7 @@ fun DebugScreen(
                     Column {
                         Text(text = "Current device IP:")
                         Text(text = "Default Server Port:")
+                        Text(text = "Temporary Server Port:")
                         Text(text = "Server Password:")
                         Text(text = "Dump Path:")
                     }
@@ -83,6 +84,7 @@ fun DebugScreen(
                             )
                         }
                         Text(text = data.defaultPort.toString())
+                        Text(text = data.temporaryPort.toString())
                         Text(text = data.serverPassword.toString())
                         Row(
                             modifier = Modifier

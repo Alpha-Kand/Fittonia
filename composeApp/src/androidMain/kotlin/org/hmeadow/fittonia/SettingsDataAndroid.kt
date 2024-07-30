@@ -44,6 +44,7 @@ data class SettingsDataAndroid(
     val destinations: List<SettingsManager.Destination> = persistentListOf(),
     val dumpPath: DumpPath = DumpPath(),
     val defaultPort: Int = DEFAULT_PORT,
+    val temporaryPort: Int? = null,
     val serverPassword: String? = null,
     val nextAutoJobName: Long = 0,
 ) {

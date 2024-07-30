@@ -182,6 +182,16 @@ class MainActivity : ComponentActivity() {
         },
     )[MainViewModel::class.java]
 
+    fun alert(alert: UserAlert) {
+        UserAlert.userAlerts.value += alert
+    }
+
+    fun unAlert(alert: Class<out UserAlert>) {
+        UserAlert.userAlerts.value = UserAlert.userAlerts.value.filter {
+            it::class.java != alert
+        }
+    }
+
     companion object {
         lateinit var mainActivity: MainActivity
 
