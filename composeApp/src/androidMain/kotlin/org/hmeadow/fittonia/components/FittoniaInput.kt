@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.shape.CornerSize
@@ -11,8 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text2.BasicTextField2
 import androidx.compose.foundation.text2.TextFieldDecorator
-import androidx.compose.foundation.text2.input.TextFieldState
-import androidx.compose.foundation.text2.input.rememberTextFieldState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -22,87 +22,115 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 
 private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
 
-@Deprecated("")
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun FittoniaTextInput(
-    modifier: Modifier = Modifier,
-    textFieldState: TextFieldState = rememberTextFieldState(initialText = ""),
-) {
-    FittoniaInput(
-        modifier = modifier,
-        textFieldState = textFieldState,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-    )
-}
-
-@Deprecated("")
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun FittoniaNumberInput(
-    modifier: Modifier = Modifier,
-    textFieldState: TextFieldState = rememberTextFieldState(initialText = ""),
-) {
-    FittoniaInput(
-        modifier = modifier,
-        textFieldState = textFieldState,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-    )
-}
-
 class InputFlow(initial: String) : MutableStateFlow<String> by MutableStateFlow(initial)
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FittoniaTextInput(
-    modifier: Modifier = Modifier,
     inputFlow: InputFlow,
+    modifier: Modifier = Modifier,
+    label: String? = null,
 ) {
-    BasicTextField2(
+    BaseFittoniaInput(
+        inputFlow = inputFlow,
         modifier = modifier,
-        value = inputFlow.collectAsState().value,
-        onValueChange = { inputFlow.value = it },
-        decorator = inputDecorator,
+        label = label,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun FittoniaTextInput(
+    inputFlow: InputFlow,
+    modifier: Modifier = Modifier,
+    label: (@Composable () -> Unit)? = null,
+) {
+    BaseFittoniaInput(
+        inputFlow = inputFlow,
+        modifier = modifier,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        label = label,
+    )
+}
+
 @Composable
 fun FittoniaNumberInput(
-    modifier: Modifier = Modifier,
     inputFlow: InputFlow,
+    modifier: Modifier = Modifier,
+    label: String? = null,
 ) {
-    BasicTextField2(
+    BaseFittoniaInput(
+        inputFlow = inputFlow,
         modifier = modifier,
-        value = inputFlow.collectAsState().value,
-        onValueChange = { inputFlow.value = it },
-        decorator = inputDecorator,
+        label = label,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
 }
 
-@Deprecated("")
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FittoniaInput(
+fun FittoniaNumberInput(
+    inputFlow: InputFlow,
     modifier: Modifier = Modifier,
-    textFieldState: TextFieldState,
-    keyboardOptions: KeyboardOptions,
+    label: (@Composable () -> Unit)? = null,
 ) {
-    BasicTextField2(
+    BaseFittoniaInput(
+        inputFlow = inputFlow,
         modifier = modifier,
-        state = textFieldState,
-        decorator = inputDecorator,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        label = label,
+    )
+}
+
+@Composable
+private fun BaseFittoniaInput(
+    inputFlow: InputFlow,
+    keyboardOptions: KeyboardOptions,
+    modifier: Modifier = Modifier,
+    label: String? = null,
+) {
+    BaseFittoniaInput(
+        inputFlow = inputFlow,
+        modifier = modifier,
         keyboardOptions = keyboardOptions,
+        label = {
+            label?.let {
+                Text(
+                    text = label,
+                    style = inputLabelStyle,
+                )
+            }
+        },
     )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-val inputDecorator = TextFieldDecorator { inputField ->
+@Composable
+private fun BaseFittoniaInput(
+    inputFlow: InputFlow,
+    keyboardOptions: KeyboardOptions,
+    modifier: Modifier = Modifier,
+    label: (@Composable () -> Unit)? = null,
+) {
+    Column {
+        label?.let {
+            it()
+            HMSpacerHeight(height = 7)
+        }
+        BasicTextField2(
+            modifier = modifier,
+            value = inputFlow.collectAsState().value,
+            onValueChange = { inputFlow.value = it },
+            decorator = inputDecorator,
+            keyboardOptions = keyboardOptions,
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+private val inputDecorator = TextFieldDecorator { inputField ->
     Box(
         modifier = Modifier
             .requiredHeight(40.dp)

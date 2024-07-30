@@ -223,30 +223,19 @@ fun SendFilesScreen(
                 HMSpacerHeight(height = 10)
                 if (oneTimeDestinationState) {
                     HMSpacerHeight(height = 15)
-                    Text(
-                        text = "IP Address/Code",
-                        style = inputLabelStyle,
-                    )
-
-                    HMSpacerHeight(height = 5)
 
                     FittoniaTextInput(
                         modifier = Modifier.fillMaxWidth(),
                         inputFlow = viewModel.oneTimeIpAddressState,
+                        label = "IP Address/Code",
                     )
 
                     HMSpacerHeight(height = 15)
 
-                    Text(
-                        text = "Password",
-                        style = inputLabelStyle,
-                    )
-
-                    HMSpacerHeight(height = 5)
-
                     FittoniaTextInput(
                         modifier = Modifier.fillMaxWidth(),
                         inputFlow = viewModel.oneTimePasswordState,
+                        label = "Password",
                     )
 
                     HMSpacerHeight(height = 10)
@@ -313,35 +302,31 @@ fun SendFilesScreen(
 
                 HMSpacerHeight(height = 30)
 
-                Text(
-                    text = "Port",
-                    style = inputLabelStyle,
-                )
-
-                HMSpacerHeight(height = 5)
-
                 FittoniaNumberInput(
                     modifier = Modifier.fillMaxWidth(),
                     inputFlow = viewModel.portState,
+                    label = "Port",
                 )
 
                 HMSpacerHeight(height = 30)
-                Row {
-                    Text(
-                        text = "Description",
-                        style = inputLabelStyle,
-                    )
-                    HMSpacerWidth(width = 4)
-                    Text(
-                        modifier = Modifier.align(alignment = CenterVertically),
-                        text = "(optional)",
-                        style = psstStyle,
-                    )
-                }
-                HMSpacerHeight(height = 5)
+
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
                     inputFlow = viewModel.descriptionState,
+                    label = {
+                        Row {
+                            Text(
+                                text = "Description",
+                                style = inputLabelStyle,
+                            )
+                            HMSpacerWidth(width = 4)
+                            Text(
+                                modifier = Modifier.align(alignment = CenterVertically),
+                                text = "(optional)",
+                                style = psstStyle,
+                            )
+                        }
+                    },
                 )
             }
         },

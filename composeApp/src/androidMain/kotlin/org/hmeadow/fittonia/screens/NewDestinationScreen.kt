@@ -23,7 +23,6 @@ import org.hmeadow.fittonia.components.Footer
 import org.hmeadow.fittonia.components.HMSpacerHeight
 import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.InputFlow
-import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
 
 class NewDestinationScreenViewModel(
@@ -84,44 +83,26 @@ fun NewDestinationScreen(
 
                 HMSpacerHeight(height = 30)
 
-                Text(
-                    text = "Name",
-                    style = headingMStyle,
-                )
-
-                HMSpacerHeight(height = 5)
-
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
                     inputFlow = viewModel.nameState,
+                    label = "Name",
                 )
 
                 HMSpacerHeight(height = 30)
-
-                Text(
-                    text = "IP Address/Code",
-                    style = headingMStyle,
-                )
-
-                HMSpacerHeight(height = 5)
 
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
                     inputFlow = viewModel.ipAddressState,
+                    label = "IP Address/Code",
                 )
 
                 HMSpacerHeight(height = 30)
 
-                Text(
-                    text = "Password",
-                    style = headingMStyle,
-                )
-
-                HMSpacerHeight(height = 5)
-
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
                     inputFlow = viewModel.passwordState,
+                    label = "Password",
                 )
             }
         },

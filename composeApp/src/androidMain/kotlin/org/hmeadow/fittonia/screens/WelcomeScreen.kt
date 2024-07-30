@@ -91,31 +91,34 @@ fun WelcomeScreen(
 
                 HMSpacerHeight(height = 15)
 
-                Row {
-                    Text(
-                        text = stringResource(id = R.string.welcome_screen_new_server_password_label),
-                        style = inputLabelStyle,
-                    )
-                    // TODO: Help Icon
-                }
-
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
                     inputFlow = viewModel.serverPasswordState,
+                    label = {
+                        Row {
+                            Text(
+                                text = stringResource(id = R.string.welcome_screen_new_server_password_label),
+                                style = inputLabelStyle,
+                            )
+                            // TODO: Help Icon
+                        }
+                    }
                 )
 
                 HMSpacerHeight(height = 15)
 
-                Row {
-                    Text(
-                        text = stringResource(id = R.string.welcome_screen_new_server_port_label),
-                        style = inputLabelStyle,
-                    )
-                    // TODO: Help Icon
-                }
                 FittoniaNumberInput(
                     modifier = Modifier.fillMaxWidth(),
                     inputFlow = viewModel.portFieldState,
+                    label = {
+                        Row {
+                            Text(
+                                text = stringResource(id = R.string.welcome_screen_new_server_port_label),
+                                style = inputLabelStyle,
+                            )
+                            // TODO: Help Icon
+                        }
+                    },
                 )
 
                 HMSpacerHeight(height = 15)
