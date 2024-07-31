@@ -124,11 +124,15 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    fun unbindFromServer() {
         if (serverConnection.isConnected) {
             unbindService(serverConnection)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unbindFromServer()
         mainActivityForServer = null
     }
 

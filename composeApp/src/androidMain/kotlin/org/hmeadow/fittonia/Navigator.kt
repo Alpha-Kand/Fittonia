@@ -16,12 +16,12 @@ import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.AndroidServer.Companion.startSending
+import org.hmeadow.fittonia.screens.AlertsScreen
+import org.hmeadow.fittonia.screens.AlertsScreenViewModel
 import org.hmeadow.fittonia.screens.DebugScreen
 import org.hmeadow.fittonia.screens.DebugScreenViewModel
 import org.hmeadow.fittonia.screens.NewDestinationScreen
 import org.hmeadow.fittonia.screens.NewDestinationScreenViewModel
-import org.hmeadow.fittonia.screens.AlertsScreen
-import org.hmeadow.fittonia.screens.AlertsScreenViewModel
 import org.hmeadow.fittonia.screens.SendFilesScreen
 import org.hmeadow.fittonia.screens.SendFilesScreenViewModel
 import org.hmeadow.fittonia.screens.TransferDetailsScreen

@@ -31,7 +31,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val coroutineContext: CoroutineContext = Dispatchers.IO
     override var jobId: Int = 100
     private val binder = AndroidServerBinder()
-    private lateinit var serverSocket: ServerSocket
+    private var serverSocket: ServerSocket? = null
     private lateinit var password: String
 
     inner class AndroidServerBinder : Binder() {
@@ -50,7 +50,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         server.value = this
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    private fun initFromIntent(intent: Intent?): Boolean {
         intent?.let {
             it.getIntExtra("org.hmeadow.fittonia.port", 0).let { port ->
                 if (port == 0) throw Exception("No port provided")
@@ -58,9 +58,8 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     serverSocket = ServerSocket(port)
                 } catch (e: BindException) {
                     if (e.message?.contains("Address already in use") == true) {
-                        MainActivity.mainActivityForServer?.let {
-                            // TODO Alert user.
-                        }
+                        MainActivity.mainActivityForServer?.alert(UserAlert.PortInUse(port = port))
+                        return false
                     } else {
                         throw e
                     }
@@ -68,24 +67,37 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
             }
             password = it.getStringExtra("org.hmeadow.fittonia.password")
                 ?: throw Exception("No password provided") // TODO
+            return true
         }
-        ServiceCompat.startForeground(
-            this,
-            NOTIFICATION_ID,
-            constructNotification(transferJobsActive = transferJobs.value.size),
-            FOREGROUND_SERVICE_TYPE_DATA_SYNC,
-        )
-        launch {
-            while (true) {
-                HMeadowSocketServer.createServerFromSocket(serverSocket).let { server ->
-                    launch {
-                        log("Connected to client.")
-                        handleCommand(server = server, jobId = jobId)
+        return true
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (initFromIntent(intent = intent).also { println("AndroidServer.onStartCommand() success = $it") }) {
+            ServiceCompat.startForeground(
+                this,
+                NOTIFICATION_ID,
+                constructNotification(transferJobsActive = transferJobs.value.size),
+                FOREGROUND_SERVICE_TYPE_DATA_SYNC,
+            )
+            serverSocket?.let { server ->
+                launch {
+                    while (true) {
+                        HMeadowSocketServer.createServerFromSocket(server).let { server ->
+                            launch {
+                                log("Connected to client.")
+                                handleCommand(server = server, jobId = jobId)
+                            }
+                        }
                     }
                 }
             }
+            return START_STICKY // If the service is killed, it will be automatically restarted.
         }
-        return START_STICKY // If the service is killed, it will be automatically restarted.
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        MainActivity.mainActivityForServer?.unbindFromServer()
+        stopSelf()
+        return START_NOT_STICKY
     }
 
     private fun constructNotification(transferJobsActive: Int) = Notification
@@ -112,7 +124,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override fun onDestroy() {
         super.onDestroy()
         println("onDestroy")
-        serverSocket.close()
+        serverSocket?.close()
     }
 
     /* MUST BE IN 'SYNCHRONIZED' */
