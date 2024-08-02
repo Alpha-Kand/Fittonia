@@ -54,6 +54,7 @@ import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
 import org.hmeadow.fittonia.screens.overviewScreen.Options
 import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
 import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
+import org.hmeadow.fittonia.utility.rememberSuspendedAction
 import kotlin.random.Random
 
 class SendFilesScreenViewModel(
@@ -63,8 +64,8 @@ class SendFilesScreenViewModel(
         onFinish: (newDestination: SettingsManager.Destination) -> Unit,
     ) -> Unit,
     private val onAddNewDestinationCallback: (onFinish: (newDestination: SettingsManager.Destination) -> Unit) -> Unit,
-    private val onConfirmCallback: (TransferJob) -> Unit,
-) : BaseViewModel {
+    private val onConfirmCallback: suspend (TransferJob) -> Unit,
+) : BaseViewModel() {
     val itemListState = MutableStateFlow<List<TransferJob.Item>>(emptyList())
     val selectedDestinationState = MutableStateFlow<SettingsManager.Destination?>(null)
     val portState = InputFlow(initial = "")
@@ -115,11 +116,13 @@ class SendFilesScreenViewModel(
         }
     }
 
-    fun onConfirmClicked() {
+    suspend fun onConfirmClicked() {
+        val newDescription = descriptionState.value.trim()
         onConfirmCallback(
             TransferJob(
                 id = -1,
-                description = descriptionState.value.takeIf { it.isNotEmpty() } ?: "Job ${Random.nextInt()}", // TODO
+                description = newDescription,
+                needDescription = descriptionState.value.isEmpty(),
                 destination = selectedDestinationState.value ?: SettingsManager.Destination(
                     name = "-",
                     ip = oneTimeIpAddressState.value,
@@ -268,7 +271,7 @@ fun SendFilesScreen(
                             HorizontalLine(modifier = Modifier.padding(vertical = 4.dp))
                             listOf(
                                 "IP Address: ${destination.ip}",
-                                "Password: ••••••••••••",
+                                "Password: • • • • • • • • • • • •",
                             ).fastForEach {
                                 Text(
                                     modifier = Modifier
@@ -341,7 +344,7 @@ fun SendFilesScreen(
                     viewModel.canContinue.collectAsState(initial = false).value
                 },
                 content = { ButtonText(text = "Confirm") },
-                onClick = viewModel::onConfirmClicked,
+                onClick =  viewModel.rememberSuspendedAction(viewModel::onConfirmClicked),
             )
         },
         overlay = {

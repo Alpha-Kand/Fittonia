@@ -69,6 +69,7 @@ data class TransferJob(
     val port: Int,
     val status: TransferStatus,
     val direction: Direction,
+    val needDescription: Boolean,
 ) {
     val totalItems = items.size
     val progressPercentage: Double = currentItem / totalItems.toDouble()

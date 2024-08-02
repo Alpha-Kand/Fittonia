@@ -24,6 +24,7 @@ import androidx.datastore.dataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 val Context.dataStore by dataStore("fittonia.json", SettingsDataAndroidSerializer)
 
@@ -32,18 +33,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var fileFolderPickerIntent: ActivityResultLauncher<Intent>
     private var onUriPicked: (Uri) -> Unit = {}
 
-    private val serverConnection = object : ServiceConnection {
-        var isConnected = false
-
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            isConnected = true
-            AndroidServer.server.value = (service as AndroidServer.AndroidServerBinder).getService()
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            isConnected = false
-        }
-    }
+    private lateinit var serverConnection:ServiceConnection
 
     fun openFilePicker(onSelectItem: (Uri) -> Unit) {
         onUriPicked = onSelectItem
@@ -81,6 +71,11 @@ class MainActivity : ComponentActivity() {
         fileFolderPickerIntent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 result.data?.data?.let {
+                    println(it.scheme)
+                    println(it.encodedPath)
+                    println(it.pathSegments)
+                    println(it.path)
+                    println(it.toString())
                     onUriPicked(it)
                 }
             }
@@ -167,6 +162,18 @@ class MainActivity : ComponentActivity() {
         val intent = Intent(mainActivity, AndroidServer::class.java).apply {
             this.putExtra("org.hmeadow.fittonia.port", port)
             this.putExtra("org.hmeadow.fittonia.password", password)
+        }
+        serverConnection = object : ServiceConnection {
+            var isConnected = false
+
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                isConnected = true
+                AndroidServer.server.value = (service as AndroidServer.AndroidServerBinder).getService()
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+                isConnected = false
+            }
         }
         bindService(
             intent,

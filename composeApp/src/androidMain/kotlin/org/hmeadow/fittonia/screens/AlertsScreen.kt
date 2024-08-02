@@ -40,16 +40,17 @@ import org.hmeadow.fittonia.description
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
 import org.hmeadow.fittonia.title
+import org.hmeadow.fittonia.utility.rememberSuspendedAction
 
 class AlertsScreenViewModel(
-    private val onTemporaryPortAcceptedCallback: (port: Int) -> Unit,
-    private val onNewDefaultPortAcceptedCallback: (port: Int) -> Unit,
-) : BaseViewModel {
+    private val onTemporaryPortAcceptedCallback: suspend (port: Int) -> Unit,
+    private val onNewDefaultPortAcceptedCallback: suspend (port: Int) -> Unit,
+) : BaseViewModel() {
     val temporaryPort = InputFlow(initial = "")
     val newDefaultPort = InputFlow(initial = "")
 
-    fun onTemporaryPortAccepted(port: Int) = onTemporaryPortAcceptedCallback(port)
-    fun onNewDefaultPortAccepted(port: Int) = onNewDefaultPortAcceptedCallback(port)
+    suspend fun onTemporaryPortAccepted() = onTemporaryPortAcceptedCallback(temporaryPort.value.toInt())
+    suspend fun onNewDefaultPortAccepted() = onNewDefaultPortAcceptedCallback(newDefaultPort.value.toInt())
 }
 
 @Composable
@@ -87,9 +88,9 @@ fun AlertsScreen(
                 PortInputDialog(
                     label = "Temporary port",
                     inputFlow = viewModel.temporaryPort,
-                    onAccept = {
+                    onAccept = viewModel.rememberSuspendedAction {
                         temporaryPortModalState = false
-                        viewModel.onTemporaryPortAccepted(viewModel.newDefaultPort.value.toInt())
+                        viewModel.onTemporaryPortAccepted()
                     },
                 )
             }
@@ -101,9 +102,9 @@ fun AlertsScreen(
                 PortInputDialog(
                     label = "New default port",
                     inputFlow = viewModel.newDefaultPort,
-                    onAccept = {
+                    onAccept = viewModel.rememberSuspendedAction {
                         newDefaultPortModalState = false
-                        viewModel.onNewDefaultPortAccepted(viewModel.newDefaultPort.value.toInt())
+                        viewModel.onNewDefaultPortAccepted()
                     },
                 )
             }

@@ -18,20 +18,26 @@ import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
 import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
 import java.net.BindException
 import java.net.ServerSocket
+import java.net.SocketException
 import kotlin.coroutines.CoroutineContext
+import kotlin.io.path.Path
 
 class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
     override val coroutineContext: CoroutineContext = Dispatchers.IO
     override var jobId: Int = 100
     private val binder = AndroidServerBinder()
-    private var serverSocket: ServerSocket? = null
+    var serverSocket: ServerSocket? = null
+    var serverJob: Job? = null
     private lateinit var password: String
 
     inner class AndroidServerBinder : Binder() {
@@ -53,20 +59,12 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     private fun initFromIntent(intent: Intent?): Boolean {
         intent?.let {
             it.getIntExtra("org.hmeadow.fittonia.port", 0).let { port ->
-                if (port == 0) throw Exception("No port provided")
-                try {
-                    serverSocket = ServerSocket(port)
-                } catch (e: BindException) {
-                    if (e.message?.contains("Address already in use") == true) {
-                        MainActivity.mainActivityForServer?.alert(UserAlert.PortInUse(port = port))
-                        return false
-                    } else {
-                        throw e
-                    }
+                if(!startServerSocket(port = port)){
+                    return false
                 }
             }
             password = it.getStringExtra("org.hmeadow.fittonia.password")
-                ?: throw Exception("No password provided") // TODO
+                ?: throw Exception("No password provided").also { serverSocket = null } // TODO
             return true
         }
         return true
@@ -80,24 +78,57 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                 constructNotification(transferJobsActive = transferJobs.value.size),
                 FOREGROUND_SERVICE_TYPE_DATA_SYNC,
             )
-            serverSocket?.let { server ->
-                launch {
-                    while (true) {
-                        HMeadowSocketServer.createServerFromSocket(server).let { server ->
-                            launch {
-                                log("Connected to client.")
-                                handleCommand(server = server, jobId = jobId)
-                            }
-                        }
-                    }
-                }
-            }
+            launchServerJob()
             return START_STICKY // If the service is killed, it will be automatically restarted.
         }
         stopForeground(STOP_FOREGROUND_REMOVE)
         MainActivity.mainActivityForServer?.unbindFromServer()
         stopSelf()
         return START_NOT_STICKY
+    }
+
+    private fun startServerSocket(port:Int):Boolean{
+        if (port == 0) throw Exception("No port provided")
+        try {
+            serverSocket = ServerSocket(port)
+        } catch (e: BindException) {
+            serverSocket = null
+            if (e.message?.contains("Address already in use") == true) {
+                MainActivity.mainActivityForServer?.alert(UserAlert.PortInUse(port = port))
+                return false
+            } else {
+                throw e
+            }
+        }
+        return true
+    }
+
+    private fun launchServerJob(){
+        serverSocket?.let { server ->
+            serverJob = launch {
+                while (true) {
+                    yield()
+                    try {
+                        HMeadowSocketServer.createServerFromSocket(server).let { server ->
+                            launch {
+                                log("Connected to client.")
+                                handleCommand(server = server, jobId = jobId)
+                            }
+                        }
+                    }catch(e: SocketException) {
+                        log(e.message ?: "Unknown server SocketException")
+                        // Don't worry!
+                    }
+                }
+            }
+        }
+    }
+
+    fun restartServerSocket(port:Int){
+        serverJob?.cancel()
+        serverSocket?.close()
+        startServerSocket(port = port)
+        launchServerJob()
     }
 
     private fun constructNotification(transferJobsActive: Int) = Notification
@@ -125,9 +156,11 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         super.onDestroy()
         println("onDestroy")
         serverSocket?.close()
+        serverJob?.cancel()
+        server.value = null
     }
 
-    /* MUST BE IN 'SYNCHRONIZED' */
+    /* MUST BE IN 'SYNCHRONIZED' */ // TODO USE MUTEX
     private fun updateTransferJob(job: TransferJob) {
         transferJobs.value = (transferJobs.value.filterNot { it.id == job.id } + job).sortedBy { it.id }
     }
@@ -182,6 +215,23 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
             logWarning("Client attempted to send files to this server, password refused.", jobId = jobId)
         } else {
             log("Client attempting to send files.", jobId = jobId)
+
+            when (server.receiveString()) {
+                ServerFlagsString.NEED_JOB_NAME -> ">:3".also {
+                    log("Server generated job name: $it", jobId = jobId)
+                    server.sendString(it)
+                }
+
+                ServerFlagsString.HAVE_JOB_NAME -> server.receiveString().also {
+                    log("Client provided job name: $it", jobId = jobId)
+                }
+
+                else -> throw Exception() // TODO
+            }
+
+            server.sendInt(128) // Not sure android has the same path limits as desktop.
+
+            server.receiveContinue()
         }
     }
 
@@ -203,37 +253,56 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
         var server: MutableStateFlow<AndroidServer?> = MutableStateFlow(null)
 
-        fun startSending(job: TransferJob) {
+        suspend fun startSending(job: TransferJob) {
+            if(server.value == null){
+                MainActivity.mainActivity.attemptStartServer()
+                server.first()
+            }
+
             server.value?.run {
-                addTransferJob(job)
-                updateNotification()
-                launch {
-                    try {
-                        val client = HMeadowSocketClient(
-                            ipAddress = job.destination.ip,
-                            port = job.port,
-                            operationTimeoutMillis = 2000,
-                            handshakeTimeoutMillis = 2000L,
-                        )
-                        if (client.communicateCommand(
-                                commandFlag = ServerCommandFlag.SEND_FILES,
-                                password = job.destination.password,
-                                onSuccess = { },
-                                onPasswordRefused = { logError("Server refused password.") },
-                                onFailure = { logError("Connected, but request refused.") },
-                            )
-                        ) {
-                            log("Password accepted")
-                        } else {
-                            logError("Password refused")
-                        }
-                        updateTransferJobCurrentItem(job = job)
-                    } catch (e: HMeadowSocket.HMeadowSocketError) { // TODO Better error handling & messaging.
-                        e.hmMessage?.let { logError(it) }
-                        e.message?.let { logError(it) }
-                    }
-                    finishTransferJob(job)
+                job.copy(
+                    description = if(job.needDescription) "Connecting..." else job.description,
+                ).let { realJob ->
+                    addTransferJob(realJob)
                     updateNotification()
+                    launch {
+                        try {
+                            val client = HMeadowSocketClient(
+                                ipAddress = realJob.destination.ip,
+                                port = realJob.port,
+                                operationTimeoutMillis = 2000,
+                                handshakeTimeoutMillis = 2000L,
+                            )
+                            if (client.communicateCommand(
+                                    commandFlag = ServerCommandFlag.SEND_FILES,
+                                    password = realJob.destination.password,
+                                    onSuccess = { },
+                                    onPasswordRefused = { logError("Server refused password.") },
+                                    onFailure = { logError("Connected, but request refused.") },
+                                )
+                            ) {
+                                log("Password accepted")
+                                realJob.description.takeIf{ !realJob.needDescription }?.let { jobName ->
+                                    client.sendString(ServerFlagsString.HAVE_JOB_NAME)
+                                    client.sendString(jobName)
+                                } ?: run {
+                                    client.sendString(ServerFlagsString.NEED_JOB_NAME)
+                                    updateTransferJob(job.copy(description = client.receiveString()))
+                                }
+
+                                log("path length: " + client.receiveInt())
+                                client.sendContinue()
+                            } else {
+                                logError("Password refused")
+                            }
+                            updateTransferJobCurrentItem(job = realJob)
+                        } catch (e: HMeadowSocket.HMeadowSocketError) { // TODO Better error handling & messaging.
+                            e.hmMessage?.let { logError(it) }
+                            e.message?.let { logError(it) }
+                        }
+                        finishTransferJob(realJob)
+                        updateNotification()
+                    }
                 }
             }
         }

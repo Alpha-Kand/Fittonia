@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.AndroidServer.Companion.server
 import org.hmeadow.fittonia.AndroidServer.Companion.startSending
 import org.hmeadow.fittonia.screens.AlertsScreen
 import org.hmeadow.fittonia.screens.AlertsScreenViewModel
@@ -45,7 +46,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
         }
     }
 
-    class LoadingScreenViewModel : BaseViewModel
+    class LoadingScreenViewModel : BaseViewModel()
 
     private fun loadingScreen() = Screen(
         viewModel = LoadingScreenViewModel(),
@@ -76,11 +77,11 @@ class Navigator(private val mainViewModel: MainViewModel) {
         WelcomeScreen(
             viewModel = viewModel,
             data = data,
-            onClearDumpPath = { this.mainViewModel.clearDumpPath() },
+            onClearDumpPath = this.mainViewModel::clearDumpPath,
         )
     }
 
-    class OverviewScreenViewModel : BaseViewModel
+    class OverviewScreenViewModel : BaseViewModel()
 
     private fun overviewScreen() = Screen(viewModel = OverviewScreenViewModel()) { _, _ ->
         OverviewScreen(
@@ -91,7 +92,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                 push(transferDetailsScreen(transferJob = job))
             },
             onAlertsClicked = {
-                push(notificationsScreen())
+                push(alertsScreen())
             },
         )
     }
@@ -114,6 +115,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                 startSending(job = newJob)
                 pop()
             },
+            //onGetNewJobName = mainViewModel::getJobName,
         ),
     ) { data, viewModel ->
         SendFilesScreen(
@@ -144,7 +146,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
         )
     }
 
-    class TransferDetailsScreenViewModel : BaseViewModel
+    class TransferDetailsScreenViewModel : BaseViewModel()
 
     private fun transferDetailsScreen(
         transferJob: TransferJob,
@@ -155,17 +157,27 @@ class Navigator(private val mainViewModel: MainViewModel) {
         )
     }
 
-    private fun notificationsScreen() = Screen(
+    private fun alertsScreen() = Screen(
         viewModel = AlertsScreenViewModel(
             onTemporaryPortAcceptedCallback = { newPort ->
-                mainViewModel.updateTemporaryPort(newPort)
+                mainViewModel.updateTemporaryPort(port = newPort)
                 MainActivity.mainActivity.unAlert(UserAlert.PortInUse::class.java)
-                MainActivity.mainActivity.attemptStartServer()
+                println("onTemporaryPortAcceptedCallback server.value = ${server.value}")
+                if (server.value == null) {
+                    MainActivity.mainActivity.attemptStartServer()
+                } else {
+                    server.value?.restartServerSocket(port = newPort)
+                }
             },
             onNewDefaultPortAcceptedCallback = { newPort ->
-                mainViewModel.updateServerPort(newPort)
+                mainViewModel.updateServerPort(port = newPort)
                 MainActivity.mainActivity.unAlert(UserAlert.PortInUse::class.java)
-                MainActivity.mainActivity.attemptStartServer()
+                println("onNewDefaultPortAcceptedCallback server.value = ${server.value}")
+                if (server.value == null) {
+                    MainActivity.mainActivity.attemptStartServer()
+                } else {
+                    server.value?.restartServerSocket(port = newPort)
+                }
             },
         ),
     ) { _, viewModel ->
@@ -225,6 +237,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                                 job = TransferJob(
                                     id = Random.nextInt(),
                                     description = "Sending PDFs to bob (${abs(Random.nextInt() % 100)})",
+                                    needDescription = false,
                                     destination = SettingsManager.Destination(
                                         name = "Bob's PC (${abs(Random.nextInt() % 100)})",
                                         ip = "192.168.1.1",
