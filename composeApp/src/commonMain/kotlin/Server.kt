@@ -8,11 +8,11 @@ interface Server {
 
     fun HMeadowSocketServer.passwordIsValid(): Boolean
 
-    fun HMeadowSocketServer.handleCommand(
-        onSendFilesCommand: (Boolean, HMeadowSocketServer, Int) -> Unit,
-        onSendMessageCommand: (Boolean, HMeadowSocketServer, Int) -> Unit,
-        onAddDestination: (Boolean, HMeadowSocketServer, Int) -> Unit,
-        onInvalidCommand: (String) -> Unit,
+    suspend fun HMeadowSocketServer.handleCommand(
+        onSendFilesCommand: suspend (Boolean, HMeadowSocketServer, Int) -> Unit,
+        onSendMessageCommand: suspend (Boolean, HMeadowSocketServer, Int) -> Unit,
+        onAddDestination: suspend (Boolean, HMeadowSocketServer, Int) -> Unit,
+        onInvalidCommand: suspend (String) -> Unit,
         jobId: Int,
     ) {
         val receivedCommand = receiveString()
@@ -52,7 +52,7 @@ interface Server {
         }
     }
 
-    fun handleCommand(server: HMeadowSocketServer, jobId: Int) {
+    suspend fun handleCommand(server: HMeadowSocketServer, jobId: Int) {
         server.handleCommand(
             onAddDestination = ::onAddDestination,
             onSendFilesCommand = ::onSendFiles,
@@ -62,10 +62,10 @@ interface Server {
         )
     }
 
-    fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
-    fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
-    fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
-    fun onInvalidCommand(unknownCommand: String)
+    suspend fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    suspend fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    suspend fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    suspend fun onInvalidCommand(unknownCommand: String)
 }
 
 // TODO Sending files should be handled in Server.

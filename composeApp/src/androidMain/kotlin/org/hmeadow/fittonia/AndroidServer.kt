@@ -165,7 +165,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         return password == receiveString()
     }
 
-    override fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+    override suspend fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to add this server as destination, password refused.", jobId = jobId)
         } else {
@@ -177,7 +177,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         }
     }
 
-    override fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+    override suspend fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to send files to this server, password refused.", jobId = jobId)
         } else {
@@ -185,7 +185,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         }
     }
 
-    override fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+    override suspend fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to send a message, password refused.", jobId = jobId)
         } else {
@@ -194,7 +194,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         }
     }
 
-    override fun onInvalidCommand(unknownCommand: String) {
+    override suspend fun onInvalidCommand(unknownCommand: String) {
         logWarning("Received invalid server command from client: $unknownCommand", jobId = jobId)
     }
 
