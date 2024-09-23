@@ -7,6 +7,8 @@ import hmeadowSocket.HMeadowSocket.HMeadowSocketError.FailedToReceiveException
 import hmeadowSocket.HMeadowSocket.HMeadowSocketError.FailedToSendException
 import hmeadowSocket.HMeadowSocket.HMeadowSocketError.ServerSetupException
 import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 import java.lang.Thread.sleep
 import java.net.ServerSocket
 import java.net.Socket
@@ -79,9 +81,36 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
     fun receiveString() = receiveErrorWrapper { socketInterface.receiveString() }
 
     fun sendFile(
+        stream: InputStream,
+        name: String,
+        size: Long,
+        rename: String = "",
+        progressPrecision: Double = 0.01,
+        onProgressUpdate: (bytes:Long) -> Unit = {},
+    ) = sendErrorWrapper {
+        socketInterface.sendFile(
+            stream = stream,
+            name = name,
+            size = size,
+            rename = rename,
+            progressPrecision = progressPrecision,
+            onProgressUpdate = onProgressUpdate,
+        )
+    }
+
+    fun sendFile(
         filePath: String,
         rename: String = "",
-    ) = sendErrorWrapper { socketInterface.sendFile(filePath = filePath, rename = rename) }
+        progressPrecision: Double = 0.01,
+        onProgressUpdate: (bytes:Long) -> Unit = {},
+    ) = sendErrorWrapper {
+        socketInterface.sendFile(
+            filePath = filePath,
+            rename = rename,
+            progressPrecision = progressPrecision,
+            onProgressUpdate = onProgressUpdate,
+        )
+    }
 
     fun receiveFile(
         destination: String = "",
@@ -92,6 +121,18 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
             destination = destination,
             prefix = prefix,
             suffix = suffix,
+        )
+    }
+
+    fun receiveFile(
+        onOutputStream: (fileName: String) -> OutputStream?,
+        progressPrecision: Float = 0.01f,
+        onProgressUpdate: (progress: Float) -> Unit = {},
+    ) = receiveErrorWrapper {
+        socketInterface.receiveFile(
+            onOutputStream = onOutputStream,
+            progressPrecision = progressPrecision,
+            onProgressUpdate = onProgressUpdate,
         )
     }
 

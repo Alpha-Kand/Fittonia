@@ -50,14 +50,16 @@ data class SettingsDataAndroid(
 ) {
     @Serializable
     data class DumpPath(
-        val dumpPathUri: String = "",
+        val dumpPathForReal: String = "",
+        val dumpUriPath: String = "",
         val dumpPathReadable: String = "",
     ) {
-        val isSet = dumpPathUri.isNotEmpty() && dumpPathReadable.isNotEmpty()
+        val isSet = dumpUriPath.isNotEmpty() && dumpPathReadable.isNotEmpty()
 
         constructor(uri: Uri) : this(
-            dumpPathUri = uri.path ?: "Error",
+            dumpUriPath = uri.path ?: "Error",
             dumpPathReadable = queryName(uri) ?: "Error",
+            dumpPathForReal = uri.toString(),
         )
     }
 }

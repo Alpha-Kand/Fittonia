@@ -1,5 +1,6 @@
 package org.hmeadow.fittonia.screens
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,10 +21,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import org.hmeadow.fittonia.BaseViewModel
+import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.components.FittoniaButton
@@ -40,16 +41,24 @@ import org.hmeadow.fittonia.description
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
 import org.hmeadow.fittonia.title
+import org.hmeadow.fittonia.utility.rememberSuspendedAction
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class AlertsScreenViewModel(
-    private val onTemporaryPortAcceptedCallback: (port: Int) -> Unit,
-    private val onNewDefaultPortAcceptedCallback: (port: Int) -> Unit,
-) : BaseViewModel {
+    private val onUpdateDumpPath: (Uri) -> Unit,
+    private val onTemporaryPortAcceptedCallback: suspend (port: Int) -> Unit,
+    private val onNewDefaultPortAcceptedCallback: suspend (port: Int) -> Unit,
+) : BaseViewModel() {
     val temporaryPort = InputFlow(initial = "")
     val newDefaultPort = InputFlow(initial = "")
 
-    fun onTemporaryPortAccepted(port: Int) = onTemporaryPortAcceptedCallback(port)
-    fun onNewDefaultPortAccepted(port: Int) = onNewDefaultPortAcceptedCallback(port)
+    suspend fun onTemporaryPortAccepted() = onTemporaryPortAcceptedCallback(temporaryPort.value.toInt())
+    suspend fun onNewDefaultPortAccepted() = onNewDefaultPortAcceptedCallback(newDefaultPort.value.toInt())
+
+    fun onDumpPathPicked(path: Uri) {
+        onUpdateDumpPath(path)
+        MainActivity.mainActivity.unAlert<UserAlert.DumpLocationLost>()
+    }
 }
 
 @Composable
@@ -75,6 +84,12 @@ fun AlertsScreen(
                             onTemporaryPortClicked = { temporaryPortModalState = true },
                             onNewDefaultPortClicked = { newDefaultPortModalState = true },
                         )
+
+                        is UserAlert.DumpLocationLost -> DumpLocationLostTile(
+                            onPickLocationClicked = {
+                                MainActivity.mainActivity.openFolderPicker(viewModel::onDumpPathPicked)
+                            },
+                        )
                     }
                 }
             }
@@ -87,9 +102,9 @@ fun AlertsScreen(
                 PortInputDialog(
                     label = "Temporary port",
                     inputFlow = viewModel.temporaryPort,
-                    onAccept = {
+                    onAccept = viewModel.rememberSuspendedAction {
                         temporaryPortModalState = false
-                        viewModel.onTemporaryPortAccepted(viewModel.newDefaultPort.value.toInt())
+                        viewModel.onTemporaryPortAccepted()
                     },
                 )
             }
@@ -101,9 +116,9 @@ fun AlertsScreen(
                 PortInputDialog(
                     label = "New default port",
                     inputFlow = viewModel.newDefaultPort,
-                    onAccept = {
+                    onAccept = viewModel.rememberSuspendedAction {
                         newDefaultPortModalState = false
-                        viewModel.onNewDefaultPortAccepted(viewModel.newDefaultPort.value.toInt())
+                        viewModel.onNewDefaultPortAccepted()
                     },
                 )
             }
@@ -146,6 +161,17 @@ private fun PortInUseTile(
             "New temporary port" to onTemporaryPortClicked,
             "New default port" to onNewDefaultPortClicked,
         ),
+    )
+}
+
+@Composable
+private fun DumpLocationLostTile(
+    onPickLocationClicked: () -> Unit,
+) {
+    AlertTile(
+        title = UserAlert.DumpLocationLost.title(),
+        description = UserAlert.DumpLocationLost.description(),
+        actions = listOf("Select new location" to onPickLocationClicked),
     )
 }
 
@@ -214,6 +240,7 @@ private fun AlertTile(
 private fun Preview() {
     AlertsScreen(
         viewModel = AlertsScreenViewModel(
+            onUpdateDumpPath = {},
             onTemporaryPortAcceptedCallback = {},
             onNewDefaultPortAcceptedCallback = {},
         ),

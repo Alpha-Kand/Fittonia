@@ -1,6 +1,9 @@
 package org.hmeadow.fittonia.screens
 
 import SettingsManager
+import android.content.ContentResolver
+import android.net.Uri
+import android.webkit.MimeTypeMap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,6 +32,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import org.hmeadow.fittonia.BaseViewModel
+import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
@@ -54,7 +58,8 @@ import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
 import org.hmeadow.fittonia.screens.overviewScreen.Options
 import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
 import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
-import kotlin.random.Random
+import org.hmeadow.fittonia.utility.rememberSuspendedAction
+import java.util.Locale
 
 class SendFilesScreenViewModel(
     private val onSaveOneTimeDestinationCallback: (
@@ -63,11 +68,11 @@ class SendFilesScreenViewModel(
         onFinish: (newDestination: SettingsManager.Destination) -> Unit,
     ) -> Unit,
     private val onAddNewDestinationCallback: (onFinish: (newDestination: SettingsManager.Destination) -> Unit) -> Unit,
-    private val onConfirmCallback: (TransferJob) -> Unit,
-) : BaseViewModel {
+    private val onConfirmCallback: suspend (TransferJob) -> Unit,
+) : BaseViewModel() {
     val itemListState = MutableStateFlow<List<TransferJob.Item>>(emptyList())
     val selectedDestinationState = MutableStateFlow<SettingsManager.Destination?>(null)
-    val portState = InputFlow(initial = "")
+    val portState = InputFlow(initial = if (BuildConfig.DEBUG) "12345" else "")
     val descriptionState = InputFlow(initial = "")
 
     val oneTimeIpAddressState = InputFlow(initial = "")
@@ -109,17 +114,26 @@ class SendFilesScreenViewModel(
                     itemListState.value += TransferJob.Item(
                         name = name,
                         uri = docUri.uri,
+                        isFile = docUri.isFile,
+                        sizeBytes = MainActivity
+                            .mainActivity
+                            .contentResolver
+                            .openAssetFileDescriptor(docUri.uri, "r").use { file ->
+                                file?.length?.takeIf { it > 0 } ?: 0
+                            },
                     )
                 } ?: run { /*TODO*/ }
             }
         }
     }
 
-    fun onConfirmClicked() {
+    suspend fun onConfirmClicked() {
+        val newDescription = descriptionState.value.trim()
         onConfirmCallback(
             TransferJob(
                 id = -1,
-                description = descriptionState.value.takeIf { it.isNotEmpty() } ?: "Job ${Random.nextInt()}", // TODO
+                description = newDescription,
+                needDescription = descriptionState.value.isEmpty(),
                 destination = selectedDestinationState.value ?: SettingsManager.Destination(
                     name = "-",
                     ip = oneTimeIpAddressState.value,
@@ -268,7 +282,7 @@ fun SendFilesScreen(
                             HorizontalLine(modifier = Modifier.padding(vertical = 4.dp))
                             listOf(
                                 "IP Address: ${destination.ip}",
-                                "Password: ••••••••••••",
+                                "Password: • • • • • • • • • • • •",
                             ).fastForEach {
                                 Text(
                                     modifier = Modifier
@@ -341,7 +355,7 @@ fun SendFilesScreen(
                     viewModel.canContinue.collectAsState(initial = false).value
                 },
                 content = { ButtonText(text = "Confirm") },
-                onClick = viewModel::onConfirmClicked,
+                onClick = viewModel.rememberSuspendedAction(viewModel::onConfirmClicked),
             )
         },
         overlay = {

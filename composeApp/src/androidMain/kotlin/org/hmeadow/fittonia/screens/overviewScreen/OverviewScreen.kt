@@ -5,7 +5,9 @@ import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,9 +21,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.BaseViewModel
+import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.components.FittoniaButton
@@ -35,8 +41,10 @@ import org.hmeadow.fittonia.components.HMSpacerHeight
 import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.text.NumberFormat
 import java.util.Locale
+import java.util.Objects
 import kotlin.math.min
 
 @Composable
@@ -69,19 +77,34 @@ data class TransferJob(
     val port: Int,
     val status: TransferStatus,
     val direction: Direction,
+    val needDescription: Boolean,
 ) {
     val totalItems = items.size
-    val progressPercentage: Double = currentItem / totalItems.toDouble()
+    val progressPercentage: Double =
+        items.sumOf { it.progressBytes }.toDouble() / items.sumOf { it.sizeBytes }.toDouble()
     val nextItem: Int = min(currentItem + 1, totalItems)
 
     data class Item(
         val name: String,
         val uri: Uri,
-    )
+        val isFile: Boolean,
+        val sizeBytes: Long,
+        val progressBytes: Long = 0,
+    ) {
+        val id: Int = Objects.hash(name, uri, isFile, sizeBytes) // Ignore 'progressBytes'.
+    }
 
     enum class Direction {
         INCOMING,
         OUTGOING,
+    }
+
+    fun updateItem(item: Item): TransferJob {
+        return this.copy(
+            items = items.filter {
+                it.id != item.id
+            }.plus(item),
+        )
     }
 }
 
@@ -99,8 +122,34 @@ fun measureTextWidth(text: String, style: TextStyle): Dp {
     return with(LocalDensity.current) { widthInPixels.toDp() }
 }
 
+class OverviewScreenViewModel(
+    private val onUpdateDumpPath: (Uri) -> Unit,
+) : BaseViewModel() {
+    val needDumpAccess = MutableStateFlow(false)
+
+    init {
+        launch {
+            when (val state = MainActivity.mainActivity.createDumpDirectory(jobName = "ACCESS")) {
+                is MainActivity.CreateDumpDirectory.Error -> {
+                    needDumpAccess.update { true }
+                    MainActivity.mainActivity.alert(UserAlert.DumpLocationLost)
+                }
+
+                is MainActivity.CreateDumpDirectory.Success -> MainActivity.mainActivity.deleteDumpDirectory(state.uri)
+            }
+        }
+    }
+
+    fun onDumpPathPicked(path: Uri) {
+        onUpdateDumpPath(path)
+        needDumpAccess.update { false }
+        MainActivity.mainActivity.unAlert<UserAlert.DumpLocationLost>()
+    }
+}
+
 @Composable
 fun OverviewScreen(
+    viewModel: OverviewScreenViewModel,
     onSendFilesClicked: () -> Unit,
     onTransferJobClicked: (TransferJob) -> Unit,
     onAlertsClicked: () -> Unit,
@@ -145,6 +194,33 @@ fun OverviewScreen(
             }
         },
         overlay = {
+            FittoniaModal(
+                state = viewModel.needDumpAccess.collectAsState(initial = false).value,
+                onDismiss = { viewModel.needDumpAccess.update { false } },
+            ) { _ ->
+                Column(modifier = Modifier.padding(all = 16.dp)) {
+                    Row {
+                        FittoniaIcon(
+                            drawableRes = R.drawable.ic_access_folder,
+                            modifier = Modifier.requiredSize(40.dp),
+                            tint = Color(0xFFA00000),
+                        )
+                        HMSpacerWidth(width = 10)
+                        Text(
+                            modifier = Modifier.padding(top = 13.dp),
+                            text = "Permission was lost for your previously selected 'incoming transfers' folder. Please reselect or choose another folder.",
+                            style = paragraphStyle,
+                        )
+                    }
+                    HMSpacerHeight(height = 12)
+                    FittoniaButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { MainActivity.mainActivity.openFolderPicker(viewModel::onDumpPathPicked) },
+                    ) {
+                        ButtonText(text = "Pick folder")
+                    }
+                }
+            }
             FittoniaModal(
                 state = aboutState,
                 onDismiss = { aboutState = false },
@@ -217,6 +293,7 @@ fun OverviewScreen(
 @Preview
 private fun Preview() {
     OverviewScreen(
+        viewModel = OverviewScreenViewModel(onUpdateDumpPath = {}),
         onSendFilesClicked = {},
         onTransferJobClicked = {},
         onAlertsClicked = {},

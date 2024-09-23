@@ -16,13 +16,13 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         dataStore.data.collect { data ->
             data.temporaryPort?.let { port ->
                 data.serverPassword?.let { password ->
-                    if (port in 1025..49999) {
+                    if (port in 1025..59999) {
                         initServer(port, password)
                     }
                 }
             } ?: data.defaultPort.let { port ->
                 data.serverPassword?.let { password ->
-                    if (port in 1025..49999) {
+                    if (port in 1025..59999) {
                         initServer(port, password)
                     }
                 }
@@ -37,7 +37,7 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         }
     }
 
-    fun updateServerPort(port: Int) = launch {
+    suspend fun updateServerPort(port: Int) {
         dataStore.updateData {
             it.copy(defaultPort = port)
         }
@@ -49,9 +49,12 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         }
     }
 
-    fun clearDumpPath() = launch {
-        dataStore.updateData {
-            it.copy(dumpPath = SettingsDataAndroid.DumpPath())
+    fun clearDumpPath() {
+        launch {
+            dataStore.updateData {
+                it.copy(dumpPath = SettingsDataAndroid.DumpPath())
+            }
+            MainActivity.mainActivity.alert(UserAlert.DumpLocationLost)
         }
     }
 

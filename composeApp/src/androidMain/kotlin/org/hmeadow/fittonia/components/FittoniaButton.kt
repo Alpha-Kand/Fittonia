@@ -7,18 +7,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.hmeadow.fittonia.R
+import org.hmeadow.fittonia.utility.SuspendedAction
 
 @Composable
 @Preview
@@ -141,6 +144,11 @@ fun FittoniaButton(
     onClick: () -> Unit,
     content: @Composable FittoniaButtonScope.() -> Unit,
 ) {
+    val isLoading = if (onClick is SuspendedAction) {
+        onClick.isRunning
+    } else {
+        false
+    }
     Button(
         modifier = modifier,
         shape = RoundedCornerShape(corner = CornerSize(5.dp)),
@@ -154,7 +162,18 @@ fun FittoniaButton(
         ),
         enabled = enabled,
         onClick = onClick,
-        content = { FittoniaButtonScope(type = type, enabled = enabled).content() },
+        content = {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.requiredSize(17.dp),
+                    color = type.contentColour,
+                    strokeWidth = 4.dp,
+                    strokeCap = StrokeCap.Round,
+                )
+            } else {
+                FittoniaButtonScope(type = type, enabled = enabled).content()
+            }
+        },
         colors = buttonColors(
             containerColor = type.backgroundColor,
             contentColor = type.contentColour,

@@ -29,7 +29,7 @@ class NewDestinationScreenViewModel(
     oneTimeIp: String?,
     oneTimePassword: String?,
     private val onSaveNewDestinationCallback: (SettingsManager.Destination) -> Unit,
-) : BaseViewModel {
+) : BaseViewModel() {
     val nameState = InputFlow(initial = "")
     val ipAddressState = InputFlow(initial = oneTimeIp ?: "")
     val passwordState = InputFlow(initial = oneTimePassword ?: "")

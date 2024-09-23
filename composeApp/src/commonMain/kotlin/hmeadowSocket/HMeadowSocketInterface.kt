@@ -6,7 +6,9 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.io.InputStreamReader
+import java.io.OutputStream
 import java.net.Socket
 import java.nio.file.Files
 import java.util.Arrays
@@ -25,12 +27,32 @@ interface HMeadowSocketInterface {
     fun sendBoolean(message: Boolean)
     fun receiveBoolean(): Boolean
 
-    fun sendFile(filePath: String, rename: String = "")
+    fun sendFile(
+        stream: InputStream,
+        name: String,
+        size: Long,
+        rename: String,
+        progressPrecision: Double,
+        onProgressUpdate: (bytes: Long) -> Unit,
+    )
+
+    fun sendFile(
+        filePath: String, rename: String = "",
+        progressPrecision: Double,
+        onProgressUpdate: (bytes:Long) -> Unit,
+    )
+
     fun receiveFile(
         destination: String,
         prefix: String,
         suffix: String,
     ): Pair<String, String>
+
+    fun receiveFile(
+        onOutputStream: (fileName: String) -> OutputStream?,
+        progressPrecision: Float,
+        onProgressUpdate: (progress: Float) -> Unit,
+    )
 
     fun sendString(message: String)
     fun receiveString(): String
@@ -43,7 +65,7 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
 
     companion object {
         private const val BUFFER_SIZE_LONG: Long = 8192
-        private const val BUFFER_SIZE_INT: Int = 8192
+        const val BUFFER_SIZE_INT: Int = 8192
     }
 
     private lateinit var mDataInput: DataInputStream
@@ -85,26 +107,55 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         return String(readNBytes(messageLength), Charsets.UTF_8)
     }
 
-    override fun sendFile(filePath: String, rename: String) {
-        val bufferedReadFile = BufferedInputStream(File(filePath).inputStream())
-        val path = Path(filePath)
-        val size = Files.size(path)
+    override fun sendFile(
+        stream: InputStream,
+        name: String,
+        size: Long,
+        rename: String,
+        progressPrecision: Double,
+        onProgressUpdate: (bytes: Long) -> Unit,
+    ) {
+        val bufferedReadFile = BufferedInputStream(stream)
 
         // 1. Send file size in bytes.
         sendLong(size)
+        val step = (size * progressPrecision).toLong()
+        var currentStep = step
 
         // 2. Send file name plus trailing whitespace.
-        sendString(rename.takeIf { it.isNotEmpty() } ?: path.fileName.toString())
+        sendString(rename.takeIf { it.isNotEmpty() } ?: name)
 
         // 3. Send the file.
         var remainingBytes = size
         while (remainingBytes > 0) {
-            val nextBytes = remainingBytes.coerceAtLeast(BUFFER_SIZE_LONG)
+            val nextBytes = remainingBytes.coerceAtMost(BUFFER_SIZE_LONG)
             mDataOutput.write(bufferedReadFile.readNBytes(nextBytes.toInt()))
             remainingBytes -= nextBytes
+            if ((size - remainingBytes) > currentStep) {
+                currentStep += step
+                onProgressUpdate(size - remainingBytes)
+            }
         }
 
         bufferedReadFile.close()
+    }
+
+    override fun sendFile(
+        filePath: String,
+        rename: String,
+        progressPrecision: Double,
+        onProgressUpdate: (bytes:Long) -> Unit,
+    ) {
+        val path = Path(filePath)
+        val size = Files.size(path)
+        sendFile(
+            stream = File(filePath).inputStream(),
+            name = path.fileName.toString(),
+            size = size,
+            rename = rename,
+            progressPrecision = progressPrecision,
+            onProgressUpdate = onProgressUpdate,
+        )
     }
 
     override fun receiveFile(
@@ -143,8 +194,42 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
                 }
             }
         }
-
         return file.absolutePath to fileName
+    }
+
+    override fun receiveFile(
+        onOutputStream: (fileName: String) -> OutputStream?,
+        progressPrecision: Float,
+        onProgressUpdate: (progress: Float) -> Unit,
+    ) {
+        // 1. Get total file size in bytes.
+        var transferByteCount = receiveLong()
+        val target = transferByteCount
+        // 2. Get file name.
+        val fileName = receiveString()
+        // 3. Receive and write file data.
+        val step = (transferByteCount * progressPrecision).toLong()
+        var currentStep = step
+        onOutputStream(fileName)?.use { kerchow ->
+            if (transferByteCount == 0L) {
+                // File to transfer is empty, just create a new empty file.
+            } else {
+                while (transferByteCount > 0) {
+                    // Read next amount of data from socket.
+                    val readByteArray = readNBytes(length = transferByteCount.coerceAtMost(BUFFER_SIZE_LONG).toInt())
+                    if (readByteArray.isNotEmpty()) {
+                        // Write data to file.
+                        transferByteCount -= BUFFER_SIZE_LONG
+                        kerchow.write(readByteArray)
+
+                        if ((target - transferByteCount) > currentStep) {
+                            currentStep += step
+                            onProgressUpdate(target / (target - transferByteCount).toFloat())
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun sendContinue() = sendBoolean(message = true)
@@ -198,7 +283,7 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
      *         allocated.
      */
     @Throws(IOException::class)
-    private fun readNBytes(length: Int): ByteArray {
+    fun readNBytes(length: Int): ByteArray {
         require(length >= 0) { "length <= 0" }
         // List of buffers which may or may not be full (Max BUFFER_SIZE).
         var bufferList: MutableList<ByteArray>? = null
@@ -331,9 +416,13 @@ class HMeadowSocketInterfaceRealDebug(
         return value
     }
 
-    override fun sendFile(filePath: String, rename: String) {
+    override fun sendFile(
+        filePath: String, rename: String,
+        progressPrecision: Double,
+        onProgressUpdate: (bytes:Long) -> Unit,
+    ) {
         printStatus("sendFile = (filePath: $filePath ) (rename: $rename )")
-        super.sendFile(filePath, rename)
+        super.sendFile(filePath, rename, progressPrecision, onProgressUpdate)
     }
 
     override fun receiveFile(

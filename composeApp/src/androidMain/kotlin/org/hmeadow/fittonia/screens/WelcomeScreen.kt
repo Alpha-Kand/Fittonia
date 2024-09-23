@@ -13,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.combine
 import org.hmeadow.fittonia.BaseViewModel
+import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.R
@@ -35,7 +36,7 @@ import psstColour
 class WelcomeScreenViewModel(
     private val mainViewModel: MainViewModel,
     private val onContinueCallback: (password: String, port: Int) -> Unit,
-) : BaseViewModel {
+) : BaseViewModel() {
     val serverPasswordState = InputFlow(initial = "")
     val portFieldState = InputFlow(initial = "")
 
@@ -44,7 +45,7 @@ class WelcomeScreenViewModel(
         portFieldState,
         mainViewModel.dataStore.data,
     ) { passwordState, portState, dumpPathState ->
-        passwordState.isNotEmpty() && portState.isNotEmpty() && dumpPathState.dumpPath.dumpPathUri.isNotEmpty()
+        passwordState.isNotEmpty() && portState.isNotEmpty() && dumpPathState.dumpPath.dumpUriPath.isNotEmpty()
     }
 
     fun onContinue() {
@@ -73,6 +74,17 @@ fun WelcomeScreen(
                     text = stringResource(id = R.string.welcome_screen_title),
                     style = headingLStyle,
                 )
+
+                if (BuildConfig.DEBUG) {
+                    FittoniaButton(
+                        onClick = {
+                            viewModel.portFieldState.value = "12345"
+                            viewModel.serverPasswordState.value = "password"
+                        },
+                    ) {
+                        ButtonText(text = "Debug Fill Values")
+                    }
+                }
 
                 HMSpacerHeight(height = 40)
 

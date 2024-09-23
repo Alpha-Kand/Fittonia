@@ -21,9 +21,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.datastore.dataStore
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 
 val Context.dataStore by dataStore("fittonia.json", SettingsDataAndroidSerializer)
 
@@ -32,18 +34,11 @@ class MainActivity : ComponentActivity() {
     private lateinit var fileFolderPickerIntent: ActivityResultLauncher<Intent>
     private var onUriPicked: (Uri) -> Unit = {}
 
-    private val serverConnection = object : ServiceConnection {
-        var isConnected = false
+    var testBind = 0
+    var testUnbind = 0
 
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            isConnected = true
-            AndroidServer.server.value = (service as AndroidServer.AndroidServerBinder).getService()
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            isConnected = false
-        }
-    }
+    private var lastServerConnection: ServiceConnection? = null
+    private var serverConnection: ServiceConnection? = null
 
     fun openFilePicker(onSelectItem: (Uri) -> Unit) {
         onUriPicked = onSelectItem
@@ -54,7 +49,6 @@ class MainActivity : ComponentActivity() {
             },
         )
     }
-
     fun openFolderPicker(onSelectItem: (Uri) -> Unit) {
         onUriPicked = onSelectItem
         fileFolderPickerIntent.launch(
@@ -81,6 +75,11 @@ class MainActivity : ComponentActivity() {
         fileFolderPickerIntent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 result.data?.data?.let {
+                    println(it.scheme)
+                    println(it.encodedPath)
+                    println(it.pathSegments)
+                    println(it.path)
+                    println(it.toString())
                     onUriPicked(it)
                 }
             }
@@ -125,9 +124,12 @@ class MainActivity : ComponentActivity() {
     }
 
     fun unbindFromServer() {
-        if (serverConnection.isConnected) {
-            unbindService(serverConnection)
+        serverConnection?.let {
+            if (isConnected) {
+                unbindService(it).also { println("testUnbind = ${++testUnbind}")}
+            }
         }
+        serverConnection = null
     }
 
     override fun onDestroy() {
@@ -163,17 +165,32 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    var isConnected = false
     private fun initAndroidServer(port: Int, password: String) {
         val intent = Intent(mainActivity, AndroidServer::class.java).apply {
             this.putExtra("org.hmeadow.fittonia.port", port)
             this.putExtra("org.hmeadow.fittonia.password", password)
         }
-        bindService(
-            intent,
-            serverConnection,
-            0,
-        )
-        startForegroundService(intent)
+        lastServerConnection = serverConnection
+        if(serverConnection == null) {
+            serverConnection = object : ServiceConnection {
+                override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                    isConnected = true
+                    AndroidServer.server.value = (service as AndroidServer.AndroidServerBinder).getService()
+                }
+
+                override fun onServiceDisconnected(name: ComponentName?) {
+                    isConnected = false
+                }
+            }.also {
+                startForegroundService(intent)
+                bindService(
+                    intent,
+                    it,
+                    0,
+                ).also { println("testBind = ${++testBind}") }
+            }
+        }
     }
 
     private fun getViewModel() = ViewModelProvider(
@@ -186,15 +203,59 @@ class MainActivity : ComponentActivity() {
         },
     )[MainViewModel::class.java]
 
-    fun alert(alert: UserAlert) {
-        UserAlert.userAlerts.value += alert
-    }
-
-    fun unAlert(alert: Class<out UserAlert>) {
-        UserAlert.userAlerts.value = UserAlert.userAlerts.value.filter {
-            it::class.java != alert
+    inline fun <reified T:UserAlert> alert(alert: T) {
+        if(UserAlert.userAlerts.value.filterIsInstance<T>().size < alert.numAllowed) {
+            UserAlert.userAlerts.value += alert
         }
     }
+
+    inline fun <reified T: UserAlert> unAlert() {
+        UserAlert.userAlerts.value = UserAlert.userAlerts.value.filter {
+            it !is T
+        }
+    }
+
+    interface CreateDumpDirectory {
+        class Success(val uri: Uri) : CreateDumpDirectory
+        object Failure : CreateDumpDirectory
+        interface Error : CreateDumpDirectory {
+            object PermissionDenied : Error
+            object Other : Error
+        }
+    }
+
+    suspend fun createDumpDirectory(jobName: String, print: (String) -> Unit = {}): CreateDumpDirectory {
+        try {
+            val dumpUri = Uri.parse(dataStore.data.first().dumpPath.dumpPathForReal)
+            print("'dumpPathForReal': $dumpUri")
+
+            val dumpObject = DocumentFile.fromTreeUri(this, dumpUri)
+            print("dumpObject: $dumpObject")
+
+            val directoryObject = dumpObject?.createDirectory(jobName)
+            print("directoryObject: $directoryObject")
+
+            val directoryUri = directoryObject?.uri
+            print("directoryUri: $directoryUri")
+
+            return if (directoryUri != null) {
+                CreateDumpDirectory.Success(uri = directoryUri)
+            } else {
+                CreateDumpDirectory.Failure
+            }
+        } catch (e: Exception) {
+            return if (e.message?.contains("requires that you obtain access") == true) {
+                if (BuildConfig.DEBUG) {
+                    e.printStackTrace()
+                }
+                CreateDumpDirectory.Error.PermissionDenied
+            } else {
+                CreateDumpDirectory.Error.Other
+            }
+        }
+    }
+
+    fun deleteDumpDirectory(uri: Uri) = DocumentFile.fromTreeUri(this, uri)?.delete()
 
     companion object {
         lateinit var mainActivity: MainActivity

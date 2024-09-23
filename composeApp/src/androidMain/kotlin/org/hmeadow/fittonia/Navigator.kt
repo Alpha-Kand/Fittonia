@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.AndroidServer.Companion.server
 import org.hmeadow.fittonia.AndroidServer.Companion.startSending
 import org.hmeadow.fittonia.screens.AlertsScreen
 import org.hmeadow.fittonia.screens.AlertsScreenViewModel
@@ -28,6 +29,7 @@ import org.hmeadow.fittonia.screens.TransferDetailsScreen
 import org.hmeadow.fittonia.screens.WelcomeScreen
 import org.hmeadow.fittonia.screens.WelcomeScreenViewModel
 import org.hmeadow.fittonia.screens.overviewScreen.OverviewScreen
+import org.hmeadow.fittonia.screens.overviewScreen.OverviewScreenViewModel
 import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
 import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
 import kotlin.math.abs
@@ -45,7 +47,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
         }
     }
 
-    class LoadingScreenViewModel : BaseViewModel
+    class LoadingScreenViewModel : BaseViewModel()
 
     private fun loadingScreen() = Screen(
         viewModel = LoadingScreenViewModel(),
@@ -67,7 +69,9 @@ class Navigator(private val mainViewModel: MainViewModel) {
             mainViewModel = mainViewModel,
             onContinueCallback = { password, port ->
                 mainViewModel.updateServerPassword(password)
-                mainViewModel.updateServerPort(port)
+                mainViewModel.launch {
+                    mainViewModel.updateServerPort(port)
+                }
                 MainActivity.mainActivity.attemptStartServer()
                 push(overviewScreen())
             },
@@ -76,14 +80,15 @@ class Navigator(private val mainViewModel: MainViewModel) {
         WelcomeScreen(
             viewModel = viewModel,
             data = data,
-            onClearDumpPath = { this.mainViewModel.clearDumpPath() },
+            onClearDumpPath = this.mainViewModel::clearDumpPath,
         )
     }
 
-    class OverviewScreenViewModel : BaseViewModel
-
-    private fun overviewScreen() = Screen(viewModel = OverviewScreenViewModel()) { _, _ ->
+    private fun overviewScreen() = Screen(viewModel = OverviewScreenViewModel(
+        onUpdateDumpPath = mainViewModel::updateDumpPath,
+    )) { _, viewModel ->
         OverviewScreen(
+            viewModel= viewModel,
             onSendFilesClicked = {
                 push(sendFilesScreen())
             },
@@ -91,7 +96,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                 push(transferDetailsScreen(transferJob = job))
             },
             onAlertsClicked = {
-                push(notificationsScreen())
+                push(alertsScreen())
             },
         )
     }
@@ -111,9 +116,10 @@ class Navigator(private val mainViewModel: MainViewModel) {
                 push(newDestinationScreen(onFinish = onFinish))
             },
             onConfirmCallback = { newJob ->
-                startSending(job = newJob)
+                startSending(newJob = newJob)
                 pop()
             },
+            //onGetNewJobName = mainViewModel::getJobName,
         ),
     ) { data, viewModel ->
         SendFilesScreen(
@@ -144,7 +150,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
         )
     }
 
-    class TransferDetailsScreenViewModel : BaseViewModel
+    class TransferDetailsScreenViewModel : BaseViewModel()
 
     private fun transferDetailsScreen(
         transferJob: TransferJob,
@@ -155,17 +161,28 @@ class Navigator(private val mainViewModel: MainViewModel) {
         )
     }
 
-    private fun notificationsScreen() = Screen(
+    private fun alertsScreen() = Screen(
         viewModel = AlertsScreenViewModel(
+            onUpdateDumpPath = mainViewModel::updateDumpPath,
             onTemporaryPortAcceptedCallback = { newPort ->
-                mainViewModel.updateTemporaryPort(newPort)
-                MainActivity.mainActivity.unAlert(UserAlert.PortInUse::class.java)
-                MainActivity.mainActivity.attemptStartServer()
+                mainViewModel.updateTemporaryPort(port = newPort)
+                MainActivity.mainActivity.unAlert<UserAlert.PortInUse>()
+                println("onTemporaryPortAcceptedCallback server.value = ${server.value}")
+                if (server.value == null) {
+                    MainActivity.mainActivity.attemptStartServer()
+                } else {
+                    server.value?.restartServerSocket(port = newPort)
+                }
             },
             onNewDefaultPortAcceptedCallback = { newPort ->
-                mainViewModel.updateServerPort(newPort)
-                MainActivity.mainActivity.unAlert(UserAlert.PortInUse::class.java)
-                MainActivity.mainActivity.attemptStartServer()
+                mainViewModel.updateServerPort(port = newPort)
+                MainActivity.mainActivity.unAlert<UserAlert.PortInUse>()
+                println("onNewDefaultPortAcceptedCallback server.value = ${server.value}")
+                if (server.value == null) {
+                    MainActivity.mainActivity.attemptStartServer()
+                } else {
+                    server.value?.restartServerSocket(port = newPort)
+                }
             },
         ),
     ) { _, viewModel ->
@@ -222,9 +239,10 @@ class Navigator(private val mainViewModel: MainViewModel) {
                         onBackClicked = instance::pop,
                         debugNewThread = {
                             startSending(
-                                job = TransferJob(
+                                newJob = TransferJob(
                                     id = Random.nextInt(),
                                     description = "Sending PDFs to bob (${abs(Random.nextInt() % 100)})",
+                                    needDescription = false,
                                     destination = SettingsManager.Destination(
                                         name = "Bob's PC (${abs(Random.nextInt() % 100)})",
                                         ip = "192.168.1.1",
@@ -234,6 +252,8 @@ class Navigator(private val mainViewModel: MainViewModel) {
                                         TransferJob.Item(
                                             name = "File_${abs(Random.nextInt() % 100)}.pdf",
                                             uri = Uri.parse("https://www.google.com"),
+                                            isFile = true,
+                                            sizeBytes = Random.nextLong(),
                                         )
                                     },
                                     port = 5556,
