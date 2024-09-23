@@ -49,6 +49,7 @@ class MainActivity : ComponentActivity() {
             },
         )
     }
+
     fun openFolderPicker(onSelectItem: (Uri) -> Unit) {
         onUriPicked = onSelectItem
         fileFolderPickerIntent.launch(
@@ -126,7 +127,7 @@ class MainActivity : ComponentActivity() {
     fun unbindFromServer() {
         serverConnection?.let {
             if (isConnected) {
-                unbindService(it).also { println("testUnbind = ${++testUnbind}")}
+                unbindService(it).also { println("testUnbind = ${++testUnbind}") }
             }
         }
         serverConnection = null
@@ -172,7 +173,7 @@ class MainActivity : ComponentActivity() {
             this.putExtra("org.hmeadow.fittonia.password", password)
         }
         lastServerConnection = serverConnection
-        if(serverConnection == null) {
+        if (serverConnection == null) {
             serverConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                     isConnected = true
@@ -203,13 +204,13 @@ class MainActivity : ComponentActivity() {
         },
     )[MainViewModel::class.java]
 
-    inline fun <reified T:UserAlert> alert(alert: T) {
-        if(UserAlert.userAlerts.value.filterIsInstance<T>().size < alert.numAllowed) {
+    inline fun <reified T : UserAlert> alert(alert: T) {
+        if (UserAlert.userAlerts.value.filterIsInstance<T>().size < alert.numAllowed) {
             UserAlert.userAlerts.value += alert
         }
     }
 
-    inline fun <reified T: UserAlert> unAlert() {
+    inline fun <reified T : UserAlert> unAlert() {
         UserAlert.userAlerts.value = UserAlert.userAlerts.value.filter {
             it !is T
         }

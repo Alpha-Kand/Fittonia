@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
@@ -208,7 +209,7 @@ fun OverviewScreen(
                         HMSpacerWidth(width = 10)
                         Text(
                             modifier = Modifier.padding(top = 13.dp),
-                            text = "Permission was lost for your previously selected 'incoming transfers' folder. Please reselect or choose another folder.",
+                            text = stringResource(R.string.overview_screen_dump_permission_lost_notice),
                             style = paragraphStyle,
                         )
                     }

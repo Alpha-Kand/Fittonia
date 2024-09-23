@@ -32,12 +32,12 @@ sealed class UserAlert {
 
 @Composable
 fun UserAlert.title(): String = when (this) {
-    is UserAlert.PortInUse -> stringResource(id = R.string.notification_default_port_in_use_title)
-    is UserAlert.DumpLocationLost -> "'Incoming files' destination permissions lost."
+    is UserAlert.PortInUse -> stringResource(R.string.notification_default_port_in_use_title)
+    is UserAlert.DumpLocationLost -> stringResource(R.string.notification_default_dump_permission_lost_title)
 }
 
 @Composable
 fun UserAlert.description(): String = when (this) {
-    is UserAlert.PortInUse -> stringResource(id = R.string.notification_default_port_in_use_description, port)
-    is UserAlert.DumpLocationLost -> "The permission to access your previously selected 'Incoming files' destination has been lost or the destination has been moved/deleted. Please select a new destination."
+    is UserAlert.PortInUse -> stringResource(R.string.notification_default_port_in_use_description, port)
+    is UserAlert.DumpLocationLost -> stringResource(R.string.notification_default_dump_permission_lost_description)
 }

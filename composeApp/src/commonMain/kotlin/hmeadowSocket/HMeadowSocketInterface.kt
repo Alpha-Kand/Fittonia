@@ -37,9 +37,10 @@ interface HMeadowSocketInterface {
     )
 
     fun sendFile(
-        filePath: String, rename: String = "",
+        filePath: String,
+        rename: String = "",
         progressPrecision: Double,
-        onProgressUpdate: (bytes:Long) -> Unit,
+        onProgressUpdate: (bytes: Long) -> Unit,
     )
 
     fun receiveFile(
@@ -144,7 +145,7 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         filePath: String,
         rename: String,
         progressPrecision: Double,
-        onProgressUpdate: (bytes:Long) -> Unit,
+        onProgressUpdate: (bytes: Long) -> Unit,
     ) {
         val path = Path(filePath)
         val size = Files.size(path)
@@ -417,9 +418,10 @@ class HMeadowSocketInterfaceRealDebug(
     }
 
     override fun sendFile(
-        filePath: String, rename: String,
+        filePath: String,
+        rename: String,
         progressPrecision: Double,
-        onProgressUpdate: (bytes:Long) -> Unit,
+        onProgressUpdate: (bytes: Long) -> Unit,
     ) {
         printStatus("sendFile = (filePath: $filePath ) (rename: $rename )")
         super.sendFile(filePath, rename, progressPrecision, onProgressUpdate)

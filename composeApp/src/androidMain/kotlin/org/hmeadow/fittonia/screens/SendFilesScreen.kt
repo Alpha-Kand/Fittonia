@@ -1,9 +1,6 @@
 package org.hmeadow.fittonia.screens
 
 import SettingsManager
-import android.content.ContentResolver
-import android.net.Uri
-import android.webkit.MimeTypeMap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -59,7 +56,6 @@ import org.hmeadow.fittonia.screens.overviewScreen.Options
 import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
 import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
-import java.util.Locale
 
 class SendFilesScreenViewModel(
     private val onSaveOneTimeDestinationCallback: (

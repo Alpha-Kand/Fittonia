@@ -89,7 +89,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
             FOREGROUND_SERVICE_TYPE_DATA_SYNC,
         )
         if (serverSocket == null) {
-            if (initServerFromIntent(intent = intent).also { println("AndroidServer.onStartCommand() success = $it") }) {
+            if (initServerFromIntent(intent = intent)) {
                 launchServerJob()
                 println("START_STICKY")
                 return START_STICKY // If the service is killed, it will be automatically restarted.
@@ -243,7 +243,6 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                 ServerFlagsString.NEED_JOB_NAME -> "Job${abs(Random.nextInt()) % 100000}".also {
                     log("Server generated job name: $it", jobId = jobId)
                     server.sendString(it)
-
                 }
 
                 ServerFlagsString.HAVE_JOB_NAME -> server.receiveString().also {
@@ -280,9 +279,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                                     }
                             },
                             progressPrecision = 0.01f,
-                            onProgressUpdate = {
-                                //updateTransferJob()
-                            },
+                            onProgressUpdate = { },
                         )
                         server.sendContinue()
                     }

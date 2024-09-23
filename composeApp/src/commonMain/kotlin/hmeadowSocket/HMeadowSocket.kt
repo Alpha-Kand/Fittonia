@@ -86,7 +86,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         size: Long,
         rename: String = "",
         progressPrecision: Double = 0.01,
-        onProgressUpdate: (bytes:Long) -> Unit = {},
+        onProgressUpdate: (bytes: Long) -> Unit = {},
     ) = sendErrorWrapper {
         socketInterface.sendFile(
             stream = stream,
@@ -102,7 +102,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         filePath: String,
         rename: String = "",
         progressPrecision: Double = 0.01,
-        onProgressUpdate: (bytes:Long) -> Unit = {},
+        onProgressUpdate: (bytes: Long) -> Unit = {},
     ) = sendErrorWrapper {
         socketInterface.sendFile(
             filePath = filePath,

@@ -84,11 +84,13 @@ class Navigator(private val mainViewModel: MainViewModel) {
         )
     }
 
-    private fun overviewScreen() = Screen(viewModel = OverviewScreenViewModel(
-        onUpdateDumpPath = mainViewModel::updateDumpPath,
-    )) { _, viewModel ->
+    private fun overviewScreen() = Screen(
+        viewModel = OverviewScreenViewModel(
+            onUpdateDumpPath = mainViewModel::updateDumpPath,
+        ),
+    ) { _, viewModel ->
         OverviewScreen(
-            viewModel= viewModel,
+            viewModel = viewModel,
             onSendFilesClicked = {
                 push(sendFilesScreen())
             },
@@ -119,7 +121,6 @@ class Navigator(private val mainViewModel: MainViewModel) {
                 startSending(newJob = newJob)
                 pop()
             },
-            //onGetNewJobName = mainViewModel::getJobName,
         ),
     ) { data, viewModel ->
         SendFilesScreen(
