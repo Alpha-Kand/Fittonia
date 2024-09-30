@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_LETTERS
+import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_SYMBOLS
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 
 private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
@@ -32,12 +34,14 @@ class InputFlow(initial: String) : MutableStateFlow<String> by MutableStateFlow(
 fun FittoniaTextInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    filters: List<FittoniaInputFilter> = emptyList(),
     label: String? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
         modifier = modifier,
         label = label,
+        filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
     )
 }
@@ -46,11 +50,13 @@ fun FittoniaTextInput(
 fun FittoniaTextInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    filters: List<FittoniaInputFilter> = emptyList(),
     label: (@Composable () -> Unit)? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
         modifier = modifier,
+        filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         label = label,
     )
@@ -60,12 +66,14 @@ fun FittoniaTextInput(
 fun FittoniaNumberInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    filters: List<FittoniaInputFilter> = emptyList(),
     label: String? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
         modifier = modifier,
         label = label,
+        filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
 }
@@ -74,11 +82,13 @@ fun FittoniaNumberInput(
 fun FittoniaNumberInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    filters: List<FittoniaInputFilter> = emptyList(),
     label: (@Composable () -> Unit)? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
         modifier = modifier,
+        filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         label = label,
     )
@@ -89,12 +99,14 @@ private fun BaseFittoniaInput(
     inputFlow: InputFlow,
     keyboardOptions: KeyboardOptions,
     modifier: Modifier = Modifier,
+    filters: List<FittoniaInputFilter>,
     label: String? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
         modifier = modifier,
         keyboardOptions = keyboardOptions,
+        filters = filters,
         label = {
             label?.let {
                 Text(
@@ -112,6 +124,7 @@ private fun BaseFittoniaInput(
     inputFlow: InputFlow,
     keyboardOptions: KeyboardOptions,
     modifier: Modifier = Modifier,
+    filters: List<FittoniaInputFilter>,
     label: (@Composable () -> Unit)? = null,
 ) {
     Column {
@@ -122,6 +135,11 @@ private fun BaseFittoniaInput(
         BasicTextField2(
             modifier = modifier,
             value = inputFlow.collectAsState().value,
+            inputTransformation = { _, valueWithChanges ->
+                if (!filters.success(input = valueWithChanges.toString())) {
+                    valueWithChanges.revertAllChanges()
+                }
+            },
             onValueChange = { inputFlow.value = it },
             decorator = inputDecorator,
             keyboardOptions = keyboardOptions,
@@ -142,4 +160,21 @@ private val inputDecorator = TextFieldDecorator { inputField ->
     ) {
         inputField()
     }
+}
+
+enum class FittoniaInputFilter {
+    NO_SYMBOLS,
+    NO_LETTERS,
+}
+
+val socketPortFilters = listOf(NO_SYMBOLS, NO_LETTERS)
+
+private fun List<FittoniaInputFilter>.success(input: String): Boolean {
+    this.forEach { filter ->
+        when (filter) {
+            NO_SYMBOLS -> if (!input.all { it.isLetterOrDigit() }) return false
+            NO_LETTERS -> if (!input.all { it.isDigit() }) return false
+        }
+    }
+    return true
 }
