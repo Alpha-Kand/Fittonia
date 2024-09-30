@@ -27,6 +27,7 @@ import backgroundLayer2Colour
 import org.hmeadow.fittonia.MainActivity.Companion.imeHeight
 import org.hmeadow.fittonia.MainActivity.Companion.navBarHeight
 import org.hmeadow.fittonia.MainActivity.Companion.statusBarsHeight
+import org.hmeadow.fittonia.utility.applyIf
 import statusBarColour
 
 private enum class ScaffoldSectionsEnum {
@@ -39,6 +40,7 @@ fun FittoniaScaffold(
     header: (@Composable BoxScope.() -> Unit)? = null,
     footer: (@Composable BoxScope.() -> Unit)? = null,
     overlay: @Composable BoxScope.() -> Unit = {},
+    scrollable: Boolean = true,
 ) {
     val imeHeightLocal = imeHeight.collectAsState(initial = 0)
     val navBarHeightLocal = navBarHeight.collectAsState(initial = 0)
@@ -93,7 +95,12 @@ fun FittoniaScaffold(
             }.single().measure(constraints)
 
             val contentPlaceables = subcompose(ScaffoldSectionsEnum.CONTENT) {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                val scrollState = rememberScrollState()
+                Column(
+                    modifier = Modifier.applyIf(scrollable) {
+                        verticalScroll(scrollState)
+                    },
+                ) {
                     content()
                     Spacer(modifier = Modifier.requiredHeight(height = footerPlaceables.height.toDp()))
                 }
