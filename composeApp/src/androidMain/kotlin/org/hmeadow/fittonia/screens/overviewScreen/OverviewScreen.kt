@@ -130,7 +130,7 @@ class OverviewScreenViewModel(
 
     init {
         launch {
-            when (val state = MainActivity.mainActivity.createDumpDirectory(jobName = "ACCESS")) {
+            when (val state = MainActivity.mainActivity.createJobDirectory(jobName = "ACCESS")) {
                 is MainActivity.CreateDumpDirectory.Error -> {
                     needDumpAccess.update { true }
                     MainActivity.mainActivity.alert(UserAlert.DumpLocationLost)
