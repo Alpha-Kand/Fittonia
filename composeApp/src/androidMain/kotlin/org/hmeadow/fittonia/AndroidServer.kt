@@ -258,7 +258,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
             val totalExpectedItems = server.receiveInt()
             logDebug("totalExpectedItems: $totalExpectedItems", jobId = jobId)
-            val aaa = MainActivity.mainActivity.createDumpDirectory(
+            val aaa = MainActivity.mainActivity.createJobDirectory(
                 jobName = jobName,
                 print = {
                     this.logDebug(it, jobId = jobId)

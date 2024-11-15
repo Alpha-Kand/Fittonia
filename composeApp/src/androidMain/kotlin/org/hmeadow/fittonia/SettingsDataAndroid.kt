@@ -47,6 +47,7 @@ data class SettingsDataAndroid(
     val temporaryPort: Int? = null,
     val serverPassword: String? = null,
     val nextAutoJobName: Long = 0,
+    val debugSettings: DebugSettings = DebugSettings(),
 ) {
     @Serializable
     data class DumpPath(
@@ -62,6 +63,14 @@ data class SettingsDataAndroid(
             dumpPathForReal = uri.toString(),
         )
     }
+
+    @Serializable
+    data class DebugSettings(
+        val defaultNewDestinationName: String = "NewDestination",
+        val defaultNewDestinationPort: Int = 12345,
+        val defaultNewDestinationPassword: String = "password123",
+        val defaultNewDestinationIP: String = "0.0.0.0",
+    )
 }
 
 private fun queryName(uri: Uri): String? {

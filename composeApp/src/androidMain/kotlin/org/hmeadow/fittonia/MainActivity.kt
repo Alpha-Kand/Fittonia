@@ -17,7 +17,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.datastore.dataStore
@@ -92,11 +96,23 @@ class MainActivity : ComponentActivity() {
             this,
             object : GestureDetector.SimpleOnGestureListener() {
                 override fun onSingleTapUp(ev: MotionEvent): Boolean {
-                    currentFocus?.let { curFocus ->
-                        val inputMethodManager = (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
-                        inputMethodManager?.hideSoftInputFromWindow(curFocus.windowToken, 0)
-                        curFocus.clearFocus()
-                    }
+                    /*
+                    println("currentFocus: $currentFocus")
+                    currentFocus?.let { focus ->
+                        println("focus.clipBounds: ${focus.clipBounds}}")
+                        println("x: ${focus.x}")
+                        println("y: ${focus.y}")
+                        println("width: ${focus.width}")
+                        println("height: ${focus.height}")
+                        focus.clipBounds?.let { aaa ->
+                            println(aaa)
+                            if (!(ev.x >= aaa.left && ev.x <= aaa.right && ev.y >= aaa.top && ev.y <= aaa.bottom)) {
+                                val inputMethodManager = (getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+                                inputMethodManager?.hideSoftInputFromWindow(focus.windowToken, 0)
+                                focus.clearFocus()
+                            }
+                        }
+                    }*/
                     return false
                 }
             },
@@ -141,7 +157,7 @@ class MainActivity : ComponentActivity() {
 
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
         return event?.let {
-            gestureDetector.onTouchEvent(event)
+            //gestureDetector.onTouchEvent(event)
             super.dispatchTouchEvent(event)
         } ?: false
     }
@@ -225,27 +241,40 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    suspend fun createDumpDirectory(jobName: String, print: (String) -> Unit = {}): CreateDumpDirectory {
+    suspend fun createJobDirectory(jobName: String?, print: (String) -> Unit = {}): CreateDumpDirectory {
+        val foo = dataStore.data.first()
         try {
-            val dumpUri = Uri.parse(dataStore.data.first().dumpPath.dumpPathForReal)
+            val dumpUri = Uri.parse(foo.dumpPath.dumpPathForReal)
             print("'dumpPathForReal': $dumpUri")
 
             val dumpObject = DocumentFile.fromTreeUri(this, dumpUri)
             print("dumpObject: $dumpObject")
 
-            val directoryObject = dumpObject?.createDirectory(jobName)
-            print("directoryObject: $directoryObject")
-
-            val directoryUri = directoryObject?.uri
-            print("directoryUri: $directoryUri")
-
-            return if (directoryUri != null) {
-                CreateDumpDirectory.Success(uri = directoryUri)
-            } else {
-                CreateDumpDirectory.Failure
+            var nextAutoJobName = foo.nextAutoJobName
+            var limit = 100
+            var attemptJobName: String = jobName ?: "Job$nextAutoJobName"
+            while (true) {
+                if (dumpObject?.findFile(attemptJobName) == null) {
+                    val directoryObject = dumpObject?.createDirectory(attemptJobName)
+                    print("directoryObject: $directoryObject")
+                    val directoryUri = directoryObject?.uri
+                    print("directoryUri: $directoryUri")
+                    return if (directoryUri != null) {
+                        dataStore.updateData { it.copy(nextAutoJobName = ++nextAutoJobName) }
+                        CreateDumpDirectory.Success(uri = directoryUri)
+                    } else {
+                        CreateDumpDirectory.Failure
+                    }
+                }
+                attemptJobName = "${jobName ?: "Job"}$nextAutoJobName"
+                nextAutoJobName++
+                limit--
+                if (limit == 0) {
+                    throw RuntimeException("Could not create directory after 100 tries.")
+                }
             }
         } catch (e: Exception) {
-            return if (e.message?.contains("requires that you obtain access") == true) {
+            return if (e.message?.contains(other = "requires that you obtain access") == true) {
                 if (BuildConfig.DEBUG) {
                     e.printStackTrace()
                 }
@@ -267,4 +296,8 @@ class MainActivity : ComponentActivity() {
         val navBarHeight: MutableStateFlow<Int> = MutableStateFlow(0)
         val statusBarsHeight: MutableStateFlow<Int> = MutableStateFlow(0)
     }
+}
+
+val LocalFocusRequester = compositionLocalOf {
+    FocusRequester()
 }

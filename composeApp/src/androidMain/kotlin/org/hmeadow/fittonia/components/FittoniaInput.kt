@@ -18,7 +18,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -127,13 +129,18 @@ private fun BaseFittoniaInput(
     filters: List<FittoniaInputFilter>,
     label: (@Composable () -> Unit)? = null,
 ) {
+    val keyboard = LocalSoftwareKeyboardController.current
     Column {
         label?.let {
             it()
             HMSpacerHeight(height = 7)
         }
         BasicTextField2(
-            modifier = modifier,
+            modifier = modifier.onFocusEvent {
+                if (it.isFocused) {
+                    keyboard?.show()
+                }
+            },
             value = inputFlow.collectAsState().value,
             inputTransformation = { _, valueWithChanges ->
                 if (!filters.success(input = valueWithChanges.toString())) {

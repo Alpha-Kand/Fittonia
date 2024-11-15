@@ -1,6 +1,9 @@
 package org.hmeadow.fittonia.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -15,15 +18,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import backgroundLayer0Colour
 import backgroundLayer1Colour
 import backgroundLayer2Colour
+import org.hmeadow.fittonia.LocalFocusRequester
 import org.hmeadow.fittonia.MainActivity.Companion.imeHeight
 import org.hmeadow.fittonia.MainActivity.Companion.navBarHeight
 import org.hmeadow.fittonia.MainActivity.Companion.statusBarsHeight
@@ -45,7 +53,23 @@ fun FittoniaScaffold(
     val imeHeightLocal = imeHeight.collectAsState(initial = 0)
     val navBarHeightLocal = navBarHeight.collectAsState(initial = 0)
     val statusBarsHeightLocal = statusBarsHeight.collectAsState(initial = 0)
-    Box(modifier = Modifier.background(backgroundLayer0Colour)) {
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focusRequester = LocalFocusRequester.current
+    Box(
+        modifier = Modifier
+            .background(backgroundLayer0Colour)
+            .focusRequester(focusRequester)
+            .focusable()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = {
+                    println("NeoScaffold.click!")
+                    keyboard?.hide()
+                    focusRequester.requestFocus()
+                },
+            ),
+    ) {
         Box(
             modifier = Modifier
                 .align(alignment = Alignment.BottomEnd)

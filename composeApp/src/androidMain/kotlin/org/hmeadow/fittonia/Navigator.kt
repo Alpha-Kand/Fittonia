@@ -19,8 +19,8 @@ import org.hmeadow.fittonia.AndroidServer.Companion.server
 import org.hmeadow.fittonia.AndroidServer.Companion.startSending
 import org.hmeadow.fittonia.screens.AlertsScreen
 import org.hmeadow.fittonia.screens.AlertsScreenViewModel
-import org.hmeadow.fittonia.screens.DebugScreen
-import org.hmeadow.fittonia.screens.DebugScreenViewModel
+import org.hmeadow.fittonia.screens.debugScreen.DebugScreen
+import org.hmeadow.fittonia.screens.debugScreen.DebugScreenViewModel
 import org.hmeadow.fittonia.screens.NewDestinationScreen
 import org.hmeadow.fittonia.screens.NewDestinationScreenViewModel
 import org.hmeadow.fittonia.screens.SendFilesScreen
@@ -230,13 +230,17 @@ class Navigator(private val mainViewModel: MainViewModel) {
 
         fun goToDebugScreen() {
             instance.push(
-                Screen(viewModel = DebugScreenViewModel()) { data, viewModel ->
+                Screen(
+                    viewModel = DebugScreenViewModel(
+                        mainViewModel = instance.mainViewModel,
+                    ),
+                ) { data, viewModel ->
                     DebugScreen(
                         viewModel = viewModel,
                         data = data,
                         onResetSettingsClicked = instance.mainViewModel::resetSettings,
                         onClearDumpPath = instance.mainViewModel::clearDumpPath,
-                        onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
+                        //onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
                         onBackClicked = instance::pop,
                         debugNewThread = {
                             startSending(
