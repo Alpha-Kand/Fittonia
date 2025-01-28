@@ -79,7 +79,7 @@ class SendFilesScreenViewModel(
         selectedDestinationState,
         portState,
     ) { itemList, _, port ->
-        itemList.isNotEmpty() && port.isNotEmpty()
+        itemList.isNotEmpty() && port.text.isNotEmpty()
     }
 
     val canContinueOneTime = combine(
@@ -88,11 +88,11 @@ class SendFilesScreenViewModel(
         oneTimePasswordState,
         portState,
     ) { itemList, ip, password, port ->
-        itemList.isNotEmpty() && ip.isNotEmpty() && password.isNotEmpty() && port.isNotEmpty()
+        itemList.isNotEmpty() && ip.text.isNotEmpty() && password.text.isNotEmpty() && port.text.isNotEmpty()
     }
 
     fun onSaveOneTimeDestinationClicked() {
-        onSaveOneTimeDestinationCallback(oneTimeIpAddressState.value, oneTimePasswordState.value) { newDestination ->
+        onSaveOneTimeDestinationCallback(oneTimeIpAddressState.string, oneTimePasswordState.string) { newDestination ->
             selectedDestinationState.value = newDestination
         }
     }
@@ -124,19 +124,19 @@ class SendFilesScreenViewModel(
     }
 
     suspend fun onConfirmClicked() {
-        val newDescription = descriptionState.value.trim()
+        val newDescription = descriptionState.string.trim()
         onConfirmCallback(
             TransferJob(
                 id = -1,
                 description = newDescription,
-                needDescription = descriptionState.value.isEmpty(),
+                needDescription = descriptionState.string.isEmpty(),
                 destination = selectedDestinationState.value ?: SettingsManager.Destination(
                     name = "-",
-                    ip = oneTimeIpAddressState.value,
-                    password = oneTimePasswordState.value,
+                    ip = oneTimeIpAddressState.string,
+                    password = oneTimePasswordState.string,
                 ), // TODO
                 items = itemListState.value,
-                port = portState.value.toInt(),
+                port = portState.string.toInt(),
                 status = TransferStatus.Sending,
                 direction = TransferJob.Direction.OUTGOING,
             ),

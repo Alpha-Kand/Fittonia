@@ -1,6 +1,5 @@
 package org.hmeadow.fittonia.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -9,12 +8,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text2.BasicTextField2
-import androidx.compose.foundation.text2.TextFieldDecorator
+import androidx.compose.foundation.text.input.TextFieldDecorator
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,7 +30,13 @@ import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 
 private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
 
-class InputFlow(initial: String) : MutableStateFlow<String> by MutableStateFlow(initial)
+class InputFlow(initial: TextFieldState) : MutableStateFlow<TextFieldState> by MutableStateFlow(initial) {
+    constructor(initial: String) : this(TextFieldState(initial))
+
+    var string: String
+        get() = this.value.toString()
+        set(value) { this.value.setTextAndPlaceCursorAtEnd(value) }
+}
 
 @Composable
 fun FittoniaTextInput(
@@ -120,7 +126,6 @@ private fun BaseFittoniaInput(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BaseFittoniaInput(
     inputFlow: InputFlow,
@@ -135,26 +140,24 @@ private fun BaseFittoniaInput(
             it()
             HMSpacerHeight(height = 7)
         }
-        BasicTextField2(
+        BasicTextField(
             modifier = modifier.onFocusEvent {
                 if (it.isFocused) {
                     keyboard?.show()
                 }
             },
-            value = inputFlow.collectAsState().value,
-            inputTransformation = { _, valueWithChanges ->
-                if (!filters.success(input = valueWithChanges.toString())) {
-                    valueWithChanges.revertAllChanges()
+            state = inputFlow.value,
+            inputTransformation = {
+                if (!filters.success(input = inputFlow.value)) {
+                    revertAllChanges()
                 }
             },
-            onValueChange = { inputFlow.value = it },
             decorator = inputDecorator,
             keyboardOptions = keyboardOptions,
         )
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 private val inputDecorator = TextFieldDecorator { inputField ->
     Box(
         modifier = Modifier
@@ -176,11 +179,11 @@ enum class FittoniaInputFilter {
 
 val socketPortFilters = listOf(NO_SYMBOLS, NO_LETTERS)
 
-private fun List<FittoniaInputFilter>.success(input: String): Boolean {
+private fun List<FittoniaInputFilter>.success(input: TextFieldState): Boolean {
     this.forEach { filter ->
         when (filter) {
-            NO_SYMBOLS -> if (!input.all { it.isLetterOrDigit() }) return false
-            NO_LETTERS -> if (!input.all { it.isDigit() }) return false
+            NO_SYMBOLS -> if (!input.text.all { it.isLetterOrDigit() }) return false
+            NO_LETTERS -> if (!input.text.all { it.isDigit() }) return false
         }
     }
     return true

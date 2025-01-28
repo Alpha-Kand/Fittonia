@@ -78,7 +78,7 @@ class DebugScreenViewModel(
         mainViewModel.dataStore.data,
         defaultNewDestinationPort,
     ) { data, newDefaultDestinationPort ->
-        newDefaultDestinationPort != data.debugSettings.defaultNewDestinationPort.toString()
+        newDefaultDestinationPort.text != data.debugSettings.defaultNewDestinationPort.toString()
     }
 
     // Admin Create
@@ -88,10 +88,10 @@ class DebugScreenViewModel(
     init {
         launch {
             mainViewModel.dataStore.data.first().run {
-                defaultNewDestinationName.value = debugSettings.defaultNewDestinationName
-                defaultNewDestinationPort.value = debugSettings.defaultNewDestinationPort.toString()
-                defaultNewDestinationIP.value = debugSettings.defaultNewDestinationIP
-                defaultNewDestinationPassword.value = debugSettings.defaultNewDestinationPassword
+                defaultNewDestinationName.string = debugSettings.defaultNewDestinationName
+                defaultNewDestinationPort.string = debugSettings.defaultNewDestinationPort.toString()
+                defaultNewDestinationIP.string = debugSettings.defaultNewDestinationIP
+                defaultNewDestinationPassword.string = debugSettings.defaultNewDestinationPassword
             }
         }
         refreshIp()
@@ -128,7 +128,7 @@ class DebugScreenViewModel(
             destination = SettingsManager.Destination(
                 name = "${defaultNewDestinationName.value} ${abs(Random.nextInt() % 100)}",
                 ip = "${getIpNum()}.${getIpNum()}.${getIpNum()}.${getIpNum()}",
-                password = defaultNewDestinationPassword.value,
+                password = defaultNewDestinationPassword.string,
             ),
         )
     }
@@ -138,7 +138,7 @@ class DebugScreenViewModel(
             mainViewModel.dataStore.updateData {
                 it.copy(
                     debugSettings = it.debugSettings.copy(
-                        defaultNewDestinationPort = defaultNewDestinationPort.value.toIntOrNull()
+                        defaultNewDestinationPort = defaultNewDestinationPort.string.toIntOrNull()
                             ?: it.debugSettings.defaultNewDestinationPort,
                     ),
                 )

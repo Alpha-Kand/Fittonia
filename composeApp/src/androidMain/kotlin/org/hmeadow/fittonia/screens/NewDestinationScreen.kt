@@ -39,15 +39,15 @@ class NewDestinationScreenViewModel(
         ipAddressState,
         passwordState,
     ) { name, ip, password ->
-        name.isNotEmpty() && ip.isNotEmpty() && password.isNotEmpty()
+        name.text.isNotEmpty() && ip.text.isNotEmpty() && password.text.isNotEmpty()
     }
 
     fun onSaveNewDestination() {
         onSaveNewDestinationCallback(
             SettingsManager.Destination(
-                name = nameState.value,
-                ip = ipAddressState.value,
-                password = passwordState.value,
+                name = nameState.string,
+                ip = ipAddressState.string,
+                password = passwordState.string,
             ),
         )
     }
