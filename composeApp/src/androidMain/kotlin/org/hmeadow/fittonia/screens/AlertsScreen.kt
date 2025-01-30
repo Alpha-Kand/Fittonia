@@ -52,8 +52,8 @@ class AlertsScreenViewModel(
     val temporaryPort = InputFlow(initial = "")
     val newDefaultPort = InputFlow(initial = "")
 
-    suspend fun onTemporaryPortAccepted() = onTemporaryPortAcceptedCallback(temporaryPort.string.toInt())
-    suspend fun onNewDefaultPortAccepted() = onNewDefaultPortAcceptedCallback(newDefaultPort.string.toInt())
+    suspend fun onTemporaryPortAccepted() = onTemporaryPortAcceptedCallback(temporaryPort.text.toInt())
+    suspend fun onNewDefaultPortAccepted() = onNewDefaultPortAcceptedCallback(newDefaultPort.text.toInt())
 
     fun onDumpPathPicked(path: Uri) {
         onUpdateDumpPath(path)

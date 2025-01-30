@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,19 +24,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
 import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_LETTERS
 import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_SYMBOLS
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 
 private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
 
-class InputFlow(initial: TextFieldState) : MutableStateFlow<TextFieldState> by MutableStateFlow(initial) {
+class InputFlow(
+    val textState: TextFieldState,
+) : Flow<String> by snapshotFlow(block = { textState.text.toString() }) {
     constructor(initial: String) : this(TextFieldState(initial))
 
-    var string: String
-        get() = this.value.toString()
-        set(value) { this.value.setTextAndPlaceCursorAtEnd(value) }
+    var text: String
+        get() = textState.text.toString()
+        set(value) {
+            textState.setTextAndPlaceCursorAtEnd(value)
+        }
 }
 
 @Composable

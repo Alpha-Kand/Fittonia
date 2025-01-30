@@ -45,13 +45,14 @@ class WelcomeScreenViewModel(
         portFieldState,
         mainViewModel.dataStore.data,
     ) { passwordState, portState, dumpPathState ->
-        passwordState.text.isNotEmpty() && portState.text.isNotEmpty() && dumpPathState.dumpPath.dumpUriPath.isNotEmpty()
+        println("password = ${passwordState}, port = ${portState}, dump = ${dumpPathState.dumpPath.dumpUriPath}")
+        passwordState.isNotEmpty() && portState.isNotEmpty() && dumpPathState.dumpPath.dumpUriPath.isNotEmpty()
     }
 
     fun onContinue() {
         onContinueCallback(
-            serverPasswordState.string,
-            portFieldState.string.toInt(),
+            serverPasswordState.text,
+            portFieldState.text.toInt(),
         )
     }
 
@@ -78,8 +79,8 @@ fun WelcomeScreen(
                 if (BuildConfig.DEBUG) {
                     FittoniaButton(
                         onClick = {
-                            viewModel.portFieldState.string = "12345"
-                            viewModel.serverPasswordState.string = "password"
+                            viewModel.portFieldState.text = "12345"
+                            viewModel.serverPasswordState.text = "password"
                         },
                     ) {
                         ButtonText(text = "Debug Fill Values")
