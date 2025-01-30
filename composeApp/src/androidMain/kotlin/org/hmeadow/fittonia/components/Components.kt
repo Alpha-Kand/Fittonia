@@ -25,11 +25,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun HMSpacerHeight(height: Int) {
     Spacer(modifier = Modifier.height(height.dp))
+}
+
+@Composable
+fun HMSpacerHeight(height: Dp) {
+    Spacer(modifier = Modifier.height(height))
 }
 
 @Composable
