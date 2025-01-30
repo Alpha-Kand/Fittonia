@@ -1,6 +1,7 @@
 package org.hmeadow.fittonia.screens.debugScreen
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.HMSpacerHeight
@@ -22,9 +24,14 @@ fun DebugScreenAdminCreateTab(
     nextAutoJobNameMessage: String,
     onCreateJobDirectory: () -> Unit,
     onCreateNewDestination: () -> Unit,
+    footerHeight: Dp,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(start = 16.dp),
+    ) {
         Text(
             text = "AdminCreate",
             style = headingLStyle,
@@ -48,9 +55,9 @@ fun DebugScreenAdminCreateTab(
                 strokeCap = StrokeCap.Round,
             )
         }
-
         FittoniaButton(onClick = onCreateNewDestination) {
             ButtonText(text = "Create new destination")
         }
+        HMSpacerHeight(footerHeight)
     }
 }

@@ -1,11 +1,14 @@
 package org.hmeadow.fittonia.screens.debugScreen
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaNumberInput
 import org.hmeadow.fittonia.components.HMSpacerHeight
@@ -21,9 +24,14 @@ fun DebugScreenDefaultsTab(
     defaultNewDestinationIP: InputFlow,
     onSaveDefaults: () -> Unit,
     needToSave: Boolean,
+    footerHeight: Dp,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(start = 16.dp),
+    ) {
         Text(
             text = "Defaults",
             style = headingLStyle,
@@ -56,5 +64,6 @@ fun DebugScreenDefaultsTab(
         ) {
             ButtonText(text = "Save")
         }
+        HMSpacerHeight(footerHeight)
     }
 }

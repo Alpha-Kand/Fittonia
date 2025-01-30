@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.AndroidServer
 import org.hmeadow.fittonia.R
@@ -23,15 +25,22 @@ import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingSStyle
+import org.hmeadow.fittonia.utility.isLandscape
+import org.hmeadow.fittonia.utility.isXLARGE
 
 @Composable
 fun DebugScreenOverviewTab(
     modifier: Modifier = Modifier,
     viewModel: DebugScreenViewModel,
     data: SettingsDataAndroid,
+    footerHeight: Dp,
     onClearDumpPath: () -> Unit,
 ) {
-    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(start = 16.dp),
+    ) {
         Text(
             text = "Overview",
             style = headingLStyle,
@@ -43,7 +52,11 @@ fun DebugScreenOverviewTab(
                 Text(text = "Default Server Port:")
                 Text(text = "Temporary Server Port:")
                 Text(text = "Server Password:")
-                Text(text = "Dump Path:")
+                Text(text = "Dump 'URI' Path:")
+                Text(text = "Dump 'Readable' Path:")
+                Text(text = "Dump 'ForReal' Path:")
+                Text(text = "Orientation:")
+                Text(text = "Device Size:")
             }
             HMSpacerWidth(width = 10)
             Column {
@@ -89,6 +102,16 @@ fun DebugScreenOverviewTab(
                 ) {
                     Text(text = data.dumpPath.dumpPathForReal)
                 }
+                Text(
+                    text = if (isLandscape()) {
+                        "Landscape"
+                    } else {
+                        "Portrait"
+                    },
+                )
+                Text(
+                    text = if (isXLARGE()) "Tablet" else "Phone",
+                )
             }
         }
         HMSpacerHeight(height = 10)
@@ -120,5 +143,6 @@ fun DebugScreenOverviewTab(
                 }
             }
         } ?: Text(text = "OFFLINE")
+        HMSpacerHeight(footerHeight)
     }
 }
