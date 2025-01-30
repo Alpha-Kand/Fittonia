@@ -22,11 +22,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import backgroundLayer0Colour
 import backgroundLayer1Colour
@@ -44,7 +44,7 @@ private enum class ScaffoldSectionsEnum {
 
 @Composable
 fun FittoniaScaffold(
-    content: @Composable ColumnScope.() -> Unit,
+    content: @Composable ColumnScope.(footerHeight: Dp) -> Unit,
     header: (@Composable BoxScope.() -> Unit)? = null,
     footer: (@Composable BoxScope.() -> Unit)? = null,
     overlay: @Composable BoxScope.() -> Unit = {},
@@ -55,6 +55,11 @@ fun FittoniaScaffold(
     val statusBarsHeightLocal = statusBarsHeight.collectAsState(initial = 0)
     val keyboard = LocalSoftwareKeyboardController.current
     val focusRequester = LocalFocusRequester.current
+    val systemBottomHeight = if (imeHeightLocal.value > 0) {
+        imeHeightLocal.value
+    } else {
+        navBarHeightLocal.value
+    }
     Box(
         modifier = Modifier
             .background(backgroundLayer0Colour)
@@ -125,19 +130,15 @@ fun FittoniaScaffold(
                         verticalScroll(scrollState)
                     },
                 ) {
-                    content()
+                    content(footerPlaceables.height.toDp())
                     Spacer(modifier = Modifier.requiredHeight(height = footerPlaceables.height.toDp()))
                 }
             }.single().measure(
                 constraints.copy(
-                    maxHeight = run {
-                        val systemBottomHeight = if (imeHeightLocal.value > 0) {
-                            imeHeightLocal.value
-                        } else {
-                            navBarHeightLocal.value
-                        }
-                        constraints.maxHeight - headerPlaceables.height - systemBottomHeight
-                    },
+                    maxHeight = constraints.maxHeight
+                        .minus(headerPlaceables.height)
+                        .minus(systemBottomHeight)
+                        .plus(navBarHeightLocal.value),
                 ),
             )
             val overlayPlaceables = subcompose(ScaffoldSectionsEnum.OVERLAY) {
@@ -150,14 +151,10 @@ fun FittoniaScaffold(
                 footerPlaceables.let { footer ->
                     footer.place(
                         x = 0,
-                        y = run {
-                            val systemBottomHeight = if (imeHeightLocal.value > 0) {
-                                imeHeightLocal.value
-                            } else {
-                                navBarHeightLocal.value
-                            }
-                            (constraints.maxHeight - footer.height + navBarHeightLocal.value) - systemBottomHeight
-                        },
+                        y = constraints.maxHeight
+                            .minus(footer.height)
+                            .minus(systemBottomHeight)
+                            .plus(navBarHeightLocal.value),
                         zIndex = 1f,
                     )
                 }
