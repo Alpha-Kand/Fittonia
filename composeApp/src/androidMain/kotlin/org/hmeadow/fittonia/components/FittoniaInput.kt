@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldDecorator
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.Text
@@ -47,6 +48,7 @@ class InputFlow(
 fun FittoniaTextInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
     label: String? = null,
 ) {
@@ -54,6 +56,7 @@ fun FittoniaTextInput(
         inputFlow = inputFlow,
         modifier = modifier,
         label = label,
+        lineLimits = lineLimits,
         filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
     )
@@ -63,12 +66,14 @@ fun FittoniaTextInput(
 fun FittoniaTextInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
     label: (@Composable () -> Unit)? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
         modifier = modifier,
+        lineLimits = lineLimits,
         filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         label = label,
@@ -79,6 +84,7 @@ fun FittoniaTextInput(
 fun FittoniaNumberInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
     label: String? = null,
 ) {
@@ -86,6 +92,7 @@ fun FittoniaNumberInput(
         inputFlow = inputFlow,
         modifier = modifier,
         label = label,
+        lineLimits = lineLimits,
         filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
@@ -95,12 +102,14 @@ fun FittoniaNumberInput(
 fun FittoniaNumberInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
     label: (@Composable () -> Unit)? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
         modifier = modifier,
+        lineLimits = lineLimits,
         filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         label = label,
@@ -111,14 +120,16 @@ fun FittoniaNumberInput(
 private fun BaseFittoniaInput(
     inputFlow: InputFlow,
     keyboardOptions: KeyboardOptions,
-    modifier: Modifier = Modifier,
+    lineLimits: TextFieldLineLimits,
     filters: List<FittoniaInputFilter>,
+    modifier: Modifier = Modifier,
     label: String? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
         modifier = modifier,
         keyboardOptions = keyboardOptions,
+        lineLimits = lineLimits,
         filters = filters,
         label = {
             label?.let {
@@ -135,8 +146,9 @@ private fun BaseFittoniaInput(
 private fun BaseFittoniaInput(
     inputFlow: InputFlow,
     keyboardOptions: KeyboardOptions,
-    modifier: Modifier = Modifier,
     filters: List<FittoniaInputFilter>,
+    lineLimits: TextFieldLineLimits,
+    modifier: Modifier = Modifier,
     label: (@Composable () -> Unit)? = null,
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
@@ -151,9 +163,10 @@ private fun BaseFittoniaInput(
                     keyboard?.show()
                 }
             },
-            state = inputFlow.value,
+            state = inputFlow.textState,
+            lineLimits = lineLimits,
             inputTransformation = {
-                if (!filters.success(input = inputFlow.value)) {
+                if (!filters.success(input = inputFlow.textState)) {
                     revertAllChanges()
                 }
             },
