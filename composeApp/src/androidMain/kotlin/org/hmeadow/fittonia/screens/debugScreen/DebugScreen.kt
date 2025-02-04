@@ -135,6 +135,7 @@ fun DebugScreen(
     data: SettingsDataAndroid,
     onResetSettingsClicked: () -> Unit,
     onClearDumpPath: () -> Unit,
+    onRemoveDestinationClicked: (SettingsManager.Destination) -> Unit,
     onBackClicked: () -> Unit,
     debugNewThread: suspend () -> Unit,
     debugNewDestination: () -> Unit,
@@ -158,8 +159,17 @@ fun DebugScreen(
                                 .width(maxWidth)
                                 .height(maxHeight),
                             viewModel = viewModel,
+                            footerHeight = footerHeight,
+                        )
+                    },
+                    "Data Store" to { maxWidth, maxHeight ->
+                        DebugScreenDataStoreTab(
+                            modifier = Modifier
+                                .width(maxWidth)
+                                .height(maxHeight),
                             data = data,
                             onClearDumpPath = onClearDumpPath,
+                            onRemoveDestinationClicked = onRemoveDestinationClicked,
                             footerHeight = footerHeight,
                         )
                     },

@@ -240,7 +240,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                         data = data,
                         onResetSettingsClicked = instance.mainViewModel::resetSettings,
                         onClearDumpPath = instance.mainViewModel::clearDumpPath,
-                        //onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
+                        onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
                         onBackClicked = instance::pop,
                         debugNewThread = {
                             startSending(
