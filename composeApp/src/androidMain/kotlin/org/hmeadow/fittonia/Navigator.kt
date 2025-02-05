@@ -216,7 +216,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
     }
 
     private fun pop() {
-        screenStack.removeLast()
+        screenStack.removeAt(screenStack.lastIndex)
         currentScreen = screenStack.last()
     }
 
