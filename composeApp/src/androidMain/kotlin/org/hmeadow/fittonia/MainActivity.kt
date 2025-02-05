@@ -76,13 +76,10 @@ class MainActivity : ComponentActivity() {
     private fun initFileFolderPickerIntent() {
         fileFolderPickerIntent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
-                result.data?.data?.let {
-                    println(it.scheme)
-                    println(it.encodedPath)
-                    println(it.pathSegments)
-                    println(it.path)
-                    println(it.toString())
-                    onUriPicked(it)
+                result.data?.data?.let { uri ->
+                    onUriPicked(uri)
+                    val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    contentResolver.takePersistableUriPermission(uri, takeFlags)
                 }
             }
         }
@@ -231,7 +228,6 @@ class MainActivity : ComponentActivity() {
 
     interface CreateDumpDirectory {
         class Success(val uri: Uri) : CreateDumpDirectory
-        object Failure : CreateDumpDirectory
         interface Error : CreateDumpDirectory {
             object PermissionDenied : Error
             object Other : Error
@@ -260,7 +256,7 @@ class MainActivity : ComponentActivity() {
                         dataStore.updateData { it.copy(nextAutoJobName = ++nextAutoJobName) }
                         CreateDumpDirectory.Success(uri = directoryUri)
                     } else {
-                        CreateDumpDirectory.Failure
+                        CreateDumpDirectory.Error.PermissionDenied
                     }
                 }
                 attemptJobName = "${jobName ?: "Job"}$nextAutoJobName"
