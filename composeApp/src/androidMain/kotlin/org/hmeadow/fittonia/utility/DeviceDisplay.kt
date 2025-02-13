@@ -20,11 +20,12 @@ fun isXLARGE(): Boolean {
 }
 
 fun MainActivity.inchesToDp(inches: Float): Dp {
-    return (TypedValue.applyDimension(
+    val dimension = TypedValue.applyDimension(
         /* unit = */ COMPLEX_UNIT_IN,
         /* value = */ inches,
         /* metrics = */ resources.displayMetrics,
-    ) / resources.displayMetrics.density).dp
+    )
+    return (dimension / resources.displayMetrics.density).dp
 }
 
 fun MainActivity.inchesToPx(inches: Float): Float {

@@ -45,7 +45,6 @@ class WelcomeScreenViewModel(
         portFieldState,
         mainViewModel.dataStore.data,
     ) { passwordState, portState, dumpPathState ->
-        println("password = ${passwordState}, port = ${portState}, dump = ${dumpPathState.dumpPath.dumpUriPath}")
         passwordState.isNotEmpty() && portState.isNotEmpty() && dumpPathState.dumpPath.dumpUriPath.isNotEmpty()
     }
 
