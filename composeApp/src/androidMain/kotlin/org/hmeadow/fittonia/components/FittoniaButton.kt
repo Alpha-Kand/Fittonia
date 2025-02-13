@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -164,12 +162,7 @@ fun FittoniaButton(
         onClick = onClick,
         content = {
             if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.requiredSize(17.dp),
-                    color = type.contentColour,
-                    strokeWidth = 4.dp,
-                    strokeCap = StrokeCap.Round,
-                )
+                FittoniaLoadingIndicator(colour = type.contentColour)
             } else {
                 FittoniaButtonScope(type = type, enabled = enabled).content()
             }
