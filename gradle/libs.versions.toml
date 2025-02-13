@@ -1,34 +1,34 @@
 [versions]
 
 # Core
-android-compileSdk = "35"
+agp = "8.8.0"
+kotlin = "2.1.10"
+compose-plugin = "1.6.11"
 android-minSdk = "29"
 android-targetSdk = "35"
-agp = "8.8.0"
-kotlin = "2.0.0"
-compose-plugin = "1.6.10"
+android-compileSdk = "35"
 
 # Shared
-kotlinSerialization = "2.0.0"
-kotlinxCollectionsImmutable = "0.3.5"
+kotlinSerialization = "2.1.10"
 kotlinxSerializationJson = "1.7.3"
+kotlinxCollectionsImmutable = "0.3.5"
 
 # Android
 datastore = "1.1.2"
 fragmentKtx = "1.8.5"
-androidx-activityCompose = "1.10.0"
 documentfile = "1.0.1"
+androidx-activityCompose = "1.10.0"
 
 # Unit Tests
-ktlint = "0.47.1"
 mockk = "1.13.12"
 junit = "4.13.2"
+kover = "0.9.1"
+ktlint = "0.47.1"
 junitJupiterApi = "5.11.4"
-kover = "0.7.5"
 kotlinx-coroutines-core = "1.9.0"
 
 # Settings Writing/Reading
-jacksonModuleKotlin = "2.11.4"
+jacksonModuleKotlin = "2.12.7"
 
 # Libraries
 kotterJvm = "1.1.1"
@@ -42,8 +42,8 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 
 # Shared
 kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlinSerialization" }
-kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 
 # Android
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
@@ -52,14 +52,14 @@ androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 
 # Unit Tests
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+kover = { group = "org.jetbrains.kotlinx", name = "kover-gradle-plugin", version.ref = "kover" }
 ktlintlib = { module = "com.pinterest:ktlint", version.ref = "ktlint" }
 mockk-library = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiterApi" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiterApi" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiterApi" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junitJupiterApi" }
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiterApi" }
-kover = { group = "org.jetbrains.kotlinx", name = "kover-gradle-plugin", version.ref = "kover" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-core" }
 
 # Settings Writing/Reading
@@ -67,18 +67,18 @@ jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-
 
 # Libraries
 kotter-library = { module = "com.varabyte.kotter:kotter-jvm", version.ref = "kotterJvm" }
-androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCryptoKtx" }
+androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 
 [plugins]
 
 # Core
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
-androidApplication = { id = "com.android.application", version.ref = "agp" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin"}
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 
 # Unit Tests
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

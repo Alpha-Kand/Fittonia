@@ -50,16 +50,19 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlin.serialization)
         }
+        commonTest.dependencies {
+            api(libs.mockk.library)
+            api(libs.junit.jupiter.api)
+        }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.jackson.module.kotlin)
+
+            api(libs.mockk.library)
+            api(libs.junit.jupiter.api)
+            implementation(libs.junit)
         }
         desktopTest.dependencies {
-            koverReport {
-                defaults {
-                    mergeWith("release")
-                }
-            }
             implementation(kotlin("test-common"))
             implementation(kotlin("test-annotations-common"))
             api(libs.mockk.library)
@@ -71,6 +74,11 @@ kotlin {
             api(libs.kotlinx.coroutines.test)
             api(libs.kover)
         }
+    }
+    sourceSets.androidMain.dependencies {
+        api(libs.mockk.library)
+        api(libs.junit.jupiter.api)
+        implementation(kotlin("test"))
     }
 }
 
@@ -101,6 +109,8 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            merges += "META-INF/LICENSE.md"
+            merges += "META-INF/LICENSE-notice.md"
         }
     }
     buildTypes {
@@ -150,6 +160,21 @@ dependencies {
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlin.serialization)
+
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(kotlin("test"))
+    androidTestImplementation(libs.mockk.library)
+    androidTestImplementation(libs.junit.jupiter.api)
+}
+
+kover {
+    reports{
+        filters {
+            excludes {
+                androidGeneratedClasses()
+            }
+        }
+    }
 }
 
 val ktlintOutputDir = "${project.layout.buildDirectory}/reports/ktlint/"
