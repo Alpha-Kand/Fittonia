@@ -51,8 +51,9 @@ interface HMeadowSocketInterface {
 
     fun receiveFile(
         onOutputStream: (fileName: String) -> OutputStream?,
-        progressPrecision: Float,
-        onProgressUpdate: (progress: Float) -> Unit,
+        progressPrecision: Double,
+        beforeDownload: (totalBytes: Long, name: String) -> Unit,
+        onProgressUpdate: (progress: Long) -> Unit,
     )
 
     fun sendString(message: String)
@@ -200,18 +201,21 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
 
     override fun receiveFile(
         onOutputStream: (fileName: String) -> OutputStream?,
-        progressPrecision: Float,
-        onProgressUpdate: (progress: Float) -> Unit,
+        progressPrecision: Double,
+        beforeDownload: (totalBytes: Long, fileName: String) -> Unit,
+        onProgressUpdate: (progress: Long) -> Unit,
     ) {
         // 1. Get total file size in bytes.
-        var transferByteCount = receiveLong()
-        val target = transferByteCount
+        val size = receiveLong()
+        var transferByteCount = size
         // 2. Get file name.
         val fileName = receiveString()
+        beforeDownload(transferByteCount, fileName)
         // 3. Receive and write file data.
         val step = (transferByteCount * progressPrecision).toLong()
         var currentStep = step
-        onOutputStream(fileName)?.use { kerchow ->
+        var remainingBytes = transferByteCount
+        onOutputStream(fileName)?.use { stream ->
             if (transferByteCount == 0L) {
                 // File to transfer is empty, just create a new empty file.
             } else {
@@ -221,11 +225,11 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
                     if (readByteArray.isNotEmpty()) {
                         // Write data to file.
                         transferByteCount -= BUFFER_SIZE_LONG
-                        kerchow.write(readByteArray)
-
-                        if ((target - transferByteCount) > currentStep) {
+                        stream.write(readByteArray)
+                        remainingBytes -= readByteArray.size
+                        if ((size - remainingBytes) > currentStep) {
                             currentStep += step
-                            onProgressUpdate(target / (target - transferByteCount).toFloat())
+                            onProgressUpdate(size - remainingBytes)
                         }
                     }
                 }

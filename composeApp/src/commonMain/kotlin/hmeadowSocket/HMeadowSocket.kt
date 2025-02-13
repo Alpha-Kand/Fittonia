@@ -47,6 +47,8 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         }
     }
 
+    private val history = mutableListOf<String>()
+
     @Throws(FailedToReceiveException::class)
     private fun <T> receiveErrorWrapper(receive: () -> T): T {
         try {
@@ -54,6 +56,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         } catch (e: Exception) {
             println(e.message)
             this.close()
+            history.forEach { println(it) } // TODO HIDE FROM RELEASE.
             throw FailedToReceiveException(e)
         }
     }
@@ -64,21 +67,42 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
             send()
         } catch (e: Exception) {
             this.close()
+            history.forEach { println(it) } // TODO HIDE FROM RELEASE.
             throw FailedToSendException(e)
         }
     }
 
-    fun sendInt(message: Int) = sendErrorWrapper { socketInterface.sendInt(message) }
-    fun receiveInt() = receiveErrorWrapper { socketInterface.receiveInt() }
+    fun sendInt(message: Int) = sendErrorWrapper {
+        socketInterface.sendInt(message)
+        history.add("SendInt -> $message")
+    }
 
-    fun sendLong(message: Long) = sendErrorWrapper { socketInterface.sendLong(message) }
-    fun receiveLong() = receiveErrorWrapper { socketInterface.receiveLong() }
+    fun receiveInt() = receiveErrorWrapper { socketInterface.receiveInt().also { history.add("ReceiveInt -> $it") } }
 
-    fun sendBoolean(message: Boolean) = sendErrorWrapper { socketInterface.sendBoolean(message) }
-    fun receiveBoolean() = receiveErrorWrapper { socketInterface.receiveBoolean() }
+    fun sendLong(message: Long) = sendErrorWrapper {
+        socketInterface.sendLong(message)
+        history.add("SendLong -> $message")
+    }
 
-    fun sendString(message: String) = sendErrorWrapper { socketInterface.sendString(message) }
-    fun receiveString() = receiveErrorWrapper { socketInterface.receiveString() }
+    fun receiveLong() = receiveErrorWrapper { socketInterface.receiveLong().also { history.add("ReceiveLong -> $it") } }
+
+    fun sendBoolean(message: Boolean) = sendErrorWrapper {
+        socketInterface.sendBoolean(message)
+        history.add("SendBoolean -> $message")
+    }
+
+    fun receiveBoolean() = receiveErrorWrapper {
+        socketInterface.receiveBoolean().also { history.add("ReceiveBoolean -> $it") }
+    }
+
+    fun sendString(message: String) = sendErrorWrapper {
+        socketInterface.sendString(message)
+        history.add("SendString -> $message")
+    }
+
+    fun receiveString() = receiveErrorWrapper {
+        socketInterface.receiveString().also { history.add("ReceiveString -> $it") }
+    }
 
     fun sendFile(
         stream: InputStream,
@@ -96,6 +120,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
             progressPrecision = progressPrecision,
             onProgressUpdate = onProgressUpdate,
         )
+        history.add("SendFile -> $name")
     }
 
     fun sendFile(
@@ -110,6 +135,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
             progressPrecision = progressPrecision,
             onProgressUpdate = onProgressUpdate,
         )
+        history.add("SendFile -> $filePath")
     }
 
     fun receiveFile(
@@ -121,23 +147,31 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
             destination = destination,
             prefix = prefix,
             suffix = suffix,
-        )
+        ).also { history.add("ReceiveFile -> $it") }
     }
 
     fun receiveFile(
         onOutputStream: (fileName: String) -> OutputStream?,
-        progressPrecision: Float = 0.01f,
-        onProgressUpdate: (progress: Float) -> Unit = {},
+        progressPrecision: Double = 0.01,
+        beforeDownload: (totalBytes: Long, name: String) -> Unit = { _, _ -> },
+        onProgressUpdate: (progress: Long) -> Unit = {},
     ) = receiveErrorWrapper {
         socketInterface.receiveFile(
             onOutputStream = onOutputStream,
             progressPrecision = progressPrecision,
+            beforeDownload = beforeDownload,
             onProgressUpdate = onProgressUpdate,
-        )
+        ).also { history.add("ReceiveFile -> $it") }
     }
 
-    fun sendContinue() = sendErrorWrapper { socketInterface.sendContinue() }
-    fun receiveContinue() = receiveErrorWrapper { socketInterface.receiveContinue() }
+    fun sendContinue() = sendErrorWrapper {
+        socketInterface.sendContinue()
+        history.add("SendContinue")
+    }
+
+    fun receiveContinue() = receiveErrorWrapper {
+        socketInterface.receiveContinue().also { history.add("ReceiveContinue") }
+    }
 
     abstract fun close()
 
