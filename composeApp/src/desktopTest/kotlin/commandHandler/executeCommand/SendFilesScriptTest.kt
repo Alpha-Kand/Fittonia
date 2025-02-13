@@ -36,10 +36,10 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
     )
 
     @BeforeEach
-    fun foo() {
-        every { SettingsManager.settingsManager.checkPassword(any()) } returns true
-        every { SettingsManager.settingsManager.settings.dumpPath } returns "dump path"
-        every { SettingsManager.settingsManager.getAutoJobName() } returns "job name"
+    fun foo() { // TODO RENAME
+        every { SettingsManagerDesktop.settingsManager.checkPassword(any()) } returns true
+        every { SettingsManagerDesktop.settingsManager.settings.dumpPath } returns "dump path"
+        every { SettingsManagerDesktop.settingsManager.getAutoJobName() } returns "job name"
 
         mockkStatic("commandHandler.executeCommand.sendExecution.SendFilesExecutionKt")
 

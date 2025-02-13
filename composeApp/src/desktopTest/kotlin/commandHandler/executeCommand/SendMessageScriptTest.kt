@@ -2,7 +2,7 @@ package commandHandler.executeCommand
 
 import BaseSocketScriptTest
 import DesktopServer
-import SettingsManager
+import SettingsManagerDesktop
 import UnitTest
 import commandHandler.SendMessageCommand
 import commandHandler.executeCommand.sendExecution.sendMessageExecution
@@ -19,7 +19,7 @@ private class SendMessageScriptTest : BaseSocketScriptTest() {
         setupBlock = {
             mockkStatic(::setupSendCommandClient)
             every { setupSendCommandClient(any()) } returns generateClient()
-            every { SettingsManager.settingsManager.checkPassword(any()) } returns true
+            every { SettingsManagerDesktop.settingsManager.checkPassword(any()) } returns true
         },
         {
             sendMessageExecution(

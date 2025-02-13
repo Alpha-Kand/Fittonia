@@ -1,6 +1,6 @@
 package commandHandler.executeCommand
 
-import BaseMockkTest
+import DesktopBaseMockkTest
 import OutputIO
 import UnitTest
 import commandHandler.DecodeIPCodeCommand
@@ -12,7 +12,7 @@ import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.compose.resources.getString
 
-private class DecodeIpCodeExecutionTest : BaseMockkTest() {
+private class DecodeIpCodeExecutionTest : DesktopBaseMockkTest() {
 
     @UnitTest
     fun default() = runTest {

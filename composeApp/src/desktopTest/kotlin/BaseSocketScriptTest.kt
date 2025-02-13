@@ -3,19 +3,21 @@ import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketInterface
 import hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
-import java.net.InetAddress
+import java.io.InputStream
+import java.io.OutputStream
 import java.net.Socket
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 
-abstract class BaseSocketScriptTest : BaseMockkTest() {
+abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
 
     private enum class TestFlags(val value: Int) {
         SEND_INT(value = 100),
@@ -64,6 +66,7 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
         serverLists.clear()
     }
 
+    @OptIn(DelicateCoroutinesApi::class) // These are tests so using 'GlobalScope' is fairly safe.
     fun runSocketScriptTest2(
         setupBlock: TestScope.() -> Unit = {},
         vararg testBlocks: suspend TestScope.() -> Unit,
@@ -167,7 +170,7 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
 
     fun generateClient(key: String = "default") = synchronized(Lock) {
         HMeadowSocketClient(
-            ipAddress = InetAddress.getByName("localhost"),
+            ipAddress = "localhost",
             port = 0,
             handshakeTimeoutMillis = 0,
             socketInterface = generateSocketInterface(
@@ -214,6 +217,17 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
         override fun sendContinue() = send(flag = TestFlags.SEND_CONTINUE, message = "continue")
 
         override fun receiveBoolean() = receive(flag = TestFlags.RECEIVE_BOOLEAN) { it.toBoolean() }
+        override fun sendFile(
+            stream: InputStream,
+            name: String,
+            size: Long,
+            rename: String,
+            progressPrecision: Double,
+            onProgressUpdate: (bytes: Long) -> Unit,
+        ) {
+            TODO("Not yet implemented")
+        }
+
         override fun sendBoolean(message: Boolean) = send(flag = TestFlags.SEND_BOOLEAN, message = message.toString())
 
         override fun receiveFile(
@@ -222,9 +236,20 @@ abstract class BaseSocketScriptTest : BaseMockkTest() {
             suffix: String,
         ): Pair<String, String> = receive(flag = TestFlags.RECEIVE_FILE) { "absolutePath" to "fileName" }
 
+        override fun receiveFile(
+            onOutputStream: (fileName: String) -> OutputStream?,
+            progressPrecision: Double,
+            beforeDownload: (totalBytes: Long, name: String) -> Unit,
+            onProgressUpdate: (progress: Long) -> Unit,
+        ) {
+            TODO("Not yet implemented")
+        }
+
         override fun sendFile(
             filePath: String,
             rename: String,
+            progressPrecision: Double,
+            onProgressUpdate: (bytes: Long) -> Unit,
         ) = send(flag = TestFlags.SEND_FILE, message = Pair(filePath, rename).toString())
 
         /*

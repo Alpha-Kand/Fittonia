@@ -4,8 +4,6 @@ import com.varabyte.kotter.runtime.RunScope
 import com.varabyte.kotter.runtime.concurrent.ConcurrentScopedData
 import fileOperations.FileOperations
 import fileOperations.FittoniaTempFileBase
-import io.mockk.MockKAnnotations
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
@@ -13,15 +11,11 @@ import io.mockk.mockkObject
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 
-abstract class BaseMockkTest {
+abstract class DesktopBaseMockkTest : BaseMockkTest() {
 
     @BeforeEach
-    fun beforeEachBaseMockk() {
-        MockKAnnotations.init(this)
-
-        // Config
-        mockkObject(Config)
-        every { Config.IS_MOCKING } returns true
+    override fun beforeEachBaseMockk() {
+        super.beforeEachBaseMockk()
 
         // Kotter
         kotter = mockk(relaxed = true)
@@ -39,15 +33,15 @@ abstract class BaseMockkTest {
         mockkObject(FileOperations.FileOperationMock)
 
         // SettingsManager
-        mockkObject(SettingsManager.settingsManager)
+        mockkObject(SettingsManagerDesktop.settingsManager)
 
         // FittoniaTempFile
         mockkObject(FittoniaTempFileBase.FittoniaTempFileMock.TempFileLines)
     }
 
     @AfterEach
-    fun afterEachBaseMockk() {
-        clearAllMocks()
+    override fun afterEachBaseMockk() {
+        super.afterEachBaseMockk()
         OutputIO.flush()
     }
 

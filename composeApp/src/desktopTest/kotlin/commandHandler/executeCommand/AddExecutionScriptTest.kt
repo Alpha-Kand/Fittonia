@@ -19,9 +19,9 @@ private class AddExecutionScriptTest : BaseSocketScriptTest() {
         setupBlock = {
             mockkStatic(::setupSendCommandClient)
             every { setupSendCommandClient(any()) } returns generateClient()
-            every { SettingsManager.settingsManager.settings.destinations } returns emptyList()
-            every { SettingsManager.settingsManager.addDestination(any(), any(), any()) } returns Unit
-            every { SettingsManager.settingsManager.checkPassword(any()) } returns true
+            every { SettingsManagerDesktop.settingsManager.settings.destinations } returns emptyList()
+            every { SettingsManagerDesktop.settingsManager.addDestination(any(), any(), any()) } returns Unit
+            every { SettingsManagerDesktop.settingsManager.checkPassword(any()) } returns true
         },
         {
             addExecution(

@@ -1,6 +1,6 @@
 package commandHandler.executeCommand.sendExecution.helpers
 
-import BaseMockkTest
+import DesktopBaseMockkTest
 import UnitTest
 import fileOperations.FileOperations
 import fileOperations.FittoniaTempFileBase.FittoniaBufferedWriterBase.BufferedWriterFileLines
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import kotlin.io.path.Path
 
-private class SourceFileListManagerTest : BaseMockkTest() {
+private class SourceFileListManagerTest : DesktopBaseMockkTest() {
 
     @BeforeEach
     fun beforeEach() {

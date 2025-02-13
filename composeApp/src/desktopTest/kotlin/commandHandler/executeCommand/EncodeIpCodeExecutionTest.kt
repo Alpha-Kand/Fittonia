@@ -1,6 +1,6 @@
 package commandHandler.executeCommand
 
-import BaseMockkTest
+import DesktopBaseMockkTest
 import OutputIO
 import UnitTest
 import commandHandler.IPCodeCommand
@@ -10,7 +10,7 @@ import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
 import java.net.Inet4Address
 
-private class EncodeIpCodeExecutionTest : BaseMockkTest() {
+private class EncodeIpCodeExecutionTest : DesktopBaseMockkTest() {
 
     @UnitTest
     fun default() = runTest {

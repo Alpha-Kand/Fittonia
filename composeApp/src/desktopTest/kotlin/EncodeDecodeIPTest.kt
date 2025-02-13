@@ -2,7 +2,7 @@ import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.assertThrows
 
-private class EncodeDecodeIPTest : BaseMockkTest() {
+private class EncodeDecodeIPTest : DesktopBaseMockkTest() {
 
     @UnitTest
     fun encodeDecodeSuccess() = runTest {
