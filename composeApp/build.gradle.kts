@@ -39,6 +39,7 @@ kotlin {
             implementation(libs.androidx.fragment.ktx)
         }
         commonMain.dependencies {
+            implementation(compose.preview)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
@@ -49,6 +50,7 @@ kotlin {
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlin.serialization)
+            implementation(libs.androidx.material3.common)
         }
         commonTest.dependencies {
             api(libs.mockk.library)
