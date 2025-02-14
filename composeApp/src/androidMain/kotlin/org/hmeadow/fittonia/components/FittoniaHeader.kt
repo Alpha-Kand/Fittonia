@@ -23,6 +23,9 @@ import headerBackgroundColour
 import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.Navigator
 import org.hmeadow.fittonia.R
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.components.FittoniaButtonType
 import org.hmeadow.fittonia.design.fonts.headerStyle
 
 @Composable
@@ -52,13 +55,13 @@ fun FittoniaHeader(
                 .fillMaxWidth()
                 .align(Center),
         ) {
-            HMSpacerWeightRow()
+            FittoniaSpacerWeightRow()
             headerText?.let {
                 Text(
                     text = headerText,
                     style = headerStyle,
                 )
-                HMSpacerWeightRow()
+                FittoniaSpacerWeightRow()
             }
         }
         Row(modifier = Modifier.align(CenterEnd)) {
@@ -80,7 +83,7 @@ fun FittoniaHeader(
                 )
             }
             if (BuildConfig.DEBUG) {
-                HMSpacerWidth(width = 5)
+                FittoniaSpacerWidth(width = 5)
                 FittoniaIcon(
                     modifier = Modifier.clickable(onClick = Navigator::goToDebugScreen),
                     drawableRes = R.drawable.ic_debug,

@@ -20,9 +20,9 @@ import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.components.FittoniaIcon
-import org.hmeadow.fittonia.components.HMSpacerHeight
-import org.hmeadow.fittonia.components.HMSpacerWeightRow
-import org.hmeadow.fittonia.components.HMSpacerWidth
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 
 @Composable
@@ -42,7 +42,7 @@ fun DebugScreenDataStoreTab(
             text = "Data Store",
             style = headingLStyle,
         )
-        HMSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = 10)
         Row {
             Column {
                 Text(text = "'defaultPort':")
@@ -55,7 +55,7 @@ fun DebugScreenDataStoreTab(
                 Text(text = "'DumpPath.isSet':")
                 Text(text = "'destinations':")
             }
-            HMSpacerWidth(width = 10)
+            FittoniaSpacerWidth(width = 10)
             Column {
                 Text(text = data.defaultPort.toString())
                 Text(text = data.temporaryPort.toString())
@@ -68,7 +68,7 @@ fun DebugScreenDataStoreTab(
                 ) {
                     Text(text = data.dumpPath.dumpUriPath)
 
-                    HMSpacerWeightRow()
+                    FittoniaSpacerWeightRow()
 
                     FittoniaIcon(
                         modifier = Modifier
@@ -121,6 +121,6 @@ fun DebugScreenDataStoreTab(
             }
         }
 
-        HMSpacerHeight(height = footerHeight)
+        FittoniaSpacerHeight(height = footerHeight)
     }
 }

@@ -1,9 +1,6 @@
-package org.hmeadow.fittonia.components
+ package org.hmeadow.fittonia.compose.components
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,62 +10,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.utility.SuspendedAction
-
-@Composable
-@Preview
-private fun Preview() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Primary")
-        HMSpacerHeight(height = 4)
-        FittoniaButton(onClick = { /*TODO*/ }) {
-            ButtonText(text = "Hello There!")
-            HMSpacerWidth(width = 5)
-            ButtonIcon(drawableRes = R.drawable.ic_add)
-        }
-
-        HMSpacerHeight(height = 16)
-
-        Text(text = "Secondary")
-        HMSpacerHeight(height = 4)
-        FittoniaButton(
-            type = FittoniaButtonType.Secondary,
-            onClick = { /*TODO*/ },
-        ) {
-            ButtonText(text = "Hello There!")
-        }
-
-        HMSpacerHeight(height = 16)
-
-        Text(text = "Primary Disabled")
-        HMSpacerHeight(height = 4)
-        FittoniaButton(
-            type = FittoniaButtonType.Primary,
-            enabled = false,
-            onClick = { /*TODO*/ },
-        ) {
-            ButtonText(text = "Hello There!")
-        }
-
-        HMSpacerHeight(height = 16)
-
-        Text(text = "Secondary Disabled")
-        HMSpacerHeight(height = 4)
-        FittoniaButton(
-            type = FittoniaButtonType.Secondary,
-            enabled = false,
-            onClick = { /*TODO*/ },
-        ) {
-            ButtonText(text = "Hello There!")
-        }
-    }
-}
 
 data class FittoniaButtonScope(
     private val type: FittoniaButtonType,
@@ -94,10 +41,10 @@ data class FittoniaButtonScope(
     }
 
     @Composable
-    fun ButtonIcon(@DrawableRes drawableRes: Int) {
+    fun ButtonIcon(painter: Painter) {
         FittoniaIcon(
             modifier = Modifier.requiredSize(17.dp),
-            drawableRes = drawableRes,
+            painter = painter,
             tint = if (enabled) {
                 type.contentColour
             } else {

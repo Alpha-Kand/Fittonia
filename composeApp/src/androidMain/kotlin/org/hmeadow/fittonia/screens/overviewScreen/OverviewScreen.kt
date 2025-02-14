@@ -31,16 +31,17 @@ import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.UserAlert
-import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaComingSoon
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaModal
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.Footer
-import org.hmeadow.fittonia.components.HMSpacerHeight
-import org.hmeadow.fittonia.components.HMSpacerWeightRow
-import org.hmeadow.fittonia.components.HMSpacerWidth
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.components.FittoniaButton
+
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.text.NumberFormat
@@ -169,7 +170,7 @@ fun OverviewScreen(
         },
         content = {
             Column(modifier = Modifier.padding(all = 16.dp)) {
-                HMSpacerHeight(height = 15)
+                FittoniaSpacerHeight(height = 15)
 
                 TransferList(onTransferJobClicked = onTransferJobClicked)
             }
@@ -182,7 +183,7 @@ fun OverviewScreen(
                         onClick = onSendFilesClicked,
                         content = { ButtonText(text = "Send files") },
                     )
-                    HMSpacerWidth(20)
+                    FittoniaSpacerWidth(20)
                     FittoniaComingSoon(
                         modifier = Modifier.weight(1.0f),
                     ) {
@@ -206,14 +207,14 @@ fun OverviewScreen(
                             modifier = Modifier.requiredSize(40.dp),
                             tint = Color(0xFFA00000),
                         )
-                        HMSpacerWidth(width = 10)
+                        FittoniaSpacerWidth(width = 10)
                         Text(
                             modifier = Modifier.padding(top = 13.dp),
                             text = stringResource(R.string.overview_screen_dump_permission_lost_notice),
                             style = paragraphStyle,
                         )
                     }
-                    HMSpacerHeight(height = 12)
+                    FittoniaSpacerHeight(height = 12)
                     FittoniaButton(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { MainActivity.mainActivity.openFolderPicker(viewModel::onDumpPathPicked) },
@@ -254,7 +255,7 @@ fun OverviewScreen(
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
                                     style = paragraphStyle,
                                 )
-                                HMSpacerWeightRow()
+                                FittoniaSpacerWeightRow()
                                 FittoniaIcon(
                                     modifier = Modifier.align(CenterVertically),
                                     drawableRes = R.drawable.ic_chevron_right,
@@ -276,7 +277,7 @@ fun OverviewScreen(
                                     ),
                                 style = paragraphStyle,
                             )
-                            HMSpacerWeightRow()
+                            FittoniaSpacerWeightRow()
                             FittoniaIcon(
                                 modifier = Modifier.align(CenterVertically),
                                 drawableRes = R.drawable.ic_chevron_right,

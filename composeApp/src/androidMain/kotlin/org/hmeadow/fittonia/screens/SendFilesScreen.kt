@@ -1,5 +1,7 @@
 package org.hmeadow.fittonia.screens
 
+import org.hmeadow.fittonia.components.ButtonIcon
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import SettingsManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,19 +35,18 @@ import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
-import org.hmeadow.fittonia.components.FittoniaButton
-import org.hmeadow.fittonia.components.FittoniaButtonType
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaModal
 import org.hmeadow.fittonia.components.FittoniaNumberInput
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.FittoniaTextInput
-import org.hmeadow.fittonia.components.HMSpacerHeight
-import org.hmeadow.fittonia.components.HMSpacerWeightRow
-import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.HorizontalLine
 import org.hmeadow.fittonia.components.InputFlow
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.components.FittoniaButton
+import org.hmeadow.fittonia.compose.components.FittoniaButtonType
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
@@ -162,13 +163,13 @@ fun SendFilesScreen(
         },
         content = {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                HMSpacerHeight(height = 15)
+                FittoniaSpacerHeight(height = 15)
 
                 Text(
                     text = "Select files/folders to send.",
                     style = headingMStyle,
                 )
-                HMSpacerHeight(height = 5)
+                FittoniaSpacerHeight(height = 5)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -182,7 +183,7 @@ fun SendFilesScreen(
                             verticalAlignment = CenterVertically,
                         ) {
                             Text(text = file.name)
-                            HMSpacerWeightRow()
+                            FittoniaSpacerWeightRow()
                             FittoniaIcon(
                                 modifier = Modifier
                                     .requiredSize(14.dp)
@@ -198,25 +199,25 @@ fun SendFilesScreen(
                         }
                     }
                 }
-                HMSpacerHeight(height = 5)
+                FittoniaSpacerHeight(height = 5)
                 Row {
                     FittoniaButton(
                         onClick = viewModel::onUserSelectItem,
                         type = FittoniaButtonType.Secondary,
                         content = {
                             ButtonText(text = "Add")
-                            HMSpacerWidth(width = 5)
+                            FittoniaSpacerWidth(width = 5)
                             ButtonIcon(drawableRes = R.drawable.ic_add)
                         },
                     )
                     Spacer(modifier = Modifier.weight(1.0f))
                 }
-                HMSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = 30)
                 Text(
                     text = "Destination",
                     style = headingMStyle,
                 )
-                HMSpacerHeight(height = 10)
+                FittoniaSpacerHeight(height = 10)
                 Row(
                     modifier = Modifier.clickable { oneTimeDestinationState = !oneTimeDestinationState },
                     verticalAlignment = CenterVertically,
@@ -230,9 +231,9 @@ fun SendFilesScreen(
                         style = psstStyle,
                     )
                 }
-                HMSpacerHeight(height = 10)
+                FittoniaSpacerHeight(height = 10)
                 if (oneTimeDestinationState) {
-                    HMSpacerHeight(height = 15)
+                    FittoniaSpacerHeight(height = 15)
 
                     FittoniaTextInput(
                         modifier = Modifier.fillMaxWidth(),
@@ -240,7 +241,7 @@ fun SendFilesScreen(
                         label = "IP Address/Code",
                     )
 
-                    HMSpacerHeight(height = 15)
+                    FittoniaSpacerHeight(height = 15)
 
                     FittoniaTextInput(
                         modifier = Modifier.fillMaxWidth(),
@@ -248,7 +249,7 @@ fun SendFilesScreen(
                         label = "Password",
                     )
 
-                    HMSpacerHeight(height = 10)
+                    FittoniaSpacerHeight(height = 10)
                 }
                 if (data.destinations.isNotEmpty() && !oneTimeDestinationState) {
                     Column(
@@ -267,7 +268,7 @@ fun SendFilesScreen(
                                 text = foo.value?.name ?: "Select destination...",
                                 style = readOnlyFieldTextStyle,
                             )
-                            HMSpacerWeightRow()
+                            FittoniaSpacerWeightRow()
                             FittoniaIcon(
                                 modifier = Modifier.requiredSize(10.dp),
                                 drawableRes = R.drawable.ic_chevron_down,
@@ -291,14 +292,14 @@ fun SendFilesScreen(
                         }
                     }
                 }
-                HMSpacerHeight(height = 5)
+                FittoniaSpacerHeight(height = 5)
                 if (oneTimeDestinationState) {
                     FittoniaButton(
                         type = FittoniaButtonType.Secondary,
                         onClick = viewModel::onSaveOneTimeDestinationClicked,
                     ) {
                         ButtonText(text = "Save as new destination")
-                        HMSpacerWidth(width = 5)
+                        FittoniaSpacerWidth(width = 5)
                         ButtonIcon(drawableRes = R.drawable.ic_add)
                     }
                 } else {
@@ -310,7 +311,7 @@ fun SendFilesScreen(
                     }
                 }
 
-                HMSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = 30)
 
                 FittoniaNumberInput(
                     modifier = Modifier.fillMaxWidth(),
@@ -318,7 +319,7 @@ fun SendFilesScreen(
                     label = "Port",
                 )
 
-                HMSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = 30)
 
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
@@ -329,7 +330,7 @@ fun SendFilesScreen(
                                 text = "Description",
                                 style = inputLabelStyle,
                             )
-                            HMSpacerWidth(width = 4)
+                            FittoniaSpacerWidth(width = 4)
                             Text(
                                 modifier = Modifier.align(alignment = CenterVertically),
                                 text = "(optional)",
@@ -379,7 +380,7 @@ fun SendFilesScreen(
                                     .padding(horizontal = 10.dp, vertical = 10.dp),
                                 style = paragraphStyle,
                             )
-                            HMSpacerWeightRow()
+                            FittoniaSpacerWeightRow()
                             FittoniaIcon(
                                 modifier = Modifier
                                     .requiredSize(10.dp)

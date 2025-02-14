@@ -1,4 +1,4 @@
-package org.hmeadow.fittonia.components
+package org.hmeadow.fittonia.compose.components
 
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material.CircularProgressIndicator

@@ -14,15 +14,16 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.combine
 import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.R
-import org.hmeadow.fittonia.components.FittoniaButton
-import org.hmeadow.fittonia.components.FittoniaButtonType
+import org.hmeadow.fittonia.components.ButtonIcon
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.FittoniaTextInput
 import org.hmeadow.fittonia.components.Footer
-import org.hmeadow.fittonia.components.HMSpacerHeight
-import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.InputFlow
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.components.FittoniaButton
+import org.hmeadow.fittonia.compose.components.FittoniaButtonType
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
 
 class NewDestinationScreenViewModel(
@@ -67,21 +68,21 @@ fun NewDestinationScreen(
         },
         content = {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                HMSpacerHeight(height = 15)
+                FittoniaSpacerHeight(height = 15)
 
                 Text(
                     text = stringResource(R.string.new_destination_screen_body),
                     style = paragraphStyle,
                 )
 
-                HMSpacerHeight(height = 7)
+                FittoniaSpacerHeight(height = 7)
 
                 Text(
                     text = "The destination will be pinged to confirm its existence.",
                     style = paragraphStyle,
                 )
 
-                HMSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = 30)
 
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
@@ -89,7 +90,7 @@ fun NewDestinationScreen(
                     label = "Name",
                 )
 
-                HMSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = 30)
 
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
@@ -97,7 +98,7 @@ fun NewDestinationScreen(
                     label = "IP Address/Code",
                 )
 
-                HMSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = 30)
 
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
@@ -115,7 +116,7 @@ fun NewDestinationScreen(
                     type = FittoniaButtonType.Primary,
                     content = {
                         ButtonText(text = "Save")
-                        HMSpacerWidth(width = 5)
+                        FittoniaSpacerWidth(width = 5)
                         ButtonIcon(drawableRes = R.drawable.ic_save)
                     },
                 )

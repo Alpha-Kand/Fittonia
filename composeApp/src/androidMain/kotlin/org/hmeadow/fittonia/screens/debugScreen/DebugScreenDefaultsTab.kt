@@ -9,11 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaNumberInput
-import org.hmeadow.fittonia.components.HMSpacerHeight
 import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.components.socketPortFilters
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
+import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 
 @Composable
@@ -36,34 +36,34 @@ fun DebugScreenDefaultsTab(
             text = "Defaults",
             style = headingLStyle,
         )
-        HMSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = 10)
         FittoniaNumberInput(
             label = "Default New Destination Name",
             inputFlow = defaultNewDestinationName,
         )
-        HMSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = 10)
         FittoniaNumberInput(
             label = "Default New Destination Port",
             filters = socketPortFilters,
             inputFlow = defaultNewDestinationPort,
         )
-        HMSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = 10)
         FittoniaNumberInput(
             label = "Default New Destination Password",
             inputFlow = defaultNewDestinationPassword,
         )
-        HMSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = 10)
         FittoniaNumberInput(
             label = "Default New Destination IP Address",
             inputFlow = defaultNewDestinationIP,
         )
-        HMSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = 10)
         FittoniaButton(
             onClick = onSaveDefaults,
             enabled = needToSave,
         ) {
             ButtonText(text = "Save")
         }
-        HMSpacerHeight(footerHeight)
+        FittoniaSpacerHeight(footerHeight)
     }
 }

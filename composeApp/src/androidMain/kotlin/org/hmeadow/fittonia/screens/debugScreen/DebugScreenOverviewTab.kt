@@ -15,8 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.AndroidServer
-import org.hmeadow.fittonia.components.HMSpacerHeight
-import org.hmeadow.fittonia.components.HMSpacerWidth
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.utility.isLandscape
@@ -37,18 +37,18 @@ fun DebugScreenOverviewTab(
             text = "Overview",
             style = headingLStyle,
         )
-        HMSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = 10)
         Row {
             Column {
                 Text(text = "Current device IP:")
                 Text(text = "Orientation:")
                 Text(text = "Device Size:")
             }
-            HMSpacerWidth(width = 10)
+            FittoniaSpacerHeight(height = 10)
             Column {
                 Row {
                     Text(text = viewModel.deviceIp.collectAsState().value)
-                    HMSpacerWidth(width = 10)
+                    FittoniaSpacerWidth(width = 10)
                     Text(
                         modifier = Modifier.clickable(onClick = viewModel::refreshIp),
                         text = "Refresh",
@@ -67,7 +67,7 @@ fun DebugScreenOverviewTab(
                 )
             }
         }
-        HMSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = 10)
         Text(
             text = "Active AndroidServer",
             style = headingSStyle,
@@ -79,7 +79,7 @@ fun DebugScreenOverviewTab(
                     Text(text = "Socket Job:")
                     Text(text = ".server.value:")
                 }
-                HMSpacerWidth(width = 10)
+                FittoniaSpacerWidth(width = 10)
                 Column {
                     Text(
                         modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -96,6 +96,6 @@ fun DebugScreenOverviewTab(
                 }
             }
         } ?: Text(text = "OFFLINE")
-        HMSpacerHeight(footerHeight)
+        FittoniaSpacerHeight(footerHeight)
     }
 }

@@ -1,5 +1,6 @@
 package org.hmeadow.fittonia.screens
 
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,16 +28,15 @@ import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.UserAlert
-import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaLinkText
 import org.hmeadow.fittonia.components.FittoniaModal
 import org.hmeadow.fittonia.components.FittoniaNumberInput
 import org.hmeadow.fittonia.components.FittoniaScaffold
-import org.hmeadow.fittonia.components.HMSpacerHeight
-import org.hmeadow.fittonia.components.HMSpacerWeightRow
 import org.hmeadow.fittonia.components.InputFlow
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
+import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.description
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
@@ -138,9 +138,9 @@ private fun PortInputDialog(
             modifier = Modifier.fillMaxWidth(),
             inputFlow = inputFlow,
         )
-        HMSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = 10)
         Row {
-            HMSpacerWeightRow()
+            FittoniaSpacerWeightRow()
             FittoniaButton(onClick = onAccept) {
                 ButtonText(text = "Accept")
             }
@@ -199,7 +199,7 @@ private fun AlertTile(
                     text = title,
                     style = headingSStyle,
                 )
-                HMSpacerWeightRow()
+                FittoniaSpacerWeightRow()
                 FittoniaIcon(
                     modifier = Modifier
                         .requiredHeight(16.dp)
@@ -212,12 +212,12 @@ private fun AlertTile(
                 )
             }
             if (expandedState) {
-                HMSpacerHeight(height = 7)
+                FittoniaSpacerHeight(height = 7)
                 Text(
                     text = description,
                     style = paragraphStyle,
                 )
-                HMSpacerHeight(height = 8)
+                FittoniaSpacerHeight(height = 8)
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,

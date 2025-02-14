@@ -13,8 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.hmeadow.fittonia.components.FittoniaButton
-import org.hmeadow.fittonia.components.HMSpacerHeight
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
+import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.psstStyle
 
@@ -36,7 +36,7 @@ fun DebugScreenAdminCreateTab(
             text = "AdminCreate",
             style = headingLStyle,
         )
-        HMSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = 10)
         if (nextAutoJobName >= 0) {
             Column {
                 FittoniaButton(onClick = onCreateJobDirectory) {
@@ -58,6 +58,6 @@ fun DebugScreenAdminCreateTab(
         FittoniaButton(onClick = onCreateNewDestination) {
             ButtonText(text = "Create new destination")
         }
-        HMSpacerHeight(footerHeight)
+        FittoniaSpacerHeight(footerHeight)
     }
 }

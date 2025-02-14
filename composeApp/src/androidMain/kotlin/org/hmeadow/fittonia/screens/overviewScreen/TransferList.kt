@@ -24,12 +24,14 @@ import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.AndroidServer
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.FittoniaIcon
-import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.HorizontalLine
 import org.hmeadow.fittonia.components.VerticalLine
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldSmallTextStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
+import org.hmeadow.fittonia.models.TransferJob
+import org.hmeadow.fittonia.models.TransferStatus
 
 @Composable
 fun TransferList(
@@ -150,7 +152,7 @@ private fun HeaderRow(
                 text = "Status",
             )
             VerticalLine()
-            HMSpacerWidth(width = 20)
+            FittoniaSpacerWidth(width = 20)
         }
         Box(
             modifier = Modifier

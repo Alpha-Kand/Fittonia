@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
 import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_LETTERS
 import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_SYMBOLS
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 
 private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
@@ -155,7 +156,7 @@ private fun BaseFittoniaInput(
     Column {
         label?.let {
             it()
-            HMSpacerHeight(height = 7)
+            FittoniaSpacerHeight(height = 7)
         }
         BasicTextField(
             modifier = modifier.onFocusEvent {

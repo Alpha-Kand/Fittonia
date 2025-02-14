@@ -30,18 +30,19 @@ import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.UserAlert
-import org.hmeadow.fittonia.components.FittoniaButton
+import org.hmeadow.fittonia.components.ButtonIcon
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaModal
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.Footer
-import org.hmeadow.fittonia.components.HMSpacerWeightRow
-import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.components.pager.LazyPager
 import org.hmeadow.fittonia.components.pager.PagerState
 import org.hmeadow.fittonia.components.pager.PagerState.Companion.rememberPagerState
 import org.hmeadow.fittonia.components.pager.PagerTabLabels
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
 import kotlin.math.abs
 import kotlin.random.Random
@@ -228,7 +229,7 @@ fun DebugScreen(
                         FittoniaButton(onClick = viewModel.rememberSuspendedAction(debugNewThread)) {
                             ButtonText(text = "New Thread")
                         }
-                        HMSpacerWeightRow()
+                        FittoniaSpacerWeightRow()
                         FittoniaButton(onClick = debugNewDestination) {
                             ButtonText(text = "New Destination")
                         }
@@ -255,7 +256,7 @@ fun DebugScreen(
                         },
                     ) {
                         ButtonIcon(drawableRes = R.drawable.ic_add)
-                        HMSpacerWidth(width = 5)
+                        FittoniaSpacerWidth(width = 5)
                         ButtonText(text = "UserAlert.PortInUse")
                     }
                 }

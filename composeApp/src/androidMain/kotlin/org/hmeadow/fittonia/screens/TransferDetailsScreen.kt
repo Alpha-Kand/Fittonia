@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,15 +20,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.AndroidServer
 import org.hmeadow.fittonia.R
-import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaHeader
-import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaScaffold
-import org.hmeadow.fittonia.components.HMSpacerHeight
-import org.hmeadow.fittonia.components.HMSpacerWeightRow
-import org.hmeadow.fittonia.components.HMSpacerWidth
 import org.hmeadow.fittonia.components.HorizontalLine
 import org.hmeadow.fittonia.components.ReadOnlyEntries
+import org.hmeadow.fittonia.compose.architecture.ComposeDataState
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.architecture.LoadingCompose
+import org.hmeadow.fittonia.compose.components.FittoniaButton
+import org.hmeadow.fittonia.compose.components.FittoniaIcon
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
@@ -60,7 +61,7 @@ fun TransferDetailsScreen(
                     style = headingLStyle,
                 )
 
-                HMSpacerHeight(height = 40)
+                        FittoniaSpacerHeight(height = 40)
 
                 Text(
                     text = "Destination",
@@ -79,7 +80,7 @@ fun TransferDetailsScreen(
                     style = headingMStyle,
                 )
 
-                HMSpacerHeight(height = 5)
+                        FittoniaSpacerHeight(height = 5)
 
                 val statusComposable: @Composable () -> Unit = {
                     Row(
@@ -116,14 +117,14 @@ fun TransferDetailsScreen(
 
                 ReadOnlyEntries(entries = listOf(statusComposable))
 
-                HMSpacerHeight(height = 30)
+                        FittoniaSpacerHeight(height = 30)
 
                 Text(
                     text = "Progress",
                     style = headingMStyle,
                 )
 
-                HMSpacerHeight(height = 5)
+                        FittoniaSpacerHeight(height = 5)
 
                 val aaa = when (activeTransferJob.status) {
                     TransferStatus.Sending -> "sent"
@@ -145,14 +146,14 @@ fun TransferDetailsScreen(
                     ),
                 )
 
-                HMSpacerHeight(height = 30)
+                        FittoniaSpacerHeight(height = 30)
 
                 Text(
                     text = "Logs",
                     style = headingMStyle,
                 )
 
-                HMSpacerHeight(height = 5)
+                        FittoniaSpacerHeight(height = 5)
 
                 ReadOnlyEntries(
                     entries = activeTransferJob.items.mapIndexed { index, file ->
@@ -243,7 +244,7 @@ private fun TranferDetailsFooter() {
             ) {
                 ButtonText(text = "Queue \uD83D\uDD03")
             }
-            HMSpacerWidth(width = 5)
+            FittoniaSpacerWidth(width = 5)
             FittoniaButton(
                 modifier = Modifier.weight(1f),
                 onClick = { /*TODO*/ },

@@ -18,15 +18,15 @@ import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
-import org.hmeadow.fittonia.components.FittoniaButton
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaNumberInput
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.FittoniaTextInput
 import org.hmeadow.fittonia.components.Footer
-import org.hmeadow.fittonia.components.HMSpacerHeight
 import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.components.ReadOnlyEntries
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
+import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
@@ -86,14 +86,14 @@ fun WelcomeScreen(
                     }
                 }
 
-                HMSpacerHeight(height = 40)
+                FittoniaSpacerHeight(height = 40)
 
                 Text(
                     text = stringResource(R.string.welcome_screen_body),
                     style = paragraphStyle,
                 )
 
-                HMSpacerHeight(height = 3)
+                FittoniaSpacerHeight(height = 3)
 
                 Text(
                     text = stringResource(id = R.string.welcome_screen_you_can_change_these_later),
@@ -101,7 +101,7 @@ fun WelcomeScreen(
                     color = psstColour,
                 )
 
-                HMSpacerHeight(height = 15)
+                FittoniaSpacerHeight(height = 15)
 
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
@@ -117,7 +117,7 @@ fun WelcomeScreen(
                     },
                 )
 
-                HMSpacerHeight(height = 15)
+                FittoniaSpacerHeight(height = 15)
 
                 FittoniaNumberInput(
                     modifier = Modifier.fillMaxWidth(),
@@ -133,7 +133,7 @@ fun WelcomeScreen(
                     },
                 )
 
-                HMSpacerHeight(height = 15)
+                FittoniaSpacerHeight(height = 15)
 
                 Row {
                     Text(
