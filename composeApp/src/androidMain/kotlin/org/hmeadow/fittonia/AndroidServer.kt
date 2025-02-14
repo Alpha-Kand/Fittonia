@@ -10,6 +10,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
 import androidx.compose.ui.util.fastForEach
@@ -30,8 +31,10 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
-import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
-import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
+import org.hmeadow.fittonia.models.IncomingJob
+import org.hmeadow.fittonia.models.OutgoingJob
+import org.hmeadow.fittonia.models.TransferJob
+import org.hmeadow.fittonia.models.TransferStatus
 import java.io.InputStream
 import java.net.BindException
 import java.net.InetSocketAddress
@@ -134,7 +137,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         HMeadowSocketServer.createServerFromSocket(server).let { server ->
                             launch {
                                 log("Connected to client.")
-                                handleCommand(server = server, jobId = jobId)
+                                handleCommand(server = server, jobId = jobId++) //TODO SYNCHRONIZE ++
                             }
                         }
                     } catch (e: SocketException) {
@@ -184,11 +187,12 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     /* MUST BE IN 'SYNCHRONIZED' */ // TODO USE MUTEX
-    private fun updateTransferJob(job: TransferJob) {
+    private inline fun <reified T : TransferJob> updateTransferJob(job: T): T {
         transferJobs.update { (transferJobs.value.filterNot { it.id == job.id } + job).sortedBy { it.id } }
+        return job
     }
 
-    private fun findJob(job: TransferJob): TransferJob? = transferJobs.value.find { it.id == job.id }
+    private inline fun <reified T : TransferJob> findJob(job: T): T? = transferJobs.value.find { it.id == job.id } as? T
 
     private fun registerTransferJob(job: TransferJob) {
         synchronized(transferJobs) {
@@ -196,7 +200,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         }
     }
 
-    private fun updateTransferJobCurrentItem(job: TransferJob) {
+    private fun updateTransferJobCurrentItem(job: OutgoingJob) {
         synchronized(transferJobs) {
             findJob(job)?.let { job ->
                 updateTransferJob(job.copy(currentItem = job.nextItem))
@@ -204,7 +208,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         }
     }
 
-    private fun finishTransferJob(job: TransferJob) {
+    private fun finishTransferJob(job: OutgoingJob) {
         synchronized(transferJobs) {
             findJob(job)?.let { job ->
                 updateTransferJob(
@@ -237,6 +241,8 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to send files to this server, password refused.", jobId = jobId)
         } else {
+            var job = IncomingJob(id = jobId)
+            registerTransferJob(job)
             log("Client attempting to send files.", jobId = jobId)
 
             val jobName = when (server.receiveString()) {
@@ -258,32 +264,62 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
             val totalExpectedItems = server.receiveInt()
             logDebug("totalExpectedItems: $totalExpectedItems", jobId = jobId)
+            job = updateTransferJob(job.copy(description = jobName, currentItem = 1))
+            repeat(totalExpectedItems) {
+                val isFile = server.receiveBoolean()
+                val name = server.receiveString()
+                val uri = server.receiveString()
+                val sizeBytes = server.receiveLong()
+                job = updateTransferJob(
+                    job.copy(
+                        items = job.items + listOf(
+                            TransferJob.Item(
+                                name = name,
+                                uri = Uri.parse(uri),
+                                isFile = isFile,
+                                progressBytes = 0,
+                                sizeBytes = sizeBytes,
+                            ),
+                        ),
+                    ),
+                )
+                server.sendContinue()
+            }
             val aaa = MainActivity.mainActivity.createJobDirectory(
                 jobName = jobName,
-                print = {
-                    this.logDebug(it, jobId = jobId)
-                },
+                print = { this.logDebug(it, jobId = jobId) },
             )
             if (aaa is MainActivity.CreateDumpDirectory.Success) {
                 val jobPath = aaa.uri
                 logDebug("jobPath: $jobPath", jobId = jobId)
-                repeat(totalExpectedItems) {
+                job.cloneItems().fastForEach { item ->
                     if (server.receiveBoolean()) { // Is a file...
                         server.receiveFile(
                             onOutputStream = { fileName ->
                                 DocumentFile
                                     .fromTreeUri(MainActivity.mainActivity, jobPath)
                                     ?.createFile("*/*", fileName)
-                                    ?.let {
-                                        MainActivity.mainActivity.contentResolver.openOutputStream(it.uri)
+                                    ?.let { file ->
+                                        MainActivity.mainActivity.contentResolver.openOutputStream(file.uri)
                                     }
                             },
-                            progressPrecision = 0.01f,
-                            onProgressUpdate = { },
+                            progressPrecision = 0.01,
+                            onProgressUpdate = { progress ->
+                                runBlocking {
+                                    progressUpdateMutex.withLock {
+                                        job = job.updateItem(item.copy(progressBytes = item.progressBytes + progress))
+                                        updateTransferJob(job = job)
+                                    }
+                                }
+                            },
                         )
+                        job = updateTransferJob(job.copy(currentItem = job.nextItem))
                         server.sendContinue()
                     }
                 }
+                job = updateTransferJob(job.copy(status = TransferStatus.Done))
+            } else {
+                updateTransferJob(job.copy(status = TransferStatus.Error))
             }
         }
     }
@@ -306,7 +342,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
         var server: MutableStateFlow<AndroidServer?> = MutableStateFlow(null)
 
-        suspend fun startSending(newJob: TransferJob) {
+        suspend fun startSending(newJob: OutgoingJob) {
             if (server.value == null) {
                 MainActivity.mainActivity.attemptStartServer()
                 server.first()
@@ -334,7 +370,14 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                             log("destination's path length: " + client.receiveInt())
                             client.sendContinue()
                             client.sendInt(currentJob.totalItems)
-                            val items = currentJob.items // 'currentJob' may change.
+                            val items = currentJob.cloneItems()
+                            items.fastForEach { item ->
+                                client.sendBoolean(item.isFile)
+                                client.sendString(item.name)
+                                client.sendString(item.uri.toString())
+                                client.sendLong(item.sizeBytes)
+                                client.receiveContinue()
+                            }
                             items.fastForEach { item ->
                                 // TODO: Relative path
                                 client.sendBoolean(item.isFile)
@@ -372,14 +415,14 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 }
 
-fun TransferJob.createClient() = HMeadowSocketClient(
+fun OutgoingJob.createClient() = HMeadowSocketClient(
     ipAddress = destination.ip,
     port = port,
     operationTimeoutMillis = 2000,
     handshakeTimeoutMillis = 2000L,
 )
 
-fun AndroidServer.communicateCommand(client: HMeadowSocketClient, currentJob: TransferJob): Boolean {
+fun AndroidServer.communicateCommand(client: HMeadowSocketClient, currentJob: OutgoingJob): Boolean {
     return client.communicateCommand(
         commandFlag = ServerCommandFlag.SEND_FILES,
         password = currentJob.destination.password,
@@ -389,9 +432,9 @@ fun AndroidServer.communicateCommand(client: HMeadowSocketClient, currentJob: Tr
     )
 }
 
-fun TransferJob.getInitialDescriptionText() = if (needDescription) "Connecting..." else description
+fun OutgoingJob.getInitialDescriptionText() = if (needDescription) "Connecting..." else description
 
-fun HMeadowSocketClient.syncDescription(aaa: TransferJob): TransferJob {
+fun HMeadowSocketClient.syncDescription(aaa: OutgoingJob): OutgoingJob {
     return if (aaa.needDescription) {
         sendString(ServerFlagsString.NEED_JOB_NAME)
         aaa.copy(description = receiveString())

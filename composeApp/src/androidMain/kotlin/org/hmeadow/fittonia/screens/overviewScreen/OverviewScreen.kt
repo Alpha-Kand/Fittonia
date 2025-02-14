@@ -1,6 +1,5 @@
 package org.hmeadow.fittonia.screens.overviewScreen
 
-import SettingsManager
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -43,11 +42,10 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
+import org.hmeadow.fittonia.models.TransferJob
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.text.NumberFormat
 import java.util.Locale
-import java.util.Objects
-import kotlin.math.min
 
 @Composable
 fun rememberPercentageFormat(
@@ -69,53 +67,6 @@ class Options(
     val name: String,
     val onClick: () -> Unit,
 )
-
-data class TransferJob(
-    val id: Int,
-    val description: String,
-    val destination: SettingsManager.Destination,
-    val items: List<Item>,
-    val currentItem: Int = 1,
-    val port: Int,
-    val status: TransferStatus,
-    val direction: Direction,
-    val needDescription: Boolean,
-) {
-    val totalItems = items.size
-    val progressPercentage: Double =
-        items.sumOf { it.progressBytes }.toDouble() / items.sumOf { it.sizeBytes }.toDouble()
-    val nextItem: Int = min(currentItem + 1, totalItems)
-
-    data class Item(
-        val name: String,
-        val uri: Uri,
-        val isFile: Boolean,
-        val sizeBytes: Long,
-        val progressBytes: Long = 0,
-    ) {
-        val id: Int = Objects.hash(name, uri, isFile, sizeBytes) // Ignore 'progressBytes'.
-    }
-
-    enum class Direction {
-        INCOMING,
-        OUTGOING,
-    }
-
-    fun updateItem(item: Item): TransferJob {
-        return this.copy(
-            items = items.filter {
-                it.id != item.id
-            }.plus(item),
-        )
-    }
-}
-
-enum class TransferStatus {
-    Sending,
-    Receiving,
-    Error,
-    Done,
-}
 
 @Composable
 fun measureTextWidth(text: String, style: TextStyle): Dp {

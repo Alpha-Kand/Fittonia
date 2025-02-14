@@ -16,9 +16,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import org.hmeadow.fittonia.AndroidServer
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import org.hmeadow.fittonia.AndroidServer.Companion.server
+import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaScaffold
@@ -34,20 +41,27 @@ import org.hmeadow.fittonia.compose.components.FittoniaIcon
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
-import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
-import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
+import org.hmeadow.fittonia.models.IncomingJob
+import org.hmeadow.fittonia.models.OutgoingJob
+import org.hmeadow.fittonia.models.TransferJob
+import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.screens.overviewScreen.rememberPercentageFormat
 import kotlin.random.Random
 
+class TransferDetailsScreenViewModel(private val transferJob: TransferJob) : BaseViewModel() {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val currentTransferJob: Flow<TransferJob?> = server.flatMapLatest { eee ->
+        eee?.transferJobs?.map { bbb ->
+            bbb.firstOrNull { it.id == transferJob.id }
+        } ?: flow { emit(null) }
+    }
+}
+
 @Composable
 fun TransferDetailsScreen(
-    transferJob: TransferJob,
+    transferJobState: ComposeDataState<TransferJob?>,
     onBackClicked: () -> Unit,
 ) {
-    val androidServer = AndroidServer.server.collectAsState().value
-    val transferJobs = androidServer?.transferJobs?.collectAsState()?.value ?: emptyList()
-    val activeTransferJob = transferJobs.first { it.id == transferJob.id }
-
     FittoniaScaffold(
         header = {
             FittoniaHeader(
@@ -55,177 +69,213 @@ fun TransferDetailsScreen(
             )
         },
         content = {
-            Column(modifier = Modifier.padding(all = 16.dp)) {
-                Text(
-                    text = activeTransferJob.description,
-                    style = headingLStyle,
-                )
+            LoadingCompose(
+                composeDataState = transferJobState,
+                failureBlock = {
+                    Text(
+                        text = "Something went wrong!", //TODO
+                        style = headingLStyle,
+                    )
+                },
+            ) { transferJob ->
+                if (transferJob == null) {
+                    Text(
+                        text = "Something went wrong! 2", //TODO
+                        style = headingLStyle,
+                    )
+                } else {
+                    Column(modifier = Modifier.padding(all = 16.dp)) {
+                        Text(
+                            text = transferJob.description,
+                            style = headingLStyle,
+                        )
 
                         FittoniaSpacerHeight(height = 40)
 
-                Text(
-                    text = "Destination",
-                    style = headingMStyle,
-                )
+                        when (transferJob) {
+                            is OutgoingJob -> {
+                                Text(
+                                    text = "Destination",
+                                    style = headingMStyle,
+                                )
+                                FittoniaSpacerHeight(height = 5)
+                                ReadOnlyEntries(
+                                    entries = listOf(transferJob.destination.name),
+                                    textStyle = readOnlyFieldTextStyle,
+                                )
+                            }
 
-                HMSpacerHeight(height = 5)
-                ReadOnlyEntries(
-                    entries = listOf(activeTransferJob.destination.name),
-                    textStyle = readOnlyFieldTextStyle,
-                )
-                HMSpacerHeight(height = 30)
+                            is IncomingJob -> {
+                                Text(
+                                    text = "Source",
+                                    style = headingMStyle,
+                                )
+                                FittoniaSpacerHeight(height = 5)
+                                ReadOnlyEntries(
+                                    entries = listOf(transferJob.source.name),
+                                    textStyle = readOnlyFieldTextStyle,
+                                )
+                            }
+                        }
+                        FittoniaSpacerHeight(height = 30)
 
-                Text(
-                    text = "Status",
-                    style = headingMStyle,
-                )
+                        Text(
+                            text = "Status",
+                            style = headingMStyle,
+                        )
 
                         FittoniaSpacerHeight(height = 5)
 
-                val statusComposable: @Composable () -> Unit = {
-                    Row(
-                        modifier = Modifier.requiredHeight(30.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        FittoniaIcon(
-                            drawableRes = when (activeTransferJob.status) {
-                                TransferStatus.Sending -> R.drawable.ic_arrow_send
-                                TransferStatus.Receiving -> R.drawable.ic_arrow_receive
-                                TransferStatus.Error -> R.drawable.ic_alert
-                                TransferStatus.Done -> R.drawable.ic_checkmark
-                            },
-                            tint = when (activeTransferJob.status) {
-                                TransferStatus.Sending -> Color(0xFF0000FF)
-                                TransferStatus.Receiving -> Color(0xFF0000FF)
-                                TransferStatus.Error -> Color(0xFFFFFF00)
-                                TransferStatus.Done -> Color(0xFF00FF00)
-                            },
-                        )
-                        HMSpacerWidth(width = 10)
+                        val statusComposable: @Composable () -> Unit = {
+                            Row(
+                                modifier = Modifier.requiredHeight(30.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                FittoniaIcon(
+                                    painter = painterResource(
+                                        when (transferJob.status) {
+                                            TransferStatus.Sending -> R.drawable.ic_arrow_send
+                                            TransferStatus.Receiving -> R.drawable.ic_arrow_receive
+                                            TransferStatus.Error -> R.drawable.ic_alert
+                                            TransferStatus.Done -> R.drawable.ic_checkmark
+                                        },
+                                    ),
+                                    tint = when (transferJob.status) {
+                                        TransferStatus.Sending -> Color(0xFF0000FF)
+                                        TransferStatus.Receiving -> Color(0xFF0000FF)
+                                        TransferStatus.Error -> Color(0xFFFFFF00)
+                                        TransferStatus.Done -> Color(0xFF00FF00)
+                                    },
+                                )
+                                FittoniaSpacerWidth(width = 10)
+
+                                Text(
+                                    text = when (transferJob.status) {
+                                        TransferStatus.Sending -> "Sending"
+                                        TransferStatus.Receiving -> "Receiving"
+                                        TransferStatus.Error -> "Error"
+                                        TransferStatus.Done -> "Done!"
+                                    },
+                                    style = readOnlyFieldTextStyle,
+                                )
+                            }
+                        }
+
+                        ReadOnlyEntries(entries = listOf(statusComposable))
+
+                        FittoniaSpacerHeight(height = 30)
 
                         Text(
-                            text = when (activeTransferJob.status) {
-                                TransferStatus.Sending -> "Sending"
-                                TransferStatus.Receiving -> "Receiving"
-                                TransferStatus.Error -> "Error"
-                                TransferStatus.Done -> "Done!"
+                            text = "Progress",
+                            style = headingMStyle,
+                        )
+
+                        FittoniaSpacerHeight(height = 5)
+
+                        val aaa = when (transferJob.status) {
+                            TransferStatus.Sending -> "sent"
+                            TransferStatus.Receiving -> "received"
+                            else -> ""
+                        }
+                        ReadOnlyEntries(
+                            entries = listOf(
+                                stringResource(
+                                    id = R.string.transfer_details_screen_progress,
+                                    rememberPercentageFormat(
+                                        percentage = transferJob.progressPercentage,
+                                        maxFraction = 2,
+                                    ),
+                                    transferJob.currentItem,
+                                    transferJob.totalItems,
+                                    aaa,
+                                ),
+                            ),
+                        )
+
+                        FittoniaSpacerHeight(height = 30)
+
+                        Text(
+                            text = "Logs",
+                            style = headingMStyle,
+                        )
+
+                        FittoniaSpacerHeight(height = 5)
+
+                        ReadOnlyEntries(
+                            entries = transferJob.items.mapIndexed { index, file ->
+                                val composable = @Composable {
+                                    var pathExpandedState by remember { mutableStateOf(false) }
+
+                                    Column(
+                                        modifier = Modifier
+                                            .defaultMinSize(minHeight = 30.dp)
+                                            .clickable { pathExpandedState = !pathExpandedState }
+                                            .fillMaxWidth(),
+                                    ) {
+                                        val transferStatus = when (transferJob.status) {
+                                            TransferStatus.Sending -> ""
+                                            TransferStatus.Receiving -> ""
+                                            TransferStatus.Error -> " Error"
+                                            TransferStatus.Done -> " Done"
+                                        }
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            if (pathExpandedState) {
+                                                Text(
+                                                    text = file.name + " todo long path?",
+                                                )
+                                                FittoniaSpacerWeightRow()
+                                            } else {
+                                                Text(
+                                                    text = stringResource(
+                                                        id = R.string.transfer_details_screen_item_transfer_status,
+                                                        file.name,
+                                                        transferStatus,
+                                                    ),
+                                                    style = readOnlyFieldTextStyle,
+                                                )
+                                                FittoniaSpacerWeightRow()
+                                                Text(
+                                                    text = rememberPercentageFormat(Random.nextDouble(1.0)),
+                                                    style = readOnlyFieldTextStyle,
+                                                )
+                                            }
+                                            FittoniaIcon(
+                                                modifier = Modifier.requiredHeight(20.dp),
+                                                painter = painterResource(
+                                                    if (pathExpandedState) {
+                                                        R.drawable.ic_chevron_up
+                                                    } else {
+                                                        R.drawable.ic_chevron_down
+                                                    },
+                                                ),
+                                                tint = Color(0xFF222222),
+                                            )
+                                        }
+                                        if (pathExpandedState) {
+                                            Row {
+                                                Text(
+                                                    text = "$transferStatus${0.0}",
+                                                    style = readOnlyFieldTextStyle,
+                                                )
+                                                FittoniaSpacerWeightRow()
+                                                Text(
+                                                    text = "${1000}b/${2000}b",
+                                                    style = readOnlyFieldTextStyle,
+                                                )
+                                            }
+                                        }
+                                    }
+                                    if (index != transferJob.items.lastIndex) {
+                                        HorizontalLine()
+                                    }
+                                }
+                                composable
                             },
-                            style = readOnlyFieldTextStyle,
                         )
                     }
                 }
-
-                ReadOnlyEntries(entries = listOf(statusComposable))
-
-                        FittoniaSpacerHeight(height = 30)
-
-                Text(
-                    text = "Progress",
-                    style = headingMStyle,
-                )
-
-                        FittoniaSpacerHeight(height = 5)
-
-                val aaa = when (activeTransferJob.status) {
-                    TransferStatus.Sending -> "sent"
-                    TransferStatus.Receiving -> "received"
-                    else -> ""
-                }
-                ReadOnlyEntries(
-                    entries = listOf(
-                        stringResource(
-                            id = R.string.transfer_details_screen_progress,
-                            rememberPercentageFormat(
-                                percentage = activeTransferJob.progressPercentage,
-                                maxFraction = 2,
-                            ),
-                            activeTransferJob.currentItem,
-                            activeTransferJob.totalItems,
-                            aaa,
-                        ),
-                    ),
-                )
-
-                        FittoniaSpacerHeight(height = 30)
-
-                Text(
-                    text = "Logs",
-                    style = headingMStyle,
-                )
-
-                        FittoniaSpacerHeight(height = 5)
-
-                ReadOnlyEntries(
-                    entries = activeTransferJob.items.mapIndexed { index, file ->
-                        val composable = @Composable {
-                            var pathExpandedState by remember { mutableStateOf(false) }
-
-                            Column(
-                                modifier = Modifier
-                                    .defaultMinSize(minHeight = 30.dp)
-                                    .clickable { pathExpandedState = !pathExpandedState }
-                                    .fillMaxWidth(),
-                            ) {
-                                val transferStatus = when (activeTransferJob.status) {
-                                    TransferStatus.Sending -> ""
-                                    TransferStatus.Receiving -> ""
-                                    TransferStatus.Error -> " Error"
-                                    TransferStatus.Done -> " Done"
-                                }
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    if (pathExpandedState) {
-                                        Text(
-                                            text = file.name + " todo long path?",
-                                        )
-                                        HMSpacerWeightRow()
-                                    } else {
-                                        Text(
-                                            text = stringResource(
-                                                id = R.string.transfer_details_screen_item_transfer_status,
-                                                file.name,
-                                                transferStatus,
-                                            ),
-                                            style = readOnlyFieldTextStyle,
-                                        )
-                                        HMSpacerWeightRow()
-                                        Text(
-                                            text = rememberPercentageFormat(Random.nextDouble(1.0)),
-                                            style = readOnlyFieldTextStyle,
-                                        )
-                                    }
-                                    FittoniaIcon(
-                                        modifier = Modifier.requiredHeight(20.dp),
-                                        drawableRes = if (pathExpandedState) {
-                                            R.drawable.ic_chevron_up
-                                        } else {
-                                            R.drawable.ic_chevron_down
-                                        },
-                                        tint = Color(0xFF222222),
-                                    )
-                                }
-                                if (pathExpandedState) {
-                                    Row {
-                                        Text(
-                                            text = "$transferStatus${0.0}",
-                                            style = readOnlyFieldTextStyle,
-                                        )
-                                        HMSpacerWeightRow()
-                                        Text(
-                                            text = "${1000}b/${2000}b",
-                                            style = readOnlyFieldTextStyle,
-                                        )
-                                    }
-                                }
-                            }
-                            if (index != activeTransferJob.items.lastIndex) {
-                                HorizontalLine()
-                            }
-                        }
-                        composable
-                    },
-                )
             }
         },
         footer = {

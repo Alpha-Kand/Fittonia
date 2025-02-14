@@ -17,21 +17,24 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.AndroidServer.Companion.server
 import org.hmeadow.fittonia.AndroidServer.Companion.startSending
+import org.hmeadow.fittonia.compose.architecture.dataState
+import org.hmeadow.fittonia.models.OutgoingJob
+import org.hmeadow.fittonia.models.TransferJob
+import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.screens.AlertsScreen
 import org.hmeadow.fittonia.screens.AlertsScreenViewModel
-import org.hmeadow.fittonia.screens.debugScreen.DebugScreen
-import org.hmeadow.fittonia.screens.debugScreen.DebugScreenViewModel
 import org.hmeadow.fittonia.screens.NewDestinationScreen
 import org.hmeadow.fittonia.screens.NewDestinationScreenViewModel
 import org.hmeadow.fittonia.screens.SendFilesScreen
 import org.hmeadow.fittonia.screens.SendFilesScreenViewModel
 import org.hmeadow.fittonia.screens.TransferDetailsScreen
+import org.hmeadow.fittonia.screens.TransferDetailsScreenViewModel
 import org.hmeadow.fittonia.screens.WelcomeScreen
 import org.hmeadow.fittonia.screens.WelcomeScreenViewModel
+import org.hmeadow.fittonia.screens.debugScreen.DebugScreen
+import org.hmeadow.fittonia.screens.debugScreen.DebugScreenViewModel
 import org.hmeadow.fittonia.screens.overviewScreen.OverviewScreen
 import org.hmeadow.fittonia.screens.overviewScreen.OverviewScreenViewModel
-import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
-import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -151,13 +154,11 @@ class Navigator(private val mainViewModel: MainViewModel) {
         )
     }
 
-    class TransferDetailsScreenViewModel : BaseViewModel()
-
     private fun transferDetailsScreen(
         transferJob: TransferJob,
-    ) = Screen(viewModel = TransferDetailsScreenViewModel()) { _, _ ->
+    ) = Screen(viewModel = TransferDetailsScreenViewModel(transferJob = transferJob)) { _, viewModel ->
         TransferDetailsScreen(
-            transferJob = transferJob,
+            transferJobState = viewModel.currentTransferJob.dataState,
             onBackClicked = ::pop,
         )
     }
@@ -244,7 +245,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                         onBackClicked = instance::pop,
                         debugNewThread = {
                             startSending(
-                                newJob = TransferJob(
+                                newJob = OutgoingJob(
                                     id = Random.nextInt(),
                                     description = "Sending PDFs to bob (${abs(Random.nextInt() % 100)})",
                                     needDescription = false,
@@ -263,7 +264,6 @@ class Navigator(private val mainViewModel: MainViewModel) {
                                     },
                                     port = 5556,
                                     status = TransferStatus.Sending,
-                                    direction = TransferJob.Direction.OUTGOING,
                                 ),
                             )
                         },

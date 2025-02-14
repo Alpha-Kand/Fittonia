@@ -53,9 +53,10 @@ import org.hmeadow.fittonia.design.fonts.paragraphStyle
 import org.hmeadow.fittonia.design.fonts.psstStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldLightTextStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
+import org.hmeadow.fittonia.models.OutgoingJob
+import org.hmeadow.fittonia.models.TransferJob
+import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.screens.overviewScreen.Options
-import org.hmeadow.fittonia.screens.overviewScreen.TransferJob
-import org.hmeadow.fittonia.screens.overviewScreen.TransferStatus
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
 
 class SendFilesScreenViewModel(
@@ -65,7 +66,7 @@ class SendFilesScreenViewModel(
         onFinish: (newDestination: SettingsManager.Destination) -> Unit,
     ) -> Unit,
     private val onAddNewDestinationCallback: (onFinish: (newDestination: SettingsManager.Destination) -> Unit) -> Unit,
-    private val onConfirmCallback: suspend (TransferJob) -> Unit,
+    private val onConfirmCallback: suspend (OutgoingJob) -> Unit,
 ) : BaseViewModel() {
     val itemListState = MutableStateFlow<List<TransferJob.Item>>(emptyList())
     val selectedDestinationState = MutableStateFlow<SettingsManager.Destination?>(null)
@@ -127,7 +128,7 @@ class SendFilesScreenViewModel(
     suspend fun onConfirmClicked() {
         val newDescription = descriptionState.text.trim()
         onConfirmCallback(
-            TransferJob(
+            OutgoingJob(
                 id = -1,
                 description = newDescription,
                 needDescription = descriptionState.text.isEmpty(),
@@ -139,7 +140,6 @@ class SendFilesScreenViewModel(
                 items = itemListState.value,
                 port = portState.text.toInt(),
                 status = TransferStatus.Sending,
-                direction = TransferJob.Direction.OUTGOING,
             ),
         )
     }
