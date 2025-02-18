@@ -10,6 +10,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.lang.Thread.sleep
+import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.time.Instant
@@ -318,7 +319,7 @@ open class HMeadowSocketClient
 constructor(
     ipAddress: String,
     port: Int,
-    handshakeTimeoutMillis: Long = 0,
+    handshakeTimeoutMillis: Int = 0,
     operationTimeoutMillis: Int = 0,
     final override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
 ) : HMeadowSocket(socketInterface) {
@@ -327,10 +328,10 @@ constructor(
         var trySocket: Socket? = null
         do {
             try {
-                trySocket = Socket(ipAddress, port)
+                trySocket = Socket().also { it.connect(InetSocketAddress(ipAddress, port), handshakeTimeoutMillis) }
                 break
             } catch (e: IOException) {
-                sleep(handshakeTimeoutMillis / 10)
+                sleep(handshakeTimeoutMillis / 10L)
             }
         } while (Instant.now().toEpochMilli() < timeLimit)
         trySocket ?: throw ClientSetupException(Exception())

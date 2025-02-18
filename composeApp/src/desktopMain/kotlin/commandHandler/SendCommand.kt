@@ -13,13 +13,13 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
             ipAddress = destination.ip,
             port = command.getPort(),
             operationTimeoutMillis = 2000,
-            handshakeTimeoutMillis = 2000L,
+            handshakeTimeoutMillis = 2000,
         )
     } ?: HMeadowSocketClient(
         ipAddress = command.getIP(),
         port = command.getPort(),
         operationTimeoutMillis = 2000,
-        handshakeTimeoutMillis = 2000L,
+        handshakeTimeoutMillis = 2000,
     )
 }
 

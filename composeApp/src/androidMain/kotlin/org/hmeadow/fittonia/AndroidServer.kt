@@ -419,7 +419,7 @@ fun OutgoingJob.createClient() = HMeadowSocketClient(
     ipAddress = destination.ip,
     port = port,
     operationTimeoutMillis = 2000,
-    handshakeTimeoutMillis = 2000L,
+    handshakeTimeoutMillis = 2000,
 )
 
 fun AndroidServer.communicateCommand(client: HMeadowSocketClient, currentJob: OutgoingJob): Boolean {
