@@ -4,19 +4,19 @@ import java.time.format.DateTimeFormatter
 interface ServerLogs {
     val mLogs: MutableList<Log>
 
-    fun log(log: String, jobId: Int? = null) = synchronized(mLogs) {
+    fun log(log: String, jobId: Int? = null): Unit = synchronized(mLogs) {
         mLogs.add(Log(log, LogType.NORMAL, jobId))
     }
 
-    fun logWarning(log: String, jobId: Int? = null) = synchronized(mLogs) {
+    fun logWarning(log: String, jobId: Int? = null): Unit = synchronized(mLogs) {
         mLogs.add(Log(log, LogType.WARNING, jobId))
     }
 
-    fun logError(log: String, jobId: Int? = null) = synchronized(mLogs) {
+    fun logError(log: String, jobId: Int? = null): Unit = synchronized(mLogs) {
         mLogs.add(Log(log, LogType.ERROR, jobId))
     }
 
-    fun logDebug(log: String, jobId: Int? = null) = synchronized(mLogs) {
+    fun logDebug(log: String, jobId: Int? = null): Unit = synchronized(mLogs) {
         mLogs.add(Log(log, LogType.DEBUG, jobId))
     }
 }
