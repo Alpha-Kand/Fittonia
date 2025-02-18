@@ -40,6 +40,7 @@ sealed interface TransferJob {
         val sizeBytes: Long,
         val progressBytes: Long = 0,
     ) {
+        val progress: Double = progressBytes.toDouble() / sizeBytes.toDouble()
         val id: Int = Objects.hash(name, uri, isFile, sizeBytes) // Ignore 'progressBytes'.
     }
 }

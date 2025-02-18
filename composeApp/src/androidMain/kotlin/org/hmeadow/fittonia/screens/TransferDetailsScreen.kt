@@ -46,7 +46,6 @@ import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.screens.overviewScreen.rememberPercentageFormat
-import kotlin.random.Random
 
 class TransferDetailsScreenViewModel(private val transferJob: TransferJob) : BaseViewModel() {
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -237,7 +236,11 @@ fun TransferDetailsScreen(
                                                 )
                                                 FittoniaSpacerWeightRow()
                                                 Text(
-                                                    text = rememberPercentageFormat(Random.nextDouble(1.0)),
+                                                    text = rememberPercentageFormat(
+                                                        percentage = file.progress,
+                                                        minFraction = 1,
+                                                        maxFraction = 1,
+                                                    ),
                                                     style = readOnlyFieldTextStyle,
                                                 )
                                             }
