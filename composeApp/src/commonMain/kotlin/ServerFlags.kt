@@ -18,6 +18,7 @@ class ServerFlagsString {
 }
 
 enum class ServerCommandFlag(val text: String) {
+    PING(text = "PING"),
     SEND_FILES(text = "SEND_FILES"),
     SEND_MESSAGE(text = "SEND_MESSAGE"),
     ADD_DESTINATION(text = "ADD_DESTINATION"),

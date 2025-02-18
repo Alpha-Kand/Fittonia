@@ -39,6 +39,10 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         }
     }
 
+    override suspend fun onPing(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to add this server as destination, password refused.", jobId = jobId)

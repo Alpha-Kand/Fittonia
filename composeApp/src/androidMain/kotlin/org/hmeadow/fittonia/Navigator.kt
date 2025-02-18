@@ -120,6 +120,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
             onAddNewDestinationCallback = { onFinish ->
                 push(newDestinationScreen(onFinish = onFinish))
             },
+            onPing = AndroidServer::ping,
             onConfirmCallback = { newJob ->
                 startSending(newJob = newJob)
                 pop()

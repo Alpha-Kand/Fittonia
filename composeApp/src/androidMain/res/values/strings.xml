@@ -34,4 +34,9 @@
     <string name="notification_default_port_in_use_description">The default port you set for the server (%1$d) is already in use by some other application. You can either choose a new temporary port or select a new default port.</string>
     <string name="notification_default_dump_permission_lost_title">\'Incoming files\' destination permissions lost.</string>
     <string name="notification_default_dump_permission_lost_description">The permission to access your previously selected \'Incoming files\' destination has been lost or the destination has been moved/deleted. Please select a new destination.</string>
+
+    <!-- Send Files Screen -->
+    <string name="send_files_screen_ping_success">✅ Connection success</string>
+    <string name="send_files_screen_ping_processing">📶</string>
+    <string name="send_files_screen_ping_failure">❌ Connection failure</string>
 </resources>

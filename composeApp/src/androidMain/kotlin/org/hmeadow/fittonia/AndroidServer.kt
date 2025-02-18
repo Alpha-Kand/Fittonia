@@ -17,12 +17,14 @@ import androidx.compose.ui.util.fastForEach
 import androidx.core.app.ServiceCompat
 import androidx.documentfile.provider.DocumentFile
 import communicateCommand
+import communicateCommandBoolean
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -33,6 +35,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import org.hmeadow.fittonia.models.IncomingJob
 import org.hmeadow.fittonia.models.OutgoingJob
+import org.hmeadow.fittonia.models.Ping
+import org.hmeadow.fittonia.models.PingStatus
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
 import java.io.InputStream
@@ -40,6 +44,7 @@ import java.net.BindException
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.SocketException
+import java.net.SocketTimeoutException
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.abs
 import kotlin.random.Random
@@ -225,6 +230,14 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         return password == receiveString()
     }
 
+    override suspend fun onPing(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientPasswordSuccess) {
+            logWarning("Client attempted to ping this server, password refused.", jobId = jobId)
+        } else {
+            log("Client successfully pinged this server.", jobId = jobId)
+        }
+    }
+
     override suspend fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientPasswordSuccess) {
             logWarning("Client attempted to add this server as destination, password refused.", jobId = jobId)
@@ -342,74 +355,133 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
         var server: MutableStateFlow<AndroidServer?> = MutableStateFlow(null)
 
-        suspend fun startSending(newJob: OutgoingJob) {
+        private suspend fun bootStrap(block: suspend AndroidServer.() -> Unit) {
             if (server.value == null) {
                 MainActivity.mainActivity.attemptStartServer()
                 server.first()
             }
             server.value?.run {
-                try {
-                    launch {
-                        var currentJob = newJob.copy(description = newJob.getInitialDescriptionText())
-                        registerTransferJob(currentJob)
-                        updateNotification()
-                        val client: HMeadowSocketClient
-                        try {
-                            client = currentJob.createClient()
-                        } catch (e: HMeadowSocket.HMeadowSocketError) {
-                            e.hmMessage?.let { logError(it) }
-                            e.message?.let { logError(it) }
-                            return@launch
-                        }
-                        val commandSuccess = communicateCommand(client = client, currentJob = currentJob)
-                        if (commandSuccess) {
-                            log(log = "Password accepted")
-                            currentJob = client.syncDescription(currentJob)
-                            updateTransferJob(currentJob)
+                launch {
+                    try {
+                        block()
+                    } catch (e: HMeadowSocket.HMeadowSocketError) { // TODO Better error handling & messaging.
+                        e.hmMessage?.let { logError(it) }
+                        e.message?.let { logError(it) }
+                    } catch (e: Exception) {
+                        e.message?.let { logError(it) }
+                    }
+                }
+            }
+        }
 
-                            log("destination's path length: " + client.receiveInt())
-                            client.sendContinue()
-                            client.sendInt(currentJob.totalItems)
-                            val items = currentJob.cloneItems()
-                            items.fastForEach { item ->
-                                client.sendBoolean(item.isFile)
-                                client.sendString(item.name)
-                                client.sendString(item.uri.toString())
-                                client.sendLong(item.sizeBytes)
-                                client.receiveContinue()
-                            }
-                            items.fastForEach { item ->
-                                // TODO: Relative path
-                                client.sendBoolean(item.isFile)
-                                if (item.isFile) {
-                                    MainActivity.mainActivity.contentResolver.openInputStream(item.uri).use {
-                                        it?.sendFile(client = client, item = item) { progressBytes ->
-                                            runBlocking {
-                                                progressUpdateMutex.withLock {
-                                                    currentJob = currentJob.updateItem(
-                                                        item = item.copy(progressBytes = progressBytes),
-                                                    )
-                                                    updateTransferJob(job = currentJob)
-                                                }
-                                            }
+        private suspend fun <T> bootStrap(onError: () -> T, block: suspend AndroidServer.() -> T): T {
+            if (server.value == null) {
+                MainActivity.mainActivity.attemptStartServer()
+                server.first()
+            }
+            return server.value?.run {
+                async {
+                    try {
+                        block()
+                    } catch (e: HMeadowSocket.HMeadowSocketError) { // TODO Better error handling & messaging.
+                        e.hmMessage?.let { logError(it) }
+                        e.message?.let { logError(it) }
+                        onError()
+                    } catch (e: Exception) {
+                        e.message?.let { logError(it) }
+                        onError()
+                    }
+                }.await()
+            } ?: onError()
+        }
+
+        suspend fun ping(ip: String, port: Int, password: String, requestTimestamp: Long): Ping {
+            return Ping(
+                pingStatus = bootStrap<PingStatus>(onError = { PingStatus.InternalBug }) {
+                    val client: HMeadowSocketClient
+                    try {
+                        client = HMeadowSocketClient(
+                            ipAddress = ip,
+                            port = port,
+                            operationTimeoutMillis = 2000,
+                            handshakeTimeoutMillis = 2000,
+                        )
+                    } catch (socketError: SocketTimeoutException) {
+                        socketError.message?.let { logError(it) }
+                        return@bootStrap PingStatus.CouldNotConnect
+                    } catch (e: HMeadowSocket.HMeadowSocketError) {
+                        e.hmMessage?.let { logError(it) }
+                        e.message?.let { logError(it) }
+                        return@bootStrap PingStatus.InternalBug
+                    }
+
+                    client.communicateCommand<PingStatus>(
+                        commandFlag = ServerCommandFlag.PING,
+                        password = password,
+                        onSuccess = { PingStatus.Success },
+                        onPasswordRefused = { PingStatus.IncorrectPassword },
+                        onFailure = { PingStatus.ConnectionRefused },
+                    )
+                },
+                requestTimestamp = requestTimestamp,
+            )
+        }
+
+        suspend fun startSending(newJob: OutgoingJob) {
+            bootStrap {
+                var currentJob = newJob.copy(description = newJob.getInitialDescriptionText())
+                registerTransferJob(currentJob)
+                updateNotification()
+                val client: HMeadowSocketClient
+                try {
+                    client = currentJob.createClient()
+                } catch (e: HMeadowSocket.HMeadowSocketError) {
+                    e.hmMessage?.let { logError(it) }
+                    e.message?.let { logError(it) }
+                    return@bootStrap
+                }
+                val commandSuccess = communicateCommand(client = client, currentJob = currentJob)
+                if (commandSuccess) {
+                    log(log = "Password accepted")
+                    currentJob = client.syncDescription(currentJob)
+                    updateTransferJob(currentJob)
+
+                    log("destination's path length: " + client.receiveInt())
+                    client.sendContinue()
+                    client.sendInt(currentJob.totalItems)
+                    val items = currentJob.cloneItems()
+                    items.fastForEach { item ->
+                        client.sendBoolean(item.isFile)
+                        client.sendString(item.name)
+                        client.sendString(item.uri.toString())
+                        client.sendLong(item.sizeBytes)
+                        client.receiveContinue()
+                    }
+                    items.fastForEach { item ->
+                        // TODO: Relative path
+                        client.sendBoolean(item.isFile)
+                        if (item.isFile) {
+                            MainActivity.mainActivity.contentResolver.openInputStream(item.uri).use {
+                                it?.sendFile(client = client, item = item) { progressBytes ->
+                                    runBlocking {
+                                        progressUpdateMutex.withLock {
+                                            currentJob = currentJob.updateItem(
+                                                item = item.copy(progressBytes = progressBytes),
+                                            )
+                                            updateTransferJob(job = currentJob)
                                         }
                                     }
                                 }
-                                client.receiveContinue()
-                                updateTransferJobCurrentItem(job = currentJob) // Todo needed?
                             }
-                        } else {
-                            logError(log = "Password refused")
                         }
-                        finishTransferJob(currentJob)
-                        updateNotification()
+                        client.receiveContinue()
+                        updateTransferJobCurrentItem(job = currentJob) // Todo needed?
                     }
-                } catch (e: HMeadowSocket.HMeadowSocketError) { // TODO Better error handling & messaging.
-                    e.hmMessage?.let { logError(it) }
-                    e.message?.let { logError(it) }
-                } catch (e: Exception) {
-                    e.message?.let { logError(it) }
+                } else {
+                    logError(log = "Password refused")
                 }
+                finishTransferJob(currentJob)
+                updateNotification()
             }
         }
     }
@@ -423,7 +495,7 @@ fun OutgoingJob.createClient() = HMeadowSocketClient(
 )
 
 fun AndroidServer.communicateCommand(client: HMeadowSocketClient, currentJob: OutgoingJob): Boolean {
-    return client.communicateCommand(
+    return client.communicateCommandBoolean(
         commandFlag = ServerCommandFlag.SEND_FILES,
         password = currentJob.destination.password,
         onSuccess = { },

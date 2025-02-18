@@ -12,6 +12,7 @@ interface Server {
         onSendFilesCommand: suspend (Boolean, HMeadowSocketServer, Int) -> Unit,
         onSendMessageCommand: suspend (Boolean, HMeadowSocketServer, Int) -> Unit,
         onAddDestination: suspend (Boolean, HMeadowSocketServer, Int) -> Unit,
+        onPing: suspend (Boolean, HMeadowSocketServer, Int) -> Unit,
         onInvalidCommand: suspend (String) -> Unit,
         jobId: Int,
     ) {
@@ -28,6 +29,7 @@ interface Server {
         val passwordIsValid = passwordIsValid()
         sendApproval(choice = passwordIsValid)
         when (command) {
+            ServerCommandFlag.PING -> onPing(passwordIsValid, this, jobId)
             ServerCommandFlag.SEND_FILES -> onSendFilesCommand(passwordIsValid, this, jobId)
             ServerCommandFlag.SEND_MESSAGE -> onSendMessageCommand(passwordIsValid, this, jobId)
             ServerCommandFlag.ADD_DESTINATION -> onAddDestination(passwordIsValid, this, jobId)
@@ -54,17 +56,19 @@ interface Server {
 
     suspend fun handleCommand(server: HMeadowSocketServer, jobId: Int) {
         server.handleCommand(
+            jobId = jobId,
+            onPing = ::onPing,
+            onInvalidCommand = ::onInvalidCommand,
             onAddDestination = ::onAddDestination,
             onSendFilesCommand = ::onSendFiles,
             onSendMessageCommand = ::onSendMessage,
-            onInvalidCommand = ::onInvalidCommand,
-            jobId = jobId,
         )
     }
 
-    suspend fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    suspend fun onPing(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
     suspend fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
     suspend fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    suspend fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
     suspend fun onInvalidCommand(unknownCommand: String)
 }
 
@@ -78,7 +82,28 @@ fun <T> HMeadowSocket.receiveApproval(onConfirm: () -> T, onDeny: () -> T): T {
 }
 
 // TODO Sending files should be handled in Server.
-fun HMeadowSocketClient.communicateCommand(
+fun <T> HMeadowSocketClient.communicateCommand(
+    commandFlag: ServerCommandFlag,
+    password: String,
+    onSuccess: () -> T,
+    onPasswordRefused: () -> T,
+    onFailure: () -> T,
+): T {
+    sendString(message = commandFlag.text)
+    return receiveApproval(
+        onConfirm = {
+            sendString(password)
+            receiveApproval(
+                onConfirm = { onSuccess() },
+                onDeny = { onPasswordRefused() },
+            )
+        },
+        onDeny = { onFailure() },
+    )
+}
+
+// TODO Sending files should be handled in Server.
+fun HMeadowSocketClient.communicateCommandBoolean(
     commandFlag: ServerCommandFlag,
     password: String,
     onSuccess: () -> Unit,

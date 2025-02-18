@@ -1,7 +1,5 @@
 package org.hmeadow.fittonia.screens
 
-import org.hmeadow.fittonia.components.ButtonIcon
-import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import SettingsManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
@@ -30,11 +29,15 @@ import androidx.documentfile.provider.DocumentFile
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
+import org.hmeadow.fittonia.components.ButtonIcon
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaModal
@@ -43,10 +46,12 @@ import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.FittoniaTextInput
 import org.hmeadow.fittonia.components.HorizontalLine
 import org.hmeadow.fittonia.components.InputFlow
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.compose.components.FittoniaButtonType
+import org.hmeadow.fittonia.compose.components.FittoniaLoadingIndicator
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
@@ -54,10 +59,14 @@ import org.hmeadow.fittonia.design.fonts.psstStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldLightTextStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
 import org.hmeadow.fittonia.models.OutgoingJob
+import org.hmeadow.fittonia.models.Ping
+import org.hmeadow.fittonia.models.PingStatus
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
+import org.hmeadow.fittonia.models.mostRecent
 import org.hmeadow.fittonia.screens.overviewScreen.Options
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
+import java.time.Instant
 
 class SendFilesScreenViewModel(
     private val onSaveOneTimeDestinationCallback: (
@@ -66,15 +75,47 @@ class SendFilesScreenViewModel(
         onFinish: (newDestination: SettingsManager.Destination) -> Unit,
     ) -> Unit,
     private val onAddNewDestinationCallback: (onFinish: (newDestination: SettingsManager.Destination) -> Unit) -> Unit,
+    private val onPing: suspend (ip: String, port: Int, password: String, requestTimestamp: Long) -> Ping,
     private val onConfirmCallback: suspend (OutgoingJob) -> Unit,
 ) : BaseViewModel() {
     val itemListState = MutableStateFlow<List<TransferJob.Item>>(emptyList())
     val selectedDestinationState = MutableStateFlow<SettingsManager.Destination?>(null)
-    val portState = InputFlow(initial = if (BuildConfig.DEBUG) "12345" else "")
+    val portState: InputFlow = InputFlow(
+        initial = if (BuildConfig.DEBUG) "12345" else "",
+        onValueChange = { port ->
+            if (port.isNotEmpty()) {
+                selectedDestinationState.value?.let {
+                    updatePing(it, port.toInt())
+                } ?: updatePing(
+                    ip = oneTimeIpAddressState.text,
+                    password = oneTimePasswordState.text,
+                    port = port.toInt(),
+                )
+            }
+        },
+    )
     val descriptionState = InputFlow(initial = "")
 
-    val oneTimeIpAddressState = InputFlow(initial = "")
-    val oneTimePasswordState = InputFlow(initial = "")
+    val oneTimeIpAddressState: InputFlow = InputFlow(
+        initial = "",
+        onValueChange = { ip ->
+            updatePing(
+                ip = ip,
+                password = oneTimePasswordState.text,
+                port = portState.text.toInt(),
+            )
+        },
+    )
+    val oneTimePasswordState = InputFlow(
+        initial = "",
+        onValueChange = { password ->
+            updatePing(
+                ip = oneTimeIpAddressState.text,
+                password = password,
+                port = portState.text.toInt(),
+            )
+        },
+    )
 
     val canContinue = combine(
         itemListState,
@@ -82,6 +123,48 @@ class SendFilesScreenViewModel(
         portState,
     ) { itemList, _, port ->
         itemList.isNotEmpty() && port.isNotEmpty()
+    }
+
+    fun updateDestination(destination: SettingsManager.Destination) {
+        selectedDestinationState.value = destination
+        if (portState.text.isNotEmpty()) {
+            updatePing(destination, portState.text.toInt())
+        }
+    }
+
+    private fun updatePing(destination: SettingsManager.Destination, port: Int) {
+        updatePing(ip = destination.ip, password = destination.password, port = port)
+    }
+
+    private fun updatePing(ip: String, password: String, port: Int) {
+        if (ip.isNotBlank() && password.isNotBlank()) {
+            launch {
+                val timestamp = Instant.now().toEpochMilli()
+                updatePingAtomically(newPing = Ping(PingStatus.Processing, timestamp))
+                updatePingAtomically(
+                    newPing = onPing(
+                        ip,
+                        port, // TODO make Port type.
+                        password,
+                        Instant.now().toEpochMilli().let { now ->
+                            if (now == timestamp) {
+                                timestamp + 1
+                            } else {
+                                now
+                            }
+                        },
+                    ),
+                )
+            }
+        }
+    }
+
+    val ping = MutableStateFlow(Ping(PingStatus.NoPing))
+    private val pingMutex = Mutex()
+    private suspend fun updatePingAtomically(newPing: Ping) {
+        pingMutex.withLock {
+            ping.value = mostRecent(ping.value, newPing)
+        }
     }
 
     val canContinueOneTime = combine(
@@ -311,6 +394,29 @@ fun SendFilesScreen(
                     }
                 }
 
+                FittoniaSpacerHeight(height = 10)
+
+                when (viewModel.ping.collectAsState(Ping(PingStatus.NoPing)).value.pingStatus) {
+                    is PingStatus.NoPing -> Unit
+                    is PingStatus.Processing -> Row {
+                        Text(
+                            text = stringResource(R.string.send_files_screen_ping_processing),
+                            style = paragraphStyle,
+                        )
+                        FittoniaLoadingIndicator()
+                    }
+
+                    is PingStatus.Success -> Text(
+                        text = stringResource(R.string.send_files_screen_ping_success),
+                        style = paragraphStyle,
+                    )
+
+                    is PingStatus.Failure -> Text(
+                        text = stringResource(R.string.send_files_screen_ping_failure),
+                        style = paragraphStyle,
+                    )
+                }
+
                 FittoniaSpacerHeight(height = 30)
 
                 FittoniaNumberInput(
@@ -370,7 +476,7 @@ fun SendFilesScreen(
                         Row(
                             modifier = Modifier.clickable {
                                 destinationState = destination.name
-                                viewModel.selectedDestinationState.value = destination
+                                viewModel.updateDestination(destination)
                                 destinationPickerActive = false
                             },
                         ) {
@@ -407,6 +513,7 @@ private fun Preview() {
         viewModel = SendFilesScreenViewModel(
             onSaveOneTimeDestinationCallback = { _, _, _ -> },
             onAddNewDestinationCallback = { _ -> },
+            onPing = { _, _, _, _ -> Ping(PingStatus.NoPing) },
             onConfirmCallback = { },
         ),
         data = SettingsDataAndroid(
