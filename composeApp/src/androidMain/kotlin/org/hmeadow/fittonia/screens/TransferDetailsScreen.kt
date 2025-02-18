@@ -49,9 +49,9 @@ import org.hmeadow.fittonia.screens.overviewScreen.rememberPercentageFormat
 
 class TransferDetailsScreenViewModel(private val transferJob: TransferJob) : BaseViewModel() {
     @OptIn(ExperimentalCoroutinesApi::class)
-    val currentTransferJob: Flow<TransferJob?> = server.flatMapLatest { eee ->
-        eee?.transferJobs?.map { bbb ->
-            bbb.firstOrNull { it.id == transferJob.id }
+    val currentTransferJob: Flow<TransferJob?> = server.flatMapLatest { androidServer ->
+        androidServer?.transferJobs?.map { transferJobs ->
+            transferJobs.firstOrNull { it.id == transferJob.id }
         } ?: flow { emit(null) }
     }
 }
@@ -62,11 +62,7 @@ fun TransferDetailsScreen(
     onBackClicked: () -> Unit,
 ) {
     FittoniaScaffold(
-        header = {
-            FittoniaHeader(
-                onBackClicked = onBackClicked,
-            )
-        },
+        header = { FittoniaHeader(onBackClicked = onBackClicked) },
         content = {
             LoadingCompose(
                 composeDataState = transferJobState,
@@ -171,7 +167,7 @@ fun TransferDetailsScreen(
 
                         FittoniaSpacerHeight(height = 5)
 
-                        val aaa = when (transferJob.status) {
+                        val status = when (transferJob.status) {
                             TransferStatus.Sending -> "sent"
                             TransferStatus.Receiving -> "received"
                             else -> ""
@@ -186,7 +182,7 @@ fun TransferDetailsScreen(
                                     ),
                                     transferJob.currentItem,
                                     transferJob.totalItems,
-                                    aaa,
+                                    status,
                                 ),
                             ),
                         )

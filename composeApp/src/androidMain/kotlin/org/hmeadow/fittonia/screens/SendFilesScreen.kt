@@ -260,12 +260,12 @@ fun SendFilesScreen(
                             .padding(5.dp)
                             .clickable(onClick = { destinationPickerActive = true }),
                     ) {
-                        val foo = viewModel.selectedDestinationState.collectAsState()
+                        val selectedDestination = viewModel.selectedDestinationState.collectAsState()
                         Row(
                             verticalAlignment = CenterVertically,
                         ) {
                             Text(
-                                text = foo.value?.name ?: "Select destination...",
+                                text = selectedDestination.value?.name ?: "Select destination...",
                                 style = readOnlyFieldTextStyle,
                             )
                             FittoniaSpacerWeightRow()
@@ -275,7 +275,7 @@ fun SendFilesScreen(
                                 tint = Color(0xFF222222),
                             )
                         }
-                        foo.value?.let { destination ->
+                        selectedDestination.value?.let { destination ->
                             HorizontalLine(modifier = Modifier.padding(vertical = 4.dp))
                             listOf(
                                 "IP Address: ${destination.ip}",
