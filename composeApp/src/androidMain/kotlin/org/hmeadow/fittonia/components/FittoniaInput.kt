@@ -35,8 +35,9 @@ private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
 
 class InputFlow(
     val textState: TextFieldState,
-) : Flow<String> by snapshotFlow(block = { textState.text.toString() }) {
-    constructor(initial: String) : this(TextFieldState(initial))
+    private val onValueChange: (String) -> Unit = {},
+) : Flow<String> by snapshotFlow(block = { textState.text.toString().also { onValueChange(it) } }) {
+    constructor(initial: String, onValueChange: (String) -> Unit = {}) : this(TextFieldState(initial), onValueChange)
 
     var text: String
         get() = textState.text.toString()
