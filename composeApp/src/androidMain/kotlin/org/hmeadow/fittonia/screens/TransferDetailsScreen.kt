@@ -218,7 +218,7 @@ fun TransferDetailsScreen(
                                         ) {
                                             if (pathExpandedState) {
                                                 Text(
-                                                    text = file.name + " todo long path?",
+                                                    text = file.name, // TODO todo long path?
                                                 )
                                                 FittoniaSpacerWeightRow()
                                             } else {
@@ -233,9 +233,9 @@ fun TransferDetailsScreen(
                                                 FittoniaSpacerWeightRow()
                                                 Text(
                                                     text = rememberPercentageFormat(
-                                                        percentage = file.progress,
+                                                        percentage = file.progressPercentage,
                                                         minFraction = 1,
-                                                        maxFraction = 1,
+                                                        maxFraction = 2,
                                                     ),
                                                     style = readOnlyFieldTextStyle,
                                                 )
@@ -255,12 +255,18 @@ fun TransferDetailsScreen(
                                         if (pathExpandedState) {
                                             Row {
                                                 Text(
-                                                    text = "$transferStatus${0.0}",
+                                                    text = "$transferStatus${
+                                                        rememberPercentageFormat(
+                                                            percentage = file.progressPercentage,
+                                                            minFraction = 1,
+                                                            maxFraction = 2,
+                                                        )
+                                                    }",
                                                     style = readOnlyFieldTextStyle,
                                                 )
                                                 FittoniaSpacerWeightRow()
                                                 Text(
-                                                    text = "${1000}b/${2000}b",
+                                                    text = "${file.progressBytes}b/${file.sizeBytes}b",
                                                     style = readOnlyFieldTextStyle,
                                                 )
                                             }
