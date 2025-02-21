@@ -11,10 +11,14 @@ import java.io.InputStreamReader
 import java.io.OutputStream
 import java.net.Socket
 import java.nio.file.Files
+import java.time.Instant
 import java.util.Arrays
 import kotlin.io.path.Path
 
 interface HMeadowSocketInterface {
+    var sendBytesPerSecond: Long
+    var receiveBytesPerSecond: Long
+
     fun bindToSocket(block: () -> Socket): Socket
     fun close()
 
@@ -64,6 +68,8 @@ interface HMeadowSocketInterface {
 }
 
 open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
+    override var sendBytesPerSecond: Long = Long.MAX_VALUE
+    override var receiveBytesPerSecond: Long = Long.MAX_VALUE
 
     companion object {
         private const val BUFFER_SIZE_LONG: Long = 8192
@@ -129,13 +135,23 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
 
         // 3. Send the file.
         var remainingBytes = size
+
+        var throttle = sendBytesPerSecond
+        var now = Instant.now().toEpochMilli()
         while (remainingBytes > 0) {
-            val nextBytes = remainingBytes.coerceAtMost(BUFFER_SIZE_LONG)
+            val nextBytes = minOf(remainingBytes, BUFFER_SIZE_LONG, throttle)
+            throttle -= nextBytes
             mDataOutput.write(bufferedReadFile.readNBytes(nextBytes.toInt()))
             remainingBytes -= nextBytes
             if ((size - remainingBytes) > currentStep) {
                 currentStep += step
                 onProgressUpdate(size - remainingBytes)
+            }
+            if (throttle == 0L) {
+                onProgressUpdate(size - remainingBytes)
+                throttle = sendBytesPerSecond
+                Thread.sleep((1000L - ((Instant.now().toEpochMilli() - now).coerceAtLeast(minimumValue = 0))))
+                now = Instant.now().toEpochMilli()
             }
         }
 

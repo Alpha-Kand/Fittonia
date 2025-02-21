@@ -440,6 +440,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     e.message?.let { logError(it) }
                     return@bootStrap
                 }
+                client.sendBytesPerSecond = 2 * 1024 * 1024 // TODO have this come from the screen.
                 val commandSuccess = communicateCommand(client = client, currentJob = currentJob)
                 if (commandSuccess) {
                     log(log = "Password accepted")

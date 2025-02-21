@@ -66,6 +66,7 @@ data class SettingsDataAndroid(
 
     @Serializable
     data class DebugSettings(
+        val defaultSendThrottle: Double = 2.0,
         val defaultNewDestinationName: String = "NewDestination",
         val defaultNewDestinationPort: Int = 12345,
         val defaultNewDestinationPassword: String = "password123",

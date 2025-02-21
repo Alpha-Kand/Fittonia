@@ -18,6 +18,7 @@ import org.hmeadow.fittonia.design.fonts.headingLStyle
 
 @Composable
 fun DebugScreenDefaultsTab(
+    defaultSendThrottle: InputFlow,
     defaultNewDestinationName: InputFlow,
     defaultNewDestinationPort: InputFlow,
     defaultNewDestinationPassword: InputFlow,
@@ -35,6 +36,11 @@ fun DebugScreenDefaultsTab(
         Text(
             text = "Defaults",
             style = headingLStyle,
+        )
+        FittoniaSpacerHeight(height = 10)
+        FittoniaNumberInput(
+            label = "Default Send Throttle mb",
+            inputFlow = defaultSendThrottle,
         )
         FittoniaSpacerHeight(height = 10)
         FittoniaNumberInput(

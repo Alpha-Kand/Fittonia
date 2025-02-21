@@ -73,19 +73,30 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         }
     }
 
+    var sendBytesPerSecond: Long
+        get() = socketInterface.sendBytesPerSecond
+        set(value) {
+            socketInterface.sendBytesPerSecond = value
+        }
+    var receiveBytesPerSecond: Long
+        get() = throw Exception() // TODO socketInterface.receiveBytesPerSecond
+        set(value) {
+            socketInterface.receiveBytesPerSecond = value
+        }
+
     fun sendInt(message: Int) = sendErrorWrapper {
         socketInterface.sendInt(message)
         history.add("SendInt -> $message")
     }
 
-    fun receiveInt() = receiveErrorWrapper { socketInterface.receiveInt().also { history.add("ReceiveInt -> $it") } }
+    fun receiveInt() = receiveErrorWrapper { socketInterface.receiveInt() }
 
     fun sendLong(message: Long) = sendErrorWrapper {
         socketInterface.sendLong(message)
         history.add("SendLong -> $message")
     }
 
-    fun receiveLong() = receiveErrorWrapper { socketInterface.receiveLong().also { history.add("ReceiveLong -> $it") } }
+    fun receiveLong() = receiveErrorWrapper { socketInterface.receiveLong() }
 
     fun sendBoolean(message: Boolean) = sendErrorWrapper {
         socketInterface.sendBoolean(message)

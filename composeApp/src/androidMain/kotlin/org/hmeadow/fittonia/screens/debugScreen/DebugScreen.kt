@@ -53,6 +53,7 @@ class DebugScreenViewModel(
     val deviceIp = MutableStateFlow("Unknown")
 
     // Defaults
+    val defaultSendThrottle = InputFlow(initial = "")
     val defaultNewDestinationName = InputFlow(initial = "")
     val defaultNewDestinationPort = InputFlow(initial = "")
     val defaultNewDestinationPassword = InputFlow(initial = "")
@@ -71,6 +72,7 @@ class DebugScreenViewModel(
     init {
         launch {
             mainViewModel.dataStore.data.first().run {
+                defaultSendThrottle.text = debugSettings.defaultSendThrottle.toString()
                 defaultNewDestinationName.text = debugSettings.defaultNewDestinationName
                 defaultNewDestinationPort.text = debugSettings.defaultNewDestinationPort.toString()
                 defaultNewDestinationIP.text = debugSettings.defaultNewDestinationIP
@@ -176,6 +178,7 @@ fun DebugScreen(
                     },
                     "Defaults" to { maxWidth, maxHeight ->
                         DebugScreenDefaultsTab(
+                            defaultSendThrottle = viewModel.defaultSendThrottle,
                             defaultNewDestinationName = viewModel.defaultNewDestinationName,
                             defaultNewDestinationPort = viewModel.defaultNewDestinationPort,
                             defaultNewDestinationPassword = viewModel.defaultNewDestinationPassword,
