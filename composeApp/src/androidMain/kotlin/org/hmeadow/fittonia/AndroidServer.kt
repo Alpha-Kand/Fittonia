@@ -53,6 +53,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
     override val coroutineContext: CoroutineContext = Dispatchers.IO
     override var jobId: Int = 100
+    private val jobIdMutex = Mutex()
     private val binder = AndroidServerBinder()
     var serverSocket: ServerSocket? = null
     var serverJob: Job? = null
@@ -142,7 +143,14 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         HMeadowSocketServer.createServerFromSocket(server).let { server ->
                             launch {
                                 log("Connected to client.")
-                                handleCommand(server = server, jobId = jobId++) //TODO SYNCHRONIZE ++
+                                handleCommand(
+                                    server = server,
+                                    jobId = jobIdMutex.withLock {
+                                        val id = jobId
+                                        jobId++
+                                        id
+                                    },
+                                )
                             }
                         }
                     } catch (e: SocketException) {
@@ -397,7 +405,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
         suspend fun ping(ip: String, port: Int, password: String, requestTimestamp: Long): Ping {
             return Ping(
-                pingStatus = bootStrap<PingStatus>(onError = { PingStatus.InternalBug }) {
+                pingStatus = bootStrap(onError = { PingStatus.InternalBug }) {
                     val client: HMeadowSocketClient
                     try {
                         client = HMeadowSocketClient(
@@ -415,7 +423,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         return@bootStrap PingStatus.InternalBug
                     }
 
-                    client.communicateCommand<PingStatus>(
+                    client.communicateCommand(
                         commandFlag = ServerCommandFlag.PING,
                         password = password,
                         onSuccess = { PingStatus.Success },
