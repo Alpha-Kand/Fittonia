@@ -19,13 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import headerBackgroundColour
 import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.Navigator
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
-import org.hmeadow.fittonia.compose.components.FittoniaButtonType
+import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.design.fonts.headerStyle
 import org.hmeadow.fittonia.utility.isDebug
 
@@ -38,7 +37,7 @@ fun FittoniaHeader(
 ) {
     Box(
         modifier = Modifier
-            .background(color = headerBackgroundColour)
+            .background(color = currentStyle.headerBackgroundColour)
             .padding(all = 5.dp),
         contentAlignment = Center,
     ) {
@@ -70,11 +69,11 @@ fun FittoniaHeader(
                 Box(
                     modifier = Modifier
                         .requiredSize(40.dp)
-                        .border(1.dp, FittoniaButtonType.Primary.borderColour, CircleShape)
-                        .background(FittoniaButtonType.Primary.backgroundColor, CircleShape)
+                        .border(1.dp, currentStyle.primaryButtonType.borderColour, CircleShape)
+                        .background(currentStyle.primaryButtonType.backgroundColor, CircleShape)
                         .clickable(onClick = onOptionsClicked),
                     contentAlignment = Center,
-                ) { Text("•••", color = FittoniaButtonType.Primary.contentColour) }
+                ) { Text(text = "•••", color = currentStyle.primaryButtonType.contentColour) }
             }
             onAlertsClicked?.let {
                 Image(

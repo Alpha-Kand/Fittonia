@@ -11,32 +11,24 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import backgroundLayer0Colour
-import backgroundLayer1Colour
-import backgroundLayer2Colour
 import org.hmeadow.fittonia.LocalFocusRequester
 import org.hmeadow.fittonia.MainActivity.Companion.imeHeight
 import org.hmeadow.fittonia.MainActivity.Companion.navBarHeight
 import org.hmeadow.fittonia.MainActivity.Companion.statusBarsHeight
+import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.utility.applyIf
-import statusBarColour
 
 private enum class ScaffoldSectionsEnum {
     HEADER, FOOTER, CONTENT, OVERLAY,
@@ -62,7 +54,6 @@ fun FittoniaScaffold(
     }
     Box(
         modifier = Modifier
-            .background(backgroundLayer0Colour)
             .focusRequester(focusRequester)
             .focusable()
             .clickable(
@@ -74,22 +65,7 @@ fun FittoniaScaffold(
                 },
             ),
     ) {
-        Box(
-            modifier = Modifier
-                .align(alignment = Alignment.BottomEnd)
-                .padding(top = 100.dp, start = 100.dp)
-                .clip(RoundedCornerShape(topStart = 500.dp))
-                .fillMaxSize()
-                .background(backgroundLayer1Colour),
-        ) {}
-        Box(
-            modifier = Modifier
-                .align(alignment = Alignment.BottomEnd)
-                .padding(top = 200.dp, start = 200.dp)
-                .clip(RoundedCornerShape(topStart = 500.dp))
-                .fillMaxSize()
-                .background(backgroundLayer2Colour),
-        ) {}
+        currentStyle.Background()
         SubcomposeLayout(modifier = Modifier) { constraints ->
             val headerPlaceables = subcompose(ScaffoldSectionsEnum.HEADER) {
                 header?.let {
@@ -98,7 +74,7 @@ fun FittoniaScaffold(
                             modifier = Modifier
                                 .requiredHeight(statusBarsHeightLocal.value.toDp())
                                 .fillMaxWidth()
-                                .background(color = statusBarColour),
+                                .background(color = currentStyle.statusBarColour),
                         )
                         Box(
                             modifier = Modifier
@@ -113,7 +89,7 @@ fun FittoniaScaffold(
 
             val footerPlaceables = subcompose(ScaffoldSectionsEnum.FOOTER) {
                 footer?.let {
-                    Column(modifier = Modifier.background(color = Color(0xAA448844))) {
+                    Column(modifier = Modifier.background(color = currentStyle.footerBackgroundColour)) {
                         Box(modifier = Modifier.fillMaxWidth()) {
                             footer()
                         }

@@ -49,8 +49,8 @@ import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
-import org.hmeadow.fittonia.compose.components.FittoniaButtonType
 import org.hmeadow.fittonia.compose.components.FittoniaLoadingIndicator
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
@@ -286,7 +286,7 @@ fun SendFilesScreen(
                 Row {
                     FittoniaButton(
                         onClick = viewModel::onUserSelectItem,
-                        type = FittoniaButtonType.Secondary,
+                        type = currentStyle.secondaryButtonType,
                         content = {
                             ButtonText(text = "Add")
                             FittoniaSpacerWidth(width = 5)
@@ -378,7 +378,7 @@ fun SendFilesScreen(
                 FittoniaSpacerHeight(height = 5)
                 if (oneTimeDestinationState) {
                     FittoniaButton(
-                        type = FittoniaButtonType.Secondary,
+                        type = currentStyle.secondaryButtonType,
                         onClick = viewModel::onSaveOneTimeDestinationClicked,
                     ) {
                         ButtonText(text = "Save as new destination")
@@ -387,7 +387,7 @@ fun SendFilesScreen(
                     }
                 } else {
                     FittoniaButton(
-                        type = FittoniaButtonType.Secondary,
+                        type = currentStyle.secondaryButtonType,
                         onClick = viewModel::onAddNewDestinationClicked,
                     ) {
                         ButtonText(text = "Add new destination")

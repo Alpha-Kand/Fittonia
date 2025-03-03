@@ -27,6 +27,7 @@ import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.HorizontalLine
 import org.hmeadow.fittonia.components.VerticalLine
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldSmallTextStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
@@ -41,8 +42,8 @@ fun TransferList(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .border(width = 2.dp, color = Color(0xFF446644))
-            .background(color = Color(0xFFDDFFEE)),
+            .border(width = 2.dp, color = currentStyle.readOnlyBorderColour)
+            .background(color = currentStyle.readOnlyBackgroundColour),
     ) {
         val maxProgressWidth = measureTextWidth(text = "100.0%", style = readOnlyFieldTextStyle)
         val maxStatusWidth = measureTextWidth(text = "Status", style = readOnlyFieldTextStyle)
@@ -156,7 +157,7 @@ private fun HeaderRow(
         }
         Box(
             modifier = Modifier
-                .background(Color(0xFF999999))
+                .background(currentStyle.readOnlyBackgroundColour)
                 .requiredHeight(2.dp)
                 .fillMaxWidth(),
         ) {}

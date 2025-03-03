@@ -23,9 +23,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
-import readOnlyBackgroundColour
-import readOnlyBorderColour
-import readOnlyClearIconColour
+import org.hmeadow.fittonia.compose.architecture.currentStyle
 
 @Composable
 fun ReadOnlyEntries(
@@ -39,8 +37,8 @@ fun ReadOnlyEntries(
     var expanded by remember { mutableStateOf(false) }
     Column(
         modifier = modifier
-            .border(width = 2.dp, color = readOnlyBorderColour)
-            .background(color = readOnlyBackgroundColour)
+            .border(width = 2.dp, color = currentStyle.readOnlyBorderColour)
+            .background(color = currentStyle.readOnlyBackgroundColour)
             .clickable {
                 if (expandOnClick) {
                     expanded = !expanded
@@ -75,7 +73,7 @@ fun ReadOnlyEntries(
                                 .requiredSize(14.dp)
                                 .clickable { onEntryClearClicked(text) },
                             drawableRes = R.drawable.ic_clear,
-                            tint = readOnlyClearIconColour,
+                            tint = currentStyle.readOnlyClearIconColour,
                         )
                     }
                 }
@@ -94,8 +92,8 @@ fun ReadOnlyEntries(
 ) {
     Column(
         modifier = modifier
-            .border(width = 2.dp, color = readOnlyBorderColour)
-            .background(color = readOnlyBackgroundColour),
+            .border(width = 2.dp, color = currentStyle.readOnlyBorderColour)
+            .background(color = currentStyle.readOnlyBackgroundColour),
     ) {
         entries.forEachIndexed { index, content ->
             Row(

@@ -1,4 +1,4 @@
- package org.hmeadow.fittonia.compose.components
+package org.hmeadow.fittonia.compose.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.requiredSize
@@ -15,6 +15,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.utility.SuspendedAction
 
 data class FittoniaButtonScope(
@@ -54,37 +55,19 @@ data class FittoniaButtonScope(
     }
 }
 
-sealed interface FittoniaButtonType {
-    val backgroundColor: Color
-    val disabledBackgroundColor: Color
-    val contentColour: Color
-    val disabledContentColor: Color
-    val borderColour: Color
-    val disabledBorderColour: Color
-
-    data object Primary : FittoniaButtonType {
-        override val backgroundColor: Color = Color(0xFF992266)
-        override val disabledBackgroundColor: Color = Color(0xFFDDAADD)
-        override val contentColour: Color = Color(0xFFFFCCFF)
-        override val disabledContentColor: Color = contentColour
-        override val borderColour: Color = Color(0xFF550022)
-        override val disabledBorderColour: Color = borderColour.copy(alpha = 0.00f)
-    }
-
-    data object Secondary : FittoniaButtonType {
-        override val backgroundColor: Color = Color(0xFFFFDDFF)
-        override val disabledBackgroundColor: Color = Color(0xFFEECCEE)
-        override val contentColour: Color = Color(0xFF331133)
-        override val disabledContentColor: Color = contentColour.copy(alpha = 0.5f)
-        override val borderColour: Color = Color(0xFF550022)
-        override val disabledBorderColour: Color = borderColour.copy(alpha = 0.00f)
-    }
-}
+data class FittoniaButtonType(
+    val backgroundColor: Color,
+    val disabledBackgroundColor: Color,
+    val contentColour: Color,
+    val disabledContentColor: Color,
+    val borderColour: Color,
+    val disabledBorderColour: Color,
+)
 
 @Composable
 fun FittoniaButton(
     modifier: Modifier = Modifier,
-    type: FittoniaButtonType = FittoniaButtonType.Primary,
+    type: FittoniaButtonType = currentStyle.primaryButtonType,
     enabled: Boolean = true,
     onClick: () -> Unit,
     content: @Composable FittoniaButtonScope.() -> Unit,
