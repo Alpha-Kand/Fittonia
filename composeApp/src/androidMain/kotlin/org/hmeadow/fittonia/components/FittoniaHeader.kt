@@ -27,6 +27,7 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButtonType
 import org.hmeadow.fittonia.design.fonts.headerStyle
+import org.hmeadow.fittonia.utility.isDebug
 
 @Composable
 fun FittoniaHeader(
@@ -82,7 +83,7 @@ fun FittoniaHeader(
                     contentDescription = "", // TODO
                 )
             }
-            if (BuildConfig.DEBUG) {
+            if (isDebug()) {
                 FittoniaSpacerWidth(width = 5)
                 FittoniaIcon(
                     modifier = Modifier.clickable(onClick = Navigator::goToDebugScreen),

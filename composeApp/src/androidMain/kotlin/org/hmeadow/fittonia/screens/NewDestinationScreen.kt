@@ -23,7 +23,6 @@ import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
-import org.hmeadow.fittonia.compose.components.FittoniaButtonType
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
 
 class NewDestinationScreenViewModel(
@@ -113,7 +112,6 @@ fun NewDestinationScreen(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = viewModel::onSaveNewDestination,
                     enabled = viewModel.canAddDestination.collectAsState(initial = false).value,
-                    type = FittoniaButtonType.Primary,
                     content = {
                         ButtonText(text = "Save")
                         FittoniaSpacerWidth(width = 5)

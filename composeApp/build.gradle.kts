@@ -15,7 +15,6 @@ val testAttribute: Attribute<String> = Attribute.of("key", String::class.java)
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }

@@ -69,7 +69,6 @@ fun FittoniaScaffold(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = {
-                    println("NeoScaffold.click!")
                     keyboard?.hide()
                     focusRequester.requestFocus()
                 },

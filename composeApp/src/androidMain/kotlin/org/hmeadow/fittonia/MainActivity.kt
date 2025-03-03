@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import org.hmeadow.fittonia.utility.debug
 
 val Context.dataStore by dataStore("fittonia.json", SettingsDataAndroidSerializer)
 
@@ -35,8 +36,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var fileFolderPickerIntent: ActivityResultLauncher<Intent>
     private var onUriPicked: (Uri) -> Unit = {}
 
-    var testBind = 0
-    var testUnbind = 0
+    // TODO
+    private var testBind = 0
+    private var testUnbind = 0
 
     private var lastServerConnection: ServiceConnection? = null
     private var serverConnection: ServiceConnection? = null
@@ -63,13 +65,11 @@ class MainActivity : ComponentActivity() {
 
     fun getDeviceIpAddress(): String? {
         return (getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager)?.let { conman ->
-            conman.getLinkProperties(conman.activeNetwork)?.let { addresses ->
-                addresses
-                    .linkAddresses
-                    .find { it.toString().contains('.') }
-                    .toString()
-                    .substringBefore('/')
-            }
+            conman.getLinkProperties(conman.activeNetwork)
+                ?.linkAddresses
+                ?.find { it.toString().contains('.') }
+                ?.toString()
+                ?.substringBefore('/')
         }
     }
 
@@ -90,6 +90,7 @@ class MainActivity : ComponentActivity() {
             this,
             object : GestureDetector.SimpleOnGestureListener() {
                 override fun onSingleTapUp(ev: MotionEvent): Boolean {
+                    // TODO
                     /*
                     println("currentFocus: $currentFocus")
                     currentFocus?.let { focus ->
@@ -137,7 +138,11 @@ class MainActivity : ComponentActivity() {
     fun unbindFromServer() {
         serverConnection?.let {
             if (isConnected) {
-                unbindService(it).also { println("testUnbind = ${++testUnbind}") }
+                unbindService(it).also {
+                    debug {
+                        println("testUnbind = ${++testUnbind}")
+                    }
+                }
             }
         }
         serverConnection = null
@@ -151,7 +156,7 @@ class MainActivity : ComponentActivity() {
 
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
         return event?.let {
-            //gestureDetector.onTouchEvent(event)
+            //gestureDetector.onTouchEvent(event) // TODO
             super.dispatchTouchEvent(event)
         } ?: false
     }
@@ -199,7 +204,11 @@ class MainActivity : ComponentActivity() {
                     intent,
                     it,
                     0,
-                ).also { println("testBind = ${++testBind}") }
+                ).also {
+                    debug {
+                        println("testBind = ${++testBind}")
+                    }
+                }
             }
         }
     }
@@ -238,20 +247,14 @@ class MainActivity : ComponentActivity() {
         val foo = dataStore.data.first()
         try {
             val dumpUri = Uri.parse(foo.dumpPath.dumpPathForReal)
-            print("'dumpPathForReal': $dumpUri")
-
             val dumpObject = DocumentFile.fromTreeUri(this, dumpUri)
-            print("dumpObject: $dumpObject")
-
             var nextAutoJobName = foo.nextAutoJobName
             var limit = 100
             var attemptJobName: String = jobName ?: "Job$nextAutoJobName"
             while (true) {
                 if (dumpObject?.findFile(attemptJobName) == null) {
                     val directoryObject = dumpObject?.createDirectory(attemptJobName)
-                    print("directoryObject: $directoryObject")
                     val directoryUri = directoryObject?.uri
-                    print("directoryUri: $directoryUri")
                     return if (directoryUri != null) {
                         dataStore.updateData { it.copy(nextAutoJobName = ++nextAutoJobName) }
                         CreateDumpDirectory.Success(uri = directoryUri)

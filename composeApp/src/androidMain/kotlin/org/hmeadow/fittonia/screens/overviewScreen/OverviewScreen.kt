@@ -40,9 +40,10 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
-
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
 import org.hmeadow.fittonia.models.TransferJob
+import org.hmeadow.fittonia.utility.Debug
+import org.hmeadow.fittonia.utility.isLandscape
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.text.NumberFormat
 import java.util.Locale
@@ -134,15 +135,24 @@ fun OverviewScreen(
                         onClick = onSendFilesClicked,
                         content = { ButtonText(text = "Send files") },
                     )
-                    FittoniaSpacerWidth(20)
-                    FittoniaComingSoon(
-                        modifier = Modifier.weight(1.0f),
-                    ) {
-                        FittoniaButton(
-                            onClick = { /*TODO*/ },
-                            content = { ButtonText(text = "Send Message TODO") },
-                        )
-                    }
+                    FittoniaSpacerWidth(width = 20)
+                    Debug(
+                        releaseBlock = {
+                            if (isLandscape()) {
+                                FittoniaSpacerWeightRow(weight = 1.0f)
+                            }
+                        },
+                        debugBlock = {
+                            FittoniaComingSoon(
+                                modifier = Modifier.weight(1.0f),
+                            ) {
+                                FittoniaButton(
+                                    onClick = { /*TODO*/ },
+                                    content = { ButtonText(text = "Send Message TODO") },
+                                )
+                            }
+                        },
+                    )
                 }
             }
         },
@@ -179,7 +189,7 @@ fun OverviewScreen(
                 onDismiss = { aboutState = false },
             ) { _ ->
                 Text(
-                    text = "Made by me :3",
+                    text = "Made by me :3", // TODO
                 )
             }
             FittoniaModal(
