@@ -144,7 +144,7 @@ class SendFilesScreenViewModel(
                 updatePingAtomically(
                     newPing = onPing(
                         ip,
-                        port, // TODO make Port type.
+                        port, // TODO make Port type. - After release
                         password,
                         Instant.now().toEpochMilli().let { now ->
                             if (now == timestamp) {
@@ -203,7 +203,7 @@ class SendFilesScreenViewModel(
                                 file?.length?.takeIf { it > 0 } ?: 0
                             },
                     )
-                } ?: run { /*TODO*/ }
+                } ?: run { /* TODO - After release */ }
             }
         }
     }
@@ -219,7 +219,7 @@ class SendFilesScreenViewModel(
                     name = "-",
                     ip = oneTimeIpAddressState.text,
                     password = oneTimePasswordState.text,
-                ), // TODO
+                ), // TODO - After release
                 items = itemListState.value,
                 port = portState.text.toInt(),
                 status = TransferStatus.Sending,

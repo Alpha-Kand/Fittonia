@@ -112,7 +112,7 @@ fun WelcomeScreen(
                                 text = stringResource(id = R.string.welcome_screen_new_server_password_label),
                                 style = inputLabelStyle,
                             )
-                            // TODO: Help Icon
+                            // TODO: Help Icon - After release
                         }
                     },
                 )
@@ -128,7 +128,7 @@ fun WelcomeScreen(
                                 text = stringResource(id = R.string.welcome_screen_new_server_port_label),
                                 style = inputLabelStyle,
                             )
-                            // TODO: Help Icon
+                            // TODO: Help Icon - After release
                         }
                     },
                 )
@@ -140,7 +140,7 @@ fun WelcomeScreen(
                         text = stringResource(id = R.string.welcome_screen_new_destination_folder_label),
                         style = inputLabelStyle,
                     )
-                    // TODO: Help Icon
+                    // TODO: Help Icon - After release
                 }
                 ReadOnlyEntries(
                     entries = listOf(data.dumpPath.dumpPathReadable),

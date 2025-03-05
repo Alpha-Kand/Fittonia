@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var fileFolderPickerIntent: ActivityResultLauncher<Intent>
     private var onUriPicked: (Uri) -> Unit = {}
 
-    // TODO
+    // TODO - After release
     private var testBind = 0
     private var testUnbind = 0
 
@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
             this,
             object : GestureDetector.SimpleOnGestureListener() {
                 override fun onSingleTapUp(ev: MotionEvent): Boolean {
-                    // TODO
+                    // TODO - After release.
                     /*
                     println("currentFocus: $currentFocus")
                     currentFocus?.let { focus ->
@@ -139,9 +139,7 @@ class MainActivity : ComponentActivity() {
         serverConnection?.let {
             if (isConnected) {
                 unbindService(it).also {
-                    debug {
-                        println("testUnbind = ${++testUnbind}")
-                    }
+                    println("testUnbind = ${++testUnbind}")
                 }
             }
         }
@@ -156,7 +154,7 @@ class MainActivity : ComponentActivity() {
 
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
         return event?.let {
-            //gestureDetector.onTouchEvent(event) // TODO
+            //gestureDetector.onTouchEvent(event) // TODO - After release
             super.dispatchTouchEvent(event)
         } ?: false
     }
@@ -205,9 +203,7 @@ class MainActivity : ComponentActivity() {
                     it,
                     0,
                 ).also {
-                    debug {
-                        println("testBind = ${++testBind}")
-                    }
+                    println("testBind = ${++testBind}")
                 }
             }
         }

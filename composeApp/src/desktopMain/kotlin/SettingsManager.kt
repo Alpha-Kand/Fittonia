@@ -10,8 +10,8 @@ class SettingsManagerDesktop private constructor() : SettingsManager() {
         val settingsManager = SettingsManagerDesktop()
     }
 
-    private val settingsPath =
-        "/Users/hunter.wiesman/Desktop/FittoniaTRANSFER/fittoniaSettings|4.xml" // settingsOSSpecificPath // TODO
+    private val settingsPath = // TODO - After release
+        "/Users/hunter.wiesman/Desktop/FittoniaTRANSFER/fittoniaSettings|4.xml" // settingsOSSpecificPath
 
     override var settings = loadSettings()
 

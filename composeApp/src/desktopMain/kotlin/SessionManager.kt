@@ -60,7 +60,7 @@ class SessionManager {
                     }
                 }
             }
-            // /TODODODODODODODODO TODO don't require ip and password if destination is already given.
+            // TODO don't require ip and password if destination is already given. - After release
             return listOfNotNull(
                 input.first(),
                 // Insert after command name, but before trailing 'send items'.

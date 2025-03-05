@@ -135,30 +135,30 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     private fun launchServerJob() {
-        serverSocket?.let { server ->
-            serverJob = launch {
-                while (true) {
-                    yield()
-                    try {
-                        HMeadowSocketServer.createServerFromSocket(server).let { server ->
-                            launch {
-                                log("Connected to client.")
-                                handleCommand(
-                                    server = server,
-                                    jobId = jobIdMutex.withLock {
-                                        val id = jobId
-                                        jobId++
-                                        id
-                                    },
-                                )
+        try {
+            serverSocket?.let { server ->
+                serverJob = launch {
+                    while (true) {
+                        yield()
+                        try {
+                            HMeadowSocketServer.createServerFromSocket(server).let { server ->
+                                launch {
+                                    log("Connected to client.")
+                                    handleCommand(
+                                        server = server,
+                                        jobId = getAndIncrementJobId(),
+                                    )
+                                }
                             }
+                        } catch (e: SocketException) {
+                            log(e.message ?: "Unknown server SocketException")
+                            // TODO: Don't worry! - After release
                         }
-                    } catch (e: SocketException) {
-                        log(e.message ?: "Unknown server SocketException")
-                        // TODO: Don't worry!
                     }
                 }
             }
+        } catch (e: Throwable) {
+            // TODO - After release
         }
     }
 
@@ -276,7 +276,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     log("Client provided job name: $it", jobId = jobId)
                 }
 
-                else -> throw Exception() // TODO
+                else -> throw Exception() // TODO - After release
             }
 
             server.sendInt(128) // Not sure android has the same path limits as desktop.
@@ -372,7 +372,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                 launch {
                     try {
                         block()
-                    } catch (e: HMeadowSocket.HMeadowSocketError) { // TODO Better error handling & messaging.
+                    } catch (e: HMeadowSocket.HMeadowSocketError) { // TODO Better error handling & messaging. - After R
                         e.hmMessage?.let { logError(it) }
                         e.message?.let { logError(it) }
                     } catch (e: Exception) {
@@ -391,7 +391,8 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                 async {
                     try {
                         block()
-                    } catch (e: HMeadowSocket.HMeadowSocketError) { // TODO Better error handling & messaging.
+                    } catch (e: HMeadowSocket.HMeadowSocketError) {
+                        // TODO Better error handling & messaging. - After release
                         e.hmMessage?.let { logError(it) }
                         e.message?.let { logError(it) }
                         onError()
@@ -448,7 +449,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     e.message?.let { logError(it) }
                     return@bootStrap
                 }
-                client.sendBytesPerSecond = 2 * 1024 * 1024 // TODO have this come from the screen.
+                // client.sendBytesPerSecond = 2 * 1024 * 1024 // TODO have this come from the screen. - After release
                 val commandSuccess = communicateCommand(client = client, currentJob = currentJob)
                 if (commandSuccess) {
                     log(log = "Password accepted")
@@ -467,7 +468,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         client.receiveContinue()
                     }
                     items.fastForEach { item ->
-                        // TODO: Relative path
+                        // TODO: Relative path - After release
                         client.sendBoolean(item.isFile)
                         if (item.isFile) {
                             MainActivity.mainActivity.contentResolver.openInputStream(item.uri).use {
@@ -484,7 +485,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                             }
                         }
                         client.receiveContinue()
-                        updateTransferJobCurrentItem(job = currentJob) // Todo needed?
+                        updateTransferJobCurrentItem(job = currentJob) // TODO needed? - After release
                     }
                 } else {
                     logError(log = "Password refused")

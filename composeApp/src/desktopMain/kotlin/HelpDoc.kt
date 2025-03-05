@@ -74,7 +74,7 @@ object HelpDocLoader {
             return if (initialized) {
                 mHelpDocs
             } else {
-                throw Exception() // TODO
+                throw Exception() // TODO - After release
             }
         }
 

@@ -1,7 +1,4 @@
-import android.os.Build
+import org.hmeadow.fittonia.BuildConfig
 
-class AndroidPlatform : Platform {
-    override val name: String = "Android ${Build.VERSION.SDK_INT}"
-}
-
-actual fun getPlatform(): Platform = AndroidPlatform()
+actual fun getPlatform(): Platform = Platform.ANDROID
+actual fun isDebug(): Boolean = BuildConfig.DEBUG

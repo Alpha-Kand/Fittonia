@@ -190,7 +190,7 @@ internal suspend fun fileNamesTooLong(
             -> return userInput.toName
 
             FileTransfer.SHOW_ALL -> continue
-            else -> throw IllegalStateException("kinda wack") // TODO
+            else -> throw IllegalStateException("kinda wack") // TODO - After release
         }
     }
 }

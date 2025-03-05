@@ -23,7 +23,7 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     )
 }
 
-// TODO Sending files should be handled in DesktopServer.
+// TODO Sending files should be handled in DesktopServer. - After release
 fun SendCommand.canContinueSendCommand(client: HMeadowSocketClient): Boolean {
     val destination = SettingsManagerDesktop.settingsManager.findDestination(this.getDestination())
     val password = destination?.password ?: this.getPassword()

@@ -68,14 +68,14 @@ fun TransferDetailsScreen(
                 composeDataState = transferJobState,
                 failureBlock = {
                     Text(
-                        text = "Something went wrong!", //TODO
+                        text = "Something went wrong!", // TODO - After release
                         style = headingLStyle,
                     )
                 },
             ) { transferJob ->
                 if (transferJob == null) {
                     Text(
-                        text = "Something went wrong! 2", //TODO
+                        text = "Something went wrong!", // TODO - After release
                         style = headingLStyle,
                     )
                 } else {
@@ -218,7 +218,7 @@ fun TransferDetailsScreen(
                                         ) {
                                             if (pathExpandedState) {
                                                 Text(
-                                                    text = file.name, // TODO todo long path?
+                                                    text = file.name, // TODO long path? - After release
                                                 )
                                                 FittoniaSpacerWeightRow()
                                             } else {
@@ -284,7 +284,7 @@ fun TransferDetailsScreen(
             }
         },
         footer = {
-            // TODO TranferDetailsFooter()
+            // TODO TranferDetailsFooter() - After release
         },
     )
 }
@@ -295,21 +295,21 @@ private fun TranferDetailsFooter() {
         Row {
             FittoniaButton(
                 modifier = Modifier.weight(1f),
-                onClick = { /*TODO*/ },
+                onClick = { /*TODO - After release*/ },
             ) {
                 ButtonText(text = "Queue \uD83D\uDD03")
             }
             FittoniaSpacerWidth(width = 5)
             FittoniaButton(
                 modifier = Modifier.weight(1f),
-                onClick = { /*TODO*/ },
+                onClick = { /*TODO - After release*/ },
             ) {
                 ButtonText(text = "Cancel ❌")
             }
         }
         FittoniaButton(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { /*TODO*/ },
+            onClick = { /*TODO - After release*/ },
         ) {
             ButtonText(text = "Pause ⏸\uFE0F")
         }

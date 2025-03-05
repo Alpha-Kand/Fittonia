@@ -147,8 +147,8 @@ fun OverviewScreen(
                                 modifier = Modifier.weight(1.0f),
                             ) {
                                 FittoniaButton(
-                                    onClick = { /*TODO*/ },
-                                    content = { ButtonText(text = "Send Message TODO") },
+                                    onClick = { /* TODO - After release */ },
+                                    content = { ButtonText(text = "Send Message") },
                                 )
                             }
                         },

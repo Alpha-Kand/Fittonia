@@ -72,7 +72,7 @@ interface Server {
     suspend fun onInvalidCommand(unknownCommand: String)
 }
 
-// TODO Sending files should be handled in Server.
+// TODO Sending files should be handled in Server. - After release
 fun <T> HMeadowSocket.receiveApproval(onConfirm: () -> T, onDeny: () -> T): T {
     receiveString()
     return when (receiveBoolean()) {
@@ -81,7 +81,7 @@ fun <T> HMeadowSocket.receiveApproval(onConfirm: () -> T, onDeny: () -> T): T {
     }
 }
 
-// TODO Sending files should be handled in Server.
+// TODO Sending files should be handled in Server. - After release
 fun <T> HMeadowSocketClient.communicateCommand(
     commandFlag: ServerCommandFlag,
     password: String,
@@ -102,7 +102,7 @@ fun <T> HMeadowSocketClient.communicateCommand(
     )
 }
 
-// TODO Sending files should be handled in Server.
+// TODO Sending files should be handled in Server. - After release
 fun HMeadowSocketClient.communicateCommandBoolean(
     commandFlag: ServerCommandFlag,
     password: String,

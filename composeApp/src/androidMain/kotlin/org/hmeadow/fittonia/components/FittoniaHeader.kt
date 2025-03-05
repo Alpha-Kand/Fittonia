@@ -19,14 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import org.hmeadow.fittonia.BuildConfig
+import isDebug
 import org.hmeadow.fittonia.Navigator
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.design.fonts.headerStyle
-import org.hmeadow.fittonia.utility.isDebug
 
 @Composable
 fun FittoniaHeader(
@@ -79,7 +78,7 @@ fun FittoniaHeader(
                 Image(
                     modifier = Modifier.clickable(onClick = onAlertsClicked),
                     painter = painterResource(id = R.drawable.ic_warning_yellow),
-                    contentDescription = "", // TODO
+                    contentDescription = "", // TODO - After release
                 )
             }
             if (isDebug()) {

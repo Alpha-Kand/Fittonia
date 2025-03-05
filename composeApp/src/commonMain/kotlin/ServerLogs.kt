@@ -42,16 +42,19 @@ class Log(
     )
 
     init {
-        // TODO Need a better way to see logs in app, don't want to expose them to system.out.
+        // TODO Need a better way to see logs in app, don't want to expose them to system.out. - After release
         val typeString = when (type) {
             LogType.NORMAL -> ""
             LogType.WARNING -> "WARNING "
             LogType.ERROR -> "ERROR "
             LogType.DEBUG -> "DEBUG "
         }
-        jobId?.let {
-            println("$typeString$timeStamp ($jobId): $message")
-        } ?: println("$typeString$timeStamp: $message")
+
+        debug {
+            jobId?.let {
+                println("$typeString$timeStamp ($jobId): $message")
+            } ?: println("$typeString$timeStamp: $message")
+        }
     }
 
     constructor(message: String, type: LogType = LogType.NORMAL, jobId: Int? = null) : this(

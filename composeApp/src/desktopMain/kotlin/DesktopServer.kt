@@ -40,7 +40,7 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
     }
 
     override suspend fun onPing(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
-        TODO("Not yet implemented")
+        TODO("Not yet implemented") // After release
     }
 
     override suspend fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
@@ -136,7 +136,7 @@ private fun HMeadowSocketServer.getJobName2(flag: String, jobId: Int): String {
             DesktopServer.log("Client provided job name: $it", jobId = jobId)
         }
 
-        else -> throw Exception() // TODO
+        else -> throw Exception() // TODO - After release
     }
     var nonConflictedJobName: String = autoJobName
 
@@ -145,7 +145,7 @@ private fun HMeadowSocketServer.getJobName2(flag: String, jobId: Int): String {
         nonConflictedJobName = autoJobName + "_" + settingsManager.getAutoJobName()
         i++
         if (i > 20) {
-            throw Exception() // TODO
+            throw Exception() // TODO - After release
         }
     }
     return (settingsManager.settings.dumpPath + "/$nonConflictedJobName").also {

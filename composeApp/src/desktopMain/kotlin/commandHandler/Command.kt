@@ -2,6 +2,7 @@ package commandHandler
 
 import FittoniaError
 import FittoniaErrorType
+import ServerFlagsString
 import SessionManager
 import commandHandler.Command.Companion.verifyArgumentIsSet
 import decodeIpAddress
@@ -44,7 +45,7 @@ fun verifyPortNumber(port: Int?): Boolean {
     return false
 }
 
-fun HMeadowSocket.receiveConfirmation(): Boolean { // TODO replace with sending and receiving booleans.
+fun HMeadowSocket.receiveConfirmation(): Boolean { // TODO replace with sending and receiving booleans. - After release
     return receiveString() == ServerFlagsString.CONFIRM && receiveBoolean()
 }
 
@@ -61,7 +62,7 @@ sealed class SendCommand : Command {
 
     override fun verify() {
         if (destination == null) {
-            // getIP() TODO
+            // getIP() TODO - After release
             getPassword()
         }
         verifyPortNumber(port)

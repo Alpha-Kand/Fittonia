@@ -6,6 +6,7 @@ import hmeadowSocket.HMeadowSocket.HMeadowSocketError.CouldNotFindAvailablePort
 import hmeadowSocket.HMeadowSocket.HMeadowSocketError.FailedToReceiveException
 import hmeadowSocket.HMeadowSocket.HMeadowSocketError.FailedToSendException
 import hmeadowSocket.HMeadowSocket.HMeadowSocketError.ServerSetupException
+import org.hmeadow.fittonia.utility.debug
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -55,9 +56,11 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         try {
             return receive()
         } catch (e: Exception) {
-            println(e.message)
             this.close()
-            history.forEach { println(it) } // TODO HIDE FROM RELEASE.
+            debug {
+                println(e.message)
+                history.forEach { println(it) }
+            }
             throw FailedToReceiveException(e)
         }
     }
@@ -68,7 +71,10 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
             send()
         } catch (e: Exception) {
             this.close()
-            history.forEach { println(it) } // TODO HIDE FROM RELEASE.
+            debug {
+                println(e.message)
+                history.forEach { println(it) }
+            }
             throw FailedToSendException(e)
         }
     }
@@ -79,7 +85,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
             socketInterface.sendBytesPerSecond = value
         }
     var receiveBytesPerSecond: Long
-        get() = throw Exception() // TODO socketInterface.receiveBytesPerSecond
+        get() = throw Exception() // TODO socketInterface.receiveBytesPerSecond - After release
         set(value) {
             socketInterface.receiveBytesPerSecond = value
         }
