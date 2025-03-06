@@ -7,6 +7,8 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
@@ -68,7 +70,7 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
 
     @OptIn(DelicateCoroutinesApi::class) // These are tests so using 'GlobalScope' is fairly safe.
     fun runSocketScriptTest2(
-        setupBlock: TestScope.() -> Unit = {},
+        setupBlock: suspend TestScope.() -> Unit = {},
         vararg testBlocks: suspend TestScope.() -> Unit,
     ) {
         var throwException: Throwable? = null
@@ -166,9 +168,9 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
         }
     }
 
-    private object Lock
+    private val lock = Mutex()
 
-    fun generateClient(key: String = "default") = synchronized(Lock) {
+    suspend fun generateClient(key: String = "default") = lock.withLock {
         HMeadowSocketClient(
             ipAddress = "localhost",
             port = 0,
@@ -181,7 +183,7 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
         )
     }
 
-    fun generateServer(key: String = "default") = synchronized(Lock) {
+    suspend fun generateServer(key: String = "default") = lock.withLock {
         HMeadowSocketServer(
             socket = Socket(),
             socketInterface = generateSocketInterface(
@@ -197,6 +199,12 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
         thisQueue: LinkedBlockingQueue<Communication>,
         thisList: MutableList<Communication>,
     ) = object : HMeadowSocketInterface {
+        override var sendBytesPerSecond: Long
+            get() = 2000
+            set(_) {}
+        override var receiveBytesPerSecond: Long
+            get() = 2000
+            set(_) {}
 
         override fun bindToSocket(block: () -> Socket) = Socket()
         override fun close() {}
@@ -225,7 +233,7 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
             progressPrecision: Double,
             onProgressUpdate: (bytes: Long) -> Unit,
         ) {
-            TODO("Not yet implemented")
+            TODO("Not yet implemented") // After release
         }
 
         override fun sendBoolean(message: Boolean) = send(flag = TestFlags.SEND_BOOLEAN, message = message.toString())
@@ -242,7 +250,7 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
             beforeDownload: (totalBytes: Long, name: String) -> Unit,
             onProgressUpdate: (progress: Long) -> Unit,
         ) {
-            TODO("Not yet implemented")
+            TODO("Not yet implemented") // After release
         }
 
         override fun sendFile(
@@ -253,7 +261,7 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
         ) = send(flag = TestFlags.SEND_FILE, message = Pair(filePath, rename).toString())
 
         /*
-        // TODO
+        // TODO - After release
         override fun debugCheckpoint() {
             thisList.add(Communication(flag = TestFlags.DEBUG_CHECKPOINT, value = "\uD83C\uDFF4\u200D☠\uFE0F"))
         }

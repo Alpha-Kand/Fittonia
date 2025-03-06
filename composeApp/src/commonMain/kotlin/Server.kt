@@ -2,9 +2,20 @@ import ServerCommandFlag.Companion.toCommandFlag
 import hmeadowSocket.HMeadowSocket
 import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 interface Server {
     var jobId: Int
+    val jobIdMutex: Mutex
+
+    suspend fun getAndIncrementJobId():Int {
+        return jobIdMutex.withLock {
+            val id = jobId
+            jobId++
+            id
+        }
+    }
 
     fun HMeadowSocketServer.passwordIsValid(): Boolean
 

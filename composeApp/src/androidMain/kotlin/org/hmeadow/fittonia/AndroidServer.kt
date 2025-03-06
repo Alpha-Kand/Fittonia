@@ -53,12 +53,14 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
     override val coroutineContext: CoroutineContext = Dispatchers.IO
     override var jobId: Int = 100
-    private val jobIdMutex = Mutex()
+    override val jobIdMutex = Mutex()
+    override val logsMutex  = Mutex()
     private val binder = AndroidServerBinder()
     var serverSocket: ServerSocket? = null
     var serverJob: Job? = null
     private lateinit var password: String
     private val progressUpdateMutex = Mutex()
+    private val notificationManagerMutex = Mutex()
 
     inner class AndroidServerBinder : Binder() {
         fun getService(): AndroidServer = this@AndroidServer
@@ -66,6 +68,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     var transferJobs = MutableStateFlow<List<TransferJob>>(emptyList())
         private set
+    private val transferJobsMutex = Mutex()
 
     override fun onBind(intent: Intent): IBinder {
         return binder
@@ -177,9 +180,9 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         .setContentText(getString(R.string.send_receive_foreground_service_notification_content, transferJobsActive))
         .build()
 
-    private fun updateNotification() {
+    private suspend fun updateNotification() {
         val notificationManager = (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
-        synchronized(notificationManager) {
+        notificationManagerMutex.withLock {
             notificationManager.notify(
                 NOTIFICATION_ID,
                 constructNotification(
@@ -199,7 +202,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         server.value = null
     }
 
-    /* MUST BE IN 'SYNCHRONIZED' */ // TODO USE MUTEX
+    /* MUST BE IN MUTEX */
     private inline fun <reified T : TransferJob> updateTransferJob(job: T): T {
         transferJobs.update { (transferJobs.value.filterNot { it.id == job.id } + job).sortedBy { it.id } }
         return job
@@ -207,22 +210,22 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     private inline fun <reified T : TransferJob> findJob(job: T): T? = transferJobs.value.find { it.id == job.id } as? T
 
-    private fun registerTransferJob(job: TransferJob) {
-        synchronized(transferJobs) {
+    private suspend fun registerTransferJob(job: TransferJob) {
+        transferJobsMutex.withLock {
             updateTransferJob(job = job)
         }
     }
 
-    private fun updateTransferJobCurrentItem(job: OutgoingJob) {
-        synchronized(transferJobs) {
+    private suspend fun updateTransferJobCurrentItem(job: OutgoingJob) {
+        transferJobsMutex.withLock {
             findJob(job)?.let { job ->
                 updateTransferJob(job.copy(currentItem = job.nextItem))
             }
         }
     }
 
-    private fun finishTransferJob(job: OutgoingJob) {
-        synchronized(transferJobs) {
+    private suspend fun finishTransferJob(job: OutgoingJob) {
+        transferJobsMutex.withLock {
             findJob(job)?.let { job ->
                 updateTransferJob(
                     job.copy(

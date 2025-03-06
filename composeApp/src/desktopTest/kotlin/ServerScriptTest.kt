@@ -1,21 +1,37 @@
+import hmeadowSocket.HMeadowSocketClient
 import hmeadowSocket.HMeadowSocketServer
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
 
 private class ServerScriptTest : BaseSocketScriptTest() {
 
     private val onConfirm: () -> Boolean = mockk(relaxed = true)
     private val onDeny: () -> Boolean = mockk(relaxed = true)
 
-    class TestServer(testScope: BaseSocketScriptTest) : Server {
-        val client = testScope.generateClient()
-        val server = testScope.generateServer()
+    suspend fun testServerFactory(): TestServer {
+        return TestServer(
+            client = generateClient(),
+            server = generateServer(),
+        )
+    }
+
+    class TestServer(
+        val client: HMeadowSocketClient,
+        val server: HMeadowSocketServer,
+    ) : Server {
         override var jobId: Int
             get() = 0
             set(_) {}
+        override val jobIdMutex = Mutex()
 
         override fun HMeadowSocketServer.passwordIsValid(): Boolean {
             return true
+        }
+
+        override suspend fun onPing(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+            TODO("Not yet implemented") // After release
         }
 
         override suspend fun onAddDestination(
@@ -43,8 +59,8 @@ private class ServerScriptTest : BaseSocketScriptTest() {
     }
 
     @UnitTest
-    fun sendReceiveApprovalConfirm() {
-        val testServer = TestServer(testScope = this)
+    fun sendReceiveApprovalConfirm() = runBlocking {
+        val testServer = testServerFactory()
         runSocketScriptTest2(
             setupBlock = {},
             {
@@ -64,8 +80,8 @@ private class ServerScriptTest : BaseSocketScriptTest() {
     }
 
     @UnitTest
-    fun sendReceiveApprovalDeny() {
-        val testServer = TestServer(testScope = this)
+    fun sendReceiveApprovalDeny() = runBlocking {
+        val testServer = testServerFactory()
         runSocketScriptTest2(
             setupBlock = {},
             {

@@ -1,3 +1,5 @@
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import java.util.Base64
 import java.util.LinkedList
@@ -17,7 +19,9 @@ abstract class SettingsManager {
 
     abstract fun loadSettings(): SettingsData
 
-    abstract fun saveSettings()
+    abstract suspend fun saveSettings()
+
+    val settingsMutex = Mutex()
 
     val defaultPort: Int
         get() = settings.defaultPort
@@ -25,14 +29,14 @@ abstract class SettingsManager {
     val previousCmdEntries: LinkedList<String>
         get() = settings.previousCmdEntries
 
-    fun setDumpPath(dumpPath: String) {
+    suspend fun setDumpPath(dumpPath: String) {
         settings = settings.copy(dumpPath = dumpPath)
         saveSettings()
     }
 
     fun hasDumpPath(): Boolean = settings.dumpPath.isNotEmpty()
 
-    fun addDestination(
+    suspend fun addDestination(
         name: String,
         ip: String,
         password: String,
@@ -52,7 +56,7 @@ abstract class SettingsManager {
         saveSettings()
     }
 
-    fun removeDestination(name: String): Boolean {
+    suspend fun removeDestination(name: String): Boolean {
         if (settings.destinations.find { it.name == name } == null) {
             return false
         }
@@ -63,14 +67,14 @@ abstract class SettingsManager {
         return true
     }
 
-    fun setDefaultPort(port: Int) {
+    suspend fun setDefaultPort(port: Int) {
         settings = settings.copy(defaultPort = port)
         saveSettings()
     }
 
-    fun clearDefaultPort() = setDefaultPort(port = DEFAULT_PORT)
+    suspend fun clearDefaultPort() = setDefaultPort(port = DEFAULT_PORT)
 
-    fun setServerPassword(newPassword: String) {
+    suspend fun setServerPassword(newPassword: String) {
         settings = settings.copy(serverPassword = newPassword)
         saveSettings()
     }
@@ -81,7 +85,7 @@ abstract class SettingsManager {
 
     fun hasServerPassword(): Boolean = settings.serverPassword != null
 
-    fun getAutoJobName(): String = synchronized(settings) {
+    suspend fun getAutoJobName(): String = settingsMutex.withLock {
         settings.nextAutoJobName.let {
             settings = settings.copy(nextAutoJobName = it + 1)
             saveSettings()
@@ -125,7 +129,7 @@ abstract class SettingsManager {
     object AESEncyption {
         // Based off of code by Kasım Özdemir.
 
-        // TODO
+        // TODO FOR REAL
         private const val secretKey = "U29tZWJvZHkgb25jZSB0b2xkIG1lIHRoZSB3b3JsZCB3YXMgZ29pbmcgdG8gcm9sbCBtZ"
         private const val salt = "QWxsIHRoYXQgZ2xpdHRlcg=="
         private const val iv = "SG9tZSBzd2VldCBwaW5lYQ=="

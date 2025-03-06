@@ -1,23 +1,41 @@
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import org.hmeadow.fittonia.utility.debug
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.coroutines.CoroutineContext
 
-interface ServerLogs {
+interface ServerLogs : CoroutineScope {
     val mLogs: MutableList<Log>
+    val logsMutex: Mutex
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO
 
-    fun log(log: String, jobId: Int? = null): Unit = synchronized(mLogs) {
+    fun log(log: String, jobId: Int? = null) = launchAndMutex {
         mLogs.add(Log(log, LogType.NORMAL, jobId))
     }
 
-    fun logWarning(log: String, jobId: Int? = null): Unit = synchronized(mLogs) {
+    fun logWarning(log: String, jobId: Int? = null) = launchAndMutex {
         mLogs.add(Log(log, LogType.WARNING, jobId))
     }
 
-    fun logError(log: String, jobId: Int? = null): Unit = synchronized(mLogs) {
+    fun logError(log: String, jobId: Int? = null) = launchAndMutex {
         mLogs.add(Log(log, LogType.ERROR, jobId))
     }
 
-    fun logDebug(log: String, jobId: Int? = null): Unit = synchronized(mLogs) {
+    fun logDebug(log: String, jobId: Int? = null) = launchAndMutex {
         mLogs.add(Log(log, LogType.DEBUG, jobId))
+    }
+
+    private fun launchAndMutex(block: () -> Unit) {
+        launch(Dispatchers.Main) {
+            logsMutex.withLock {
+                block()
+            }
+        }
     }
 }
 

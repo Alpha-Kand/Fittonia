@@ -2,7 +2,7 @@ package commandHandler.executeCommand
 
 import BaseSocketScriptTest
 import DesktopServer
-import SettingsManager
+import SettingsManagerDesktop
 import UnitTest
 import commandHandler.AddCommand
 import commandHandler.ipArguments
@@ -10,6 +10,7 @@ import commandHandler.nameArguments
 import commandHandler.passwordArguments
 import commandHandler.portArguments
 import commandHandler.setupSendCommandClient
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockkStatic
 
@@ -20,7 +21,7 @@ private class AddExecutionScriptTest : BaseSocketScriptTest() {
             mockkStatic(::setupSendCommandClient)
             every { setupSendCommandClient(any()) } returns generateClient()
             every { SettingsManagerDesktop.settingsManager.settings.destinations } returns emptyList()
-            every { SettingsManagerDesktop.settingsManager.addDestination(any(), any(), any()) } returns Unit
+            coEvery { SettingsManagerDesktop.settingsManager.addDestination(any(), any(), any()) } returns Unit
             every { SettingsManagerDesktop.settingsManager.checkPassword(any()) } returns true
         },
         {

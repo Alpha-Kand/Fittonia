@@ -5,11 +5,14 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import java.nio.file.Path
 import kotlin.io.path.Path
 
 class DesktopServer private constructor(port: Int) : ServerLogs, Server {
     override var jobId: Int = 100
+    override val jobIdMutex = Mutex()
+    override val logsMutex = Mutex()
 
     private val serverCoroutineScope = CoroutineScope(
         context = Dispatchers.IO + CoroutineExceptionHandler { _, e ->
@@ -27,9 +30,7 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
             while (true) {
                 log("Waiting for client.")
                 waitForClient { server ->
-                    val newJobId = synchronized(instance()) {
-                        jobId++
-                    }
+                    val newJobId = getAndIncrementJobId()
                     log("Connected to client.", jobId = newJobId)
                     serverCoroutineScope.launch {
                         handleCommand(server, jobId = newJobId)
@@ -93,7 +94,7 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         logWarning("Received invalid server command from client: $unknownCommand", jobId = jobId)
     }
 
-    private fun waitForClient(block: (HMeadowSocketServer) -> Unit) {
+    private suspend fun waitForClient(block: suspend (HMeadowSocketServer) -> Unit) {
         block(HMeadowSocketServer.createServerFromSocket(serverSocket = mainServerSocket))
     }
 
@@ -125,7 +126,7 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
     }
 }
 
-private fun HMeadowSocketServer.getJobName2(flag: String, jobId: Int): String {
+private suspend fun HMeadowSocketServer.getJobName2(flag: String, jobId: Int): String {
     val settingsManager = SettingsManagerDesktop.settingsManager
     val autoJobName = when (flag) {
         ServerFlagsString.NEED_JOB_NAME -> settingsManager.getAutoJobName().also {

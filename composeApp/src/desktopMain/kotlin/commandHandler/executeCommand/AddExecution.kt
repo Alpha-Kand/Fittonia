@@ -14,7 +14,7 @@ import commandHandler.AddCommand
 import commandHandler.canContinueSendCommand
 import commandHandler.setupSendCommandClient
 
-fun addExecution(command: AddCommand) {
+suspend fun addExecution(command: AddCommand) {
     val settingsManager = SettingsManagerDesktop.settingsManager
     if (settingsManager.settings.destinations.find { it.ip == command.getIP() } != null) {
         var userInput = ""

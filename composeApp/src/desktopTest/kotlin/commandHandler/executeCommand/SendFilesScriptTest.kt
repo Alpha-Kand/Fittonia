@@ -2,7 +2,7 @@ package commandHandler.executeCommand
 
 import BaseSocketScriptTest
 import DesktopServer
-import SettingsManager
+import SettingsManagerDesktop
 import UnitTest
 import commandHandler.FileTransfer
 import commandHandler.FileTransfer.Companion.toName
@@ -36,10 +36,10 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
     )
 
     @BeforeEach
-    fun foo() { // TODO RENAME
+    fun setup() {
         every { SettingsManagerDesktop.settingsManager.checkPassword(any()) } returns true
         every { SettingsManagerDesktop.settingsManager.settings.dumpPath } returns "dump path"
-        every { SettingsManagerDesktop.settingsManager.getAutoJobName() } returns "job name"
+        coEvery { SettingsManagerDesktop.settingsManager.getAutoJobName() } returns "job name"
 
         mockkStatic("commandHandler.executeCommand.sendExecution.SendFilesExecutionKt")
 
