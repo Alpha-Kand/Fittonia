@@ -3,7 +3,7 @@ package commandHandler
 import OutputIO.printlnIO
 import ServerCommandFlag
 import SettingsManagerDesktop
-import communicateCommand
+import communicateCommandBoolean
 import hmeadowSocket.HMeadowSocketClient
 
 fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
@@ -32,7 +32,7 @@ fun SendCommand.canContinueSendCommand(client: HMeadowSocketClient): Boolean {
         is SendMessageCommand -> ServerCommandFlag.SEND_MESSAGE
         is AddCommand -> ServerCommandFlag.ADD_DESTINATION
     }
-    return client.communicateCommand(
+    return client.communicateCommandBoolean(
         commandFlag = commandFlag,
         password = password,
         onSuccess = { },

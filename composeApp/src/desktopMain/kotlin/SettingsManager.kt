@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.sync.withLock
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -29,7 +30,7 @@ class SettingsManagerDesktop private constructor() : SettingsManager() {
         }
     }
 
-    override fun saveSettings() = synchronized(settings) {
+    override suspend fun saveSettings() = settingsMutex.withLock {
         if (MockConfig.IS_MOCKING) throw IllegalStateException("Attempting to save settings in mock mode.")
         val byteArrayOutputStream = ByteArrayOutputStream()
         jacksonObjectMapper().writeValue(byteArrayOutputStream, settings)

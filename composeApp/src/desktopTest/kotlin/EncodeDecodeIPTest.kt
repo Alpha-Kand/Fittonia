@@ -22,8 +22,8 @@ private class EncodeDecodeIPTest : DesktopBaseMockkTest() {
             assertEquals(it, decodeIpAddress(ipAddress = code))
         }
 
-        assertEquals("17.136.51.0", decodeIpAddress(ipAddress = "a-a-0").also { println(it) })
-        assertEquals("17.136.51.170", decodeIpAddress(ipAddress = "A-A-AA").also { println(it) })
+        assertEquals("17.136.51.0", decodeIpAddress(ipAddress = "a-a-0"))
+        assertEquals("17.136.51.170", decodeIpAddress(ipAddress = "A-A-AA"))
     }
 
     @UnitTest
