@@ -16,7 +16,7 @@ suspend fun encodeIpCodeExecution(command: IPCodeCommand) {
         val address = withContext(Dispatchers.IO) {
             Inet4Address.getLocalHost()
         }.hostAddress
-        if (command.ioFormat) {
+        if (command.machineReadableOutput.ioFormat) {
             printlnIO(text = encodeIpAddress(address))
         } else {
             printlnIO(Res.string.your_ip_address, address)

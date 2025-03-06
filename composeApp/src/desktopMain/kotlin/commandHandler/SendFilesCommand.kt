@@ -8,9 +8,7 @@ import requireNull
 class SendFilesCommand(
     private var files: List<String>? = null,
     private var job: String? = null,
-) : SendCommand(), MachineReadableOutput {
-    override var ioFormat: Boolean = machineReadableDefault()
-
+) : SendCommand() {
     fun getFiles() = verifyArgumentIsSet(argument = files, reportingName = filesArguments.first())
     fun getJob() = job
 
@@ -36,7 +34,7 @@ class SendFilesCommand(
         argumentName: String,
         value: String,
     ) = tryCatch(argumentName = argumentName, value = value) {
-        if (handleMachineReadableOutputFlag(argumentName = argumentName)) {
+        if (machineReadableOutput.handleMachineReadableOutputFlag(argumentName = argumentName)) {
             return@tryCatch true
         }
         if (handleSendCommandArgument(argumentName = argumentName, value = value)) {

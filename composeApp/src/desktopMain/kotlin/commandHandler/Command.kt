@@ -10,6 +10,8 @@ import hmeadowSocket.HMeadowSocket
 import requireNull
 
 sealed interface Command {
+    val machineReadableOutput: MachineReadableOutput
+        get() = MachineReadableOutput()
 
     suspend fun addArg(argumentName: String, value: String)
     fun verify()

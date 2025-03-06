@@ -3,8 +3,7 @@ package commandHandler
 import commandHandler.Command.Companion.verifyArgumentIsSet
 import requireNull
 
-class DecodeIPCodeCommand : Command, MachineReadableOutput {
-    override var ioFormat: Boolean = machineReadableDefault()
+class DecodeIPCodeCommand : Command {
     private var code: String? = null
 
     fun getCode() = verifyArgumentIsSet(argument = code, reportingName = destinationArguments.first())
@@ -14,7 +13,7 @@ class DecodeIPCodeCommand : Command, MachineReadableOutput {
         argumentName: String,
         value: String,
     ) = tryCatch(argumentName = argumentName, value = value) {
-        if (handleMachineReadableOutputFlag(argumentName = argumentName)) {
+        if (machineReadableOutput.handleMachineReadableOutputFlag(argumentName = argumentName)) {
             return@tryCatch true
         }
         if (ipCodeArguments.contains(argumentName)) {
