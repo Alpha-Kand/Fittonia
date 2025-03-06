@@ -24,7 +24,7 @@ sealed interface AppStyle {
     val secondaryButtonType: FittoniaButtonType
 
     @Composable
-    fun Background(modifier: Modifier = Modifier)
+    fun Background(modifier: Modifier)
 }
 
 val currentStyle: AppStyle = Empty

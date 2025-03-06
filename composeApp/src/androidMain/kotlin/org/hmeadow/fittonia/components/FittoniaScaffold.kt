@@ -65,7 +65,7 @@ fun FittoniaScaffold(
                 },
             ),
     ) {
-        currentStyle.Background()
+        currentStyle.Background(modifier = Modifier)
         SubcomposeLayout(modifier = Modifier) { constraints ->
             val headerPlaceables = subcompose(ScaffoldSectionsEnum.HEADER) {
                 header?.let {
