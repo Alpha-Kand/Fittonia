@@ -189,7 +189,22 @@ fun OverviewScreen(
                 onDismiss = { aboutState = false },
             ) { _ ->
                 Text(
-                    text = "Made by me :3", // TODO
+                    text = stringResource(
+                        R.string.about_modal_name_format,
+                        stringResource(R.string.app_name),
+                        stringResource(R.string.app_version),
+                    ),
+                    style = headingMStyle,
+                )
+                FittoniaSpacerHeight(10)
+                Text(
+                    text = stringResource(R.string.last_built_date),
+                    style = paragraphStyle,
+                )
+                FittoniaSpacerHeight(10)
+                Text(
+                    text = stringResource(R.string.credits),
+                    style = paragraphStyle,
                 )
             }
             FittoniaModal(

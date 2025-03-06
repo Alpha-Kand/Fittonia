@@ -90,7 +90,7 @@ fun TransferDetailsScreen(
                         when (transferJob) {
                             is OutgoingJob -> {
                                 Text(
-                                    text = "Destination",
+                                    text = stringResource(R.string.transfer_details_screen_destination_label),
                                     style = headingMStyle,
                                 )
                                 FittoniaSpacerHeight(height = 5)
@@ -102,7 +102,7 @@ fun TransferDetailsScreen(
 
                             is IncomingJob -> {
                                 Text(
-                                    text = "Source",
+                                    text = stringResource(R.string.transfer_details_screen_source_label),
                                     style = headingMStyle,
                                 )
                                 FittoniaSpacerHeight(height = 5)
@@ -115,7 +115,7 @@ fun TransferDetailsScreen(
                         FittoniaSpacerHeight(height = 30)
 
                         Text(
-                            text = "Status",
+                            text = stringResource(R.string.transfer_details_screen_status_label),
                             style = headingMStyle,
                         )
 
@@ -161,7 +161,7 @@ fun TransferDetailsScreen(
                         FittoniaSpacerHeight(height = 30)
 
                         Text(
-                            text = "Progress",
+                            text = stringResource(R.string.transfer_details_screen_progress_label),
                             style = headingMStyle,
                         )
 
@@ -190,7 +190,7 @@ fun TransferDetailsScreen(
                         FittoniaSpacerHeight(height = 30)
 
                         Text(
-                            text = "Logs",
+                            text = stringResource(R.string.transfer_details_screen_logs_label),
                             style = headingMStyle,
                         )
 

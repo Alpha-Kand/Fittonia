@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Fittonia</string>
+    <string name="app_version">1.0</string>
+    <string name="about_modal_name_format">%1$s, %2$s</string>
+    <string name="last_built_date">Built March 4, 2025</string>
+    <string name="credits">By Hunter Wiesman</string>
 
     <!-- Send/Receive Files Channel -->
     <string name="send_receive_channel_id">send-receive-channel-id</string>
@@ -28,6 +32,11 @@
     <!-- Transfer Details Screen -->
     <string name="transfer_details_screen_progress">%1$s - %2$d out of %3$d items %4$s.</string>
     <string name="transfer_details_screen_item_transfer_status">%1$s : %2$s</string>
+    <string name="transfer_details_screen_destination_label">Destination</string>
+    <string name="transfer_details_screen_source_label">Source</string>
+    <string name="transfer_details_screen_status_label">Status</string>
+    <string name="transfer_details_screen_progress_label">Progress</string>
+    <string name="transfer_details_screen_logs_label">Logs</string>
 
     <!-- Notifications -->
     <string name="notification_default_port_in_use_title">Default port unavailable</string>
