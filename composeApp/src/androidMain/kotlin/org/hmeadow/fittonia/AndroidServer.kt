@@ -54,7 +54,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val coroutineContext: CoroutineContext = Dispatchers.IO
     override var jobId: Int = 100
     override val jobIdMutex = Mutex()
-    override val logsMutex  = Mutex()
+    override val logsMutex = Mutex()
     private val binder = AndroidServerBinder()
     var serverSocket: ServerSocket? = null
     var serverJob: Job? = null
@@ -177,7 +177,13 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         .Builder(this, getString(R.string.send_receive_channel_id))
         .setSmallIcon(R.mipmap.ic_launcher)
         .setOnlyAlertOnce(true)
-        .setContentText(getString(R.string.send_receive_foreground_service_notification_content, transferJobsActive))
+        .setContentText(
+            MainActivity.mainActivity.resources.getQuantityString(
+                R.plurals.send_receive_foreground_service_notification_content,
+                transferJobsActive,
+                transferJobsActive,
+            ),
+        )
         .build()
 
     private suspend fun updateNotification() {
