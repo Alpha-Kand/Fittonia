@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.hmeadow.fittonia.utility.isLandscape
 
 @Composable
 fun FittoniaComingSoon(
@@ -56,27 +58,43 @@ fun FittoniaComingSoon(
 @Composable
 fun FittoniaModal(
     state: Boolean,
+    alignment: Alignment = Center,
     onDismiss: () -> Unit,
     content: @Composable ColumnScope.(() -> Unit) -> Unit,
 ) {
     if (state) {
         Box(
             modifier = Modifier
-                .background(color = Color.Black.copy(alpha = 0.5f))
+                .background(color = Color.Black.copy(alpha = 0.0f))
                 .fillMaxSize()
                 .clickable(onClick = onDismiss),
         ) {
-            Column(
+            Box(
                 modifier = Modifier
-                    .align(alignment = Center)
-                    .padding(all = 30.dp)
-                    .clip(RoundedCornerShape(corner = CornerSize(5.dp)))
-                    .background(color = Color.White)
-                    .fillMaxWidth(),
-                content = {
-                    content(onDismiss)
-                },
-            )
+                    .background(color = Color.Black.copy(alpha = 0.5f))
+                    .fillMaxHeight()
+                    .fillMaxWidth(
+                        if(isLandscape()){
+                            0.5f
+                        } else {
+                            0.85f
+                        },
+                    )
+                    .clickable(onClick = onDismiss),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .align(alignment = alignment)
+                        .padding(all = 30.dp)
+                        .clip(RoundedCornerShape(corner = CornerSize(5.dp)))
+                        .background(color = Color.White)
+                        .fillMaxWidth()
+                        .padding(all = 10.dp),
+                    content = {
+                        content(onDismiss)
+                    },
+                )
+            }
         }
     }
 }

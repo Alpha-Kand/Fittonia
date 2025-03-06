@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +41,7 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
+import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.utility.Debug
@@ -209,6 +211,7 @@ fun OverviewScreen(
             }
             FittoniaModal(
                 state = optionsState,
+                alignment = Alignment.TopStart,
                 onDismiss = { optionsState = false },
             ) { onDismiss ->
                 listOf(
@@ -218,46 +221,49 @@ fun OverviewScreen(
                     ),
                     Options(
                         name = "About",
-                        onClick = {
-                            aboutState = true
-                        },
+                        onClick = { aboutState = true },
                     ),
                 ).forEach {
                     if (it.name == "Settings") {
-                        FittoniaComingSoon {
-                            Row {
-                                Text(
-                                    text = it.name,
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
-                                    style = paragraphStyle,
-                                )
-                                FittoniaSpacerWeightRow()
-                                FittoniaIcon(
-                                    modifier = Modifier.align(CenterVertically),
-                                    drawableRes = R.drawable.ic_chevron_right,
-                                    tint = Color(0xFF222222),
-                                )
+                        Debug {
+                            FittoniaComingSoon {
+                                Row {
+                                    Text(
+                                        text = it.name,
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
+                                        style = paragraphStyle,
+                                    )
+                                    FittoniaSpacerWeightRow()
+                                    FittoniaIcon(
+                                        modifier = Modifier.align(CenterVertically),
+                                        drawableRes = R.drawable.ic_chevron_right,
+                                        tint = Color(0xFF222222),
+                                    )
+                                }
                             }
                         }
                     } else {
-                        Row {
+                        Row(
+                            modifier = Modifier
+                                .clickable(
+                                    onClick = {
+                                        onDismiss()
+                                        it.onClick()
+                                    },
+                                ),
+                        ) {
                             Text(
                                 text = it.name,
-                                modifier = Modifier
-                                    .padding(horizontal = 10.dp, vertical = 10.dp)
-                                    .clickable(
-                                        onClick = {
-                                            onDismiss()
-                                            it.onClick()
-                                        },
-                                    ),
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
                                 style = paragraphStyle,
                             )
                             FittoniaSpacerWeightRow()
                             FittoniaIcon(
-                                modifier = Modifier.align(CenterVertically),
+                                modifier = Modifier
+                                    .align(CenterVertically)
+                                    .requiredSize(20.dp),
                                 drawableRes = R.drawable.ic_chevron_right,
-                                tint = Color(0xFF222222),
+                                tint = Color(0xFF222222), // TODO no hard coded colors - After release
                             )
                         }
                     }
