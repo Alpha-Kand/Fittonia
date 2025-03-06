@@ -8,9 +8,9 @@ import commandHandler.ipCodeArguments
 import fittonia.composeapp.generated.resources.Res
 import fittonia.composeapp.generated.resources.blank_ip_code
 import fittonia.composeapp.generated.resources.could_not_decode_ip
-import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.compose.resources.getString
+import org.junit.jupiter.api.Assertions
 
 private class DecodeIpCodeExecutionTest : DesktopBaseMockkTest() {
 
@@ -22,7 +22,7 @@ private class DecodeIpCodeExecutionTest : DesktopBaseMockkTest() {
                 it.addArg(argumentName = ipCodeArguments.first(), value = "twin-theatre-60")
             },
         )
-        TestCase.assertEquals(
+        Assertions.assertEquals(
             listOf("192.168.205.96"),
             OutputIO.flush(),
         )
@@ -36,7 +36,7 @@ private class DecodeIpCodeExecutionTest : DesktopBaseMockkTest() {
                 it.addArg(argumentName = ipCodeArguments.first(), value = "nothing")
             },
         )
-        TestCase.assertEquals(
+        Assertions.assertEquals(
             listOf(getString(Res.string.could_not_decode_ip)),
             OutputIO.flush(),
         )
@@ -47,7 +47,7 @@ private class DecodeIpCodeExecutionTest : DesktopBaseMockkTest() {
         decodeIpCodeExecution(
             command = DecodeIPCodeCommand().also { it.ioFormat = true },
         )
-        TestCase.assertEquals(
+        Assertions.assertEquals(
             listOf(getString(Res.string.blank_ip_code)),
             OutputIO.flush(),
         )

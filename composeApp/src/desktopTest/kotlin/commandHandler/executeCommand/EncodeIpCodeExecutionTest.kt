@@ -6,8 +6,8 @@ import UnitTest
 import commandHandler.IPCodeCommand
 import io.mockk.every
 import io.mockk.mockkStatic
-import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions
 import java.net.Inet4Address
 
 private class EncodeIpCodeExecutionTest : DesktopBaseMockkTest() {
@@ -22,7 +22,7 @@ private class EncodeIpCodeExecutionTest : DesktopBaseMockkTest() {
                 it.ioFormat = true
             },
         )
-        assertEquals(
+        Assertions.assertEquals(
             listOf("twin-theatre-60"),
             OutputIO.flush(),
         )

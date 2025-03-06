@@ -1,5 +1,5 @@
-import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.assertThrows
 
 private class EncodeDecodeIPTest : DesktopBaseMockkTest() {
@@ -8,22 +8,22 @@ private class EncodeDecodeIPTest : DesktopBaseMockkTest() {
     fun encodeDecodeSuccess() = runTest {
         "123.123.123.123".let {
             val code = encodeIpAddress(ipAddress = it)
-            assertEquals("alpha-blind-7b", code)
-            assertEquals(it, decodeIpAddress(ipAddress = code))
+            Assertions.assertEquals("alpha-blind-7b", code) // TODO assertions
+            Assertions.assertEquals(it, decodeIpAddress(ipAddress = code))
         }
         "0.0.0.0".let {
             val code = encodeIpAddress(ipAddress = it)
-            assertEquals("bedding-bedding-00", code)
-            assertEquals(it, decodeIpAddress(ipAddress = code))
+            Assertions.assertEquals("bedding-bedding-00", code)
+            Assertions.assertEquals(it, decodeIpAddress(ipAddress = code))
         }
         "255.255.255.255".let {
             val code = encodeIpAddress(ipAddress = it)
-            assertEquals("mapping-mapping-ff", code)
-            assertEquals(it, decodeIpAddress(ipAddress = code))
+            Assertions.assertEquals("mapping-mapping-ff", code)
+            Assertions.assertEquals(it, decodeIpAddress(ipAddress = code))
         }
 
-        assertEquals("17.136.51.0", decodeIpAddress(ipAddress = "a-a-0"))
-        assertEquals("17.136.51.170", decodeIpAddress(ipAddress = "A-A-AA"))
+        Assertions.assertEquals("17.136.51.0", decodeIpAddress(ipAddress = "a-a-0"))
+        Assertions.assertEquals("17.136.51.170", decodeIpAddress(ipAddress = "A-A-AA"))
     }
 
     @UnitTest
