@@ -63,6 +63,9 @@ interface HMeadowSocketInterface {
 
     fun sendContinue()
     fun receiveContinue()
+
+    fun sendByteArray(message: ByteArray)
+    fun receiveByteArray(): ByteArray
 }
 
 open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
@@ -251,6 +254,18 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
     override fun sendContinue() = sendBoolean(message = true)
     override fun receiveContinue() {
         receiveBoolean()
+    }
+
+    override fun sendByteArray(message: ByteArray) {
+        sendInt(message.size)
+        mDataOutput.write(message)
+    }
+
+    override fun receiveByteArray(): ByteArray {
+        val size = receiveInt()
+        val buffer = ByteArray(size)
+        mDataInput.read(buffer, 0, size)
+        return buffer
     }
 
     /**
