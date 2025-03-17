@@ -1,13 +1,11 @@
 package hmeadowSocket
 
 import java.io.BufferedInputStream
-import java.io.BufferedReader
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import java.io.InputStreamReader
 import java.io.OutputStream
 import java.net.Socket
 import java.nio.file.Files
@@ -78,20 +76,17 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
 
     private lateinit var mDataInput: DataInputStream
     private lateinit var mDataOutput: DataOutputStream
-    private lateinit var mInputStreamReader: BufferedReader
 
     override fun bindToSocket(block: () -> Socket): Socket {
         val socket = block()
         mDataInput = DataInputStream(socket.getInputStream())
         mDataOutput = DataOutputStream(socket.getOutputStream())
-        mInputStreamReader = BufferedReader(InputStreamReader(socket.getInputStream()))
         return socket
     }
 
     override fun close() {
         mDataInput.close()
         mDataOutput.close()
-        mInputStreamReader.close()
     }
 
     override fun sendInt(message: Int) = mDataOutput.writeInt(message)
@@ -379,106 +374,5 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
             remainingBytes -= count
         }
         return resultBuffer
-    }
-}
-
-class HMeadowSocketInterfaceRealDebug(
-    private val tag: String,
-    private val print: (String) -> Unit = ::println,
-) : HMeadowSocketInterfaceReal() {
-    private var shush = false
-    private var count = 1
-    private fun printStatus(message: String) = print("$count tag:$tag $message").also { count++ }
-
-    override fun bindToSocket(block: () -> Socket): Socket {
-        printStatus("bindToSocket")
-        return super.bindToSocket(block)
-    }
-
-    override fun close() {
-        printStatus("close")
-        super.close()
-    }
-
-    override fun sendInt(message: Int) {
-        if (!shush) {
-            printStatus("sendInt = $message")
-        }
-        super.sendInt(message)
-    }
-
-    override fun receiveInt(): Int {
-        val value = super.receiveInt()
-        if (!shush) {
-            printStatus("receiveInt = $value")
-        }
-        return value
-    }
-
-    override fun sendLong(message: Long) {
-        printStatus("sendLong = $message")
-        super.sendLong(message)
-    }
-
-    override fun receiveLong(): Long {
-        val value = super.receiveLong()
-        printStatus("receiveLong = $value")
-        return value
-    }
-
-    override fun sendBoolean(message: Boolean) {
-        printStatus("sendBoolean = $message")
-        super.sendBoolean(message)
-    }
-
-    override fun receiveBoolean(): Boolean {
-        val value = super.receiveBoolean()
-        printStatus("receiveBoolean = $value")
-        return value
-    }
-
-    override fun sendFile(
-        filePath: String,
-        rename: String,
-        progressPrecision: Double,
-        onProgressUpdate: (bytes: Long) -> Unit,
-    ) {
-        printStatus("sendFile = (filePath: $filePath ) (rename: $rename )")
-        super.sendFile(filePath, rename, progressPrecision, onProgressUpdate)
-    }
-
-    override fun receiveFile(
-        destination: String,
-        prefix: String,
-        suffix: String,
-    ): Pair<String, String> {
-        val value = super.receiveFile(destination, prefix, suffix)
-        printStatus("receiveFile = (first: ${value.first} ) (second: ${value.second} )")
-        return value
-    }
-
-    override fun sendString(message: String) {
-        shush = true
-        super.sendString(message)
-        printStatus("sendString = $message")
-        shush = false
-    }
-
-    override fun receiveString(): String {
-        shush = true
-        val value = super.receiveString()
-        shush = false
-        printStatus("receiveString = $value")
-        return value
-    }
-
-    override fun sendContinue() {
-        printStatus("sendContinue")
-        super.sendContinue()
-    }
-
-    override fun receiveContinue() {
-        printStatus("receiveContinue")
-        super.receiveContinue()
     }
 }
