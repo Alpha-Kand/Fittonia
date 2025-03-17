@@ -1,6 +1,6 @@
 package commandHandler
 
-class LogsCommand : Command {
+class LogsCommand : Command() {
     override fun verify() {}
     override suspend fun addArg(
         argumentName: String,

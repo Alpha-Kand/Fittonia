@@ -4,17 +4,15 @@ import FittoniaError
 import FittoniaErrorType
 import ServerFlagsString
 import SessionManager
-import commandHandler.Command.Companion.verifyArgumentIsSet
 import decodeIpAddress
 import hmeadowSocket.HMeadowSocket
 import requireNull
 
-sealed interface Command {
-    val machineReadableOutput: MachineReadableOutput
-        get() = MachineReadableOutput()
+sealed class Command {
+    val machineReadableOutput = MachineReadableOutput()
 
-    suspend fun addArg(argumentName: String, value: String)
-    fun verify()
+    abstract suspend fun addArg(argumentName: String, value: String)
+    abstract fun verify()
 
     suspend fun tryCatch(argumentName: String, value: String, addArgBlock: suspend () -> Boolean) {
         try {
@@ -51,7 +49,7 @@ fun HMeadowSocket.receiveConfirmation(): Boolean { // TODO replace with sending 
     return receiveString() == ServerFlagsString.CONFIRM && receiveBoolean()
 }
 
-sealed class SendCommand : Command {
+sealed class SendCommand : Command() {
     private var port: Int? = null
     private var destination: String? = null
     private var ip: String? = null

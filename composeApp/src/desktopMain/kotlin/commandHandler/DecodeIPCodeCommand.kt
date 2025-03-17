@@ -1,9 +1,8 @@
 package commandHandler
 
-import commandHandler.Command.Companion.verifyArgumentIsSet
 import requireNull
 
-class DecodeIPCodeCommand : Command {
+class DecodeIPCodeCommand : Command() {
     private var code: String? = null
 
     fun getCode() = verifyArgumentIsSet(argument = code, reportingName = destinationArguments.first())

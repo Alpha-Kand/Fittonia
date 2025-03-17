@@ -4,7 +4,7 @@ import FittoniaError
 import FittoniaErrorType
 import requireNull
 
-class SetDefaultPortCommand : Command {
+class SetDefaultPortCommand : Command() {
     private var port: Int? = null
     private var clear: Boolean = false
 

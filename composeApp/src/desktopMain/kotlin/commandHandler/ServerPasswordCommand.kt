@@ -3,7 +3,7 @@ package commandHandler
 import commandHandler.Command.Companion.verifyArgumentIsSet
 import requireNull
 
-class ServerPasswordCommand : Command {
+class ServerPasswordCommand : Command() {
     private var newPassword: String? = null
     private var oldPassword: String? = null
 

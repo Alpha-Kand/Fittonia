@@ -19,7 +19,7 @@ private class EncodeIpCodeExecutionTest : DesktopBaseMockkTest() {
 
         encodeIpCodeExecution(
             command = IPCodeCommand().also {
-                it.ioFormat = true
+                it.machineReadableOutput.ioFormat = true
             },
         )
         Assertions.assertEquals(

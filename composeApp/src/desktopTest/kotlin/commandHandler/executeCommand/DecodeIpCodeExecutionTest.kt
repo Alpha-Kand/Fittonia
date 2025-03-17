@@ -18,7 +18,7 @@ private class DecodeIpCodeExecutionTest : DesktopBaseMockkTest() {
     fun default() = runTest {
         decodeIpCodeExecution(
             command = DecodeIPCodeCommand().also {
-                it.ioFormat = true
+                it.machineReadableOutput.ioFormat = true
                 it.addArg(argumentName = ipCodeArguments.first(), value = "twin-theatre-60")
             },
         )
@@ -32,7 +32,7 @@ private class DecodeIpCodeExecutionTest : DesktopBaseMockkTest() {
     fun errorInvalidCode() = runTest {
         decodeIpCodeExecution(
             command = DecodeIPCodeCommand().also {
-                it.ioFormat = true
+                it.machineReadableOutput.ioFormat = true
                 it.addArg(argumentName = ipCodeArguments.first(), value = "nothing")
             },
         )
@@ -45,7 +45,7 @@ private class DecodeIpCodeExecutionTest : DesktopBaseMockkTest() {
     @UnitTest
     fun errorEmptyCode() = runTest {
         decodeIpCodeExecution(
-            command = DecodeIPCodeCommand().also { it.ioFormat = true },
+            command = DecodeIPCodeCommand().also { it.machineReadableOutput.ioFormat = true },
         )
         Assertions.assertEquals(
             listOf(getString(Res.string.blank_ip_code)),
