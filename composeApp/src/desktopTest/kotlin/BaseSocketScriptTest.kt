@@ -222,6 +222,14 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
             receive(flag = TestFlags.RECEIVE_CONTINUE) { it }
         }
 
+        override fun sendByteArray(message: ByteArray) {
+            TODO("Not yet implemented") // After release
+        }
+
+        override fun receiveByteArray(): ByteArray {
+            TODO("Not yet implemented") // After release
+        }
+
         override fun sendContinue() = send(flag = TestFlags.SEND_CONTINUE, message = "continue")
 
         override fun receiveBoolean() = receive(flag = TestFlags.RECEIVE_BOOLEAN) { it.toBoolean() }
@@ -230,6 +238,7 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
             name: String,
             size: Long,
             rename: String,
+            encryptBlock: (ByteArray) -> ByteArray,
             progressPrecision: Double,
             onProgressUpdate: (bytes: Long) -> Unit,
         ) {
@@ -256,6 +265,7 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
         override fun sendFile(
             filePath: String,
             rename: String,
+            encryptBlock: (ByteArray) -> ByteArray,
             progressPrecision: Double,
             onProgressUpdate: (bytes: Long) -> Unit,
         ) = send(flag = TestFlags.SEND_FILE, message = Pair(filePath, rename).toString())

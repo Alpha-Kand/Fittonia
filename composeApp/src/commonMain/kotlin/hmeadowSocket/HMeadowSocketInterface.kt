@@ -1,5 +1,7 @@
 package hmeadowSocket
 
+import hmeadowSocket.HMeadowSocketInterfaceReal.Now.now
+import hmeadowSocket.HMeadowSocketInterfaceReal.Sleeper.sleep
 import java.io.BufferedInputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -34,6 +36,7 @@ interface HMeadowSocketInterface {
         name: String,
         size: Long,
         rename: String,
+        encryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         onProgressUpdate: (bytes: Long) -> Unit,
     )
@@ -41,6 +44,7 @@ interface HMeadowSocketInterface {
     fun sendFile(
         filePath: String,
         rename: String = "",
+        encryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         onProgressUpdate: (bytes: Long) -> Unit,
     )
@@ -69,12 +73,28 @@ interface HMeadowSocketInterface {
 }
 
 open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
+
+    data object Sleeper {
+        fun sleep(millis: Long) {
+            Thread.sleep(millis)
+        }
+    }
+
+    data object Now {
+        fun now(): Long {
+            return Instant.now().toEpochMilli()
+        }
+    }
+
     override var sendBytesPerSecond: Long = Long.MAX_VALUE
     override var receiveBytesPerSecond: Long = Long.MAX_VALUE
 
     companion object {
         private const val BUFFER_SIZE_LONG: Long = 8192
-        const val BUFFER_SIZE_INT: Int = 8192
+        private const val BUFFER_SIZE_INT: Int = 8192
+
+        private const val CIPHER_BLOCK_SIZE_INT: Int = 128
+        private const val CIPHER_BLOCK_SIZE_LONG: Long = 128
     }
 
     private lateinit var mDataInput: DataInputStream
@@ -118,6 +138,7 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         name: String,
         size: Long,
         rename: String,
+        encryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         onProgressUpdate: (bytes: Long) -> Unit,
     ) {
@@ -128,37 +149,54 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         val step = (size * progressPrecision).toLong()
         var currentStep = step
 
-        // 2. Send file name plus trailing whitespace.
+        // 2. Send file name.
         sendString(rename.takeIf { it.isNotEmpty() } ?: name)
 
         // 3. Send the file.
         var remainingBytes = size
 
         var throttle = sendBytesPerSecond
-        var now = Instant.now().toEpochMilli()
+        var now = now()
         while (remainingBytes > 0) {
-            val nextBytes = minOf(remainingBytes, BUFFER_SIZE_LONG, throttle)
-            throttle -= nextBytes
-            mDataOutput.write(bufferedReadFile.readNBytes(nextBytes.toInt()))
-            remainingBytes -= nextBytes
+            val buffer = ByteArray(BUFFER_SIZE_INT)
+            var offset = 0
+            var bufferFilled = 0
+
+            while (offset < BUFFER_SIZE_INT / CIPHER_BLOCK_SIZE_INT) {
+                if (remainingBytes == 0L) {
+                    break
+                }
+                val nextBytes = minOf(remainingBytes, CIPHER_BLOCK_SIZE_LONG)
+                val readBytes = encryptBlock(bufferedReadFile.readNBytes(nextBytes.toInt()))
+                readBytes.copyInto(destination = buffer, destinationOffset = offset * CIPHER_BLOCK_SIZE_INT)
+                remainingBytes -= nextBytes
+                bufferFilled += nextBytes.toInt()
+                offset++
+            }
+
             if ((size - remainingBytes) > currentStep) {
                 currentStep += step
                 onProgressUpdate(size - remainingBytes)
             }
-            if (throttle == 0L) {
+
+            throttle -= BUFFER_SIZE_LONG
+            mDataOutput.write(buffer, 0, bufferFilled)
+
+            if (throttle <= 0L) {
                 onProgressUpdate(size - remainingBytes)
                 throttle = sendBytesPerSecond
-                Thread.sleep((1000L - ((Instant.now().toEpochMilli() - now).coerceAtLeast(minimumValue = 0))))
-                now = Instant.now().toEpochMilli()
+                sleep((1000L - ((now() - now).coerceAtLeast(minimumValue = 0))))
+                now = now()
             }
         }
-
         bufferedReadFile.close()
+        onProgressUpdate(size)
     }
 
     override fun sendFile(
         filePath: String,
         rename: String,
+        encryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         onProgressUpdate: (bytes: Long) -> Unit,
     ) {
@@ -169,6 +207,7 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
             name = path.fileName.toString(),
             size = size,
             rename = rename,
+            encryptBlock = encryptBlock,
             progressPrecision = progressPrecision,
             onProgressUpdate = onProgressUpdate,
         )
