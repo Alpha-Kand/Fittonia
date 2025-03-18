@@ -11,6 +11,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.net.Socket
 import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Instant
 import java.util.Arrays
 import kotlin.io.path.Path
@@ -35,7 +36,6 @@ interface HMeadowSocketInterface {
         stream: InputStream,
         name: String,
         size: Long,
-        rename: String,
         encryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         onProgressUpdate: (bytes: Long) -> Unit,
@@ -43,7 +43,6 @@ interface HMeadowSocketInterface {
 
     fun sendFile(
         filePath: String,
-        rename: String = "",
         encryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         onProgressUpdate: (bytes: Long) -> Unit,
@@ -83,6 +82,16 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
     data object Now {
         fun now(): Long {
             return Instant.now().toEpochMilli()
+        }
+    }
+
+    data object FilesObject {
+        fun size(path: Path): Long {
+            return Files.size(path)
+        }
+
+        fun inputStream(filePath: String): InputStream {
+            return File(filePath).inputStream()
         }
     }
 
@@ -137,7 +146,6 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         stream: InputStream,
         name: String,
         size: Long,
-        rename: String,
         encryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         onProgressUpdate: (bytes: Long) -> Unit,
@@ -150,7 +158,7 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         var currentStep = step
 
         // 2. Send file name.
-        sendString(rename.takeIf { it.isNotEmpty() } ?: name)
+        sendString(name.takeIf { it.isNotEmpty() } ?: throw IllegalArgumentException("Name should not be empty."))
 
         // 3. Send the file.
         var remainingBytes = size
@@ -195,18 +203,16 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
 
     override fun sendFile(
         filePath: String,
-        rename: String,
         encryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         onProgressUpdate: (bytes: Long) -> Unit,
     ) {
         val path = Path(filePath)
-        val size = Files.size(path)
+        val size = FilesObject.size(path)
         sendFile(
-            stream = File(filePath).inputStream(),
+            stream = FilesObject.inputStream(filePath),
             name = path.fileName.toString(),
             size = size,
-            rename = rename,
             encryptBlock = encryptBlock,
             progressPrecision = progressPrecision,
             onProgressUpdate = onProgressUpdate,

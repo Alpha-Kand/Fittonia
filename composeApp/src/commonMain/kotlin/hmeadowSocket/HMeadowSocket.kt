@@ -126,7 +126,6 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         stream: InputStream,
         name: String,
         size: Long,
-        rename: String = "",
         encryptBlock: (ByteArray) -> ByteArray = { it },
         progressPrecision: Double = 0.01,
         onProgressUpdate: (bytes: Long) -> Unit = {},
@@ -135,7 +134,6 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
             stream = stream,
             name = name,
             size = size,
-            rename = rename,
             encryptBlock = encryptBlock,
             progressPrecision = progressPrecision,
             onProgressUpdate = onProgressUpdate,
@@ -145,14 +143,12 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
 
     fun sendFile(
         filePath: String,
-        rename: String = "",
         encryptBlock: (ByteArray) -> ByteArray = { it },
         progressPrecision: Double = 0.01,
         onProgressUpdate: (bytes: Long) -> Unit = {},
     ) = sendErrorWrapper {
         socketInterface.sendFile(
             filePath = filePath,
-            rename = rename,
             encryptBlock = encryptBlock,
             progressPrecision = progressPrecision,
             onProgressUpdate = onProgressUpdate,

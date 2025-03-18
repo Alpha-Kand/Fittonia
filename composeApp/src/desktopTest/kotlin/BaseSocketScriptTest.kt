@@ -237,7 +237,6 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
             stream: InputStream,
             name: String,
             size: Long,
-            rename: String,
             encryptBlock: (ByteArray) -> ByteArray,
             progressPrecision: Double,
             onProgressUpdate: (bytes: Long) -> Unit,
@@ -264,11 +263,10 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
 
         override fun sendFile(
             filePath: String,
-            rename: String,
             encryptBlock: (ByteArray) -> ByteArray,
             progressPrecision: Double,
             onProgressUpdate: (bytes: Long) -> Unit,
-        ) = send(flag = TestFlags.SEND_FILE, message = Pair(filePath, rename).toString())
+        ) = send(flag = TestFlags.SEND_FILE, message = filePath)
 
         /*
         // TODO - After release

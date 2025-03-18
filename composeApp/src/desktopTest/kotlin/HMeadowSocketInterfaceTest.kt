@@ -91,7 +91,7 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     }
 
     @UnitTest
-    @DisplayName("sendFile should send the correct data.")
+    @DisplayName("`sendFile` should send the correct data.")
     fun sendFileBytes() {
         // Setup
         val (socketInterface, socket) = setup()
@@ -116,7 +116,6 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
             stream = fileStream,
             name = fileName,
             size = fileStreamSize.toLong(),
-            rename = "",
             encryptBlock = { it },
             progressPrecision = 0.01,
             onProgressUpdate = { },
@@ -128,7 +127,7 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     }
 
     @UnitTest
-    @DisplayName("sendFile should call the progress callback the appropriate amount of times.")
+    @DisplayName("`sendFile` should call the progress callback the appropriate amount of times.")
     fun sendFileProgress() {
         // Setup
         val (socketInterface, _) = setup()
@@ -147,7 +146,6 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
             stream = fileStream,
             name = "File Name",
             size = fileStreamSize.toLong(),
-            rename = "",
             encryptBlock = { it },
             progressPrecision = 0.01,
             onProgressUpdate = { progress++ },
@@ -158,7 +156,7 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     }
 
     @UnitTest
-    @DisplayName("sendFile should be able to throttle fast transfer speeds.")
+    @DisplayName("`sendFile` should be able to throttle fast transfer speeds.")
     fun sendFileThrottle() {
         // Setup
         val (socketInterface, _) = setup()
@@ -178,7 +176,6 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
             stream = fileStream,
             name = "File Name",
             size = fileStreamSize.toLong(),
-            rename = "",
             encryptBlock = { it },
             progressPrecision = 0.1,
             onProgressUpdate = { progress++ },
@@ -196,6 +193,51 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     }
 
     @UnitTest
+    @DisplayName("`sendFile` with an empty or invalid name should throw an error.")
+    fun sendFileEmptyName() {
+        // TODO - After release.
+    }
+
+    @UnitTest
+    @DisplayName("`sendFile` given a file path should send files correctly.")
+    fun sendFilePath() {
+        // Setup
+        val (socketInterface, socket) = setup()
+        val fileStream = TestInputStream()
+        val fileName = "FileName.txt"
+        val fileStreamSize = 100
+        val fileBytes = ByteArray(size = fileStreamSize)
+        repeat(times = fileStreamSize) { index ->
+            fileBytes[index] = index.toByte()
+        }
+        val streamEndByte = ByteArray(size = 1).apply { this[0] = -1 }
+        fileStream.setBuffer(buffer = fileBytes + streamEndByte)
+        val expected = run {
+            val sizeBytes = fileStreamSize.toLong().byteArray
+            val nameSizeBytes = fileName.length.byteArray
+            val nameBytes = fileName.byteArray
+            sizeBytes + nameSizeBytes + nameBytes + fileBytes
+        }
+
+        mockkObject(HMeadowSocketInterfaceReal.FilesObject)
+        every { HMeadowSocketInterfaceReal.FilesObject.size(any()) } returns 100
+        every { HMeadowSocketInterfaceReal.FilesObject.inputStream(any()) } returns fileStream
+
+        // Execute
+        socketInterface.sendFile(
+            filePath = "file/$fileName",
+            encryptBlock = { it },
+            progressPrecision = 0.01,
+            onProgressUpdate = { },
+        )
+
+        // Assert
+        val actual = (socket.outputStream as? TestOutputStream)?.getByteArray()
+        Assertions.assertArrayEquals(expected, actual)
+    }
+
+    @UnitTest
+    @DisplayName("Closing the interface should close the input/output streams.")
     fun close() {
         val inputStream = mockk<InputStream>(relaxed = true)
         val outputStream = mockk<OutputStream>(relaxed = true)
