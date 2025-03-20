@@ -281,19 +281,18 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
                 while (transferByteCount > 0) {
                     // Read next amount of data from socket.
                     val readByteArray = readNBytes(length = transferByteCount.coerceAtMost(BUFFER_SIZE_LONG).toInt())
-                    if (readByteArray.isNotEmpty()) {
-                        // Write data to file.
-                        transferByteCount -= BUFFER_SIZE_LONG
-                        stream.write(readByteArray)
-                        remainingBytes -= readByteArray.size
-                        if ((size - remainingBytes) > currentStep) {
-                            currentStep += step
-                            onProgressUpdate(size - remainingBytes)
-                        }
+                    // Write data to file.
+                    transferByteCount -= BUFFER_SIZE_LONG
+                    stream.write(readByteArray)
+                    remainingBytes -= readByteArray.size
+                    if ((size - remainingBytes) > currentStep) {
+                        currentStep += step
+                        onProgressUpdate(size - remainingBytes)
                     }
                 }
             }
         }
+        onProgressUpdate(size)
     }
 
     override fun sendContinue() = sendBoolean(message = true)

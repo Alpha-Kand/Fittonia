@@ -199,9 +199,10 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
         try {
             sendInt(-1)
             receiveInt()
-            socket.close()
         } catch (e: FailedToReceiveException) {
             // Expected, trying to shutdown anyway.
+        } finally {
+            socket.close()
         }
     }
 }
