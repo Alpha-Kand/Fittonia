@@ -242,6 +242,7 @@ private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
             // Execute
             socketInterface.receiveFile(
                 onOutputStream = { fileStream },
+                decryptBlock = { it },
                 progressPrecision = 0.1,
                 beforeDownload = { size, name ->
                     Assertions.assertEquals(100, size)
@@ -251,7 +252,10 @@ private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
             )
 
             // Assert
-            Assertions.assertArrayEquals(fileBytes, fileStream.getByteArray())
+            val fileStreamArray = fileStream.getByteArray()
+            repeat(fileBytes.size) { index ->
+                Assertions.assertEquals(fileBytes[index], fileStreamArray[index])
+            }
         }
 
         @UnitTest
@@ -269,6 +273,7 @@ private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
             // Execute
             socketInterface.receiveFile(
                 onOutputStream = { fileStream },
+                decryptBlock = { it },
                 progressPrecision = 0.01,
                 beforeDownload = { _, _ -> },
                 onProgressUpdate = { progress++ },
@@ -291,6 +296,7 @@ private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
             // Execute
             socketInterface.receiveFile(
                 onOutputStream = { fileStream },
+                decryptBlock = { it },
                 progressPrecision = 0.1,
                 beforeDownload = { size, name ->
                     Assertions.assertEquals(0, size)

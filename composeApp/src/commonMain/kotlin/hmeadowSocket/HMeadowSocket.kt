@@ -158,11 +158,13 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketHandler) {
 
     fun receiveFile(
         destination: String = "",
+        decryptBlock: (ByteArray) -> ByteArray = { it },
         prefix: String = "___",
         suffix: String = "___",
     ): Pair<String, String> = receiveErrorWrapper {
         socketInterface.receiveFile(
             destination = destination,
+            decryptBlock = decryptBlock,
             prefix = prefix,
             suffix = suffix,
         ).also { history.add("ReceiveFile -> $it") }
@@ -170,12 +172,14 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketHandler) {
 
     fun receiveFile(
         onOutputStream: (fileName: String) -> OutputStream?,
+        decryptBlock: (ByteArray) -> ByteArray = { it },
         progressPrecision: Double = 0.01,
         beforeDownload: (totalBytes: Long, name: String) -> Unit = { _, _ -> },
         onProgressUpdate: (progress: Long) -> Unit = {},
     ) = receiveErrorWrapper {
         socketInterface.receiveFile(
             onOutputStream = onOutputStream,
+            decryptBlock = decryptBlock,
             progressPrecision = progressPrecision,
             beforeDownload = beforeDownload,
             onProgressUpdate = onProgressUpdate,

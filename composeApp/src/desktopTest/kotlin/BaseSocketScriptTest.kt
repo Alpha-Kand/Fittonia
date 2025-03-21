@@ -248,12 +248,14 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
 
         override fun receiveFile(
             destination: String,
+            decryptBlock: (ByteArray) -> ByteArray,
             prefix: String,
             suffix: String,
         ): Pair<String, String> = receive(flag = TestFlags.RECEIVE_FILE) { "absolutePath" to "fileName" }
 
         override fun receiveFile(
             onOutputStream: (fileName: String) -> OutputStream?,
+            decryptBlock: (ByteArray) -> ByteArray,
             progressPrecision: Double,
             beforeDownload: (totalBytes: Long, name: String) -> Unit,
             onProgressUpdate: (progress: Long) -> Unit,

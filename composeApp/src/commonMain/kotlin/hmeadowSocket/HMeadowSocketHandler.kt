@@ -166,6 +166,7 @@ open class HMeadowSocketHandler {
 
     open fun receiveFile(
         destination: String,
+        decryptBlock: (ByteArray) -> ByteArray,
         prefix: String,
         suffix: String,
     ): Pair<String, String> {
@@ -191,13 +192,17 @@ open class HMeadowSocketHandler {
             // File to transfer is empty, just create a new empty file.
         } else {
             while (transferByteCount > 0) {
-                // Read next amount of data from socket.
-                val readByteArray = readNBytes(transferByteCount.coerceAtMost(BUFFER_SIZE_LONG).toInt())
-                if (readByteArray.isNotEmpty()) {
-                    // Write data to file.
-                    transferByteCount -= BUFFER_SIZE_LONG
-                    file.appendBytes(readByteArray)
+                val buffer = ByteArray(BUFFER_SIZE_INT)
+                repeat(times = BUFFER_SIZE_INT / CIPHER_BLOCK_SIZE_INT) { offset ->
+                    if (transferByteCount == 0L) {
+                        return@repeat
+                    }
+                    val nextBytes = minOf(transferByteCount, CIPHER_BLOCK_SIZE_LONG)
+                    val readBytes = decryptBlock(readNBytes(nextBytes.toInt()))
+                    readBytes.copyInto(destination = buffer, destinationOffset = offset * CIPHER_BLOCK_SIZE_INT)
+                    transferByteCount -= nextBytes
                 }
+                file.appendBytes(buffer)
             }
         }
         return file.absolutePath to fileName
@@ -205,6 +210,7 @@ open class HMeadowSocketHandler {
 
     open fun receiveFile(
         onOutputStream: (fileName: String) -> OutputStream?,
+        decryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         beforeDownload: (totalBytes: Long, fileName: String) -> Unit,
         onProgressUpdate: (progress: Long) -> Unit,
@@ -224,12 +230,18 @@ open class HMeadowSocketHandler {
                 // File to transfer is empty, just create a new empty file.
             } else {
                 while (transferByteCount > 0) {
-                    // Read next amount of data from socket.
-                    val readByteArray = readNBytes(length = transferByteCount.coerceAtMost(BUFFER_SIZE_LONG).toInt())
-                    // Write data to file.
-                    transferByteCount -= BUFFER_SIZE_LONG
-                    stream.write(readByteArray)
-                    remainingBytes -= readByteArray.size
+                    val buffer = ByteArray(BUFFER_SIZE_INT)
+                    repeat(times = BUFFER_SIZE_INT / CIPHER_BLOCK_SIZE_INT) { offset ->
+                        if (transferByteCount == 0L) {
+                            return@repeat
+                        }
+                        val nextBytes = minOf(transferByteCount, CIPHER_BLOCK_SIZE_LONG)
+                        val readBytes = decryptBlock(readNBytes(nextBytes.toInt()))
+                        readBytes.copyInto(destination = buffer, destinationOffset = offset * CIPHER_BLOCK_SIZE_INT)
+                        transferByteCount -= nextBytes
+                        remainingBytes -= nextBytes
+                    }
+                    stream.write(buffer)
                     if ((size - remainingBytes) > currentStep) {
                         currentStep += step
                         onProgressUpdate(size - remainingBytes)
