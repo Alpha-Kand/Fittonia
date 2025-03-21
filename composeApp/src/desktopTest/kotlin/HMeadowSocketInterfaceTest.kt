@@ -8,6 +8,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.Socket
@@ -26,7 +27,7 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     @UnitTest
     @DisplayName("sendInt & receiveInt")
     fun sendReceiveInt() {
-        val (socketInterface, socket) = setup()
+        val (socketInterface, socket) = socketSetup()
         val int = 42
 
         socketInterface.sendInt(int)
@@ -39,7 +40,7 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     @UnitTest
     @DisplayName("sendLong & receiveLong")
     fun sendReceiveLong() {
-        val (socketInterface, socket) = setup()
+        val (socketInterface, socket) = socketSetup()
         val long = 33L
 
         socketInterface.sendLong(long)
@@ -52,7 +53,7 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     @UnitTest
     @DisplayName("sendBoolean & receiveBoolean")
     fun sendReceiveBoolean() {
-        val (socketInterface, socket) = setup()
+        val (socketInterface, socket) = socketSetup()
         val boolean = true
 
         socketInterface.sendBoolean(boolean)
@@ -65,7 +66,7 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     @UnitTest
     @DisplayName("sendString & receiveString")
     fun sendReceiveString() {
-        val (socketInterface, socket) = setup()
+        val (socketInterface, socket) = socketSetup()
         val message = "Hello there"
         val messageBytes = message.length.byteArray + message.byteArray
 
@@ -79,7 +80,7 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     @UnitTest
     @DisplayName("sendByteArray & receiveByteArray")
     fun sendReceiveByteArray() {
-        val (socketInterface, socket) = setup()
+        val (socketInterface, socket) = socketSetup()
         val message = "Hello there"
         val messageBytes = message.length.byteArray + message.byteArray
 
@@ -90,249 +91,217 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
         Assertions.assertTrue(message.byteArray.equalsOther(socketInterface.receiveByteArray()))
     }
 
-    @UnitTest
-    @DisplayName("`sendFile` should send the correct data.")
-    fun sendFileBytes() {
-        // Setup
-        val (socketInterface, socket) = setup()
-        val fileStream = TestInputStream()
-        val fileName = "File Name"
-        val fileStreamSize = 100
-        val fileBytes = ByteArray(size = fileStreamSize)
-        repeat(times = fileStreamSize) { index ->
-            fileBytes[index] = index.toByte()
+    @Nested
+    inner class SendReceiveFiles {
+        private val fileName = "File Name"
+
+        private fun createFileBytes(fileStreamSize: Int): ByteArray {
+            val fileBytes = ByteArray(size = fileStreamSize)
+            repeat(times = fileStreamSize) { index ->
+                fileBytes[index] = (index % 100).toByte()
+            }
+            return fileBytes
         }
-        val streamEndByte = ByteArray(size = 1).apply { this[0] = -1 }
-        fileStream.setBuffer(buffer = fileBytes + streamEndByte)
-        val expected = run {
-            val sizeBytes = fileStreamSize.toLong().byteArray
+
+        private fun constructTransferByteArray(fileBytes: ByteArray, size: Int): ByteArray {
+            val sizeBytes = size.toLong().byteArray
             val nameSizeBytes = fileName.length.byteArray
             val nameBytes = fileName.byteArray
-            sizeBytes + nameSizeBytes + nameBytes + fileBytes
+            return sizeBytes + nameSizeBytes + nameBytes + fileBytes
         }
 
-        // Execute
-        socketInterface.sendFile(
-            stream = fileStream,
-            name = fileName,
-            size = fileStreamSize.toLong(),
-            encryptBlock = { it },
-            progressPrecision = 0.01,
-            onProgressUpdate = { },
-        )
+        @UnitTest
+        @DisplayName("`sendFile` should send the correct data.")
+        fun sendFileBytes() {
+            // Setup
+            val (socketInterface, socket) = socketSetup()
+            val fileStreamSize = 100
+            val fileBytes = createFileBytes(fileStreamSize = fileStreamSize)
+            val fileStream = TestInputStream()
+            fileStream.setFileBytes(buffer = fileBytes)
+            val expected = constructTransferByteArray(fileBytes = fileBytes, size = fileStreamSize)
 
-        // Assert
-        val actual = (socket.outputStream as? TestOutputStream)?.getByteArray()
-        Assertions.assertArrayEquals(expected, actual)
-    }
+            // Execute
+            socketInterface.sendFile(
+                stream = fileStream,
+                name = fileName,
+                size = fileStreamSize.toLong(),
+                encryptBlock = { it },
+                progressPrecision = 0.01,
+                onProgressUpdate = { },
+            )
 
-    @UnitTest
-    @DisplayName("`receiveFile` should send the correct data.")
-    fun receiveFileBytes() {
-        // Setup
-        val (socketInterface, socket) = setup()
-        val fileStream = TestOutputStream()
-        val fileName = "File Name"
-        val fileStreamSize = 100
-        val fileBytes = ByteArray(size = fileStreamSize)
-        repeat(times = fileStreamSize) { index ->
-            fileBytes[index] = index.toByte()
-        }
-        val incomingBytes = run {
-            val sizeBytes = fileStreamSize.toLong().byteArray
-            val nameSizeBytes = fileName.length.byteArray
-            val nameBytes = fileName.byteArray
-            sizeBytes + nameSizeBytes + nameBytes + fileBytes
-        }
-        socket.prepareToReceive(inputBytes = incomingBytes)
-
-        // Execute
-        socketInterface.receiveFile(
-            onOutputStream = { fileStream },
-            progressPrecision = 0.1,
-            beforeDownload = { size, name ->
-                Assertions.assertEquals(100, size)
-                Assertions.assertEquals(fileName, name)
-            },
-            onProgressUpdate = {},
-        )
-
-        // Assert
-        Assertions.assertArrayEquals(fileBytes, fileStream.getByteArray())
-    }
-
-    @UnitTest
-    @DisplayName("`receiveFile` should call the progress callback the appropriate amount of times.")
-    fun receiveFileProgress() {
-        // Setup
-        val (socketInterface, socket) = setup()
-        val fileStream = TestOutputStream()
-        val fileName = "File Name"
-        val fileStreamSize = 8192 * 1000
-        val fileBytes = ByteArray(size = fileStreamSize)
-        repeat(times = fileStreamSize) { index ->
-            fileBytes[index] = (index % 100).toByte()
-        }
-        val incomingBytes = run {
-            val sizeBytes = fileStreamSize.toLong().byteArray
-            val nameSizeBytes = fileName.length.byteArray
-            val nameBytes = fileName.byteArray
-            sizeBytes + nameSizeBytes + nameBytes + fileBytes
-        }
-        socket.prepareToReceive(inputBytes = incomingBytes)
-        var progress = 0
-
-        // Execute
-        socketInterface.receiveFile(
-            onOutputStream = { fileStream },
-            progressPrecision = 0.01,
-            beforeDownload = { _, _ ->},
-            onProgressUpdate = { progress++ },
-        )
-
-        // Assert
-        Assertions.assertEquals(100, progress)
-    }
-
-    @UnitTest
-    @DisplayName("`receiveFile` should handle receiving a directory.")
-    fun receiveFileDirectory() {
-        // Setup
-        val (socketInterface, socket) = setup()
-        val fileStream = TestOutputStream()
-        val fileName = "File Name"
-        val fileStreamSize = 0
-        val incomingBytes = run {
-            val sizeBytes = fileStreamSize.toLong().byteArray
-            val nameSizeBytes = fileName.length.byteArray
-            val nameBytes = fileName.byteArray
-            sizeBytes + nameSizeBytes + nameBytes
-        }
-        socket.prepareToReceive(inputBytes = incomingBytes)
-
-        // Execute
-        socketInterface.receiveFile(
-            onOutputStream = { fileStream },
-            progressPrecision = 0.1,
-            beforeDownload = { size, name ->
-                Assertions.assertEquals(0, size)
-                Assertions.assertEquals(fileName, name)
-            },
-            onProgressUpdate = {},
-        )
-
-        // Assert
-        Assertions.assertEquals(0, fileStream.getByteArray().size)
-    }
-
-    @UnitTest
-    @DisplayName("`sendFile` should call the progress callback the appropriate amount of times.")
-    fun sendFileProgress() {
-        // Setup
-        val (socketInterface, _) = setup()
-        val fileStream = TestInputStream()
-        val fileStreamSize = 8192 * 1000
-        val fileBytes = ByteArray(size = fileStreamSize + 1)
-        repeat(times = fileStreamSize) { index ->
-            fileBytes[index] = (index % 100).toByte()
-        }
-        fileBytes[fileBytes.lastIndex] = -1
-        fileStream.setBuffer(buffer = fileBytes)
-        var progress = 0
-
-        // Execute
-        socketInterface.sendFile(
-            stream = fileStream,
-            name = "File Name",
-            size = fileStreamSize.toLong(),
-            encryptBlock = { it },
-            progressPrecision = 0.01,
-            onProgressUpdate = { progress++ },
-        )
-
-        // Assert
-        Assertions.assertEquals(100, progress)
-    }
-
-    @UnitTest
-    @DisplayName("`sendFile` should be able to throttle fast transfer speeds.")
-    fun sendFileThrottle() {
-        // Setup
-        val (socketInterface, _) = setup()
-        val fileStream = TestInputStream()
-        val fileStreamSize = 8192 * 20
-        val fileBytes = ByteArray(size = fileStreamSize + 1)
-        repeat(times = fileStreamSize) { index ->
-            fileBytes[index] = (index % 100).toByte()
-        }
-        fileBytes[fileBytes.lastIndex] = -1
-        fileStream.setBuffer(buffer = fileBytes)
-        var progress = 0
-        socketInterface.sendBytesPerSecond = 8192 * 2
-
-        // Execute
-        socketInterface.sendFile(
-            stream = fileStream,
-            name = "File Name",
-            size = fileStreamSize.toLong(),
-            encryptBlock = { it },
-            progressPrecision = 0.1,
-            onProgressUpdate = { progress++ },
-        )
-
-        // Assert
-
-        // 1. Called at the start of the transfer.
-        // 2. Called each time in the throttle block to set the sleep time.
-        // 3. Called each time in the throttle block immediately after waking from sleep.
-        verify(exactly = 21) { HMeadowSocketInterfaceReal.Now.now() }
-        // 10 Calls for each normal 10% progress updates, 10 calls for the progress update in the throttle block being
-        // called every 2 buffers (also 10% each).
-        Assertions.assertEquals(20, progress)
-    }
-
-    @UnitTest
-    @DisplayName("`sendFile` with an empty or invalid name should throw an error.")
-    fun sendFileEmptyName() {
-        // TODO - After release.
-    }
-
-    @UnitTest
-    @DisplayName("`sendFile` given a file path should send files correctly.")
-    fun sendFilePath() {
-        // Setup
-        val (socketInterface, socket) = setup()
-        val fileStream = TestInputStream()
-        val fileName = "FileName.txt"
-        val fileStreamSize = 100
-        val fileBytes = ByteArray(size = fileStreamSize)
-        repeat(times = fileStreamSize) { index ->
-            fileBytes[index] = index.toByte()
-        }
-        val streamEndByte = ByteArray(size = 1).apply { this[0] = -1 }
-        fileStream.setBuffer(buffer = fileBytes + streamEndByte)
-        val expected = run {
-            val sizeBytes = fileStreamSize.toLong().byteArray
-            val nameSizeBytes = fileName.length.byteArray
-            val nameBytes = fileName.byteArray
-            sizeBytes + nameSizeBytes + nameBytes + fileBytes
+            // Assert
+            val actual = (socket.outputStream as? TestOutputStream)?.getByteArray()
+            Assertions.assertArrayEquals(expected, actual)
         }
 
-        mockkObject(HMeadowSocketInterfaceReal.FilesObject)
-        every { HMeadowSocketInterfaceReal.FilesObject.size(any()) } returns 100
-        every { HMeadowSocketInterfaceReal.FilesObject.inputStream(any()) } returns fileStream
+        @UnitTest
+        @DisplayName("`sendFile` should call the progress callback the appropriate amount of times.")
+        fun sendFileProgress() {
+            // Setup
+            val (socketInterface, _) = socketSetup()
+            val fileStream = TestInputStream()
+            val fileStreamSize = 8192 * 1000
+            val fileBytes = createFileBytes(fileStreamSize = fileStreamSize)
+            fileStream.setFileBytes(buffer = fileBytes)
+            var progress = 0
 
-        // Execute
-        socketInterface.sendFile(
-            filePath = "file/$fileName",
-            encryptBlock = { it },
-            progressPrecision = 0.01,
-            onProgressUpdate = { },
-        )
+            // Execute
+            socketInterface.sendFile(
+                stream = fileStream,
+                name = fileName,
+                size = fileStreamSize.toLong(),
+                encryptBlock = { it },
+                progressPrecision = 0.01,
+                onProgressUpdate = { progress++ },
+            )
 
-        // Assert
-        val actual = (socket.outputStream as? TestOutputStream)?.getByteArray()
-        Assertions.assertArrayEquals(expected, actual)
+            // Assert
+            Assertions.assertEquals(100, progress)
+        }
+
+        @UnitTest
+        @DisplayName("`sendFile` should be able to throttle fast transfer speeds.")
+        fun sendFileThrottle() {
+            // Setup
+            val (socketInterface, _) = socketSetup()
+            val fileStream = TestInputStream()
+            val fileStreamSize = 8192 * 20
+            val fileBytes = createFileBytes(fileStreamSize = fileStreamSize)
+            fileStream.setFileBytes(buffer = fileBytes)
+            var progress = 0
+            socketInterface.sendBytesPerSecond = 8192 * 2
+
+            // Execute
+            socketInterface.sendFile(
+                stream = fileStream,
+                name = fileName,
+                size = fileStreamSize.toLong(),
+                encryptBlock = { it },
+                progressPrecision = 0.1,
+                onProgressUpdate = { progress++ },
+            )
+
+            // Assert
+
+            // 1. Called at the start of the transfer.
+            // 2. Called each time in the throttle block to set the sleep time.
+            // 3. Called each time in the throttle block immediately after waking from sleep.
+            verify(exactly = 21) { HMeadowSocketInterfaceReal.Now.now() }
+            // 10 Calls for each normal 10% progress updates, 10 calls for the progress update in the throttle block being
+            // called every 2 buffers (also 10% each).
+            Assertions.assertEquals(20, progress)
+        }
+
+        @UnitTest
+        @DisplayName("`sendFile` with an empty or invalid name should throw an error.")
+        fun sendFileEmptyName() {
+            // TODO - After release.
+        }
+
+        @UnitTest
+        @DisplayName("`sendFile` given a file path should send files correctly.")
+        fun sendFilePath() {
+            // Setup
+            val (socketInterface, socket) = socketSetup()
+            val fileStream = TestInputStream()
+            val fileStreamSize = 100
+            val fileBytes = createFileBytes(fileStreamSize = fileStreamSize)
+            fileStream.setFileBytes(buffer = fileBytes)
+            val expected = constructTransferByteArray(fileBytes = fileBytes, size = fileStreamSize)
+
+            mockkObject(HMeadowSocketInterfaceReal.FilesObject)
+            every { HMeadowSocketInterfaceReal.FilesObject.size(any()) } returns 100
+            every { HMeadowSocketInterfaceReal.FilesObject.inputStream(any()) } returns fileStream
+
+            // Execute
+            socketInterface.sendFile(
+                filePath = "file/$fileName",
+                encryptBlock = { it },
+                progressPrecision = 0.01,
+                onProgressUpdate = { },
+            )
+
+            // Assert
+            val actual = (socket.outputStream as? TestOutputStream)?.getByteArray()
+            Assertions.assertArrayEquals(expected, actual)
+        }
+
+        @UnitTest
+        @DisplayName("`receiveFile` should send the correct data.")
+        fun receiveFileBytes() {
+            // Setup
+            val (socketInterface, socket) = socketSetup()
+            val fileStream = TestOutputStream()
+            val fileStreamSize = 100
+            val fileBytes = createFileBytes(fileStreamSize = fileStreamSize)
+            val incomingBytes = constructTransferByteArray(fileBytes = fileBytes, size = fileStreamSize)
+            socket.prepareToReceive(inputBytes = incomingBytes)
+
+            // Execute
+            socketInterface.receiveFile(
+                onOutputStream = { fileStream },
+                progressPrecision = 0.1,
+                beforeDownload = { size, name ->
+                    Assertions.assertEquals(100, size)
+                    Assertions.assertEquals(fileName, name)
+                },
+                onProgressUpdate = {},
+            )
+
+            // Assert
+            Assertions.assertArrayEquals(fileBytes, fileStream.getByteArray())
+        }
+
+        @UnitTest
+        @DisplayName("`receiveFile` should call the progress callback the appropriate amount of times.")
+        fun receiveFileProgress() {
+            // Setup
+            val (socketInterface, socket) = socketSetup()
+            val fileStream = TestOutputStream()
+            val fileStreamSize = 8192 * 1000
+            val fileBytes = createFileBytes(fileStreamSize = fileStreamSize)
+            val incomingBytes = constructTransferByteArray(fileBytes = fileBytes, size = fileStreamSize)
+            socket.prepareToReceive(inputBytes = incomingBytes)
+            var progress = 0
+
+            // Execute
+            socketInterface.receiveFile(
+                onOutputStream = { fileStream },
+                progressPrecision = 0.01,
+                beforeDownload = { _, _ -> },
+                onProgressUpdate = { progress++ },
+            )
+
+            // Assert
+            Assertions.assertEquals(100, progress)
+        }
+
+        @UnitTest
+        @DisplayName("`receiveFile` should handle receiving a directory.")
+        fun receiveFileDirectory() {
+            // Setup
+            val (socketInterface, socket) = socketSetup()
+            val fileStream = TestOutputStream()
+            val fileStreamSize = 0
+            val incomingBytes = constructTransferByteArray(fileBytes = ByteArray(size = 0), size = fileStreamSize)
+            socket.prepareToReceive(inputBytes = incomingBytes)
+
+            // Execute
+            socketInterface.receiveFile(
+                onOutputStream = { fileStream },
+                progressPrecision = 0.1,
+                beforeDownload = { size, name ->
+                    Assertions.assertEquals(0, size)
+                    Assertions.assertEquals(fileName, name)
+                },
+                onProgressUpdate = {},
+            )
+
+            // Assert
+            Assertions.assertEquals(0, fileStream.getByteArray().size)
+        }
     }
 
     @UnitTest
@@ -351,9 +320,9 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     }
 }
 
-private fun setup(): Pair<HMeadowSocketInterfaceReal, TestSocket> {
-    val socketInterface = HMeadowSocketInterfaceReal()
+private fun socketSetup(): Pair<HMeadowSocketInterfaceReal, TestSocket> {
     val socket = TestSocket()
+    val socketInterface = HMeadowSocketInterfaceReal()
     socketInterface.bindToSocket { socket }
     return socketInterface to socket
 }
@@ -398,6 +367,11 @@ private class TestInputStream : InputStream() {
 
     fun setBuffer(buffer: ByteArray) {
         input = buffer
+        index = 0
+    }
+
+    fun setFileBytes(buffer: ByteArray) {
+        input = buffer + ByteArray(size = 1).apply { this[0] = -1 }
         index = 0
     }
 
