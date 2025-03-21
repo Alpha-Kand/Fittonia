@@ -16,7 +16,7 @@ import java.net.ServerSocket
 import java.net.Socket
 import java.time.Instant
 
-sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
+sealed class HMeadowSocket(open val socketInterface: HMeadowSocketHandler) {
 
     sealed class HMeadowSocketError(
         error: Exception,
@@ -210,7 +210,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketInterface) {
 open class HMeadowSocketServer(
     private val socket: Socket,
     operationTimeoutMillis: Int = 0,
-    final override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
+    final override val socketInterface: HMeadowSocketHandler = HMeadowSocketHandler(),
 ) : HMeadowSocket(socketInterface) {
     init {
         try {
@@ -232,7 +232,7 @@ open class HMeadowSocketServer(
 
         fun createServerFromSocket(
             serverSocket: ServerSocket,
-            socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
+            socketInterface: HMeadowSocketHandler = HMeadowSocketHandler(),
         ): HMeadowSocketServer {
             return HMeadowSocketServer(
                 socket = serverSocket.accept(),
@@ -247,7 +247,7 @@ open class HMeadowSocketServer(
         fun createServer(
             port: Int,
             timeoutMillis: Long = 0,
-            socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
+            socketInterface: HMeadowSocketHandler = HMeadowSocketHandler(),
         ): HMeadowSocketServer {
             val timeLimit = Instant.now().toEpochMilli() + timeoutMillis
             var exception: Exception
@@ -296,7 +296,7 @@ open class HMeadowSocketServer(
         @Throws(CouldNotFindAvailablePort::class, ServerSetupException::class)
         fun createServerAnyPort(
             startingPort: Int,
-            socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
+            socketInterface: HMeadowSocketHandler = HMeadowSocketHandler(),
             onFindAvailablePort: (port: Int) -> Unit = {},
         ): HMeadowSocketServer {
             return HMeadowSocketServer(
@@ -339,7 +339,7 @@ constructor(
     port: Int,
     handshakeTimeoutMillis: Int = 0,
     operationTimeoutMillis: Int = 0,
-    final override val socketInterface: HMeadowSocketInterface = HMeadowSocketInterfaceReal(),
+    final override val socketInterface: HMeadowSocketHandler = HMeadowSocketHandler(),
 ) : HMeadowSocket(socketInterface) {
     private val socket: Socket = socketInterface.bindToSocket {
         val timeLimit = Instant.now().toEpochMilli() + handshakeTimeoutMillis

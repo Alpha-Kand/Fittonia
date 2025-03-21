@@ -1,7 +1,7 @@
 package hmeadowSocket
 
-import hmeadowSocket.HMeadowSocketInterfaceReal.Now.now
-import hmeadowSocket.HMeadowSocketInterfaceReal.Sleeper.sleep
+import hmeadowSocket.HMeadowSocketHandler.Now.now
+import hmeadowSocket.HMeadowSocketHandler.Sleeper.sleep
 import java.io.BufferedInputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -16,62 +16,7 @@ import java.time.Instant
 import java.util.Arrays
 import kotlin.io.path.Path
 
-interface HMeadowSocketInterface {
-    var sendBytesPerSecond: Long
-    var receiveBytesPerSecond: Long
-
-    fun bindToSocket(block: () -> Socket): Socket
-    fun close()
-
-    fun sendInt(message: Int)
-    fun receiveInt(): Int
-
-    fun sendLong(message: Long)
-    fun receiveLong(): Long
-
-    fun sendBoolean(message: Boolean)
-    fun receiveBoolean(): Boolean
-
-    fun sendFile(
-        stream: InputStream,
-        name: String,
-        size: Long,
-        encryptBlock: (ByteArray) -> ByteArray,
-        progressPrecision: Double,
-        onProgressUpdate: (bytes: Long) -> Unit,
-    )
-
-    fun sendFile(
-        filePath: String,
-        encryptBlock: (ByteArray) -> ByteArray,
-        progressPrecision: Double,
-        onProgressUpdate: (bytes: Long) -> Unit,
-    )
-
-    fun receiveFile(
-        destination: String,
-        prefix: String,
-        suffix: String,
-    ): Pair<String, String>
-
-    fun receiveFile(
-        onOutputStream: (fileName: String) -> OutputStream?,
-        progressPrecision: Double,
-        beforeDownload: (totalBytes: Long, name: String) -> Unit,
-        onProgressUpdate: (progress: Long) -> Unit,
-    )
-
-    fun sendString(message: String)
-    fun receiveString(): String
-
-    fun sendContinue()
-    fun receiveContinue()
-
-    fun sendByteArray(message: ByteArray)
-    fun receiveByteArray(): ByteArray
-}
-
-open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
+open class HMeadowSocketHandler {
 
     data object Sleeper {
         fun sleep(millis: Long) {
@@ -95,8 +40,8 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         }
     }
 
-    override var sendBytesPerSecond: Long = Long.MAX_VALUE
-    override var receiveBytesPerSecond: Long = Long.MAX_VALUE
+    open var sendBytesPerSecond: Long = Long.MAX_VALUE
+    open var receiveBytesPerSecond: Long = Long.MAX_VALUE
 
     companion object {
         private const val BUFFER_SIZE_LONG: Long = 8192
@@ -109,40 +54,40 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
     private lateinit var mDataInput: DataInputStream
     private lateinit var mDataOutput: DataOutputStream
 
-    override fun bindToSocket(block: () -> Socket): Socket {
+    open fun bindToSocket(block: () -> Socket): Socket {
         val socket = block()
         mDataInput = DataInputStream(socket.getInputStream())
         mDataOutput = DataOutputStream(socket.getOutputStream())
         return socket
     }
 
-    override fun close() {
+    open fun close() {
         mDataInput.close()
         mDataOutput.close()
     }
 
-    override fun sendInt(message: Int) = mDataOutput.writeInt(message)
-    override fun receiveInt() = mDataInput.readInt()
+    open fun sendInt(message: Int) = mDataOutput.writeInt(message)
+    open fun receiveInt() = mDataInput.readInt()
 
-    override fun sendLong(message: Long) = mDataOutput.writeLong(message)
-    override fun receiveLong() = mDataInput.readLong()
+    open fun sendLong(message: Long) = mDataOutput.writeLong(message)
+    open fun receiveLong() = mDataInput.readLong()
 
-    override fun sendBoolean(message: Boolean) = mDataOutput.writeBoolean(message)
-    override fun receiveBoolean() = mDataInput.readBoolean()
+    open fun sendBoolean(message: Boolean) = mDataOutput.writeBoolean(message)
+    open fun receiveBoolean() = mDataInput.readBoolean()
 
-    override fun sendString(message: String) {
+    open fun sendString(message: String) {
         val byteArray = message.encodeToByteArray()
         val totalBytes = byteArray.size
         sendInt(message = totalBytes)
         mDataOutput.write(byteArray, 0, totalBytes)
     }
 
-    override fun receiveString(): String {
+    open fun receiveString(): String {
         val messageLength = receiveInt()
         return String(readNBytes(messageLength), Charsets.UTF_8)
     }
 
-    override fun sendFile(
+    open fun sendFile(
         stream: InputStream,
         name: String,
         size: Long,
@@ -201,7 +146,7 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         onProgressUpdate(size)
     }
 
-    override fun sendFile(
+    open fun sendFile(
         filePath: String,
         encryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
@@ -219,7 +164,7 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         )
     }
 
-    override fun receiveFile(
+    open fun receiveFile(
         destination: String,
         prefix: String,
         suffix: String,
@@ -258,7 +203,7 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         return file.absolutePath to fileName
     }
 
-    override fun receiveFile(
+    open fun receiveFile(
         onOutputStream: (fileName: String) -> OutputStream?,
         progressPrecision: Double,
         beforeDownload: (totalBytes: Long, fileName: String) -> Unit,
@@ -295,17 +240,17 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
         onProgressUpdate(size)
     }
 
-    override fun sendContinue() = sendBoolean(message = true)
-    override fun receiveContinue() {
+    open fun sendContinue() = sendBoolean(message = true)
+    open fun receiveContinue() {
         receiveBoolean()
     }
 
-    override fun sendByteArray(message: ByteArray) {
+    open fun sendByteArray(message: ByteArray) {
         sendInt(message.size)
         mDataOutput.write(message)
     }
 
-    override fun receiveByteArray(): ByteArray {
+    open fun receiveByteArray(): ByteArray {
         val size = receiveInt()
         val buffer = ByteArray(size)
         mDataInput.read(buffer, 0, size)
@@ -358,7 +303,7 @@ open class HMeadowSocketInterfaceReal : HMeadowSocketInterface {
      *         allocated.
      */
     @Throws(IOException::class)
-    fun readNBytes(length: Int): ByteArray {
+    private fun readNBytes(length: Int): ByteArray {
         require(length >= 0) { "length <= 0" }
         // List of buffers which may or may not be full (Max BUFFER_SIZE).
         var bufferList: MutableList<ByteArray>? = null

@@ -1,6 +1,6 @@
 import BaseSocketScriptTest.TestFlags.Companion.opposite
 import hmeadowSocket.HMeadowSocketClient
-import hmeadowSocket.HMeadowSocketInterface
+import hmeadowSocket.HMeadowSocketHandler
 import hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -198,7 +198,7 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
         otherQueue: LinkedBlockingQueue<Communication>,
         thisQueue: LinkedBlockingQueue<Communication>,
         thisList: MutableList<Communication>,
-    ) = object : HMeadowSocketInterface {
+    ) = object : HMeadowSocketHandler() {
         override var sendBytesPerSecond: Long
             get() = 2000
             set(_) {}

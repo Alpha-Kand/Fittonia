@@ -1,4 +1,4 @@
-import hmeadowSocket.HMeadowSocketInterfaceReal
+import hmeadowSocket.HMeadowSocketHandler
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -14,14 +14,14 @@ import java.io.OutputStream
 import java.net.Socket
 import java.nio.ByteBuffer
 
-private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
+private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
     @BeforeEach
     fun beforeEachSetup() {
-        mockkObject(HMeadowSocketInterfaceReal.Now)
-        every { HMeadowSocketInterfaceReal.Now.now() } returns 123
+        mockkObject(HMeadowSocketHandler.Now)
+        every { HMeadowSocketHandler.Now.now() } returns 123
 
-        mockkObject(HMeadowSocketInterfaceReal.Sleeper)
-        every { HMeadowSocketInterfaceReal.Sleeper.sleep(any()) } just Runs
+        mockkObject(HMeadowSocketHandler.Sleeper)
+        every { HMeadowSocketHandler.Sleeper.sleep(any()) } just Runs
     }
 
     @UnitTest
@@ -188,7 +188,7 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
             // 1. Called at the start of the transfer.
             // 2. Called each time in the throttle block to set the sleep time.
             // 3. Called each time in the throttle block immediately after waking from sleep.
-            verify(exactly = 21) { HMeadowSocketInterfaceReal.Now.now() }
+            verify(exactly = 21) { HMeadowSocketHandler.Now.now() }
             // 10 Calls for each normal 10% progress updates, 10 calls for the progress update in the throttle block being
             // called every 2 buffers (also 10% each).
             Assertions.assertEquals(20, progress)
@@ -211,9 +211,9 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
             fileStream.setFileBytes(buffer = fileBytes)
             val expected = constructTransferByteArray(fileBytes = fileBytes, size = fileStreamSize)
 
-            mockkObject(HMeadowSocketInterfaceReal.FilesObject)
-            every { HMeadowSocketInterfaceReal.FilesObject.size(any()) } returns 100
-            every { HMeadowSocketInterfaceReal.FilesObject.inputStream(any()) } returns fileStream
+            mockkObject(HMeadowSocketHandler.FilesObject)
+            every { HMeadowSocketHandler.FilesObject.size(any()) } returns 100
+            every { HMeadowSocketHandler.FilesObject.inputStream(any()) } returns fileStream
 
             // Execute
             socketInterface.sendFile(
@@ -309,7 +309,7 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     fun close() {
         val inputStream = mockk<InputStream>(relaxed = true)
         val outputStream = mockk<OutputStream>(relaxed = true)
-        HMeadowSocketInterfaceReal().run {
+        HMeadowSocketHandler().run {
             bindToSocket { TestSocket(inputStream = inputStream, outputStream = outputStream) }
             close()
         }
@@ -320,9 +320,9 @@ private class HMeadowSocketInterfaceTest : DesktopBaseMockkTest() {
     }
 }
 
-private fun socketSetup(): Pair<HMeadowSocketInterfaceReal, TestSocket> {
+private fun socketSetup(): Pair<HMeadowSocketHandler, TestSocket> {
     val socket = TestSocket()
-    val socketInterface = HMeadowSocketInterfaceReal()
+    val socketInterface = HMeadowSocketHandler()
     socketInterface.bindToSocket { socket }
     return socketInterface to socket
 }
