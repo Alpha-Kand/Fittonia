@@ -31,7 +31,7 @@ fun DebugScreenDefaultsTab(
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
-            .padding(start = 16.dp),
+            .padding(horizontal = 16.dp),
     ) {
         Text(
             text = "Defaults",

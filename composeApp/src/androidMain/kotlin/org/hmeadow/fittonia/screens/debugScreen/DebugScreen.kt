@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import hmeadowSocket.AESCipher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.BaseViewModel
+import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.R
@@ -44,6 +46,7 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
+import java.lang.StringBuilder
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -68,6 +71,17 @@ class DebugScreenViewModel(
     // Admin Create
     val nextAutoJobName = mainViewModel.dataStore.data.map { it.nextAutoJobName }
     val nextAutoJobNameMessage = MutableStateFlow("")
+
+    // Public/Private Key Encryption Test
+    val maxEncryptionBytesPuPr = 245
+    val encryptedMessagePuPr = MutableStateFlow(ByteArray(0))
+    val decryptedMessagePuPr = MutableStateFlow("")
+
+    // AES Encryption Test
+    private val keyAES = AESCipher.generateKey()
+    val maxEncryptionBytesAES = 8192
+    val encryptedMessageAES = MutableStateFlow(ByteArray(0))
+    val decryptedMessageAES = MutableStateFlow("")
 
     init {
         launch {
@@ -127,6 +141,46 @@ class DebugScreenViewModel(
                             ?: it.debugSettings.defaultNewDestinationPort,
                     ),
                 )
+            }
+        }
+    }
+
+    fun onEncryptMessagePuPr() {
+        PuPrKeyCipher.getPublicKeyFromKeyStore()?.let { publicKey ->
+            launch {
+                encryptedMessagePuPr.update {
+                    val sb = StringBuilder()
+                    repeat(maxEncryptionBytesPuPr) {
+                        sb.append('a')
+                    }
+                    PuPrKeyCipher.encrypt(sb.toString().encodeToByteArray(), publicKey.encoded)
+                }
+            }
+        }
+    }
+
+    fun onDecryptMessagePuPr() {
+        launch {
+            decryptedMessagePuPr.update {
+                PuPrKeyCipher.decrypt(encryptedMessagePuPr.value).decodeToString()
+            }
+        }
+    }
+
+    fun onEncryptMessageAES() {
+        encryptedMessageAES.update {
+            val sb = StringBuilder()
+            repeat(maxEncryptionBytesAES) {
+                sb.append('a')
+            }
+            AESCipher.encryptBytes(bytes = sb.toString().encodeToByteArray(), secretKeyBytes = keyAES)
+        }
+    }
+
+    fun onDecryptMessageAES() {
+        launch {
+            decryptedMessageAES.update {
+                AESCipher.decryptBytes(bytes = encryptedMessageAES.value, secretKeyBytes = keyAES).decodeToString()
             }
         }
     }
@@ -197,6 +251,26 @@ fun DebugScreen(
                             nextAutoJobNameMessage = viewModel.nextAutoJobNameMessage.collectAsState(initial = "").value,
                             onCreateNewDestination = viewModel::createNewDestination,
                             onCreateJobDirectory = viewModel::createJobDirectory,
+                            modifier = Modifier
+                                .width(maxWidth)
+                                .height(maxHeight),
+                            footerHeight = footerHeight,
+                        )
+                    },
+                    "Encryption Test" to { maxWidth, maxHeight ->
+                        DebugScreenEncryptionTestTab(
+                            // Public/Private Key
+                            maxEncryptionBytesPuPr = viewModel.maxEncryptionBytesPuPr,
+                            encodedPuPr = viewModel.encryptedMessagePuPr.collectAsState(ByteArray(0)).value,
+                            decodedPuPr = viewModel.decryptedMessagePuPr.collectAsState("").value,
+                            onEncryptMessagePuPr = viewModel::onEncryptMessagePuPr,
+                            onDecryptMessagePuPr = viewModel::onDecryptMessagePuPr,
+                            // AES Encryption
+                            maxEncryptionBytesAES = viewModel.maxEncryptionBytesAES,
+                            encodedAES = viewModel.encryptedMessageAES.collectAsState(ByteArray(0)).value,
+                            decodedAES = viewModel.decryptedMessageAES.collectAsState("").value,
+                            onEncryptMessageAES = viewModel::onEncryptMessageAES,
+                            onDecryptMessageAES = viewModel::onDecryptMessageAES,
                             modifier = Modifier
                                 .width(maxWidth)
                                 .height(maxHeight),
