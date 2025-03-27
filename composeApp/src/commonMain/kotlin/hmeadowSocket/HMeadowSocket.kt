@@ -195,6 +195,14 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketHandler) {
         socketInterface.receiveContinue().also { history.add("ReceiveContinue") }
     }
 
+    fun sendByteArray(message: ByteArray) = sendErrorWrapper {
+        socketInterface.sendByteArray(message = message)
+    }
+
+    fun receiveByteArray() = receiveErrorWrapper {
+        socketInterface.receiveByteArray()
+    }
+
     abstract fun close()
 
     abstract fun sendClose()
