@@ -1,11 +1,11 @@
-package hmeadowSocket
+package org.hmeadow.fittonia.hmeadowSocket
 
-import hmeadowSocket.HMeadowSocket.HMeadowSocketError.ClientSetupException
-import hmeadowSocket.HMeadowSocket.HMeadowSocketError.CouldNotBindServerToGivenPort
-import hmeadowSocket.HMeadowSocket.HMeadowSocketError.CouldNotFindAvailablePort
-import hmeadowSocket.HMeadowSocket.HMeadowSocketError.FailedToReceiveException
-import hmeadowSocket.HMeadowSocket.HMeadowSocketError.FailedToSendException
-import hmeadowSocket.HMeadowSocket.HMeadowSocketError.ServerSetupException
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket.HMeadowSocketError.ClientSetupException
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket.HMeadowSocketError.CouldNotBindServerToGivenPort
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket.HMeadowSocketError.CouldNotFindAvailablePort
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket.HMeadowSocketError.FailedToReceiveException
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket.HMeadowSocketError.FailedToSendException
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket.HMeadowSocketError.ServerSetupException
 import org.hmeadow.fittonia.utility.debug
 import java.io.IOException
 import java.io.InputStream

@@ -1,4 +1,4 @@
-package hmeadowSocket
+package org.hmeadow.fittonia.hmeadowSocket
 
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator

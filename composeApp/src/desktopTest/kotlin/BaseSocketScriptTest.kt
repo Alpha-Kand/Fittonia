@@ -1,7 +1,7 @@
 import BaseSocketScriptTest.TestFlags.Companion.opposite
-import hmeadowSocket.HMeadowSocketClient
-import hmeadowSocket.HMeadowSocketHandler
-import hmeadowSocket.HMeadowSocketServer
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope

@@ -1,6 +1,6 @@
 import commandHandler.FileTransfer
 import fileOperations.FileOperations
-import hmeadowSocket.HMeadowSocketServer
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

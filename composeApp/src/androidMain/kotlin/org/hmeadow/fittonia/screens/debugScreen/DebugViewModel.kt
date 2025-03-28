@@ -1,7 +1,7 @@
 package org.hmeadow.fittonia.screens.debugScreen
 
 import SettingsManager
-import hmeadowSocket.AESCipher
+import org.hmeadow.fittonia.hmeadowSocket.AESCipher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first

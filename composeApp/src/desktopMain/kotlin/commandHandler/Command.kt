@@ -5,7 +5,7 @@ import FittoniaErrorType
 import ServerFlagsString
 import SessionManager
 import decodeIpAddress
-import hmeadowSocket.HMeadowSocket
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
 import requireNull
 
 sealed class Command {

@@ -1,7 +1,7 @@
 import ServerCommandFlag.Companion.toCommandFlag
-import hmeadowSocket.HMeadowSocket
-import hmeadowSocket.HMeadowSocketClient
-import hmeadowSocket.HMeadowSocketServer
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 

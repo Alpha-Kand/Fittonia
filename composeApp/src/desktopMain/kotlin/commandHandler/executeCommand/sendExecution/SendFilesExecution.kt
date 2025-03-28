@@ -22,7 +22,7 @@ import fittonia.composeapp.generated.resources.send_files_user_option_compress_a
 import fittonia.composeapp.generated.resources.send_files_user_option_compress_invalid
 import fittonia.composeapp.generated.resources.send_files_user_option_show_all
 import fittonia.composeapp.generated.resources.send_files_user_option_skip_invalid
-import hmeadowSocket.HMeadowSocketClient
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
 import org.jetbrains.compose.resources.getString
 
 suspend fun sendFilesExecution(command: SendFilesCommand) {

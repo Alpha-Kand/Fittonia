@@ -1,7 +1,7 @@
-package hmeadowSocket
+package org.hmeadow.fittonia.hmeadowSocket
 
-import hmeadowSocket.HMeadowSocketHandler.Now.now
-import hmeadowSocket.HMeadowSocketHandler.Sleeper.sleep
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler.Now.now
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler.Sleeper.sleep
 import org.hmeadow.fittonia.utility.readNBytesHM
 import java.io.BufferedInputStream
 import java.io.DataInputStream

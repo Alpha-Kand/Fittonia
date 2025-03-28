@@ -18,9 +18,9 @@ import androidx.core.app.ServiceCompat
 import androidx.documentfile.provider.DocumentFile
 import communicateCommand
 import communicateCommandBoolean
-import hmeadowSocket.HMeadowSocket
-import hmeadowSocket.HMeadowSocketClient
-import hmeadowSocket.HMeadowSocketServer
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

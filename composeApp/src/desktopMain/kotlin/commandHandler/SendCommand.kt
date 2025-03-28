@@ -4,7 +4,7 @@ import OutputIO.printlnIO
 import ServerCommandFlag
 import SettingsManagerDesktop
 import communicateCommandBoolean
-import hmeadowSocket.HMeadowSocketClient
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
 
 fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     val destination = SettingsManagerDesktop.settingsManager.findDestination(command.getDestination())

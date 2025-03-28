@@ -1,5 +1,5 @@
-import hmeadowSocket.HMeadowSocketClient
-import hmeadowSocket.HMeadowSocketServer
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking

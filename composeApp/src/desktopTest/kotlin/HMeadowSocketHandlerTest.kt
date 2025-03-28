@@ -1,4 +1,4 @@
-import hmeadowSocket.HMeadowSocketHandler
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
