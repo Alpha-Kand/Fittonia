@@ -34,14 +34,15 @@ sealed interface TransferJob {
     }
 
     data class Item(
-        val uri: Uri,
+        val uriRaw: String,
         val name: String,
         val isFile: Boolean,
         val sizeBytes: Long,
         val progressBytes: Long = 0,
     ) {
+        fun uri(): Uri = Uri.parse(uriRaw)
         val progressPercentage: Double = progressBytes.toDouble() / sizeBytes.toDouble()
-        val id: Int = Objects.hash(name, uri, isFile, sizeBytes) // Ignore 'progressBytes'.
+        val id: Int = Objects.hash(name, uriRaw, isFile, sizeBytes) // Ignore 'progressBytes'.
     }
 }
 

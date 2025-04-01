@@ -194,7 +194,7 @@ class SendFilesScreenViewModel(
                 docUri.name?.let { name ->
                     itemListState.value += TransferJob.Item(
                         name = name,
-                        uri = docUri.uri,
+                        uriRaw = docUri.uri.toString(),
                         isFile = docUri.isFile,
                         sizeBytes = MainActivity
                             .mainActivity

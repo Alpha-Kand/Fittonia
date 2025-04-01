@@ -258,7 +258,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                                     items = (0..abs(Random.nextInt() % 100)).map {
                                         TransferJob.Item(
                                             name = "File_${abs(Random.nextInt() % 100)}.pdf",
-                                            uri = Uri.parse("https://www.google.com"),
+                                            uriRaw = "https://www.google.com",
                                             isFile = true,
                                             sizeBytes = Random.nextLong(),
                                         )

@@ -10,17 +10,15 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
 import androidx.compose.ui.util.fastForEach
 import androidx.core.app.ServiceCompat
 import androidx.documentfile.provider.DocumentFile
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import communicateCommand
 import communicateCommandBoolean
-import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
-import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
-import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,18 +31,24 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import org.hmeadow.fittonia.models.IncomingJob
 import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.Ping
 import org.hmeadow.fittonia.models.PingStatus
 import org.hmeadow.fittonia.models.TransferJob
+import org.hmeadow.fittonia.models.TransferJob.Item
 import org.hmeadow.fittonia.models.TransferStatus
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.net.BindException
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.SocketException
 import java.net.SocketTimeoutException
+import java.nio.charset.StandardCharsets
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.abs
 import kotlin.random.Random
@@ -274,14 +278,23 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
             var job = IncomingJob(id = jobId)
             registerTransferJob(job)
             log("Client attempting to send files.", jobId = jobId)
+            // TODO ENCRYPT PASSWORDS
 
-            val jobName = when (server.receiveString()) {
+            val sendFileClientData: SendFileClientData = String(
+                bytes = server.receiveByteArray(),
+                charset = StandardCharsets.UTF_8,
+            ).let { json ->
+                jacksonObjectMapper().readValue<SendFileClientData>(json)
+            }
+            println("Server received: $sendFileClientData")
+
+            val jobName = when (sendFileClientData.nameFlag) {
                 ServerFlagsString.NEED_JOB_NAME -> "Job${abs(Random.nextInt()) % 100000}".also {
                     log("Server generated job name: $it", jobId = jobId)
                     server.sendString(it)
                 }
 
-                ServerFlagsString.HAVE_JOB_NAME -> server.receiveString().also {
+                ServerFlagsString.HAVE_JOB_NAME -> sendFileClientData.jobName.also {
                     log("Client provided job name: $it", jobId = jobId)
                 }
 
@@ -290,31 +303,8 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
             server.sendInt(128) // Not sure android has the same path limits as desktop.
 
-            server.receiveContinue()
+            job = updateTransferJob(job.copy(items = sendFileClientData.items, description = jobName, currentItem = 1))
 
-            val totalExpectedItems = server.receiveInt()
-            logDebug("totalExpectedItems: $totalExpectedItems", jobId = jobId)
-            job = updateTransferJob(job.copy(description = jobName, currentItem = 1))
-            repeat(totalExpectedItems) {
-                val isFile = server.receiveBoolean()
-                val name = server.receiveString()
-                val uri = server.receiveString()
-                val sizeBytes = server.receiveLong()
-                job = updateTransferJob(
-                    job.copy(
-                        items = job.items + listOf(
-                            TransferJob.Item(
-                                name = name,
-                                uri = Uri.parse(uri),
-                                isFile = isFile,
-                                progressBytes = 0,
-                                sizeBytes = sizeBytes,
-                            ),
-                        ),
-                    ),
-                )
-                server.sendContinue()
-            }
             val aaa = MainActivity.mainActivity.createJobDirectory(
                 jobName = jobName,
                 print = { this.logDebug(it, jobId = jobId) },
@@ -462,25 +452,30 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                 val commandSuccess = communicateCommand(client = client, currentJob = currentJob)
                 if (commandSuccess) {
                     log(log = "Password accepted")
+
+                    val sendFileClientData = SendFileClientData(
+                        items = newJob.items,
+                        aesKey = ByteArray(0),
+                        jobName = newJob.description,
+                        nameFlag = if (newJob.needDescription) {
+                            ServerFlagsString.NEED_JOB_NAME
+                        } else {
+                            ServerFlagsString.HAVE_JOB_NAME
+                        },
+                    )
+                    val byteArrayOutputStream = ByteArrayOutputStream()
+                    jacksonObjectMapper().writeValue(byteArrayOutputStream, sendFileClientData)
+                    client.sendByteArray(byteArrayOutputStream.toByteArray()) // TODO ENCRYPT
+
                     currentJob = client.syncDescription(currentJob)
                     updateTransferJob(currentJob)
 
                     log("destination's path length: " + client.receiveInt())
-                    client.sendContinue()
-                    client.sendInt(currentJob.totalItems)
-                    val items = currentJob.cloneItems()
-                    items.fastForEach { item ->
-                        client.sendBoolean(item.isFile)
-                        client.sendString(item.name)
-                        client.sendString(item.uri.toString())
-                        client.sendLong(item.sizeBytes)
-                        client.receiveContinue()
-                    }
-                    items.fastForEach { item ->
+                    currentJob.cloneItems().fastForEach { item ->
                         // TODO: Relative path - After release
                         client.sendBoolean(item.isFile)
                         if (item.isFile) {
-                            MainActivity.mainActivity.contentResolver.openInputStream(item.uri).use {
+                            MainActivity.mainActivity.contentResolver.openInputStream(item.uri()).use {
                                 it?.sendFile(client = client, item = item) { progressBytes ->
                                     runBlocking {
                                         progressUpdateMutex.withLock {
@@ -506,6 +501,18 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 }
 
+class SendFileClientData(
+    val items: List<Item>,
+    val aesKey: ByteArray,
+    val jobName: String,
+    val nameFlag: String,
+)
+
+class SendFileServerData(
+    val jobName: String,
+    val pathLimit: Int,
+)
+
 fun OutgoingJob.createClient() = HMeadowSocketClient(
     ipAddress = destination.ip,
     port = port,
@@ -527,11 +534,8 @@ fun OutgoingJob.getInitialDescriptionText() = if (needDescription) "Connecting..
 
 fun HMeadowSocketClient.syncDescription(aaa: OutgoingJob): OutgoingJob {
     return if (aaa.needDescription) {
-        sendString(ServerFlagsString.NEED_JOB_NAME)
         aaa.copy(description = receiveString())
     } else {
-        sendString(ServerFlagsString.HAVE_JOB_NAME)
-        sendString(aaa.description)
         aaa
     }
 }

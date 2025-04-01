@@ -30,6 +30,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.kotlin.serialization)
+            implementation(libs.jackson.module.kotlin)
             implementation(libs.androidx.fragment.ktx)
             implementation(libs.androidx.activity.ktx)
             implementation(libs.androidx.activity.compose)
