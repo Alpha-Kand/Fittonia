@@ -30,7 +30,7 @@ object PuPrKeyCipher {
     private const val ALGORITHM = KEY_ALGORITHM_RSA
     private const val BLOCK_MODE = BLOCK_MODE_ECB
 
-    fun encrypt(byteArray: ByteArray, publicKey: ByteArray): ByteArray {
+    fun encrypt(byteArray: ByteArray, publicKey: HMPublicKey): ByteArray {
         val mPublicKey = createPublicKeyFromByteArray(publicKey)
         return getCipher().run {
             init(Cipher.ENCRYPT_MODE, mPublicKey)
@@ -49,13 +49,17 @@ object PuPrKeyCipher {
     // TODO - After release -> Super secure mode: Have to enter a shared password not sent over the network.
     // i.e. communicate it through another channel such as physically talking or another messenger.
 
-    fun getPublicKeyFromKeyStore(): PublicKey? {
+    fun getPublicKeyFromKeyStore(): HMPublicKey? {
         return try {
             KeyStore
                 .getInstance(ANDROID_KEY_STORE)
                 .apply { load(null) }
                 .getCertificate(KEYSTORE_ALIAS)
                 ?.publicKey
+                ?.encoded
+                ?.let {
+                    HMPublicKey(encoded = it)
+                }
         } catch (e: KeyStoreException) {
             println(e.message)
             null
@@ -96,11 +100,13 @@ object PuPrKeyCipher {
         }
     }
 
-    private fun createPublicKeyFromByteArray(publicKey: ByteArray): PublicKey {
-        return KeyFactory.getInstance(ALGORITHM).generatePublic(X509EncodedKeySpec(publicKey))
+    private fun createPublicKeyFromByteArray(publicKey: HMPublicKey): PublicKey {
+        return KeyFactory.getInstance(ALGORITHM).generatePublic(X509EncodedKeySpec(publicKey.encoded))
     }
 
     private fun getCipher(): Cipher = Cipher.getInstance(
         /* transformation = */ "$ALGORITHM/$BLOCK_MODE/$PADDING",
     )
+
+    class HMPublicKey(val encoded: ByteArray)
 }

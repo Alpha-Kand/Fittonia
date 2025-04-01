@@ -119,7 +119,7 @@ class DebugScreenViewModel(
                     repeat(maxEncryptionBytesPuPr) {
                         sb.append('a')
                     }
-                    PuPrKeyCipher.encrypt(sb.toString().encodeToByteArray(), publicKey.encoded)
+                    PuPrKeyCipher.encrypt(sb.toString().encodeToByteArray(), publicKey)
                 }
             }
         }
