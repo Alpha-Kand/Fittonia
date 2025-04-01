@@ -230,6 +230,7 @@ open class HMeadowSocketHandler {
             } else {
                 while (transferByteCount > 0) {
                     val buffer = ByteArray(BUFFER_SIZE_INT)
+                    var actual = 0
                     repeat(times = BUFFER_SIZE_INT / CIPHER_BLOCK_SIZE_INT) { offset ->
                         if (transferByteCount == 0L) {
                             return@repeat
@@ -239,8 +240,9 @@ open class HMeadowSocketHandler {
                         readBytes.copyInto(destination = buffer, destinationOffset = offset * CIPHER_BLOCK_SIZE_INT)
                         transferByteCount -= nextBytes
                         remainingBytes -= nextBytes
+                        actual += nextBytes.toInt()
                     }
-                    stream.write(buffer)
+                    stream.write(buffer.sliceArray(0..<actual))
                     if ((size - remainingBytes) > currentStep) {
                         currentStep += step
                         onProgressUpdate(size - remainingBytes)
