@@ -290,8 +290,8 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
             val jobName = when (sendFileClientData.nameFlag) {
                 ServerFlagsString.NEED_JOB_NAME -> "Job${abs(Random.nextInt()) % 100000}".also {
+                    // TODO eliminate possible conflicts BEFORE RELEASE
                     log("Server generated job name: $it", jobId = jobId)
-                    server.sendString(it)
                 }
 
                 ServerFlagsString.HAVE_JOB_NAME -> sendFileClientData.jobName.also {
@@ -301,7 +301,13 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                 else -> throw Exception() // TODO - After release
             }
 
-            server.sendInt(128) // Not sure android has the same path limits as desktop.
+            val sendFileServerData = SendFileServerData(
+                jobName = jobName,
+                pathLimit = 128, // TODO remove constant - After release
+            )
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            jacksonObjectMapper().writeValue(byteArrayOutputStream, sendFileServerData)
+            server.sendByteArray(byteArrayOutputStream.toByteArray()) // TODO ENCRYPT BEFORE RELEASE
 
             job = updateTransferJob(job.copy(items = sendFileClientData.items, description = jobName, currentItem = 1))
 
@@ -465,12 +471,19 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     )
                     val byteArrayOutputStream = ByteArrayOutputStream()
                     jacksonObjectMapper().writeValue(byteArrayOutputStream, sendFileClientData)
-                    client.sendByteArray(byteArrayOutputStream.toByteArray()) // TODO ENCRYPT
+                    client.sendByteArray(byteArrayOutputStream.toByteArray()) // TODO ENCRYPT BEFORE RELEASE
 
-                    currentJob = client.syncDescription(currentJob)
+                    val sendFileServerData: SendFileServerData = String(
+                        bytes = client.receiveByteArray(),
+                        charset = StandardCharsets.UTF_8,
+                    ).let { json ->
+                        jacksonObjectMapper().readValue<SendFileServerData>(json)
+                    }
+
+                    if (currentJob.needDescription) {
+                        currentJob = currentJob.copy(description = sendFileServerData.jobName)
+                    }
                     updateTransferJob(currentJob)
-
-                    log("destination's path length: " + client.receiveInt())
                     currentJob.cloneItems().fastForEach { item ->
                         // TODO: Relative path - After release
                         client.sendBoolean(item.isFile)
@@ -532,17 +545,9 @@ fun AndroidServer.communicateCommand(client: HMeadowSocketClient, currentJob: Ou
 
 fun OutgoingJob.getInitialDescriptionText() = if (needDescription) "Connecting..." else description
 
-fun HMeadowSocketClient.syncDescription(aaa: OutgoingJob): OutgoingJob {
-    return if (aaa.needDescription) {
-        aaa.copy(description = receiveString())
-    } else {
-        aaa
-    }
-}
-
 fun InputStream.sendFile(
     client: HMeadowSocketClient,
-    item: TransferJob.Item,
+    item: Item,
     onProgressUpdate: (Long) -> Unit,
 ) {
     client.sendFile(
