@@ -1,7 +1,6 @@
 package org.hmeadow.fittonia
 
 import SettingsManager
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,8 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.hmeadow.fittonia.AndroidServer.Companion.server
-import org.hmeadow.fittonia.AndroidServer.Companion.startSending
+import org.hmeadow.fittonia.androidServer.AndroidServer
+import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.server
+import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.startSending
 import org.hmeadow.fittonia.compose.architecture.dataState
 import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.TransferJob

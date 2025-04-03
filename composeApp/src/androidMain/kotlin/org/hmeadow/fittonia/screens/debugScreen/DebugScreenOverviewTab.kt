@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.hmeadow.fittonia.AndroidServer
+import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.design.fonts.headingLStyle

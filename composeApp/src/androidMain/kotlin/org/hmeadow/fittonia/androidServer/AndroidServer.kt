@@ -1,4 +1,4 @@
-package org.hmeadow.fittonia
+package org.hmeadow.fittonia.androidServer
 
 import Log
 import Server
@@ -31,6 +31,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
+import org.hmeadow.fittonia.MainActivity
+import org.hmeadow.fittonia.R
+import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer

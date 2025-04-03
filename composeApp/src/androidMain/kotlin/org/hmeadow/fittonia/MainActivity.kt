@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import org.hmeadow.fittonia.androidServer.AndroidServer
 
 val Context.dataStore by dataStore("fittonia.json", SettingsDataAndroidSerializer)
 

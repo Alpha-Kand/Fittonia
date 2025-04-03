@@ -21,8 +21,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.hmeadow.fittonia.AndroidServer
 import org.hmeadow.fittonia.R
+import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.HorizontalLine
 import org.hmeadow.fittonia.components.VerticalLine

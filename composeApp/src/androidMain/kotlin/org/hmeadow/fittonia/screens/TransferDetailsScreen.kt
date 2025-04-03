@@ -24,9 +24,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import org.hmeadow.fittonia.AndroidServer.Companion.server
 import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.R
+import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.server
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.HorizontalLine
