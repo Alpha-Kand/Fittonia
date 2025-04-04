@@ -4,6 +4,7 @@ import SettingsManager
 import android.net.Uri
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -11,7 +12,9 @@ import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.serverLog
 import kotlin.coroutines.CoroutineContext
 
 class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel(), CoroutineScope {
-    override val coroutineContext: CoroutineContext = Dispatchers.IO
+    override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
+        println("BaseViewModel error: ${throwable.message}") // TODO - handle errors, crashlytics? before release
+    }
 
     fun attemptAndroidServerWithPort(initServer: (port: Int, password: String) -> Unit) = launch {
         serverLog(text = "attemptAndroidServerWithPort")

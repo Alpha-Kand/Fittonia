@@ -19,6 +19,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import communicateCommand
 import communicateCommandBoolean
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -32,6 +33,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import org.hmeadow.fittonia.MainActivity
+import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
@@ -58,7 +60,9 @@ import kotlin.random.Random
 
 class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
-    override val coroutineContext: CoroutineContext = Dispatchers.IO
+    override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
+       println("AndroidServer error: ${throwable.message}") // TODO - handle errors, crashlytics? before release
+    }
     override var jobId: Int = 100
     override val jobIdMutex = Mutex()
     override val logsMutex = Mutex()
@@ -160,6 +164,21 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                             HMeadowSocketServer.createServerFromSocket(server).let { server ->
                                 launch {
                                     log("Connected to client.")
+                                    val theirPublicKey = serverSharePublicKeys(server = server, jobId = jobId)
+
+                                    when (String(
+                                        bytes = PuPrKeyCipher.decrypt(server.receiveByteArray()),
+                                        charset = StandardCharsets.UTF_8,
+                                    )) {
+                                        ServerCommandFlag.PING.text -> {
+                                            println("command share ping() success")
+                                        } // TODO - After release
+                                        ServerCommandFlag.SEND_FILES.text -> {
+                                            println("command share receiveFiles(TODO) success") // receiveFiles(server, jobId, theirPublicKey)
+                                        }
+                                        ServerCommandFlag.SEND_MESSAGE.text -> {} // TODO - After release
+                                        ServerCommandFlag.ADD_DESTINATION.text -> {} // TODO - After release
+                                    }
                                     handleCommand(
                                         server = server,
                                         jobId = getAndIncrementJobId(),
@@ -169,6 +188,8 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         } catch (e: SocketException) {
                             log(e.message ?: "Unknown server SocketException")
                             // TODO: Don't worry! - After release
+                        } catch(e: HMeadowSocket.HMeadowSocketError){
+                            log(e.message ?: "HMeadowSocket.HMeadowSocketError")
                         }
                     }
                 }
@@ -191,7 +212,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         .setSmallIcon(R.mipmap.ic_launcher)
         .setOnlyAlertOnce(true)
         .setContentText(
-            MainActivity.mainActivity.resources.getQuantityString(
+            MainActivity.mainActivityForServer?.resources?.getQuantityString( // TODO - after release
                 R.plurals.send_receive_foreground_service_notification_content,
                 transferJobsActive,
                 transferJobsActive,
@@ -229,7 +250,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     private inline fun <reified T : TransferJob> findJob(job: T): T? = transferJobs.value.find { it.id == job.id } as? T
 
-    private suspend fun registerTransferJob(job: TransferJob) {
+    suspend fun registerTransferJob(job: TransferJob) {
         transferJobsMutex.withLock {
             updateTransferJob(job = job)
         }
@@ -444,6 +465,8 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         e.message?.let { logError(it) }
                         return@bootStrap PingStatus.InternalBug
                     }
+                    val theirPublicKey = clientSharePublicKeys(client)
+                    client.sendByteArray(PuPrKeyCipher.encrypt(ServerCommandFlag.PING.text.encodeToByteArray(), theirPublicKey))
 
                     client.communicateCommand(
                         commandFlag = ServerCommandFlag.PING,
@@ -465,6 +488,8 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                 val client: HMeadowSocketClient
                 try {
                     client = currentJob.createClient()
+                    val theirPublicKey =clientSharePublicKeys(client)
+                    client.sendByteArray(PuPrKeyCipher.encrypt(ServerCommandFlag.SEND_FILES.text.encodeToByteArray(), theirPublicKey))
                 } catch (e: HMeadowSocket.HMeadowSocketError) {
                     e.hmMessage?.let { logError(it) }
                     e.message?.let { logError(it) }
