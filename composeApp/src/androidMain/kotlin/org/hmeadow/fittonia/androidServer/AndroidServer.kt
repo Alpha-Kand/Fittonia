@@ -78,18 +78,23 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     private val transferJobsMutex = Mutex()
 
     override fun onBind(intent: Intent): IBinder {
+        serverLog(text = "onBind")
         return binder
     }
 
     override fun onCreate() {
+        serverLog(text = "onCreate")
         super.onCreate()
         server.value = this
     }
 
     private fun initServerFromIntent(intent: Intent?): Boolean {
+        serverLog(text = "initServerFromIntent (intent = $intent)")
         intent?.let {
             password = it.getStringExtra("org.hmeadow.fittonia.password") ?: throw Exception("No password provided")
+            serverLog(text = "init password $password") // TODO - before release
             it.getIntExtra("org.hmeadow.fittonia.port", 0).let { port ->
+                serverLog(text = "init port $port")
                 if (!startServerSocket(port = port)) {
                     return false
                 }
@@ -123,18 +128,19 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     private fun startServerSocket(port: Int): Boolean {
+        serverLog(text = "startServerSocket")
         if (port == 0) throw Exception("No port provided")
         try {
-            println("Starting server on port $port")
+            serverLog(text = "Starting server on port $port.")
             serverSocket?.close() // Just in case.
             serverSocket = ServerSocket()
             serverSocket?.reuseAddress = true
             serverSocket?.bind(InetSocketAddress(port))
-            println("Started server on port $port")
+            serverLog(text = "Started server success!")
         } catch (e: BindException) {
             serverSocket = null
-            println("e.message: $port " + e.message)
-            if (e.message?.contains("Address already in use") == true) {
+            serverLog(text = "e.message: $port " + e.message)
+            if (e.message?.contains(other = "Address already in use") == true) {
                 MainActivity.mainActivityForServer?.alert(UserAlert.PortInUse(port = port))
                 return false
             } else {
@@ -369,7 +375,14 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     companion object {
         const val NOTIFICATION_ID = 455
 
+        var socketLogDebug = false
         var server: MutableStateFlow<AndroidServer?> = MutableStateFlow(null)
+
+        fun serverLog(text: String) {
+            if (socketLogDebug) {
+                println("Server Debug: $text")
+            }
+        }
 
         private suspend fun bootStrap(block: suspend AndroidServer.() -> Unit) {
             if (server.value == null) {

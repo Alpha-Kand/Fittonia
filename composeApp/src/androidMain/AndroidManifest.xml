@@ -26,6 +26,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name="org.hmeadow.fittonia.AndroidServer" android:foregroundServiceType="dataSync"/>
+        <service android:name="org.hmeadow.fittonia.androidServer.AndroidServer" android:foregroundServiceType="dataSync"/>
     </application>
 </manifest>

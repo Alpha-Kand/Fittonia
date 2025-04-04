@@ -28,6 +28,7 @@ import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import org.hmeadow.fittonia.androidServer.AndroidServer
+import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.serverLog
 
 val Context.dataStore by dataStore("fittonia.json", SettingsDataAndroidSerializer)
 
@@ -39,6 +40,8 @@ class MainActivity : ComponentActivity() {
     // TODO - After release
     private var testBind = 0
     private var testUnbind = 0
+    var hasBoundServer = false
+        private set
 
     private var lastServerConnection: ServiceConnection? = null
     private var serverConnection: ServiceConnection? = null
@@ -183,11 +186,13 @@ class MainActivity : ComponentActivity() {
 
     var isConnected = false
     private fun initAndroidServer(port: Int, password: String) {
+        serverLog(text = "initAndroidServer (port = $port) (password = $password)")
         val intent = Intent(mainActivity, AndroidServer::class.java).apply {
             this.putExtra("org.hmeadow.fittonia.port", port)
             this.putExtra("org.hmeadow.fittonia.password", password)
         }
         lastServerConnection = serverConnection
+        serverLog(text = "serverConnection = $serverConnection")
         if (serverConnection == null) {
             serverConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -199,14 +204,17 @@ class MainActivity : ComponentActivity() {
                     isConnected = false
                 }
             }.also {
+                serverLog(text = "Attempting to `startForegroundService(intent)`.")
                 startForegroundService(intent)
+                serverLog(text = "`startForegroundService(intent)` complete.")
+                serverLog(text = "Attempting to `bindService`.")
                 bindService(
                     intent,
                     it,
                     0,
-                ).also {
-                    println("testBind = ${++testBind}")
-                }
+                )
+                hasBoundServer = true
+                serverLog(text = "`bindService` complete. `bindService` called ${++testBind} times this session.")
             }
         }
     }

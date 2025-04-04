@@ -7,21 +7,28 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.serverLog
 import kotlin.coroutines.CoroutineContext
 
 class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel(), CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.IO
 
     fun attemptAndroidServerWithPort(initServer: (port: Int, password: String) -> Unit) = launch {
+        serverLog(text = "attemptAndroidServerWithPort")
         dataStore.data.collect { data ->
+            serverLog(text = "attemptAndroidServerWithPort data loaded")
             data.temporaryPort?.let { port ->
+                serverLog(text = "attemptAndroidServerWithPort temp port loaded ($port)")
                 data.serverPassword?.let { password ->
+                    serverLog(text = "attemptAndroidServerWithPort server password loaded ($password)")
                     if (port in 1025..59999) {
                         initServer(port, password)
                     }
                 }
             } ?: data.defaultPort.let { port ->
+                serverLog(text = "attemptAndroidServerWithPort default port loaded ($port)")
                 data.serverPassword?.let { password ->
+                    serverLog(text = "attemptAndroidServerWithPort server password loaded ($password)")
                     if (port in 1025..59999) {
                         initServer(port, password)
                     }

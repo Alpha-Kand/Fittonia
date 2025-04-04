@@ -14,9 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.utility.isLandscape
@@ -95,7 +97,22 @@ fun DebugScreenOverviewTab(
                     )
                 }
             }
-        } ?: Text(text = "OFFLINE")
+        } ?: run {
+            if (MainActivity.mainActivity.hasBoundServer) {
+                Text(text = "OFFLINE (Check AndroidManifest.xml for errors.)")
+            } else {
+                Text(text = "OFFLINE")
+            }
+            FittoniaButton(
+                onClick = {
+                    AndroidServer.socketLogDebug = true
+                    MainActivity.mainActivity.attemptStartServer()
+                },
+            ) {
+                ButtonText(text = "Restart Server")
+            }
+        }
+
         FittoniaSpacerHeight(footerHeight)
     }
 }
