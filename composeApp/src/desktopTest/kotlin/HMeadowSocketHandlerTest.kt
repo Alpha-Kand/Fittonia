@@ -1,17 +1,20 @@
-import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
+import org.hmeadow.fittonia.TestInputStream
+import org.hmeadow.fittonia.TestOutputStream
+import org.hmeadow.fittonia.TestSocket
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler
+import org.hmeadow.fittonia.utility.byteArray
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import java.io.InputStream
 import java.io.OutputStream
-import java.net.Socket
 import java.nio.ByteBuffer
 
 private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
@@ -362,52 +365,4 @@ private fun ByteArray.equalsOther(other: ByteArray): Boolean {
         if (other[index] != byte) return false
     }
     return true
-}
-
-private class TestInputStream : InputStream() {
-    private var input = ByteArray(1)
-    private var index = -1
-
-    fun setBuffer(buffer: ByteArray) {
-        input = buffer
-        index = 0
-    }
-
-    fun setFileBytes(buffer: ByteArray) {
-        input = buffer + ByteArray(size = 1).apply { this[0] = -1 }
-        index = 0
-    }
-
-    override fun read(): Int {
-        return input[index++].toInt()
-    }
-}
-
-private class TestOutputStream : OutputStream() {
-    private val buffer = mutableListOf<Int>()
-
-    fun getByteArray(): ByteArray {
-        val byteArray = ByteArray(buffer.size)
-        buffer.forEachIndexed { index, byte ->
-            byteArray[index] = byte.toByte()
-        }
-        return byteArray
-    }
-
-    override fun write(b: Int) {
-        buffer.add(b)
-    }
-}
-
-private class TestSocket(
-    private val inputStream: InputStream = TestInputStream(),
-    private val outputStream: OutputStream = TestOutputStream(),
-) : Socket() {
-    override fun getInputStream(): InputStream {
-        return inputStream
-    }
-
-    override fun getOutputStream(): OutputStream {
-        return outputStream
-    }
 }
