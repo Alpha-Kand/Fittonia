@@ -199,8 +199,16 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketHandler) {
         socketInterface.sendByteArray(message = message)
     }
 
+    fun sendByteArrayRaw(message: ByteArray) = sendErrorWrapper {
+        socketInterface.sendByteArrayRaw(message = message)
+    }
+
     fun receiveByteArray() = receiveErrorWrapper {
         socketInterface.receiveByteArray()
+    }
+
+    fun receiveByteArrayRaw(size: Int) = receiveErrorWrapper {
+        socketInterface.receiveByteArrayRaw(size = size)
     }
 
     abstract fun close()

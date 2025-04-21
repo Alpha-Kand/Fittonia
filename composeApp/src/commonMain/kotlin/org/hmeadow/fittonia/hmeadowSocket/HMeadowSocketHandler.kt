@@ -50,8 +50,8 @@ open class HMeadowSocketHandler {
         private const val CIPHER_BLOCK_SIZE_LONG: Long = 128
     }
 
-    private lateinit var mDataInput: DataInputStream
-    private lateinit var mDataOutput: DataOutputStream
+    open lateinit var mDataInput: DataInputStream
+    open lateinit var mDataOutput: DataOutputStream
 
     open fun bindToSocket(block: () -> Socket): Socket {
         val socket = block()
@@ -263,8 +263,18 @@ open class HMeadowSocketHandler {
         mDataOutput.write(message)
     }
 
+    open fun sendByteArrayRaw(message: ByteArray) {
+        mDataOutput.write(message)
+    }
+
     open fun receiveByteArray(): ByteArray {
         val size = receiveInt()
+        val buffer = ByteArray(size)
+        mDataInput.read(buffer, 0, size)
+        return buffer
+    }
+
+    open fun receiveByteArrayRaw(size: Int): ByteArray {
         val buffer = ByteArray(size)
         mDataInput.read(buffer, 0, size)
         return buffer
