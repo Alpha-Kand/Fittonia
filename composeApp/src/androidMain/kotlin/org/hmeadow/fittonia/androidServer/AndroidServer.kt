@@ -61,7 +61,7 @@ import kotlin.random.Random
 class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
-       println("AndroidServer error: ${throwable.message}") // TODO - handle errors, crashlytics? before release
+        println("AndroidServer error: ${throwable.message}") // TODO - handle errors, crashlytics? before release
     }
     override var jobId: Int = 100
     override val jobIdMutex = Mutex()
@@ -212,7 +212,8 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         .setSmallIcon(R.mipmap.ic_launcher)
         .setOnlyAlertOnce(true)
         .setContentText(
-            MainActivity.mainActivityForServer?.resources?.getQuantityString( // TODO - after release
+            MainActivity.mainActivityForServer?.resources?.getQuantityString(
+                // TODO - after release
                 R.plurals.send_receive_foreground_service_notification_content,
                 transferJobsActive,
                 transferJobsActive,
