@@ -15,7 +15,7 @@ val testAttribute: Attribute<String> = Attribute.of("key", String::class.java)
 kotlin {
     androidTarget {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
@@ -45,6 +45,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(libs.kotter.library)
             implementation(libs.kotlin.serialization)
+            implementation(libs.jackson.module.kotlin)
             implementation(compose.components.resources)
             implementation(libs.androidx.material3.common)
             implementation(libs.kotlinx.serialization.json)
@@ -93,6 +94,7 @@ compose.resources {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
 }
 
 android {
@@ -132,8 +134,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -176,7 +178,7 @@ dependencies {
 }
 
 kover {
-    reports{
+    reports {
         filters {
             excludes {
                 androidGeneratedClasses()
