@@ -1,7 +1,6 @@
 package org.hmeadow.fittonia.screens.debugScreen
 
 import SettingsManager
-import org.hmeadow.fittonia.hmeadowSocket.AESCipher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -12,7 +11,9 @@ import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.PuPrKeyCipher
+import org.hmeadow.fittonia.PuPrKeyCipher.ENCRYPT_MAX_BYTES_ALLOWED
 import org.hmeadow.fittonia.components.InputFlow
+import org.hmeadow.fittonia.hmeadowSocket.AESCipher
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -39,7 +40,7 @@ class DebugScreenViewModel(
     val nextAutoJobNameMessage = MutableStateFlow("")
 
     // Public/Private Key Encryption Test
-    val maxEncryptionBytesPuPr = 245
+    val maxEncryptionBytesPuPr = ENCRYPT_MAX_BYTES_ALLOWED
     val encryptedMessagePuPr = MutableStateFlow(ByteArray(0))
     val decryptedMessagePuPr = MutableStateFlow("")
 

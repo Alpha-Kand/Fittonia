@@ -21,6 +21,10 @@ import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 
 object PuPrKeyCipher {
+    /** Maximum amount of bytes to encrypt in one pass. */
+    const val ENCRYPT_MAX_BYTES_ALLOWED = 245
+    const val ENCRYPT_OUT_BYTES = 256
+
     private const val ANDROID_KEY_STORE = "AndroidKeyStore"
     private const val KEYSTORE_ALIAS = "FittoniaKeysTest5"
     private const val KEY_SIZE = 2048
