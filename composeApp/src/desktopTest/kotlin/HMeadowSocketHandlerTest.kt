@@ -341,9 +341,6 @@ private fun TestSocket.checkSentBytes(outputByteArray: ByteArray): Boolean {
     return (this.outputStream as? TestOutputStream)?.getByteArray()?.equalsOther(outputByteArray) ?: throw Exception()
 }
 
-private val Int.byteArray: ByteArray
-    get() = ByteBuffer.allocate(Int.SIZE_BYTES).putInt(this).array()
-
 private val Long.byteArray: ByteArray
     get() = ByteBuffer.allocate(Long.SIZE_BYTES).putLong(this).array()
 
