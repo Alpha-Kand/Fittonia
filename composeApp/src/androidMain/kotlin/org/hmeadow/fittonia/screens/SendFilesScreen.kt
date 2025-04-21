@@ -145,7 +145,7 @@ class SendFilesScreenViewModel(
                     newPing = onPing(
                         ip,
                         port, // TODO make Port type. - After release
-                        password,
+                        password, // TODO before release - check if password should be string and not bytearray.
                         Instant.now().toEpochMilli().let { now ->
                             if (now == timestamp) {
                                 timestamp + 1

@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.combine
 import org.hmeadow.fittonia.BaseViewModel
+import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.ButtonIcon
 import org.hmeadow.fittonia.components.FittoniaHeader
@@ -24,6 +25,7 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
+import org.hmeadow.fittonia.utility.Debug
 
 class NewDestinationScreenViewModel(
     oneTimeIp: String?,
@@ -96,6 +98,16 @@ fun NewDestinationScreen(
                     inputFlow = viewModel.ipAddressState,
                     label = "IP Address/Code",
                 )
+
+                Debug {
+                    FittoniaButton(
+                        onClick = {
+                            viewModel.ipAddressState.text = MainActivity.mainActivity.getDeviceIpAddress() ?: ""
+                        },
+                    ) {
+                        ButtonText("<Debug fill IP>")
+                    }
+                }
 
                 FittoniaSpacerHeight(height = 30)
 

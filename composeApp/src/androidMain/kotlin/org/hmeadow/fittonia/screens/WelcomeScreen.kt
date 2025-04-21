@@ -82,7 +82,7 @@ fun WelcomeScreen(
                             viewModel.serverPasswordState.text = "password"
                         },
                     ) {
-                        ButtonText(text = "Debug Fill Values")
+                        ButtonText(text = "<Debug Fill Values>")
                     }
                 }
 
