@@ -1,9 +1,9 @@
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.sync.withLock
-import java.io.ByteArrayOutputStream
+import org.hmeadow.fittonia.utility.toJSONByteArray
+import org.hmeadow.fittonia.utility.toString
 import java.io.File
-import java.nio.charset.StandardCharsets
 
 class SettingsManagerDesktop private constructor() : SettingsManager() {
 
@@ -32,9 +32,8 @@ class SettingsManagerDesktop private constructor() : SettingsManager() {
 
     override suspend fun saveSettings() = settingsMutex.withLock {
         if (MockConfig.IS_MOCKING) throw IllegalStateException("Attempting to save settings in mock mode.")
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        jacksonObjectMapper().writeValue(byteArrayOutputStream, settings)
-        val encrypted = AESEncyption.encrypt(String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8))
+        // TODO after release - Why convert to bytearray and then back to string.
+        val encrypted = AESEncyption.encrypt(settings.toJSONByteArray.toString)
         encrypted.let { File(settingsPath).writeText(encrypted) }
     }
 }

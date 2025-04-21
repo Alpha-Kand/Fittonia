@@ -3,7 +3,7 @@ package org.hmeadow.fittonia.androidServer
 import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 
-fun AndroidServer.serverSharePublicKeys(server: HMeadowSocketServer, jobId: Int):PuPrKeyCipher.HMPublicKey {
+fun AndroidServer.serverSharePublicKeys(server: HMeadowSocketServer, jobId: Int): PuPrKeyCipher.HMPublicKey {
     // Share public keys.
     val ourPublicKey = PuPrKeyCipher.getPublicKeyFromKeyStore()
     if (ourPublicKey == null) {

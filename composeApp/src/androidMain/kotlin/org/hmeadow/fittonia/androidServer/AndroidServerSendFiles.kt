@@ -1,10 +1,9 @@
 package org.hmeadow.fittonia.androidServer
 
-import ServerCommandFlag
 import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
 
-fun clientSharePublicKeys(client:HMeadowSocketClient): PuPrKeyCipher.HMPublicKey {
+fun clientSharePublicKeys(client: HMeadowSocketClient): PuPrKeyCipher.HMPublicKey {
     // Share public keys.
     val ourPublicKey = PuPrKeyCipher.getPublicKeyFromKeyStore() ?: throw Exception() // TODO - after releaswe
     client.sendByteArray(ourPublicKey.encoded)
