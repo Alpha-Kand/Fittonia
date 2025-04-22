@@ -28,7 +28,7 @@ suspend fun Context.createJobDirectory(jobName: String?, print: (String) -> Unit
                 val directoryUri = directoryObject?.uri
                 return if (directoryUri != null) {
                     dataStore.updateData { it.copy(nextAutoJobName = ++nextAutoJobName) }
-                    CreateDumpDirectory.Success(uri = directoryUri)
+                    CreateDumpDirectory.Success(uri = directoryUri, name = attemptJobName)
                 } else {
                     CreateDumpDirectory.Error.PermissionDenied
                 }

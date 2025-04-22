@@ -241,7 +241,15 @@ class MainActivity : ComponentActivity() {
     }
 
     interface CreateDumpDirectory {
-        class Success(val uri: Uri) : CreateDumpDirectory
+        /**
+         * @param uri The complete uri of the new directory.
+         * @param name The name of the directory only, not its path.
+         */
+        class Success(
+            val uri: Uri,
+            val name: String,
+        ) : CreateDumpDirectory
+
         interface Error : CreateDumpDirectory {
             object PermissionDenied : Error
             object Other : Error

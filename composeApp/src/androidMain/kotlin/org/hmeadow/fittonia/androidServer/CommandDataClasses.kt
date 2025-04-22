@@ -13,9 +13,8 @@ class PingServerData(
 class SendFileClientData(
     val items: List<Item>,
     val aesKey: ByteArray,
-    val jobName: String,
+    val jobName: String?,
     val password: String,
-    val nameFlag: String,
 )
 
 class SendFileServerData(
