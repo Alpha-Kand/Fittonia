@@ -8,6 +8,12 @@ import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.MainActivity.CreateDumpDirectory
 import org.hmeadow.fittonia.dataStore
 
+fun Context.getFileSizeBytes(uri: Uri): Long {
+    return contentResolver
+        .openAssetFileDescriptor(uri, "r")
+        .use { file -> file?.length?.takeIf { it > 0 } ?: 0 }
+}
+
 suspend fun Context.createJobDirectory(jobName: String?, print: (String) -> Unit = {}): CreateDumpDirectory {
     val data = dataStore.data.first()
     try {

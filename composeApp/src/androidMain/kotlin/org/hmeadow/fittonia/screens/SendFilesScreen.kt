@@ -65,6 +65,7 @@ import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.models.mostRecent
 import org.hmeadow.fittonia.screens.overviewScreen.Options
+import org.hmeadow.fittonia.utility.getFileSizeBytes
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
 import java.time.Instant
 
@@ -198,10 +199,7 @@ class SendFilesScreenViewModel(
                         isFile = docUri.isFile,
                         sizeBytes = MainActivity
                             .mainActivity
-                            .contentResolver
-                            .openAssetFileDescriptor(docUri.uri, "r").use { file ->
-                                file?.length?.takeIf { it > 0 } ?: 0
-                            },
+                            .getFileSizeBytes(uri = docUri.uri),
                     )
                 } ?: run { /* TODO - After release */ }
             }
