@@ -305,7 +305,13 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     suspend fun onPing2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
-        println("onPing2")
+        println("Server waiting for PingClientData")
+        val clientData = server.receiveAndDecrypt<PingClientData>()
+        println("onPing2.clientData.password: ${clientData.password}")
+        server.encryptAndSend(
+            data = PingServerData(isPasswordCorrect = clientData.password == password),
+            theirPublicKey = theirPublicKey,
+        )
     }
 
     suspend fun onAddDestination2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
@@ -514,15 +520,19 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         return@bootStrap PingStatus.InternalBug
                     }
                     val theirPublicKey = clientSharePublicKeys(client)
-                    client.sendByteArray(PuPrKeyCipher.encrypt(ServerCommandFlag.PING.text.encodeToByteArray(), theirPublicKey))
-
-                    client.communicateCommand(
-                        commandFlag = ServerCommandFlag.PING,
-                        password = password,
-                        onSuccess = { PingStatus.Success },
-                        onPasswordRefused = { PingStatus.IncorrectPassword },
-                        onFailure = { PingStatus.ConnectionRefused },
+                    client.sendCommandFlag(commandFlag = ServerCommandFlag.PING, theirPublicKey = theirPublicKey)
+                    client.encryptAndSend(
+                        data = PingClientData(password = password),
+                        theirPublicKey = theirPublicKey,
                     )
+                    println("Client awaiting PingServerData")
+                    if (client.receiveAndDecrypt<PingServerData>().isPasswordCorrect) {
+                        PingStatus.Success
+                    } else {
+                        PingStatus.IncorrectPassword
+                    }.also {
+                        println("Client received PingServerData: $it")
+                    }
                 },
                 requestTimestamp = requestTimestamp,
             )
