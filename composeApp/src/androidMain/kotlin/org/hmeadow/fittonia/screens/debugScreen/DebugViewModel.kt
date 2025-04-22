@@ -14,6 +14,7 @@ import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.PuPrKeyCipher.ENCRYPT_MAX_BYTES_ALLOWED
 import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.hmeadowSocket.AESCipher
+import org.hmeadow.fittonia.utility.createJobDirectory
 import kotlin.math.abs
 import kotlin.random.Random
 

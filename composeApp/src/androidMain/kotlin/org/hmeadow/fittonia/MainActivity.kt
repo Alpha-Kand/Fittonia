@@ -26,7 +26,6 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.serverLog
 
@@ -246,44 +245,6 @@ class MainActivity : ComponentActivity() {
         interface Error : CreateDumpDirectory {
             object PermissionDenied : Error
             object Other : Error
-        }
-    }
-
-    suspend fun createJobDirectory(jobName: String?, print: (String) -> Unit = {}): CreateDumpDirectory {
-        val foo = dataStore.data.first()
-        try {
-            val dumpUri = Uri.parse(foo.dumpPath.dumpPathForReal)
-            val dumpObject = DocumentFile.fromTreeUri(this, dumpUri)
-            var nextAutoJobName = foo.nextAutoJobName
-            var limit = 100
-            var attemptJobName: String = jobName ?: "Job$nextAutoJobName"
-            while (true) {
-                if (dumpObject?.findFile(attemptJobName) == null) {
-                    val directoryObject = dumpObject?.createDirectory(attemptJobName)
-                    val directoryUri = directoryObject?.uri
-                    return if (directoryUri != null) {
-                        dataStore.updateData { it.copy(nextAutoJobName = ++nextAutoJobName) }
-                        CreateDumpDirectory.Success(uri = directoryUri)
-                    } else {
-                        CreateDumpDirectory.Error.PermissionDenied
-                    }
-                }
-                attemptJobName = "${jobName ?: "Job"}$nextAutoJobName"
-                nextAutoJobName++
-                limit--
-                if (limit == 0) {
-                    throw RuntimeException("Could not create directory after 100 tries.")
-                }
-            }
-        } catch (e: Exception) {
-            return if (e.message?.contains(other = "requires that you obtain access") == true) {
-                if (BuildConfig.DEBUG) {
-                    e.printStackTrace()
-                }
-                CreateDumpDirectory.Error.PermissionDenied
-            } else {
-                CreateDumpDirectory.Error.Other
-            }
         }
     }
 

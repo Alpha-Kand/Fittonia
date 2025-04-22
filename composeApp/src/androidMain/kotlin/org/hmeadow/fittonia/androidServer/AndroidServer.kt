@@ -320,12 +320,10 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
             println("Server received: $sendFileClientData")
 
             val jobName = when (sendFileClientData.nameFlag) {
-                ServerFlagsString.NEED_JOB_NAME -> "Job${abs(Random.nextInt()) % 100000}".also {
-                    // TODO eliminate possible conflicts BEFORE RELEASE
-                    log("Server generated job name: $it", jobId = jobId)
-                }
+                ServerFlagsString.NEED_JOB_NAME -> null
 
                 ServerFlagsString.HAVE_JOB_NAME -> sendFileClientData.jobName.also {
+                    job = job.copy(description = it)
                     log("Client provided job name: $it", jobId = jobId)
                 }
 
@@ -333,14 +331,15 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
             }
 
             val sendFileServerData = SendFileServerData(
-                jobName = jobName,
+                jobName = jobName ?: "",
                 pathLimit = 128, // TODO remove constant - After release
+                isPasswordCorrect = true,
             )
             val byteArrayOutputStream = ByteArrayOutputStream()
             jacksonObjectMapper().writeValue(byteArrayOutputStream, sendFileServerData)
             server.sendByteArray(byteArrayOutputStream.toByteArray()) // TODO ENCRYPT BEFORE RELEASE
 
-            job = updateTransferJob(job.copy(items = sendFileClientData.items, description = jobName, currentItem = 1))
+            job = updateTransferJob(job.copy(items = sendFileClientData.items, currentItem = 1))
 
             val aaa = MainActivity.mainActivity.createJobDirectory(
                 jobName = jobName,
