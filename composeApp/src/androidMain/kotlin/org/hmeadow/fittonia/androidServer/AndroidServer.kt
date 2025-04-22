@@ -154,6 +154,29 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         return true
     }
 
+    private suspend fun handleCommand2(
+        jobId: Int,
+        server: HMeadowSocketServer,
+        theirPublicKey: PuPrKeyCipher.HMPublicKey,
+        onPing: suspend (PuPrKeyCipher.HMPublicKey, HMeadowSocketServer, Int) -> Unit,
+        onAddDestination: suspend (PuPrKeyCipher.HMPublicKey, HMeadowSocketServer, Int) -> Unit,
+        onSendFilesCommand: suspend (PuPrKeyCipher.HMPublicKey, HMeadowSocketServer, Int) -> Unit,
+        onSendMessageCommand: suspend (PuPrKeyCipher.HMPublicKey, HMeadowSocketServer, Int) -> Unit,
+        onInvalidCommand: suspend (String) -> Unit,
+    ) {
+        val serverCommand = PuPrKeyCipher.decrypt(server.receiveByteArray()).toString
+        when (serverCommand) {
+            ServerCommandFlag.PING.text -> onPing
+            ServerCommandFlag.SEND_FILES.text -> onSendFilesCommand
+            ServerCommandFlag.SEND_MESSAGE.text -> onSendMessageCommand
+            ServerCommandFlag.ADD_DESTINATION.text -> onAddDestination
+            else -> {
+                onInvalidCommand(serverCommand)
+                null
+            }
+        }?.invoke(theirPublicKey, server, jobId)
+    }
+
     private fun launchServerJob() {
         try {
             serverSocket?.let { server ->
@@ -165,30 +188,29 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                                 launch {
                                     log("Connected to client.")
                                     val theirPublicKey = serverSharePublicKeys(server = server, jobId = jobId)
+                                    handleCommand2(
+                                        jobId = jobId,
+                                        server = server,
+                                        onPing = ::onPing2,
+                                        theirPublicKey = theirPublicKey,
+                                        onAddDestination = ::onAddDestination2,
+                                        onSendFilesCommand = ::onSendFiles2,
+                                        onSendMessageCommand = ::onSendMessage2,
+                                        onInvalidCommand = ::onInvalidCommand,
+                                    )
 
-                                    when (String(
-                                        bytes = PuPrKeyCipher.decrypt(server.receiveByteArray()),
-                                        charset = StandardCharsets.UTF_8,
-                                    )) {
-                                        ServerCommandFlag.PING.text -> {
-                                            println("command share ping() success")
-                                        } // TODO - After release
-                                        ServerCommandFlag.SEND_FILES.text -> {
-                                            println("command share receiveFiles(TODO) success") // receiveFiles(server, jobId, theirPublicKey)
-                                        }
-                                        ServerCommandFlag.SEND_MESSAGE.text -> {} // TODO - After release
-                                        ServerCommandFlag.ADD_DESTINATION.text -> {} // TODO - After release
-                                    }
+                                    /*
                                     handleCommand(
                                         server = server,
                                         jobId = getAndIncrementJobId(),
                                     )
+                                     */
                                 }
                             }
                         } catch (e: SocketException) {
                             log(e.message ?: "Unknown server SocketException")
                             // TODO: Don't worry! - After release
-                        } catch(e: HMeadowSocket.HMeadowSocketError){
+                        } catch (e: HMeadowSocket.HMeadowSocketError) {
                             log(e.message ?: "HMeadowSocket.HMeadowSocketError")
                         }
                     }
@@ -280,6 +302,22 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     override fun HMeadowSocketServer.passwordIsValid(): Boolean {
         return password == receiveString()
+    }
+
+    suspend fun onPing2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
+        println("onPing2")
+    }
+
+    suspend fun onAddDestination2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
+        println("onAddDestination2()")
+    }
+
+    suspend fun onSendFiles2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
+        println("onSendFiles2()")
+    }
+
+    suspend fun onSendMessage2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
+        println("onSendMessage2()")
     }
 
     override suspend fun onPing(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
