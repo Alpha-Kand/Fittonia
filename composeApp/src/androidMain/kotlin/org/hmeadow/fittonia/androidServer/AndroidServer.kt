@@ -393,6 +393,16 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         logWarning("Received invalid server command from client: $unknownCommand", jobId = jobId)
     }
 
+    private fun createFile(path: Uri, fileName: String): Uri? {
+        return DocumentFile
+            .fromTreeUri(this, path)
+            ?.createFile("*/*", fileName)
+            ?.uri
+    }
+
+    private fun getUriInputStream(uri: Uri) = contentResolver.openInputStream(uri)
+    private fun getUriOutputStream(uri: Uri) = contentResolver.openOutputStream(uri)
+
     companion object {
         const val NOTIFICATION_ID = 455
 
