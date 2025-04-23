@@ -3,21 +3,18 @@ package org.hmeadow.fittonia.androidServer
 import Log
 import Server
 import ServerCommandFlag
-import ServerFlagsString
 import ServerLogs
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
 import androidx.compose.ui.util.fastForEach
 import androidx.core.app.ServiceCompat
 import androidx.documentfile.provider.DocumentFile
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import communicateCommand
 import communicateCommandBoolean
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -31,11 +28,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.UserAlert
+import org.hmeadow.fittonia.hmeadowSocket.AESCipher
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
@@ -44,19 +43,18 @@ import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.Ping
 import org.hmeadow.fittonia.models.PingStatus
 import org.hmeadow.fittonia.models.TransferJob
-import org.hmeadow.fittonia.models.TransferJob.Item
 import org.hmeadow.fittonia.models.TransferStatus
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
+import org.hmeadow.fittonia.utility.createJobDirectory
+import org.hmeadow.fittonia.utility.subDivide
+import org.hmeadow.fittonia.utility.toString
+import java.io.BufferedInputStream
+import java.io.File
 import java.net.BindException
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.SocketException
 import java.net.SocketTimeoutException
-import java.nio.charset.StandardCharsets
 import kotlin.coroutines.CoroutineContext
-import kotlin.math.abs
-import kotlin.random.Random
 
 class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
@@ -320,6 +318,82 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     suspend fun onSendFiles2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
         println("onSendFiles2()")
+        var job = IncomingJob(id = jobId)
+        registerTransferJob(job)
+
+        val clientData = server.receiveAndDecrypt<SendFileClientData>()
+        val serverData = if (clientData.password == password) {
+            SendFileServerData(
+                jobName = job.description,
+                pathLimit = 128,
+                isPasswordCorrect = true,
+            )
+        } else {
+            SendFileServerData(
+                jobName = "",
+                pathLimit = 0,
+                isPasswordCorrect = false,
+            )
+        }
+        server.encryptAndSend(data = serverData, theirPublicKey = theirPublicKey)
+        if (!serverData.isPasswordCorrect) return
+        job = updateTransferJob(job.copy(items = clientData.items, currentItem = 1))
+        val newJobDirectory = createJobDirectory(
+            jobName = clientData.jobName,
+            print = { this.logDebug(it, jobId = jobId) },
+        )
+
+        if (newJobDirectory is MainActivity.CreateDumpDirectory.Success) {
+            job = updateTransferJob(job = job.copy(description = newJobDirectory.name))
+            logDebug("jobPath: ${newJobDirectory.uri}", jobId = jobId)
+            val decryptionFileCache = createTempFile()
+            job.cloneItems().fastForEach { item ->
+                if (item.isFile) { // Is a file...
+                    decryptionFileCache.outputStream().use { output ->
+                        server.receiveFile(
+                            onOutputStream = { output },
+                            decryptBlock = { it },
+                            progressPrecision = 0.01,
+                            onProgressUpdate = { progress ->
+                                runBlocking {
+                                    progressUpdateMutex.withLock {
+                                        job = job.updateItem(item.copy(progressBytes = item.progressBytes + progress))
+                                        updateTransferJob(job = job)
+                                    }
+                                }
+                            },
+                        )
+                    }
+                    val decryptedFile = getUriOutputStream(
+                        uri = createFile(
+                            path = newJobDirectory.uri,
+                            fileName = item.name,
+                        )!!,
+                    )
+                    val encryptedSize = decryptionFileCache.length()
+                    BufferedInputStream(decryptionFileCache.inputStream()).use {
+                        it.subDivide(
+                            maxBlockSize = ENCRYPTED_AES_BLOCK_SIZE,
+                            expectedStreamSize = encryptedSize,
+                            block = { bytes ->
+                                decryptedFile?.write(
+                                    AESCipher.decryptBytes(
+                                        bytes = bytes,
+                                        secretKeyBytes = clientData.aesKey,
+                                    ),
+                                )
+                            },
+                        )
+                    }
+                    decryptedFile?.close()
+                    job = updateTransferJob(job.copy(currentItem = job.nextItem))
+                    server.sendContinue()
+                }
+            }
+            job = updateTransferJob(job.copy(status = TransferStatus.Done))
+        } else {
+            updateTransferJob(job.copy(status = TransferStatus.Error))
+        }
     }
 
     suspend fun onSendMessage2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
@@ -347,81 +421,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     override suspend fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
-        if (!clientPasswordSuccess) {
-            logWarning("Client attempted to send files to this server, password refused.", jobId = jobId)
-        } else {
-            var job = IncomingJob(id = jobId)
-            registerTransferJob(job)
-            log("Client attempting to send files.", jobId = jobId)
-            // TODO ENCRYPT PASSWORDS
-
-            val sendFileClientData: SendFileClientData = String(
-                bytes = server.receiveByteArray(),
-                charset = StandardCharsets.UTF_8,
-            ).let { json ->
-                jacksonObjectMapper().readValue<SendFileClientData>(json)
-            }
-            println("Server received: $sendFileClientData")
-
-            val jobName = when (sendFileClientData.nameFlag) {
-                ServerFlagsString.NEED_JOB_NAME -> null
-
-                ServerFlagsString.HAVE_JOB_NAME -> sendFileClientData.jobName.also {
-                    job = job.copy(description = it)
-                    log("Client provided job name: $it", jobId = jobId)
-                }
-
-                else -> throw Exception() // TODO - After release
-            }
-
-            val sendFileServerData = SendFileServerData(
-                jobName = jobName ?: "",
-                pathLimit = 128, // TODO remove constant - After release
-                isPasswordCorrect = true,
-            )
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            jacksonObjectMapper().writeValue(byteArrayOutputStream, sendFileServerData)
-            server.sendByteArray(byteArrayOutputStream.toByteArray()) // TODO ENCRYPT BEFORE RELEASE
-
-            job = updateTransferJob(job.copy(items = sendFileClientData.items, currentItem = 1))
-
-            val aaa = MainActivity.mainActivity.createJobDirectory(
-                jobName = jobName,
-                print = { this.logDebug(it, jobId = jobId) },
-            )
-            if (aaa is MainActivity.CreateDumpDirectory.Success) {
-                val jobPath = aaa.uri
-                logDebug("jobPath: $jobPath", jobId = jobId)
-                job.cloneItems().fastForEach { item ->
-                    if (server.receiveBoolean()) { // Is a file...
-                        server.receiveFile(
-                            onOutputStream = { fileName ->
-                                DocumentFile
-                                    .fromTreeUri(MainActivity.mainActivity, jobPath)
-                                    ?.createFile("*/*", fileName)
-                                    ?.let { file ->
-                                        MainActivity.mainActivity.contentResolver.openOutputStream(file.uri)
-                                    }
-                            },
-                            progressPrecision = 0.01,
-                            onProgressUpdate = { progress ->
-                                runBlocking {
-                                    progressUpdateMutex.withLock {
-                                        job = job.updateItem(item.copy(progressBytes = item.progressBytes + progress))
-                                        updateTransferJob(job = job)
-                                    }
-                                }
-                            },
-                        )
-                        job = updateTransferJob(job.copy(currentItem = job.nextItem))
-                        server.sendContinue()
-                    }
-                }
-                job = updateTransferJob(job.copy(status = TransferStatus.Done))
-            } else {
-                updateTransferJob(job.copy(status = TransferStatus.Error))
-            }
-        }
+        // TODO - after release - Obsolete.
     }
 
     override suspend fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
@@ -447,7 +447,13 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     private fun getUriInputStream(uri: Uri) = contentResolver.openInputStream(uri)
     private fun getUriOutputStream(uri: Uri) = contentResolver.openOutputStream(uri)
 
+    private suspend fun createTempFile(): File = withContext(Dispatchers.IO) {
+        File.createTempFile("fittonia", ".xyz", cacheDir)
+    }
+
     companion object {
+        private const val AES_BLOCK_SIZE = 8192 * 32
+        private const val ENCRYPTED_AES_BLOCK_SIZE = AES_BLOCK_SIZE + 16
         const val NOTIFICATION_ID = 455
 
         var socketLogDebug = false
@@ -546,84 +552,79 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                 val client: HMeadowSocketClient
                 try {
                     client = currentJob.createClient()
-                    val theirPublicKey =clientSharePublicKeys(client)
-                    client.sendByteArray(PuPrKeyCipher.encrypt(ServerCommandFlag.SEND_FILES.text.encodeToByteArray(), theirPublicKey))
+                    val theirPublicKey = clientSharePublicKeys(client = client)
+                    client.sendCommandFlag(commandFlag = ServerCommandFlag.SEND_FILES, theirPublicKey = theirPublicKey)
+
+                    val aesKey = AESCipher.generateKey()
+                    val sendFileClientData = SendFileClientData(
+                        items = newJob.items,
+                        aesKey = aesKey,
+                        jobName = newJob.description.takeUnless { newJob.needDescription },
+                        password = currentJob.destination.password,
+                    )
+                    client.encryptAndSend(
+                        data = sendFileClientData,
+                        theirPublicKey = theirPublicKey,
+                    )
+                    val serverData = client.receiveAndDecrypt<SendFileServerData>()
+                    if (serverData.isPasswordCorrect) {
+                        currentJob = currentJob.copy(description = serverData.jobName)
+                        updateTransferJob(currentJob)
+                        val encryptionFileCache = createTempFile()
+                        currentJob.cloneItems().fastForEach { item ->
+                            // TODO: Relative path - After release
+                            if (item.isFile) {
+                                encryptionFileCache.outputStream().use { encryptionStream ->
+                                    getUriInputStream(item.uri())?.use { itemInputStream ->
+                                        BufferedInputStream(itemInputStream).subDivide(
+                                            maxBlockSize = AES_BLOCK_SIZE,
+                                            expectedStreamSize = item.sizeBytes,
+                                            block = { bytes ->
+                                                encryptionStream.write(
+                                                    AESCipher.encryptBytes(
+                                                        bytes = bytes,
+                                                        secretKeyBytes = sendFileClientData.aesKey,
+                                                    ),
+                                                )
+                                            },
+                                        )
+                                    }
+                                }
+
+                                BufferedInputStream(encryptionFileCache.inputStream()).use {
+                                    client.sendFile(
+                                        stream = it,
+                                        encryptBlock = { bytes -> bytes },
+                                        name = item.name,
+                                        size = encryptionFileCache.length(),
+                                        progressPrecision = 0.01,
+                                    ) { progressBytes ->
+                                        runBlocking {
+                                            progressUpdateMutex.withLock {
+                                                currentJob = currentJob.updateItem(
+                                                    item = item.copy(progressBytes = progressBytes),
+                                                )
+                                                updateTransferJob(job = currentJob)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            client.receiveContinue()
+                        }
+                        updateTransferJobCurrentItem(job = currentJob) // TODO needed? - After release
+                    }
+                    finishTransferJob(currentJob)
+                    updateNotification()
                 } catch (e: HMeadowSocket.HMeadowSocketError) {
                     e.hmMessage?.let { logError(it) }
                     e.message?.let { logError(it) }
                     return@bootStrap
                 }
-                // client.sendBytesPerSecond = 2 * 1024 * 1024 // TODO have this come from the screen. - After release
-                val commandSuccess = communicateCommand(client = client, currentJob = currentJob)
-                if (commandSuccess) {
-                    log(log = "Password accepted")
-
-                    val sendFileClientData = SendFileClientData(
-                        items = newJob.items,
-                        aesKey = ByteArray(0),
-                        jobName = newJob.description,
-                        nameFlag = if (newJob.needDescription) {
-                            ServerFlagsString.NEED_JOB_NAME
-                        } else {
-                            ServerFlagsString.HAVE_JOB_NAME
-                        },
-                    )
-                    val byteArrayOutputStream = ByteArrayOutputStream()
-                    jacksonObjectMapper().writeValue(byteArrayOutputStream, sendFileClientData)
-                    client.sendByteArray(byteArrayOutputStream.toByteArray()) // TODO ENCRYPT BEFORE RELEASE
-
-                    val sendFileServerData: SendFileServerData = String(
-                        bytes = client.receiveByteArray(),
-                        charset = StandardCharsets.UTF_8,
-                    ).let { json ->
-                        jacksonObjectMapper().readValue<SendFileServerData>(json)
-                    }
-
-                    if (currentJob.needDescription) {
-                        currentJob = currentJob.copy(description = sendFileServerData.jobName)
-                    }
-                    updateTransferJob(currentJob)
-                    currentJob.cloneItems().fastForEach { item ->
-                        // TODO: Relative path - After release
-                        client.sendBoolean(item.isFile)
-                        if (item.isFile) {
-                            MainActivity.mainActivity.contentResolver.openInputStream(item.uri()).use {
-                                it?.sendFile(client = client, item = item) { progressBytes ->
-                                    runBlocking {
-                                        progressUpdateMutex.withLock {
-                                            currentJob = currentJob.updateItem(
-                                                item = item.copy(progressBytes = progressBytes),
-                                            )
-                                            updateTransferJob(job = currentJob)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        client.receiveContinue()
-                        updateTransferJobCurrentItem(job = currentJob) // TODO needed? - After release
-                    }
-                } else {
-                    logError(log = "Password refused")
-                }
-                finishTransferJob(currentJob)
-                updateNotification()
             }
         }
     }
 }
-
-class SendFileClientData(
-    val items: List<Item>,
-    val aesKey: ByteArray,
-    val jobName: String,
-    val nameFlag: String,
-)
-
-class SendFileServerData(
-    val jobName: String,
-    val pathLimit: Int,
-)
 
 fun OutgoingJob.createClient() = HMeadowSocketClient(
     ipAddress = destination.ip,
@@ -644,16 +645,11 @@ fun AndroidServer.communicateCommand(client: HMeadowSocketClient, currentJob: Ou
 
 fun OutgoingJob.getInitialDescriptionText() = if (needDescription) "Connecting..." else description
 
-fun InputStream.sendFile(
-    client: HMeadowSocketClient,
-    item: Item,
-    onProgressUpdate: (Long) -> Unit,
-) {
-    client.sendFile(
-        stream = this,
-        name = item.name,
-        size = item.sizeBytes,
-        progressPrecision = 0.01,
-        onProgressUpdate = onProgressUpdate,
+fun HMeadowSocketClient.sendCommandFlag(commandFlag: ServerCommandFlag, theirPublicKey: PuPrKeyCipher.HMPublicKey) {
+    sendByteArray(
+        message = PuPrKeyCipher.encrypt(
+            byteArray = commandFlag.text.encodeToByteArray(),
+            publicKey = theirPublicKey,
+        ),
     )
 }
