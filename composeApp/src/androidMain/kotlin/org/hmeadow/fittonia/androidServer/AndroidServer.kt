@@ -466,11 +466,12 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         }
 
         private suspend fun bootStrap(block: suspend AndroidServer.() -> Unit) {
+            val mainActivity = MainActivity.mainActivityForServer ?: return
             if (server.value == null) {
-                MainActivity.mainActivity.attemptStartServer()
+                mainActivity.attemptStartServer()
                 server.first()
             }
-            server.value?.run {
+            server.first()?.run {
                 launch {
                     try {
                         block()
@@ -478,18 +479,19 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         e.hmMessage?.let { logError(it) }
                         e.message?.let { logError(it) }
                     } catch (e: Exception) {
-                        e.message?.let { logError(it) }
+                        // TODO before release make this more widespread.
+                        e.message?.let { logError("${e.javaClass} - $it") }
                     }
                 }
             }
         }
 
         private suspend fun <T> bootStrap(onError: () -> T, block: suspend AndroidServer.() -> T): T {
+            val mainActivity = MainActivity.mainActivityForServer ?: return onError()
             if (server.value == null) {
-                MainActivity.mainActivity.attemptStartServer()
-                server.first()
+                mainActivity.attemptStartServer()
             }
-            return server.value?.run {
+            return server.first()?.run {
                 async {
                     try {
                         block()
@@ -499,7 +501,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         e.message?.let { logError(it) }
                         onError()
                     } catch (e: Exception) {
-                        e.message?.let { logError(it) }
+                        e.message?.let { logError("${e.javaClass} - $it") }
                         onError()
                     }
                 }.await()
