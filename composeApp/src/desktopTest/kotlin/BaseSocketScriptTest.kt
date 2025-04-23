@@ -1,7 +1,4 @@
 import BaseSocketScriptTest.TestFlags.Companion.opposite
-import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
-import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler
-import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -11,6 +8,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import org.junit.jupiter.api.BeforeEach
 import java.io.InputStream
 import java.io.OutputStream
@@ -237,7 +237,6 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
             stream: InputStream,
             name: String,
             size: Long,
-            encryptBlock: (ByteArray) -> ByteArray,
             progressPrecision: Double,
             onProgressUpdate: (bytes: Long) -> Unit,
         ) {
@@ -248,14 +247,12 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
 
         override fun receiveFile(
             destination: String,
-            decryptBlock: (ByteArray) -> ByteArray,
             prefix: String,
             suffix: String,
         ): Pair<String, String> = receive(flag = TestFlags.RECEIVE_FILE) { "absolutePath" to "fileName" }
 
         override fun receiveFile(
             onOutputStream: (fileName: String) -> OutputStream?,
-            decryptBlock: (ByteArray) -> ByteArray,
             progressPrecision: Double,
             beforeDownload: (totalBytes: Long, name: String) -> Unit,
             onProgressUpdate: (progress: Long) -> Unit,
@@ -265,7 +262,6 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
 
         override fun sendFile(
             filePath: String,
-            encryptBlock: (ByteArray) -> ByteArray,
             progressPrecision: Double,
             onProgressUpdate: (bytes: Long) -> Unit,
         ) = send(flag = TestFlags.SEND_FILE, message = filePath)

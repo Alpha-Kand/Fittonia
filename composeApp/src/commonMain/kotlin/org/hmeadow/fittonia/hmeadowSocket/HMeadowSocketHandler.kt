@@ -90,7 +90,6 @@ open class HMeadowSocketHandler {
         stream: InputStream,
         name: String,
         size: Long,
-        encryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         onProgressUpdate: (bytes: Long) -> Unit,
     ) {
@@ -102,7 +101,11 @@ open class HMeadowSocketHandler {
         var currentStep = step
 
         // 2. Send file name.
-        sendString(name.takeIf { it.isNotEmpty() } ?: throw IllegalArgumentException("Name should not be empty."))
+        sendString(
+            message = name.takeIf {
+                it.isNotEmpty()
+            } ?: throw IllegalArgumentException("Name should not be empty.")
+        )
 
         // 3. Send the file.
         var remainingBytes = size
@@ -110,29 +113,16 @@ open class HMeadowSocketHandler {
         var throttle = sendBytesPerSecond
         var now = now()
         while (remainingBytes > 0) {
-            val buffer = ByteArray(BUFFER_SIZE_INT)
-            var offset = 0
-            var bufferFilled = 0
-
-            while (offset < BUFFER_SIZE_INT / CIPHER_BLOCK_SIZE_INT) {
-                if (remainingBytes == 0L) {
-                    break
-                }
-                val nextBytes = minOf(remainingBytes, CIPHER_BLOCK_SIZE_LONG)
-                val readBytes = encryptBlock(bufferedReadFile.readNBytes(nextBytes.toInt()))
-                readBytes.copyInto(destination = buffer, destinationOffset = offset * CIPHER_BLOCK_SIZE_INT)
-                remainingBytes -= nextBytes
-                bufferFilled += nextBytes.toInt()
-                offset++
-            }
-
+            val nextBytes = minOf(remainingBytes, BUFFER_SIZE_LONG)
+            val readBytes = bufferedReadFile.readNBytes(nextBytes.toInt())
+            remainingBytes -= nextBytes
             if ((size - remainingBytes) > currentStep) {
                 currentStep += step
                 onProgressUpdate(size - remainingBytes)
             }
 
             throttle -= BUFFER_SIZE_LONG
-            mDataOutput.write(buffer, 0, bufferFilled)
+            mDataOutput.write(readBytes)
 
             if (throttle <= 0L) {
                 onProgressUpdate(size - remainingBytes)
@@ -147,7 +137,6 @@ open class HMeadowSocketHandler {
 
     open fun sendFile(
         filePath: String,
-        encryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         onProgressUpdate: (bytes: Long) -> Unit,
     ) {
@@ -157,7 +146,6 @@ open class HMeadowSocketHandler {
             stream = FilesObject.inputStream(filePath),
             name = path.fileName.toString(),
             size = size,
-            encryptBlock = encryptBlock,
             progressPrecision = progressPrecision,
             onProgressUpdate = onProgressUpdate,
         )
@@ -165,7 +153,6 @@ open class HMeadowSocketHandler {
 
     open fun receiveFile(
         destination: String,
-        decryptBlock: (ByteArray) -> ByteArray,
         prefix: String,
         suffix: String,
     ): Pair<String, String> {
@@ -191,17 +178,10 @@ open class HMeadowSocketHandler {
             // File to transfer is empty, just create a new empty file.
         } else {
             while (transferByteCount > 0) {
-                val buffer = ByteArray(BUFFER_SIZE_INT)
-                repeat(times = BUFFER_SIZE_INT / CIPHER_BLOCK_SIZE_INT) { offset ->
-                    if (transferByteCount == 0L) {
-                        return@repeat
-                    }
-                    val nextBytes = minOf(transferByteCount, CIPHER_BLOCK_SIZE_LONG)
-                    val readBytes = decryptBlock(mDataInput.readNBytesHM(nextBytes.toInt()))
-                    readBytes.copyInto(destination = buffer, destinationOffset = offset * CIPHER_BLOCK_SIZE_INT)
-                    transferByteCount -= nextBytes
-                }
-                file.appendBytes(buffer)
+                val nextBytes = minOf(transferByteCount, BUFFER_SIZE_LONG)
+                val readBytes = mDataInput.readNBytesHM(nextBytes.toInt())
+                transferByteCount -= nextBytes
+                file.appendBytes(readBytes)
             }
         }
         return file.absolutePath to fileName
@@ -209,7 +189,6 @@ open class HMeadowSocketHandler {
 
     open fun receiveFile(
         onOutputStream: (fileName: String) -> OutputStream?,
-        decryptBlock: (ByteArray) -> ByteArray,
         progressPrecision: Double,
         beforeDownload: (totalBytes: Long, fileName: String) -> Unit,
         onProgressUpdate: (progress: Long) -> Unit,
@@ -223,29 +202,18 @@ open class HMeadowSocketHandler {
         // 3. Receive and write file data.
         val step = (transferByteCount * progressPrecision).toLong()
         var currentStep = step
-        var remainingBytes = transferByteCount
         onOutputStream(fileName)?.use { stream ->
             if (transferByteCount == 0L) {
                 // File to transfer is empty, just create a new empty file.
             } else {
                 while (transferByteCount > 0) {
-                    val buffer = ByteArray(BUFFER_SIZE_INT)
-                    var actual = 0
-                    repeat(times = BUFFER_SIZE_INT / CIPHER_BLOCK_SIZE_INT) { offset ->
-                        if (transferByteCount == 0L) {
-                            return@repeat
-                        }
-                        val nextBytes = minOf(transferByteCount, CIPHER_BLOCK_SIZE_LONG)
-                        val readBytes = decryptBlock(mDataInput.readNBytesHM(nextBytes.toInt()))
-                        readBytes.copyInto(destination = buffer, destinationOffset = offset * CIPHER_BLOCK_SIZE_INT)
-                        transferByteCount -= nextBytes
-                        remainingBytes -= nextBytes
-                        actual += nextBytes.toInt()
-                    }
-                    stream.write(buffer.sliceArray(0..<actual))
-                    if ((size - remainingBytes) > currentStep) {
+                    val nextBytes = minOf(transferByteCount, BUFFER_SIZE_LONG)
+                    val readBytes = mDataInput.readNBytesHM(nextBytes.toInt())
+                    transferByteCount -= nextBytes
+                    stream.write(readBytes)
+                    if ((size - transferByteCount) > currentStep) {
                         currentStep += step
-                        onProgressUpdate(size - remainingBytes)
+                        onProgressUpdate(size - transferByteCount)
                     }
                 }
             }

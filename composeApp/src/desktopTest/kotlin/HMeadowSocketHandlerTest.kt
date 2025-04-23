@@ -129,7 +129,6 @@ private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
                 stream = fileStream,
                 name = fileName,
                 size = fileStreamSize.toLong(),
-                encryptBlock = { it },
                 progressPrecision = 0.01,
                 onProgressUpdate = { },
             )
@@ -155,7 +154,6 @@ private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
                 stream = fileStream,
                 name = fileName,
                 size = fileStreamSize.toLong(),
-                encryptBlock = { it },
                 progressPrecision = 0.01,
                 onProgressUpdate = { progress++ },
             )
@@ -181,7 +179,6 @@ private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
                 stream = fileStream,
                 name = fileName,
                 size = fileStreamSize.toLong(),
-                encryptBlock = { it },
                 progressPrecision = 0.1,
                 onProgressUpdate = { progress++ },
             )
@@ -221,7 +218,6 @@ private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
             // Execute
             socketInterface.sendFile(
                 filePath = "file/$fileName",
-                encryptBlock = { it },
                 progressPrecision = 0.01,
                 onProgressUpdate = { },
             )
@@ -245,7 +241,6 @@ private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
             // Execute
             socketInterface.receiveFile(
                 onOutputStream = { fileStream },
-                decryptBlock = { it },
                 progressPrecision = 0.1,
                 beforeDownload = { size, name ->
                     Assertions.assertEquals(100, size)
@@ -276,7 +271,6 @@ private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
             // Execute
             socketInterface.receiveFile(
                 onOutputStream = { fileStream },
-                decryptBlock = { it },
                 progressPrecision = 0.01,
                 beforeDownload = { _, _ -> },
                 onProgressUpdate = { progress++ },
@@ -299,7 +293,6 @@ private class HMeadowSocketHandlerTest : DesktopBaseMockkTest() {
             // Execute
             socketInterface.receiveFile(
                 onOutputStream = { fileStream },
-                decryptBlock = { it },
                 progressPrecision = 0.1,
                 beforeDownload = { size, name ->
                     Assertions.assertEquals(0, size)

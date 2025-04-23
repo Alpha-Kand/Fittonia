@@ -352,7 +352,6 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     decryptionFileCache.outputStream().use { output ->
                         server.receiveFile(
                             onOutputStream = { output },
-                            decryptBlock = { it },
                             progressPrecision = 0.01,
                             onProgressUpdate = { progress ->
                                 runBlocking {
@@ -596,7 +595,6 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                                 BufferedInputStream(encryptionFileCache.inputStream()).use {
                                     client.sendFile(
                                         stream = it,
-                                        encryptBlock = { bytes -> bytes },
                                         name = item.name,
                                         size = encryptionFileCache.length(),
                                         progressPrecision = 0.01,
