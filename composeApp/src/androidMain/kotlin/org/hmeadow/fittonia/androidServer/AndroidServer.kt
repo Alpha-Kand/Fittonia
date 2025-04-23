@@ -322,21 +322,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         registerTransferJob(job)
 
         val clientData = server.receiveAndDecrypt<SendFileClientData>()
-        val serverData = if (clientData.password == password) {
-            SendFileServerData(
-                jobName = job.description,
-                pathLimit = 128,
-                isPasswordCorrect = true,
-            )
-        } else {
-            SendFileServerData(
-                jobName = "",
-                pathLimit = 0,
-                isPasswordCorrect = false,
-            )
-        }
-        server.encryptAndSend(data = serverData, theirPublicKey = theirPublicKey)
-        if (!serverData.isPasswordCorrect) return
+        if (clientData.password != password) return
         job = updateTransferJob(job.copy(items = clientData.items, currentItem = 1))
         val newJobDirectory = createJobDirectory(
             jobName = clientData.jobName,
@@ -344,6 +330,20 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         )
 
         if (newJobDirectory is MainActivity.CreateDumpDirectory.Success) {
+            val serverData = if (clientData.password == password) {
+                SendFileServerData(
+                    jobName = newJobDirectory.name,
+                    pathLimit = 128,
+                    isPasswordCorrect = true,
+                )
+            } else {
+                SendFileServerData(
+                    jobName = "",
+                    pathLimit = 0,
+                    isPasswordCorrect = false,
+                )
+            }
+            server.encryptAndSend(data = serverData, theirPublicKey = theirPublicKey)
             job = updateTransferJob(job = job.copy(description = newJobDirectory.name))
             logDebug("jobPath: ${newJobDirectory.uri}", jobId = jobId)
             val decryptionFileCache = createTempFile()
@@ -629,8 +629,8 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 fun OutgoingJob.createClient() = HMeadowSocketClient(
     ipAddress = destination.ip,
     port = port,
-    operationTimeoutMillis = 2000,
-    handshakeTimeoutMillis = 2000,
+    operationTimeoutMillis = 1000 * 30,
+    handshakeTimeoutMillis = 1000 * 5,
 )
 
 fun AndroidServer.communicateCommand(client: HMeadowSocketClient, currentJob: OutgoingJob): Boolean {
