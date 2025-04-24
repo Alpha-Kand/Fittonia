@@ -318,12 +318,12 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     suspend fun onSendFiles2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
         println("onSendFiles2()")
-        var job = IncomingJob(id = jobId)
-        registerTransferJob(job)
+        var currentJob = IncomingJob(id = jobId)
+        registerTransferJob(currentJob)
 
         val clientData = server.receiveAndDecrypt<SendFileClientData>()
         if (clientData.password != password) return
-        job = updateTransferJob(job.copy(items = clientData.items, currentItem = 1))
+        currentJob = updateTransferJob(currentJob.copy(items = clientData.items, currentItem = 1))
         val newJobDirectory = createJobDirectory(
             jobName = clientData.jobName,
             print = { this.logDebug(it, jobId = jobId) },
@@ -344,24 +344,24 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                 )
             }
             server.encryptAndSend(data = serverData, theirPublicKey = theirPublicKey)
-            job = updateTransferJob(job = job.copy(description = newJobDirectory.name))
+            currentJob = updateTransferJob(job = currentJob.copy(description = newJobDirectory.name))
             logDebug("jobPath: ${newJobDirectory.uri}", jobId = jobId)
             val decryptionFileCache = createTempFile()
-            job.cloneItems().fastForEach { item ->
+            currentJob.cloneItems().fastForEach { item ->
                 if (item.isFile) { // Is a file...
                     decryptionFileCache.outputStream().use { output ->
                         server.receiveFile(
                             onOutputStream = { output },
                             progressPrecision = 0.01,
                             onProgressUpdate = { progress ->
-                                runBlocking {
-                                    progressUpdateMutex.withLock {
-                                        job = job.updateItem(item.copy(progressBytes = item.progressBytes + progress))
-                                        updateTransferJob(job = job)
-                                    }
-                                }
+                                currentJob = safelyUpdateJobItem(
+                                    job = currentJob,
+                                    item = item,
+                                    itemBytes = item.progressBytes + progress,
+                                )
                             },
                         )
+                        currentJob = safelyUpdateJobItem(job = currentJob, item = item, itemBytes = item.sizeBytes)
                     }
                     val decryptedFile = getUriOutputStream(
                         uri = createFile(
@@ -385,13 +385,13 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         )
                     }
                     decryptedFile?.close()
-                    job = updateTransferJob(job.copy(currentItem = job.nextItem))
+                    currentJob = updateTransferJob(currentJob.copy(currentItem = currentJob.nextItem))
                     server.sendContinue()
                 }
             }
-            job = updateTransferJob(job.copy(status = TransferStatus.Done))
+            currentJob = updateTransferJob(currentJob.copy(status = TransferStatus.Done))
         } else {
-            updateTransferJob(job.copy(status = TransferStatus.Error))
+            updateTransferJob(currentJob.copy(status = TransferStatus.Error))
         }
     }
 
@@ -448,6 +448,26 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     private suspend fun createTempFile(): File = withContext(Dispatchers.IO) {
         File.createTempFile("fittonia", ".xyz", cacheDir)
+    }
+
+    private fun safelyUpdateJobItem(job: IncomingJob, item: TransferJob.Item, itemBytes: Long): IncomingJob {
+        return runBlocking {
+            progressUpdateMutex.withLock {
+                job.updateItem(item.copy(progressBytes = itemBytes)).also {
+                    updateTransferJob(job = it)
+                }
+            }
+        }
+    }
+
+    private fun safelyUpdateJobItem(job: OutgoingJob, item: TransferJob.Item, itemBytes: Long): OutgoingJob {
+        return runBlocking {
+            progressUpdateMutex.withLock {
+                job.updateItem(item.copy(progressBytes = itemBytes)).also {
+                    updateTransferJob(job = it)
+                }
+            }
+        }
     }
 
     companion object {
@@ -591,7 +611,6 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                                         )
                                     }
                                 }
-
                                 BufferedInputStream(encryptionFileCache.inputStream()).use {
                                     client.sendFile(
                                         stream = it,
@@ -599,15 +618,17 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                                         size = encryptionFileCache.length(),
                                         progressPrecision = 0.01,
                                     ) { progressBytes ->
-                                        runBlocking {
-                                            progressUpdateMutex.withLock {
-                                                currentJob = currentJob.updateItem(
-                                                    item = item.copy(progressBytes = progressBytes),
-                                                )
-                                                updateTransferJob(job = currentJob)
-                                            }
-                                        }
+                                        currentJob = safelyUpdateJobItem(
+                                            job = currentJob,
+                                            item = item,
+                                            itemBytes = progressBytes,
+                                        )
                                     }
+                                    currentJob = safelyUpdateJobItem(
+                                        job = currentJob,
+                                        item = item,
+                                        itemBytes = item.sizeBytes,
+                                    )
                                 }
                             }
                             client.receiveContinue()
