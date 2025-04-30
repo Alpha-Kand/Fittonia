@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import kotlinx.coroutines.flow.first
-import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.MainActivity.CreateDumpDirectory
 import org.hmeadow.fittonia.dataStore
 
@@ -42,9 +41,7 @@ suspend fun Context.createJobDirectory(jobName: String?, print: (String) -> Unit
         }
     } catch (e: Exception) {
         return if (e.message?.contains(other = "requires that you obtain access") == true) {
-            if (BuildConfig.DEBUG) {
-                e.printStackTrace()
-            }
+            debug { e.printStackTrace() }
             CreateDumpDirectory.Error.PermissionDenied
         } else {
             CreateDumpDirectory.Error.Other

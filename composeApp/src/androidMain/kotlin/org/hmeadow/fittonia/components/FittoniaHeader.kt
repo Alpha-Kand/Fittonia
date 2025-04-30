@@ -19,13 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import isDebug
 import org.hmeadow.fittonia.Navigator
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.design.fonts.headerStyle
+import org.hmeadow.fittonia.utility.Debug
 
 @Composable
 fun FittoniaHeader(
@@ -81,7 +81,7 @@ fun FittoniaHeader(
                     contentDescription = "", // TODO - After release
                 )
             }
-            if (isDebug()) {
+            Debug {
                 FittoniaSpacerWidth(width = 5)
                 FittoniaIcon(
                     modifier = Modifier.clickable(onClick = Navigator::goToDebugScreen),

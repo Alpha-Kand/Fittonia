@@ -9,3 +9,11 @@ fun debug(releaseBlock: () -> Unit = {}, debugBlock: () -> Unit) {
         releaseBlock()
     }
 }
+
+fun <T> debug(releaseValue: T, debugValue: T): T {
+    return if (isDebug()) {
+        debugValue
+    } else {
+        releaseValue
+    }
+}

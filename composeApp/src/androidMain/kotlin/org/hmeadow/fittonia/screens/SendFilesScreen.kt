@@ -33,7 +33,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.hmeadow.fittonia.BaseViewModel
-import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
@@ -65,6 +64,7 @@ import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.models.mostRecent
 import org.hmeadow.fittonia.screens.overviewScreen.Options
+import org.hmeadow.fittonia.utility.debug
 import org.hmeadow.fittonia.utility.getFileSizeBytes
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
 import java.time.Instant
@@ -82,7 +82,7 @@ class SendFilesScreenViewModel(
     val itemListState = MutableStateFlow<List<TransferJob.Item>>(emptyList())
     val selectedDestinationState = MutableStateFlow<SettingsManager.Destination?>(null)
     val portState: InputFlow = InputFlow(
-        initial = if (BuildConfig.DEBUG) "12345" else "",
+        initial = debug(debugValue = "12345", releaseValue = ""),
         onValueChange = { port ->
             if (port.isNotEmpty()) {
                 selectedDestinationState.value?.let {

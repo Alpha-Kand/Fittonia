@@ -75,7 +75,7 @@ fun WelcomeScreen(
                     style = headingLStyle,
                 )
 
-                if (BuildConfig.DEBUG) {
+                Debug {
                     FittoniaButton(
                         onClick = {
                             viewModel.portFieldState.text = "12345"

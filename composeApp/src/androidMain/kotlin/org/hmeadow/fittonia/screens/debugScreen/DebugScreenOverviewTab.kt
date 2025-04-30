@@ -21,6 +21,7 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingSStyle
+import org.hmeadow.fittonia.utility.DebugTurnOff.allowDebug
 import org.hmeadow.fittonia.utility.isLandscape
 import org.hmeadow.fittonia.utility.isXLARGE
 
@@ -111,6 +112,10 @@ fun DebugScreenOverviewTab(
             ) {
                 ButtonText(text = "Restart Server")
             }
+        }
+
+        FittoniaButton(onClick = { allowDebug = false }) {
+            ButtonText(text = "Turn off debug")
         }
 
         FittoniaSpacerHeight(footerHeight)
