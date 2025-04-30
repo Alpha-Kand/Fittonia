@@ -87,3 +87,11 @@ val inputLabelStyle = TextStyle(
     fontStyle = FontStyle.Italic,
     fontFamily = firaSansFont,
 )
+
+val inputHintStyle = TextStyle(
+    fontSize = 17.sp,
+    lineHeight = 23.sp,
+    letterSpacing = (-0.2f).sp,
+    fontWeight = FontWeight(weight = 400),
+    fontFamily = firaSansFont,
+)

@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.TextFieldDecorator
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
@@ -25,10 +24,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import inputHintColour
 import kotlinx.coroutines.flow.Flow
 import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_LETTERS
 import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_SYMBOLS
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
+import org.hmeadow.fittonia.design.fonts.inputHintStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 
 private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
@@ -44,18 +45,23 @@ class InputFlow(
         set(value) {
             textState.setTextAndPlaceCursorAtEnd(value)
         }
+
+    val isEmpty: Boolean
+        get() = textState.text.isEmpty()
 }
 
 @Composable
 fun FittoniaTextInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    hint: String? = null,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
     label: String? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
+        hint = hint,
         modifier = modifier,
         label = label,
         lineLimits = lineLimits,
@@ -68,12 +74,14 @@ fun FittoniaTextInput(
 fun FittoniaTextInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    hint: String? = null,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
     label: (@Composable () -> Unit)? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
+        hint = hint,
         modifier = modifier,
         lineLimits = lineLimits,
         filters = filters,
@@ -86,12 +94,14 @@ fun FittoniaTextInput(
 fun FittoniaNumberInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    hint: String? = null,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
     label: String? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
+        hint = hint,
         modifier = modifier,
         label = label,
         lineLimits = lineLimits,
@@ -104,12 +114,14 @@ fun FittoniaNumberInput(
 fun FittoniaNumberInput(
     inputFlow: InputFlow,
     modifier: Modifier = Modifier,
+    hint: String? = null,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
     label: (@Composable () -> Unit)? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
+        hint = hint,
         modifier = modifier,
         lineLimits = lineLimits,
         filters = filters,
@@ -121,6 +133,7 @@ fun FittoniaNumberInput(
 @Composable
 private fun BaseFittoniaInput(
     inputFlow: InputFlow,
+    hint: String?,
     keyboardOptions: KeyboardOptions,
     lineLimits: TextFieldLineLimits,
     filters: List<FittoniaInputFilter>,
@@ -130,6 +143,7 @@ private fun BaseFittoniaInput(
     BaseFittoniaInput(
         inputFlow = inputFlow,
         modifier = modifier,
+        hint = hint,
         keyboardOptions = keyboardOptions,
         lineLimits = lineLimits,
         filters = filters,
@@ -147,6 +161,7 @@ private fun BaseFittoniaInput(
 @Composable
 private fun BaseFittoniaInput(
     inputFlow: InputFlow,
+    hint: String?,
     keyboardOptions: KeyboardOptions,
     filters: List<FittoniaInputFilter>,
     lineLimits: TextFieldLineLimits,
@@ -172,22 +187,43 @@ private fun BaseFittoniaInput(
                     revertAllChanges()
                 }
             },
-            decorator = inputDecorator,
+            decorator = { inputField ->
+                InputDecorationContent(
+                    hint = hint,
+                    inputFlow = inputFlow,
+                    inputField = inputField,
+                )
+            },
             keyboardOptions = keyboardOptions,
         )
     }
 }
 
-private val inputDecorator = TextFieldDecorator { inputField ->
+@Composable
+private fun InputDecorationContent(
+    hint: String?,
+    inputFlow: InputFlow,
+    inputField: @Composable () -> Unit,
+) {
     Box(
         modifier = Modifier
             .requiredHeight(40.dp)
             .border(width = 1.dp, color = Color(0xFF555555), shape = inputShape)
             .background(color = Color(0xFFDDDDDD), shape = inputShape)
-            .clip(inputShape)
+            .clip(shape = inputShape)
             .padding(horizontal = 5.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
+        hint?.let {
+            if (inputFlow.isEmpty) {
+                Text(
+                    modifier = Modifier.padding(start = 5.dp),
+                    text = hint,
+                    style = inputHintStyle,
+                    color = inputHintColour,
+                )
+            }
+        }
         inputField()
     }
 }
