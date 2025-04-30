@@ -13,7 +13,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.combine
 import org.hmeadow.fittonia.BaseViewModel
-import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.R
@@ -31,6 +30,7 @@ import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
 import org.hmeadow.fittonia.design.fonts.psstStyle
+import org.hmeadow.fittonia.utility.Debug
 import psstColour
 
 class WelcomeScreenViewModel(
@@ -42,16 +42,15 @@ class WelcomeScreenViewModel(
 
     val canContinue = combine(
         serverPasswordState,
-        portFieldState,
         mainViewModel.dataStore.data,
-    ) { passwordState, portState, dumpPathState ->
-        passwordState.isNotEmpty() && portState.isNotEmpty() && dumpPathState.dumpPath.dumpUriPath.isNotEmpty()
+    ) { passwordState, dumpPathState ->
+        passwordState.isNotEmpty() && dumpPathState.dumpPath.dumpUriPath.isNotEmpty()
     }
 
     fun onContinue() {
         onContinueCallback(
             serverPasswordState.text,
-            portFieldState.text.toInt(),
+            portFieldState.text.toIntOrNull() ?: 44556, // TODO - after release somewhere to put constants.
         )
     }
 
@@ -117,11 +116,12 @@ fun WelcomeScreen(
                     },
                 )
 
-                FittoniaSpacerHeight(height = 15)
+                FittoniaSpacerHeight(height = 20)
 
                 FittoniaNumberInput(
                     modifier = Modifier.fillMaxWidth(),
                     inputFlow = viewModel.portFieldState,
+                    hint = "Default: 44556",
                     label = {
                         Row {
                             Text(
@@ -133,7 +133,7 @@ fun WelcomeScreen(
                     },
                 )
 
-                FittoniaSpacerHeight(height = 15)
+                FittoniaSpacerHeight(height = 20)
 
                 Row {
                     Text(
@@ -147,6 +147,9 @@ fun WelcomeScreen(
                     onEntryClearClicked = { onClearDumpPath() },
                     expandOnClick = true,
                 )
+
+                FittoniaSpacerHeight(height = 7)
+
                 FittoniaButton(
                     onClick = { MainActivity.mainActivity.openFolderPicker(viewModel::onDumpPathPicked) },
                     content = {

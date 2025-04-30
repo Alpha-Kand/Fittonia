@@ -17,11 +17,11 @@
     </plurals>
 
     <!-- Welcome Screen -->
-    <string name="welcome_screen_title">Welcome!</string>
-    <string name="welcome_screen_body">To get started, you just need a new server password, server socket port, and a place to put incoming files.</string>
+    <string name="welcome_screen_title">Welcome to Fittonia!</string>
+    <string name="welcome_screen_body">To get started, you just need a password, socket port, and a place to put incoming files.</string>
     <string name="welcome_screen_you_can_change_these_later">(You can change these later)</string>
-    <string name="welcome_screen_new_server_password_label">New server password</string>
-    <string name="welcome_screen_new_server_port_label">New server default port.</string>
+    <string name="welcome_screen_new_server_password_label">Password</string>
+    <string name="welcome_screen_new_server_port_label">Custom default port.</string>
     <string name="welcome_screen_new_destination_folder_label">Destination folder</string>
     <string name="welcome_screen_new_destination_select_folder_button">Select folder</string>
     <string name="welcome_screen_continue_button">Continue</string>
