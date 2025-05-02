@@ -26,6 +26,7 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.design.fonts.headerStyle
 import org.hmeadow.fittonia.utility.Debug
+import org.hmeadow.fittonia.utility.InfoBorderState
 
 @Composable
 fun FittoniaHeader(
@@ -40,13 +41,20 @@ fun FittoniaHeader(
             .padding(all = 5.dp),
         contentAlignment = Center,
     ) {
-        onBackClicked?.let {
+        Row(modifier = Modifier.align(CenterStart)) {
+            onBackClicked?.let {
+                FittoniaIcon(
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .clickable(onClick = onBackClicked),
+                    drawableRes = R.drawable.ic_back_arrow,
+                )
+            }
             FittoniaIcon(
                 modifier = Modifier
-                    .align(CenterStart)
                     .padding(5.dp)
-                    .clickable(onClick = onBackClicked),
-                drawableRes = R.drawable.ic_back_arrow,
+                    .clickable(onClick = InfoBorderState::enableInfoBorder),
+                drawableRes = R.drawable.ic_info,
             )
         }
         Row(

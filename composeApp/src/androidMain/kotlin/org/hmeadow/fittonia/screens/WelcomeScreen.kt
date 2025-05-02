@@ -31,6 +31,7 @@ import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.design.fonts.paragraphStyle
 import org.hmeadow.fittonia.design.fonts.psstStyle
 import org.hmeadow.fittonia.utility.Debug
+import org.hmeadow.fittonia.utility.InfoBorderState.infoBoxOverlay
 import psstColour
 
 class WelcomeScreenViewModel(
@@ -152,6 +153,24 @@ fun WelcomeScreen(
 
                 FittoniaButton(
                     onClick = { MainActivity.mainActivity.openFolderPicker(viewModel::onDumpPathPicked) },
+                    onInfo = {
+                        Column {
+                            Text(
+                                text = stringResource(R.string.welcome_screen_select_folder_button_info_1),
+                                style = paragraphStyle,
+                            )
+                            FittoniaSpacerHeight(height = 10)
+                            Text(
+                                text = stringResource(R.string.welcome_screen_select_folder_button_info_2),
+                                style = paragraphStyle,
+                            )
+                            FittoniaSpacerHeight(height = 10)
+                            Text(
+                                text = stringResource(R.string.welcome_screen_select_folder_button_info_3),
+                                style = paragraphStyle,
+                            )
+                        }
+                    },
                     content = {
                         ButtonText(
                             text = stringResource(id = R.string.welcome_screen_new_destination_select_folder_button),
@@ -169,6 +188,9 @@ fun WelcomeScreen(
                     content = { ButtonText(text = stringResource(id = R.string.welcome_screen_continue_button)) },
                 )
             }
+        },
+        overlay = {
+            infoBoxOverlay()
         },
     )
 }

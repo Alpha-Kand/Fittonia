@@ -28,6 +28,7 @@ import org.hmeadow.fittonia.MainActivity.Companion.imeHeight
 import org.hmeadow.fittonia.MainActivity.Companion.navBarHeight
 import org.hmeadow.fittonia.MainActivity.Companion.statusBarsHeight
 import org.hmeadow.fittonia.compose.architecture.currentStyle
+import org.hmeadow.fittonia.utility.InfoBorderState.clearInfoBorderState
 import org.hmeadow.fittonia.utility.applyIf
 
 private enum class ScaffoldSectionsEnum {
@@ -62,6 +63,7 @@ fun FittoniaScaffold(
                 onClick = {
                     keyboard?.hide()
                     focusRequester.requestFocus()
+                    clearInfoBorderState()
                 },
             ),
     ) {

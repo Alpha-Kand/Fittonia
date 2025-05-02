@@ -16,7 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.hmeadow.fittonia.compose.architecture.currentStyle
+import org.hmeadow.fittonia.utility.InfoBorderState.handleClicks
+import org.hmeadow.fittonia.utility.InfoBorderState.infoBorderActive
+import org.hmeadow.fittonia.utility.InfoBorderState.infoBox
 import org.hmeadow.fittonia.utility.SuspendedAction
+import org.hmeadow.fittonia.utility.infoBorder
 
 data class FittoniaButtonScope(
     private val type: FittoniaButtonType,
@@ -70,6 +74,7 @@ fun FittoniaButton(
     type: FittoniaButtonType = currentStyle.primaryButtonType,
     enabled: Boolean = true,
     onClick: () -> Unit,
+    onInfo: (@Composable () -> Unit)? = null,
     content: @Composable FittoniaButtonScope.() -> Unit,
 ) {
     val isLoading = if (onClick is SuspendedAction) {
@@ -78,7 +83,11 @@ fun FittoniaButton(
         false
     }
     Button(
-        modifier = modifier,
+        modifier = modifier.infoBorder(
+            enabled = onInfo != null,
+            focused = infoBox == onInfo,
+            verticalPadding = 0f,
+        ),
         shape = RoundedCornerShape(corner = CornerSize(5.dp)),
         border = BorderStroke(
             width = 2.dp,
@@ -88,8 +97,12 @@ fun FittoniaButton(
                 type.disabledBorderColour
             },
         ),
-        enabled = enabled,
-        onClick = onClick,
+        enabled = if (infoBorderActive) {
+            true
+        } else {
+            enabled
+        },
+        onClick = { handleClicks(onClick = onClick, onInfo = { infoBox = onInfo }) },
         content = {
             if (isLoading) {
                 FittoniaLoadingIndicator(colour = type.contentColour)

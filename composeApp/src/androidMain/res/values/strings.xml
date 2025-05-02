@@ -25,6 +25,9 @@
     <string name="welcome_screen_new_destination_folder_label">Destination folder</string>
     <string name="welcome_screen_new_destination_select_folder_button">Select folder</string>
     <string name="welcome_screen_continue_button">Continue</string>
+    <string name="welcome_screen_select_folder_button_info_1">Fittonia needs a place to put incoming files. Ideally, pick a place that you can access easily with a file browser so you can use them.</string>
+    <string name="welcome_screen_select_folder_button_info_2">Please note that some Android devices may have strict system access permissions which can limit your options. For example, you are unlikely to be allowed to pick the generic "Documents" location.</string>
+    <string name="welcome_screen_select_folder_button_info_3">However, you could create a new folder inside "Documents" and give Fittonia access to that sub-folder.</string>
 
     <!-- Overview Screen -->
     <string name="overview_screen_dump_permission_lost_notice">Permission was lost for your previously selected \'incoming transfers\' folder. Please reselect or choose another folder.</string>
