@@ -18,13 +18,17 @@
 
     <!-- Welcome Screen -->
     <string name="welcome_screen_title">Welcome to Fittonia!</string>
-    <string name="welcome_screen_body">To get started, you just need a password, socket port, and a place to put incoming files.</string>
+    <string name="welcome_screen_body">To get started, you just need an access code, socket port, and a place to put incoming files.</string>
     <string name="welcome_screen_you_can_change_these_later">(You can change these later)</string>
-    <string name="welcome_screen_new_server_password_label">Password</string>
+    <string name="welcome_screen_new_server_access_code_label">Access Code</string>
     <string name="welcome_screen_new_server_port_label">Custom default port.</string>
     <string name="welcome_screen_new_destination_folder_label">Destination folder</string>
     <string name="welcome_screen_new_destination_select_folder_button">Select folder</string>
     <string name="welcome_screen_continue_button">Continue</string>
+    <string name="welcome_screen_access_code_field_info_1">This is the access code</string>
+    <string name="welcome_screen_access_code_field_info_2">other</string>
+    <string name="welcome_screen_access_code_field_info_3">devices will need in order to send this device any files.</string>
+    <string name="welcome_screen_access_code_field_info_4">You can think of it as a password that you can share with friends, family, trusted individuals, or just keep to yourself to send yourself files.</string>
     <string name="welcome_screen_select_folder_button_info_1">Fittonia needs a place to put incoming files. Ideally, pick a place that you can access easily with a file browser so you can use them.</string>
     <string name="welcome_screen_select_folder_button_info_2">Please note that some Android devices may have strict system access permissions which can limit your options. For example, you are unlikely to be allowed to pick the generic "Documents" location.</string>
     <string name="welcome_screen_select_folder_button_info_3">However, you could create a new folder inside "Documents" and give Fittonia access to that sub-folder.</string>

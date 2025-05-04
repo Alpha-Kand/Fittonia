@@ -83,11 +83,7 @@ fun FittoniaButton(
         false
     }
     Button(
-        modifier = modifier.infoBorder(
-            enabled = onInfo != null,
-            focused = infoBox == onInfo,
-            verticalPadding = 0f,
-        ),
+        modifier = modifier.infoBorder(onInfo = onInfo, verticalPadding = 0f),
         shape = RoundedCornerShape(corner = CornerSize(5.dp)),
         border = BorderStroke(
             width = 2.dp,

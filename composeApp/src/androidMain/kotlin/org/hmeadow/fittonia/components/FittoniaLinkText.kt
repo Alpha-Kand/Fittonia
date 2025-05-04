@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import org.hmeadow.fittonia.design.fonts.paragraphStyle
+import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.screens.overviewScreen.measureTextWidth
 
 @Composable
@@ -26,12 +26,12 @@ fun FittoniaLinkText(
         Text(
             text = text,
             color = Color.Blue,
-            style = paragraphStyle,
+            style = paragraphTextStyle,
         )
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(3.dp))
-                .width(measureTextWidth(text = text, style = paragraphStyle))
+                .width(measureTextWidth(text = text, style = paragraphTextStyle))
                 .height(1.dp)
                 .background(Color.Blue),
         )

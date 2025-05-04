@@ -10,8 +10,8 @@ object Config {
         private val osType = OSType.MACOS
 
         val settingsOSSpecificPath = when (osType) {
-            OSType.LINUX -> "/home/hunterneo/Desktop/TRANSFER/fittoniaSettings|4.xml"
-            OSType.MACOS -> "/Users/hunter.wiesman/Desktop/FittoniaTRANSFER/fittoniaSettings|4.xml"
+            OSType.LINUX -> "/home/hunterneo/Desktop/TRANSFER/fittoniaSettings|5.xml"
+            OSType.MACOS -> "/Users/hunter.wiesman/Desktop/FittoniaTRANSFER/fittoniaSettings|5.xml"
             OSType.WINDOWS -> ""
         }
     }

@@ -1,5 +1,7 @@
 package org.hmeadow.fittonia.design.fonts
 
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -8,7 +10,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import org.hmeadow.fittonia.R
 
-private val firaSansFont = FontFamily(
+val firaSansFont = FontFamily(
     Font(
         resId = R.font.fira_sans_medium,
         style = FontStyle.Normal,
@@ -47,13 +49,22 @@ val headingSStyle = TextStyle(
     fontFamily = firaSansFont,
 )
 
-val paragraphStyle = TextStyle(
+val paragraphTextStyle = TextStyle(
     fontSize = 17.sp,
     lineHeight = 23.sp,
     letterSpacing = (-0.2f).sp,
     fontWeight = FontWeight(weight = 400),
     fontFamily = firaSansFont,
 )
+
+val paragraphSpanStyle = SpanStyle(
+    fontSize = 17.sp,
+    letterSpacing = (-0.2f).sp,
+    fontWeight = FontWeight(weight = 400),
+    fontFamily = firaSansFont,
+)
+
+val paragraphParagraphStyle = ParagraphStyle(lineHeight = 23.sp)
 
 val readOnlyStyle = TextStyle(
     fontSize = 17.sp,

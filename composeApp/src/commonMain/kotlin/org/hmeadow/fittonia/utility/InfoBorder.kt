@@ -8,6 +8,8 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +35,7 @@ import org.hmeadow.fittonia.utility.InfoBorderState.LOOP_MILLIS
 import org.hmeadow.fittonia.utility.InfoBorderState.VERTICAL_GRADIENT_PADDING
 import org.hmeadow.fittonia.utility.InfoBorderState.focusedColours
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBorderActive
+import org.hmeadow.fittonia.utility.InfoBorderState.infoBox
 import org.hmeadow.fittonia.utility.InfoBorderState.unfocusedColours
 
 object InfoBorderState {
@@ -66,10 +70,16 @@ object InfoBorderState {
     @Composable
     fun BoxScope.infoBoxOverlay() {
         infoBox?.let {
+            val interactionSource = remember { MutableInteractionSource() }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xAAFFFFFF)),
+                    .background(Color(0xAAFFFFFF))
+                    .clickable(
+                        onClick = ::clearInfoBorderState,
+                        indication = null,
+                        interactionSource = interactionSource,
+                    ),
             ) {}
             Column(
                 modifier = Modifier
@@ -77,7 +87,12 @@ object InfoBorderState {
                     .background(color = Color.White)
                     .border(2.dp, Color.Black)
                     .align(Alignment.Center)
-                    .padding(all = 7.dp),
+                    .padding(all = 7.dp)
+                    .clickable(
+                        onClick = ::clearInfoBorderState,
+                        indication = null,
+                        interactionSource = interactionSource,
+                    ),
             ) {
                 it()
             }
@@ -86,8 +101,7 @@ object InfoBorderState {
 }
 
 fun Modifier.infoBorder(
-    enabled: Boolean = false,
-    focused: Boolean,
+    onInfo: (@Composable () -> Unit)? = null,
     horizontalPadding: Float = HORIZONTAL_GRADIENT_PADDING,
     verticalPadding: Float = VERTICAL_GRADIENT_PADDING,
 ): Modifier = composed {
@@ -100,7 +114,7 @@ fun Modifier.infoBorder(
         ),
     )
     drawBehind {
-        if (infoBorderActive && enabled) {
+        if (infoBorderActive && onInfo != null) {
             drawRect(
                 topLeft = Offset(x = -horizontalPadding, y = -verticalPadding),
                 size = this.size.copy(
@@ -108,7 +122,7 @@ fun Modifier.infoBorder(
                     height = this.size.height + (2 * verticalPadding),
                 ),
                 brush = Brush.linearGradient(
-                    colors = if (focused) {
+                    colors = if (infoBox == onInfo) {
                         focusedColours
                     } else {
                         unfocusedColours

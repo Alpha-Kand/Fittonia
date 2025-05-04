@@ -1,6 +1,5 @@
 package org.hmeadow.fittonia.screens
 
-import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,11 +34,12 @@ import org.hmeadow.fittonia.components.FittoniaModal
 import org.hmeadow.fittonia.components.FittoniaNumberInput
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.InputFlow
+import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.description
 import org.hmeadow.fittonia.design.fonts.headingSStyle
-import org.hmeadow.fittonia.design.fonts.paragraphStyle
+import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.title
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -215,7 +215,7 @@ private fun AlertTile(
                 FittoniaSpacerHeight(height = 7)
                 Text(
                     text = description,
-                    style = paragraphStyle,
+                    style = paragraphTextStyle,
                 )
                 FittoniaSpacerHeight(height = 8)
                 FlowRow(

@@ -42,7 +42,7 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.fonts.headingMStyle
-import org.hmeadow.fittonia.design.fonts.paragraphStyle
+import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.utility.Debug
 import org.hmeadow.fittonia.utility.createJobDirectory
@@ -175,7 +175,7 @@ fun OverviewScreen(
                         Text(
                             modifier = Modifier.padding(top = 13.dp),
                             text = stringResource(R.string.overview_screen_dump_permission_lost_notice),
-                            style = paragraphStyle,
+                            style = paragraphTextStyle,
                         )
                     }
                     FittoniaSpacerHeight(height = 12)
@@ -202,12 +202,12 @@ fun OverviewScreen(
                 FittoniaSpacerHeight(10)
                 Text(
                     text = stringResource(R.string.last_built_date),
-                    style = paragraphStyle,
+                    style = paragraphTextStyle,
                 )
                 FittoniaSpacerHeight(10)
                 Text(
                     text = stringResource(R.string.credits),
-                    style = paragraphStyle,
+                    style = paragraphTextStyle,
                 )
             }
             FittoniaModal(
@@ -232,7 +232,7 @@ fun OverviewScreen(
                                     Text(
                                         text = it.name,
                                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
-                                        style = paragraphStyle,
+                                        style = paragraphTextStyle,
                                     )
                                     FittoniaSpacerWeightRow()
                                     FittoniaIcon(
@@ -256,7 +256,7 @@ fun OverviewScreen(
                             Text(
                                 text = it.name,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
-                                style = paragraphStyle,
+                                style = paragraphTextStyle,
                             )
                             FittoniaSpacerWeightRow()
                             FittoniaIcon(

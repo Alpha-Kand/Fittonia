@@ -2,6 +2,8 @@ package org.hmeadow.fittonia.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -15,10 +17,13 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -31,6 +36,9 @@ import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_SYMBOLS
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.design.fonts.inputHintStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
+import org.hmeadow.fittonia.utility.InfoBorderState.infoBorderActive
+import org.hmeadow.fittonia.utility.InfoBorderState.infoBox
+import org.hmeadow.fittonia.utility.infoBorder
 
 private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
 
@@ -57,6 +65,7 @@ fun FittoniaTextInput(
     hint: String? = null,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
+    onInfo: (@Composable () -> Unit)? = null,
     label: String? = null,
 ) {
     BaseFittoniaInput(
@@ -67,6 +76,7 @@ fun FittoniaTextInput(
         lineLimits = lineLimits,
         filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        onInfo = onInfo,
     )
 }
 
@@ -77,6 +87,7 @@ fun FittoniaTextInput(
     hint: String? = null,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
+    onInfo: (@Composable () -> Unit)? = null,
     label: (@Composable () -> Unit)? = null,
 ) {
     BaseFittoniaInput(
@@ -86,6 +97,7 @@ fun FittoniaTextInput(
         lineLimits = lineLimits,
         filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        onInfo = onInfo,
         label = label,
     )
 }
@@ -97,6 +109,7 @@ fun FittoniaNumberInput(
     hint: String? = null,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
+    onInfo: (@Composable () -> Unit)? = null,
     label: String? = null,
 ) {
     BaseFittoniaInput(
@@ -107,6 +120,7 @@ fun FittoniaNumberInput(
         lineLimits = lineLimits,
         filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        onInfo = onInfo,
     )
 }
 
@@ -117,6 +131,7 @@ fun FittoniaNumberInput(
     hint: String? = null,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
+    onInfo: (@Composable () -> Unit)? = null,
     label: (@Composable () -> Unit)? = null,
 ) {
     BaseFittoniaInput(
@@ -126,6 +141,7 @@ fun FittoniaNumberInput(
         lineLimits = lineLimits,
         filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        onInfo = onInfo,
         label = label,
     )
 }
@@ -137,8 +153,9 @@ private fun BaseFittoniaInput(
     keyboardOptions: KeyboardOptions,
     lineLimits: TextFieldLineLimits,
     filters: List<FittoniaInputFilter>,
+    onInfo: (@Composable () -> Unit)?,
+    label: String?,
     modifier: Modifier = Modifier,
-    label: String? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
@@ -147,6 +164,7 @@ private fun BaseFittoniaInput(
         keyboardOptions = keyboardOptions,
         lineLimits = lineLimits,
         filters = filters,
+        onInfo = onInfo,
         label = {
             label?.let {
                 Text(
@@ -165,21 +183,34 @@ private fun BaseFittoniaInput(
     keyboardOptions: KeyboardOptions,
     filters: List<FittoniaInputFilter>,
     lineLimits: TextFieldLineLimits,
+    onInfo: (@Composable () -> Unit)?,
+    label: (@Composable () -> Unit)?,
     modifier: Modifier = Modifier,
-    label: (@Composable () -> Unit)? = null,
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+    val interactionSource = remember { MutableInteractionSource() }
+    if (interactionSource.collectIsPressedAsState().value && onInfo != null && infoBorderActive) {
+        infoBox = onInfo
+    }
     Column {
         label?.let {
             it()
             FittoniaSpacerHeight(height = 7)
         }
         BasicTextField(
-            modifier = modifier.onFocusEvent {
-                if (it.isFocused) {
-                    keyboard?.show()
+            modifier = modifier
+                .focusRequester(focusRequester)
+                .onFocusEvent {
+                    if (infoBorderActive) {
+                        focusRequester.freeFocus()
+                    } else if (it.isFocused) {
+                        keyboard?.show()
+                    }
                 }
-            },
+                .infoBorder(onInfo = onInfo),
+            interactionSource = interactionSource,
+            readOnly = infoBorderActive,
             state = inputFlow.textState,
             lineLimits = lineLimits,
             inputTransformation = {
