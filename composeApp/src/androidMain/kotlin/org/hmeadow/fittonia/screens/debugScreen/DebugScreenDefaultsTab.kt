@@ -21,7 +21,7 @@ fun DebugScreenDefaultsTab(
     defaultSendThrottle: InputFlow,
     defaultNewDestinationName: InputFlow,
     defaultNewDestinationPort: InputFlow,
-    defaultNewDestinationPassword: InputFlow,
+    defaultNewDestinationAccessCode: InputFlow,
     defaultNewDestinationIP: InputFlow,
     onSaveDefaults: () -> Unit,
     needToSave: Boolean,
@@ -55,8 +55,8 @@ fun DebugScreenDefaultsTab(
         )
         FittoniaSpacerHeight(height = 10)
         FittoniaNumberInput(
-            label = "Default New Destination Password",
-            inputFlow = defaultNewDestinationPassword,
+            label = "Default New Destination Access Code",
+            inputFlow = defaultNewDestinationAccessCode,
         )
         FittoniaSpacerHeight(height = 10)
         FittoniaNumberInput(

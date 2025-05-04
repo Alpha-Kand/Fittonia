@@ -39,7 +39,7 @@ abstract class SettingsManager {
     suspend fun addDestination(
         name: String,
         ip: String,
-        password: String,
+        accessCode: String,
     ) {
         if (settings.destinations.find { it.name == name } != null) {
             throw FittoniaError(FittoniaErrorType.ADD_DESTINATION_ALREADY_EXISTS)
@@ -49,7 +49,7 @@ abstract class SettingsManager {
                 Destination(
                     name = name,
                     ip = ip,
-                    password = password,
+                    accessCode = accessCode,
                 ),
             ),
         )
@@ -74,16 +74,16 @@ abstract class SettingsManager {
 
     suspend fun clearDefaultPort() = setDefaultPort(port = DEFAULT_PORT)
 
-    suspend fun setServerPassword(newPassword: String) {
-        settings = settings.copy(serverPassword = newPassword)
+    suspend fun setServerAccessCode(newAccessCode: String) {
+        settings = settings.copy(serverAccessCode = newAccessCode)
         saveSettings()
     }
 
-    fun checkPassword(password: String): Boolean {
-        return settings.serverPassword == password
+    fun checkAccessCode(accessCode: String): Boolean {
+        return settings.serverAccessCode == accessCode
     }
 
-    fun hasServerPassword(): Boolean = settings.serverPassword != null
+    fun hasServerAccessCode(): Boolean = settings.serverAccessCode != null
 
     suspend fun getAutoJobName(): String = settingsMutex.withLock {
         settings.nextAutoJobName.let {
@@ -105,7 +105,7 @@ abstract class SettingsManager {
         val destinations: List<Destination>,
         val dumpPath: String,
         val defaultPort: Int,
-        val serverPassword: String?,
+        val serverAccessCode: String?,
         val nextAutoJobName: Long,
         val previousCmdEntries: LinkedList<String>,
     ) {
@@ -113,7 +113,7 @@ abstract class SettingsManager {
             destinations = emptyList(),
             dumpPath = "",
             defaultPort = DEFAULT_PORT,
-            serverPassword = null,
+            serverAccessCode = null,
             nextAutoJobName = 0,
             previousCmdEntries = LinkedList(),
         )
@@ -123,7 +123,7 @@ abstract class SettingsManager {
     data class Destination(
         val name: String,
         val ip: String,
-        val password: String,
+        val accessCode: String,
     )
 
     object AESEncyption {

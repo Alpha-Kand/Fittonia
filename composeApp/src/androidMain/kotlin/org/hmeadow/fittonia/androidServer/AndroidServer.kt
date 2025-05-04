@@ -67,7 +67,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     private val binder = AndroidServerBinder()
     var serverSocket: ServerSocket? = null
     var serverJob: Job? = null
-    private lateinit var password: String
+    private lateinit var accessCode: String
     private val progressUpdateMutex = Mutex()
     private val notificationManagerMutex = Mutex()
 
@@ -93,8 +93,9 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     private fun initServerFromIntent(intent: Intent?): Boolean {
         serverLog(text = "initServerFromIntent (intent = $intent)")
         intent?.let {
-            password = it.getStringExtra("org.hmeadow.fittonia.password") ?: throw Exception("No password provided")
-            serverLog(text = "init password $password") // TODO - before release
+            accessCode =
+                it.getStringExtra("org.hmeadow.fittonia.accesscode") ?: throw Exception("No access code provided")
+            serverLog(text = "init access code $accessCode") // TODO - before release
             it.getIntExtra("org.hmeadow.fittonia.port", 0).let { port ->
                 serverLog(text = "init port $port")
                 if (!startServerSocket(port = port)) {
@@ -298,16 +299,16 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         }
     }
 
-    override fun HMeadowSocketServer.passwordIsValid(): Boolean {
-        return password == receiveString()
+    override fun HMeadowSocketServer.accessCodeIsValid(): Boolean {
+        return accessCode == receiveString()
     }
 
     suspend fun onPing2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
         println("Server waiting for PingClientData")
         val clientData = server.receiveAndDecrypt<PingClientData>()
-        println("onPing2.clientData.password: ${clientData.password}")
+        println("onPing2.clientData.accessCode: ${clientData.accessCode}")
         server.encryptAndSend(
-            data = PingServerData(isPasswordCorrect = clientData.password == password),
+            data = PingServerData(isAccessCodeCorrect = clientData.accessCode == accessCode),
             theirPublicKey = theirPublicKey,
         )
     }
@@ -322,7 +323,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         registerTransferJob(currentJob)
 
         val clientData = server.receiveAndDecrypt<SendFileClientData>()
-        if (clientData.password != password) return
+        if (clientData.accessCode != accessCode) return
         currentJob = updateTransferJob(currentJob.copy(items = clientData.items, currentItem = 1))
         val newJobDirectory = createJobDirectory(
             jobName = clientData.jobName,
@@ -330,17 +331,17 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         )
 
         if (newJobDirectory is MainActivity.CreateDumpDirectory.Success) {
-            val serverData = if (clientData.password == password) {
+            val serverData = if (clientData.accessCode == accessCode) {
                 SendFileServerData(
                     jobName = newJobDirectory.name,
                     pathLimit = 128,
-                    isPasswordCorrect = true,
+                    isAccessCodeCorrect = true,
                 )
             } else {
                 SendFileServerData(
                     jobName = "",
                     pathLimit = 0,
-                    isPasswordCorrect = false,
+                    isAccessCodeCorrect = false,
                 )
             }
             server.encryptAndSend(data = serverData, theirPublicKey = theirPublicKey)
@@ -399,17 +400,17 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         println("onSendMessage2()")
     }
 
-    override suspend fun onPing(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
-        if (!clientPasswordSuccess) {
-            logWarning("Client attempted to ping this server, password refused.", jobId = jobId)
+    override suspend fun onPing(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientAccessCodeSuccess) {
+            logWarning("Client attempted to ping this server, access code refused.", jobId = jobId)
         } else {
             log("Client successfully pinged this server.", jobId = jobId)
         }
     }
 
-    override suspend fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
-        if (!clientPasswordSuccess) {
-            logWarning("Client attempted to add this server as destination, password refused.", jobId = jobId)
+    override suspend fun onAddDestination(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientAccessCodeSuccess) {
+            logWarning("Client attempted to add this server as destination, access code refused.", jobId = jobId)
         } else {
             if (server.receiveBoolean()) {
                 log("Client added this server as a destination.", jobId = jobId)
@@ -419,13 +420,13 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         }
     }
 
-    override suspend fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+    override suspend fun onSendFiles(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         // TODO - after release - Obsolete.
     }
 
-    override suspend fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
-        if (!clientPasswordSuccess) {
-            logWarning("Client attempted to send a message, password refused.", jobId = jobId)
+    override suspend fun onSendMessage(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientAccessCodeSuccess) {
+            logWarning("Client attempted to send a message, access code refused.", jobId = jobId)
         } else {
             log("Client message: ${server.receiveString()}", jobId = jobId)
             server.sendConfirmation()
@@ -527,7 +528,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
             } ?: onError()
         }
 
-        suspend fun ping(ip: String, port: Int, password: String, requestTimestamp: Long): Ping {
+        suspend fun ping(ip: String, port: Int, accessCode: String, requestTimestamp: Long): Ping {
             return Ping(
                 pingStatus = bootStrap(onError = { PingStatus.InternalBug }) {
                     val client: HMeadowSocketClient
@@ -549,14 +550,14 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     val theirPublicKey = clientSharePublicKeys(client)
                     client.sendCommandFlag(commandFlag = ServerCommandFlag.PING, theirPublicKey = theirPublicKey)
                     client.encryptAndSend(
-                        data = PingClientData(password = password),
+                        data = PingClientData(accessCode = accessCode),
                         theirPublicKey = theirPublicKey,
                     )
                     println("Client awaiting PingServerData")
-                    if (client.receiveAndDecrypt<PingServerData>().isPasswordCorrect) {
+                    if (client.receiveAndDecrypt<PingServerData>().isAccessCodeCorrect) {
                         PingStatus.Success
                     } else {
-                        PingStatus.IncorrectPassword
+                        PingStatus.IncorrectAccessCode
                     }.also {
                         println("Client received PingServerData: $it")
                     }
@@ -581,14 +582,14 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         items = newJob.items,
                         aesKey = aesKey,
                         jobName = newJob.description.takeUnless { newJob.needDescription },
-                        password = currentJob.destination.password,
+                        accessCode = currentJob.destination.accessCode,
                     )
                     client.encryptAndSend(
                         data = sendFileClientData,
                         theirPublicKey = theirPublicKey,
                     )
                     val serverData = client.receiveAndDecrypt<SendFileServerData>()
-                    if (serverData.isPasswordCorrect) {
+                    if (serverData.isAccessCodeCorrect) {
                         currentJob = currentJob.copy(description = serverData.jobName)
                         updateTransferJob(currentJob)
                         val encryptionFileCache = createTempFile()
@@ -657,9 +658,9 @@ fun OutgoingJob.createClient() = HMeadowSocketClient(
 fun AndroidServer.communicateCommand(client: HMeadowSocketClient, currentJob: OutgoingJob): Boolean {
     return client.communicateCommandBoolean(
         commandFlag = ServerCommandFlag.SEND_FILES,
-        password = currentJob.destination.password,
+        accessCode = currentJob.destination.accessCode,
         onSuccess = { },
-        onPasswordRefused = { logError("Server refused password.") },
+        onAccessCodeRefused = { logError("Server refused access code.") },
         onFailure = { logError("Connected, but request refused.") },
     )
 }

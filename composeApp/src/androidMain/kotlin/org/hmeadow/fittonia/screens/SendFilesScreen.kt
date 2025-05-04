@@ -53,7 +53,7 @@ import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.compose.components.FittoniaLoadingIndicator
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
-import org.hmeadow.fittonia.design.fonts.paragraphStyle
+import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.design.fonts.psstStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldLightTextStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
@@ -72,11 +72,11 @@ import java.time.Instant
 class SendFilesScreenViewModel(
     private val onSaveOneTimeDestinationCallback: (
         ip: String,
-        password: String,
+        accessCode: String,
         onFinish: (newDestination: SettingsManager.Destination) -> Unit,
     ) -> Unit,
     private val onAddNewDestinationCallback: (onFinish: (newDestination: SettingsManager.Destination) -> Unit) -> Unit,
-    private val onPing: suspend (ip: String, port: Int, password: String, requestTimestamp: Long) -> Ping,
+    private val onPing: suspend (ip: String, port: Int, accessCode: String, requestTimestamp: Long) -> Ping,
     private val onConfirmCallback: suspend (OutgoingJob) -> Unit,
 ) : BaseViewModel() {
     val itemListState = MutableStateFlow<List<TransferJob.Item>>(emptyList())
@@ -89,7 +89,7 @@ class SendFilesScreenViewModel(
                     updatePing(it, port.toInt())
                 } ?: updatePing(
                     ip = oneTimeIpAddressState.text,
-                    password = oneTimePasswordState.text,
+                    accessCode = oneTimeAccessCodeState.text,
                     port = port.toInt(),
                 )
             }
@@ -102,17 +102,17 @@ class SendFilesScreenViewModel(
         onValueChange = { ip ->
             updatePing(
                 ip = ip,
-                password = oneTimePasswordState.text,
+                accessCode = oneTimeAccessCodeState.text,
                 port = portState.text.toInt(),
             )
         },
     )
-    val oneTimePasswordState = InputFlow(
+    val oneTimeAccessCodeState = InputFlow(
         initial = "",
-        onValueChange = { password ->
+        onValueChange = { accessCode ->
             updatePing(
                 ip = oneTimeIpAddressState.text,
-                password = password,
+                accessCode = accessCode,
                 port = portState.text.toInt(),
             )
         },
@@ -134,11 +134,11 @@ class SendFilesScreenViewModel(
     }
 
     private fun updatePing(destination: SettingsManager.Destination, port: Int) {
-        updatePing(ip = destination.ip, password = destination.password, port = port)
+        updatePing(ip = destination.ip, accessCode = destination.accessCode, port = port)
     }
 
-    private fun updatePing(ip: String, password: String, port: Int) {
-        if (ip.isNotBlank() && password.isNotBlank()) {
+    private fun updatePing(ip: String, accessCode: String, port: Int) {
+        if (ip.isNotBlank() && accessCode.isNotBlank()) {
             launch {
                 val timestamp = Instant.now().toEpochMilli()
                 updatePingAtomically(newPing = Ping(PingStatus.Processing, timestamp))
@@ -146,7 +146,7 @@ class SendFilesScreenViewModel(
                     newPing = onPing(
                         ip,
                         port, // TODO make Port type. - After release
-                        password, // TODO before release - check if password should be string and not bytearray.
+                        accessCode, // TODO before release - check if access code should be string and not bytearray.
                         Instant.now().toEpochMilli().let { now ->
                             if (now == timestamp) {
                                 timestamp + 1
@@ -171,14 +171,14 @@ class SendFilesScreenViewModel(
     val canContinueOneTime = combine(
         itemListState,
         oneTimeIpAddressState,
-        oneTimePasswordState,
+        oneTimeAccessCodeState,
         portState,
-    ) { itemList, ip, password, port ->
-        itemList.isNotEmpty() && ip.isNotEmpty() && password.isNotEmpty() && port.isNotEmpty()
+    ) { itemList, ip, accessCode, port ->
+        itemList.isNotEmpty() && ip.isNotEmpty() && accessCode.isNotEmpty() && port.isNotEmpty()
     }
 
     fun onSaveOneTimeDestinationClicked() {
-        onSaveOneTimeDestinationCallback(oneTimeIpAddressState.text, oneTimePasswordState.text) { newDestination ->
+        onSaveOneTimeDestinationCallback(oneTimeIpAddressState.text, oneTimeAccessCodeState.text) { newDestination ->
             selectedDestinationState.value = newDestination
         }
     }
@@ -216,7 +216,7 @@ class SendFilesScreenViewModel(
                 destination = selectedDestinationState.value ?: SettingsManager.Destination(
                     name = "-",
                     ip = oneTimeIpAddressState.text,
-                    password = oneTimePasswordState.text,
+                    accessCode = oneTimeAccessCodeState.text,
                 ), // TODO - After release
                 items = itemListState.value,
                 port = portState.text.toInt(),
@@ -326,8 +326,8 @@ fun SendFilesScreen(
 
                     FittoniaTextInput(
                         modifier = Modifier.fillMaxWidth(),
-                        inputFlow = viewModel.oneTimePasswordState,
-                        label = "Password",
+                        inputFlow = viewModel.oneTimeAccessCodeState,
+                        label = "Access Code",
                     )
 
                     FittoniaSpacerHeight(height = 10)
@@ -360,7 +360,7 @@ fun SendFilesScreen(
                             HorizontalLine(modifier = Modifier.padding(vertical = 4.dp))
                             listOf(
                                 "IP Address: ${destination.ip}",
-                                "Password: • • • • • • • • • • • •",
+                                "Access Code: • • • • • • • • • • • •",
                             ).fastForEach {
                                 Text(
                                     modifier = Modifier
@@ -399,19 +399,19 @@ fun SendFilesScreen(
                     is PingStatus.Processing -> Row {
                         Text(
                             text = stringResource(R.string.send_files_screen_ping_processing),
-                            style = paragraphStyle,
+                            style = paragraphTextStyle,
                         )
                         FittoniaLoadingIndicator()
                     }
 
                     is PingStatus.Success -> Text(
                         text = stringResource(R.string.send_files_screen_ping_success),
-                        style = paragraphStyle,
+                        style = paragraphTextStyle,
                     )
 
                     is PingStatus.Failure -> Text(
                         text = stringResource(R.string.send_files_screen_ping_failure),
-                        style = paragraphStyle,
+                        style = paragraphTextStyle,
                     )
                 }
 
@@ -482,7 +482,7 @@ fun SendFilesScreen(
                                 text = destination.name,
                                 modifier = Modifier
                                     .padding(horizontal = 10.dp, vertical = 10.dp),
-                                style = paragraphStyle,
+                                style = paragraphTextStyle,
                             )
                             FittoniaSpacerWeightRow()
                             FittoniaIcon(
@@ -519,17 +519,17 @@ private fun Preview() {
                 SettingsManager.Destination(
                     name = "Home Computer",
                     ip = "192.456.34.01",
-                    password = "Password",
+                    accessCode = "AccessCode",
                 ),
                 SettingsManager.Destination(
                     name = "Work Computer",
                     ip = "193.852.11.02",
-                    password = "Password",
+                    accessCode = "AccessCode",
                 ),
                 SettingsManager.Destination(
                     name = "Bob's Computer",
                     ip = "164.123.45.67",
-                    password = "Password",
+                    accessCode = "AccessCode",
                 ),
             ),
         ),

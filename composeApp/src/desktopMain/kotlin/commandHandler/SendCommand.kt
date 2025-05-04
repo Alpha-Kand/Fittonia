@@ -26,7 +26,7 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
 // TODO Sending files should be handled in DesktopServer. - After release
 fun SendCommand.canContinueSendCommand(client: HMeadowSocketClient): Boolean {
     val destination = SettingsManagerDesktop.settingsManager.findDestination(this.getDestination())
-    val password = destination?.password ?: this.getPassword()
+    val accessCode = destination?.accessCode ?: this.getAccessCode()
     val commandFlag = when (this) {
         is SendFilesCommand -> ServerCommandFlag.SEND_FILES
         is SendMessageCommand -> ServerCommandFlag.SEND_MESSAGE
@@ -34,9 +34,9 @@ fun SendCommand.canContinueSendCommand(client: HMeadowSocketClient): Boolean {
     }
     return client.communicateCommandBoolean(
         commandFlag = commandFlag,
-        password = password,
+        accessCode = accessCode,
         onSuccess = { },
-        onPasswordRefused = { printlnIO("Server refused password.") },
+        onAccessCodeRefused = { printlnIO("Server refused access code.") },
         onFailure = { printlnIO("Connected, but request refused.") },
     )
 }

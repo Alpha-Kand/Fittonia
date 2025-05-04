@@ -70,8 +70,8 @@ class Navigator(private val mainViewModel: MainViewModel) {
     private fun welcomeScreen() = Screen(
         viewModel = WelcomeScreenViewModel(
             mainViewModel = mainViewModel,
-            onContinueCallback = { password, port ->
-                mainViewModel.updateServerPassword(password)
+            onContinueCallback = { accessCode, port ->
+                mainViewModel.updateServerAccessCode(accessCode)
                 mainViewModel.launch {
                     mainViewModel.updateServerPort(port)
                 }
@@ -108,11 +108,11 @@ class Navigator(private val mainViewModel: MainViewModel) {
 
     private fun sendFilesScreen() = Screen(
         viewModel = SendFilesScreenViewModel(
-            onSaveOneTimeDestinationCallback = { oneTimeIp, oneTimePassword, onFinish ->
+            onSaveOneTimeDestinationCallback = { oneTimeIp, oneTimeAccessCode, onFinish ->
                 push(
                     newDestinationScreen(
                         oneTimeIp = oneTimeIp,
-                        oneTimePassword = oneTimePassword,
+                        oneTimeAccessCode = oneTimeAccessCode,
                         onFinish = onFinish,
                     ),
                 )
@@ -136,12 +136,12 @@ class Navigator(private val mainViewModel: MainViewModel) {
 
     private fun newDestinationScreen(
         oneTimeIp: String? = null,
-        oneTimePassword: String? = null,
+        oneTimeAccessCode: String? = null,
         onFinish: (SettingsManager.Destination) -> Unit,
     ) = Screen(
         viewModel = NewDestinationScreenViewModel(
             oneTimeIp = oneTimeIp,
-            oneTimePassword = oneTimePassword,
+            oneTimeAccessCode = oneTimeAccessCode,
             onSaveNewDestinationCallback = { newDestination ->
                 mainViewModel.addDestination(newDestination)
                 onFinish(newDestination)
@@ -203,7 +203,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
         instance = this
         mainViewModel.launch {
             mainViewModel.dataStore.data.first().let {
-                if (it.defaultPort != 0 && it.serverPassword != null && it.dumpPath.isSet) {
+                if (it.defaultPort != 0 && it.serverAccessCode != null && it.dumpPath.isSet) {
                     push(overviewScreen())
                 } else {
                     push(welcomeScreen())
@@ -253,7 +253,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                                     destination = SettingsManager.Destination(
                                         name = "Bob's PC (${abs(Random.nextInt() % 100)})",
                                         ip = "192.168.1.1",
-                                        password = "Password",
+                                        accessCode = "accesscode",
                                     ),
                                     items = (0..abs(Random.nextInt() % 100)).map {
                                         TransferJob.Item(
@@ -274,7 +274,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                                 destination = SettingsManager.Destination(
                                     name = "Destination ${abs(Random.nextInt() % 100)}",
                                     ip = "${getIpNum()}.${getIpNum()}.${getIpNum()}.${getIpNum()}",
-                                    password = "Password",
+                                    accessCode = "accesscode",
                                 ),
                             )
                         },

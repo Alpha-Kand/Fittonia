@@ -53,17 +53,17 @@ sealed class SendCommand : Command() {
     private var port: Int? = null
     private var destination: String? = null
     private var ip: String? = null
-    private var password: String? = null
+    private var accessCode: String? = null
 
     open fun getDestination() = destination
     fun getPort() = verifyArgumentIsSet(argument = port, reportingName = portArguments.first())
     fun getIP() = verifyArgumentIsSet(argument = ip, reportingName = ipArguments.first())
-    fun getPassword() = verifyArgumentIsSet(argument = password, reportingName = passwordArguments.first())
+    fun getAccessCode() = verifyArgumentIsSet(argument = accessCode, reportingName = accessCodeArguments.first())
 
     override fun verify() {
         if (destination == null) {
             // getIP() TODO - After release
-            getPassword()
+            getAccessCode()
         }
         verifyPortNumber(port)
     }
@@ -72,7 +72,7 @@ sealed class SendCommand : Command() {
         SessionManager.port?.let { port = it }
         SessionManager.destination?.let { destination = it }
         SessionManager.ip?.let { ip = it }
-        SessionManager.password?.let { password = it }
+        SessionManager.accessCode?.let { accessCode = it }
     }
 
     fun handleSendCommandArgument(argumentName: String, value: String): Boolean {
@@ -86,9 +86,9 @@ sealed class SendCommand : Command() {
             destination = value
             return true
         }
-        if (passwordArguments.contains(argumentName)) {
-            requireNull(password)
-            password = value
+        if (accessCodeArguments.contains(argumentName)) {
+            requireNull(accessCode)
+            accessCode = value
             return true
         }
         if (ipArguments.contains(argumentName)) {

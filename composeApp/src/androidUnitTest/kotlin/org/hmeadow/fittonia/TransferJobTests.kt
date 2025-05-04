@@ -22,7 +22,7 @@ internal class TransferJobTests : AndroidBaseMockkTest() {
         destination = SettingsManager.Destination(
             name = "Destination Name",
             ip = "123.456.789.012",
-            password = "password",
+            accessCode = "accesscode",
         ),
         port = 12345,
         needDescription = false,

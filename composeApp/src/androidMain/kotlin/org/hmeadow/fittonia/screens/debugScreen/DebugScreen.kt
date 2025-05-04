@@ -85,7 +85,7 @@ fun DebugScreen(
                             defaultSendThrottle = viewModel.defaultSendThrottle,
                             defaultNewDestinationName = viewModel.defaultNewDestinationName,
                             defaultNewDestinationPort = viewModel.defaultNewDestinationPort,
-                            defaultNewDestinationPassword = viewModel.defaultNewDestinationPassword,
+                            defaultNewDestinationAccessCode = viewModel.defaultNewDestinationAccessCode,
                             defaultNewDestinationIP = viewModel.defaultNewDestinationIP,
                             onSaveDefaults = viewModel::onSaveDefaults,
                             needToSave = viewModel.needToSave.collectAsState(initial = false).value,

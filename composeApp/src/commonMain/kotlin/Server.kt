@@ -1,9 +1,9 @@
 import ServerCommandFlag.Companion.toCommandFlag
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 interface Server {
     var jobId: Int
@@ -17,7 +17,7 @@ interface Server {
         }
     }
 
-    fun HMeadowSocketServer.passwordIsValid(): Boolean
+    fun HMeadowSocketServer.accessCodeIsValid(): Boolean
 
     suspend fun HMeadowSocketServer.handleCommand(
         onSendFilesCommand: suspend (Boolean, HMeadowSocketServer, Int) -> Unit,
@@ -37,13 +37,13 @@ interface Server {
             return
         }
         sendConfirmation()
-        val passwordIsValid = passwordIsValid()
-        sendApproval(choice = passwordIsValid)
+        val accessCodeIsValid = accessCodeIsValid()
+        sendApproval(choice = accessCodeIsValid)
         when (command) {
-            ServerCommandFlag.PING -> onPing(passwordIsValid, this, jobId)
-            ServerCommandFlag.SEND_FILES -> onSendFilesCommand(passwordIsValid, this, jobId)
-            ServerCommandFlag.SEND_MESSAGE -> onSendMessageCommand(passwordIsValid, this, jobId)
-            ServerCommandFlag.ADD_DESTINATION -> onAddDestination(passwordIsValid, this, jobId)
+            ServerCommandFlag.PING -> onPing(accessCodeIsValid, this, jobId)
+            ServerCommandFlag.SEND_FILES -> onSendFilesCommand(accessCodeIsValid, this, jobId)
+            ServerCommandFlag.SEND_MESSAGE -> onSendMessageCommand(accessCodeIsValid, this, jobId)
+            ServerCommandFlag.ADD_DESTINATION -> onAddDestination(accessCodeIsValid, this, jobId)
         }
     }
 
@@ -76,10 +76,10 @@ interface Server {
         )
     }
 
-    suspend fun onPing(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
-    suspend fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
-    suspend fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
-    suspend fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    suspend fun onPing(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    suspend fun onSendFiles(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    suspend fun onSendMessage(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
+    suspend fun onAddDestination(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int)
     suspend fun onInvalidCommand(unknownCommand: String)
 }
 
@@ -95,18 +95,18 @@ fun <T> HMeadowSocket.receiveApproval(onConfirm: () -> T, onDeny: () -> T): T {
 // TODO Sending files should be handled in Server. - After release
 fun <T> HMeadowSocketClient.communicateCommand(
     commandFlag: ServerCommandFlag,
-    password: String,
+    accessCode: String,
     onSuccess: () -> T,
-    onPasswordRefused: () -> T,
+    onAccessCodeRefused: () -> T,
     onFailure: () -> T,
 ): T {
     sendString(message = commandFlag.text)
     return receiveApproval(
         onConfirm = {
-            sendString(password)
+            sendString(accessCode)
             receiveApproval(
                 onConfirm = { onSuccess() },
-                onDeny = { onPasswordRefused() },
+                onDeny = { onAccessCodeRefused() },
             )
         },
         onDeny = { onFailure() },
@@ -116,22 +116,22 @@ fun <T> HMeadowSocketClient.communicateCommand(
 // TODO Sending files should be handled in Server. - After release
 fun HMeadowSocketClient.communicateCommandBoolean(
     commandFlag: ServerCommandFlag,
-    password: String,
+    accessCode: String,
     onSuccess: () -> Unit,
-    onPasswordRefused: () -> Unit,
+    onAccessCodeRefused: () -> Unit,
     onFailure: () -> Unit,
 ): Boolean {
     sendString(message = commandFlag.text)
     return receiveApproval(
         onConfirm = {
-            sendString(password)
+            sendString(accessCode)
             receiveApproval(
                 onConfirm = {
                     onSuccess()
                     true
                 },
                 onDeny = {
-                    onPasswordRefused()
+                    onAccessCodeRefused()
                     false
                 },
             )

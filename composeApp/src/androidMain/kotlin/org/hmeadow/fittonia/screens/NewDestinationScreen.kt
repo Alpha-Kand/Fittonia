@@ -24,24 +24,24 @@ import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
-import org.hmeadow.fittonia.design.fonts.paragraphStyle
+import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.utility.Debug
 
 class NewDestinationScreenViewModel(
     oneTimeIp: String?,
-    oneTimePassword: String?,
+    oneTimeAccessCode: String?,
     private val onSaveNewDestinationCallback: (SettingsManager.Destination) -> Unit,
 ) : BaseViewModel() {
     val nameState = InputFlow(initial = "")
     val ipAddressState = InputFlow(initial = oneTimeIp ?: "")
-    val passwordState = InputFlow(initial = oneTimePassword ?: "")
+    val accessCodeState = InputFlow(initial = oneTimeAccessCode ?: "")
 
     val canAddDestination = combine(
         nameState,
         ipAddressState,
-        passwordState,
-    ) { name, ip, password ->
-        name.isNotEmpty() && ip.isNotEmpty() && password.isNotEmpty()
+        accessCodeState,
+    ) { name, ip, accessCode ->
+        name.isNotEmpty() && ip.isNotEmpty() && accessCode.isNotEmpty()
     }
 
     fun onSaveNewDestination() {
@@ -49,7 +49,7 @@ class NewDestinationScreenViewModel(
             SettingsManager.Destination(
                 name = nameState.text,
                 ip = ipAddressState.text,
-                password = passwordState.text,
+                accessCode = accessCodeState.text,
             ),
         )
     }
@@ -73,14 +73,14 @@ fun NewDestinationScreen(
 
                 Text(
                     text = stringResource(R.string.new_destination_screen_body),
-                    style = paragraphStyle,
+                    style = paragraphTextStyle,
                 )
 
                 FittoniaSpacerHeight(height = 7)
 
                 Text(
                     text = "The destination will be pinged to confirm its existence.",
-                    style = paragraphStyle,
+                    style = paragraphTextStyle,
                 )
 
                 FittoniaSpacerHeight(height = 30)
@@ -113,8 +113,8 @@ fun NewDestinationScreen(
 
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
-                    inputFlow = viewModel.passwordState,
-                    label = "Password",
+                    inputFlow = viewModel.accessCodeState,
+                    label = "Access Code",
                 )
             }
         },
@@ -141,7 +141,7 @@ private fun Preview() {
     NewDestinationScreen(
         viewModel = NewDestinationScreenViewModel(
             oneTimeIp = null,
-            oneTimePassword = null,
+            oneTimeAccessCode = null,
             onSaveNewDestinationCallback = {},
         ),
         onBackClicked = { },

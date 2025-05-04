@@ -16,24 +16,24 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         println("BaseViewModel error: ${throwable.message}") // TODO - handle errors, crashlytics? before release
     }
 
-    fun attemptAndroidServerWithPort(initServer: (port: Int, password: String) -> Unit) = launch {
+    fun attemptAndroidServerWithPort(initServer: (port: Int, accessCode: String) -> Unit) = launch {
         serverLog(text = "attemptAndroidServerWithPort")
         dataStore.data.collect { data ->
             serverLog(text = "attemptAndroidServerWithPort data loaded")
             data.temporaryPort?.let { port ->
                 serverLog(text = "attemptAndroidServerWithPort temp port loaded ($port)")
-                data.serverPassword?.let { password ->
-                    serverLog(text = "attemptAndroidServerWithPort server password loaded ($password)")
+                data.serverAccessCode?.let { accessCode ->
+                    serverLog(text = "attemptAndroidServerWithPort server access code loaded ($accessCode)")
                     if (port in 1025..59999) {
-                        initServer(port, password)
+                        initServer(port, accessCode)
                     }
                 }
             } ?: data.defaultPort.let { port ->
                 serverLog(text = "attemptAndroidServerWithPort default port loaded ($port)")
-                data.serverPassword?.let { password ->
-                    serverLog(text = "attemptAndroidServerWithPort server password loaded ($password)")
+                data.serverAccessCode?.let { accessCode ->
+                    serverLog(text = "attemptAndroidServerWithPort server access code loaded ($accessCode)")
                     if (port in 1025..59999) {
-                        initServer(port, password)
+                        initServer(port, accessCode)
                     }
                 }
             }
@@ -41,9 +41,9 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         updateTemporaryPort(port = null)
     }
 
-    fun updateServerPassword(password: String) = launch {
+    fun updateServerAccessCode(accessCode: String) = launch {
         dataStore.updateData {
-            it.copy(serverPassword = password)
+            it.copy(serverAccessCode = accessCode)
         }
     }
 

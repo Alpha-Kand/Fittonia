@@ -1,9 +1,9 @@
-import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
-import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 
 private class ServerScriptTest : BaseSocketScriptTest() {
 
@@ -26,30 +26,30 @@ private class ServerScriptTest : BaseSocketScriptTest() {
             set(_) {}
         override val jobIdMutex = Mutex()
 
-        override fun HMeadowSocketServer.passwordIsValid(): Boolean {
+        override fun HMeadowSocketServer.accessCodeIsValid(): Boolean {
             return true
         }
 
-        override suspend fun onPing(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        override suspend fun onPing(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
             TODO("Not yet implemented") // After release
         }
 
         override suspend fun onAddDestination(
-            clientPasswordSuccess: Boolean,
+            clientAccessCodeSuccess: Boolean,
             server: HMeadowSocketServer,
             jobId: Int,
         ) {
         }
 
         override suspend fun onSendFiles(
-            clientPasswordSuccess: Boolean,
+            clientAccessCodeSuccess: Boolean,
             server: HMeadowSocketServer,
             jobId: Int,
         ) {
         }
 
         override suspend fun onSendMessage(
-            clientPasswordSuccess: Boolean,
+            clientAccessCodeSuccess: Boolean,
             server: HMeadowSocketServer,
             jobId: Int,
         ) {

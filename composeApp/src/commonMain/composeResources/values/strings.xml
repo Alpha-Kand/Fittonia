@@ -47,18 +47,18 @@
     <string name="remove_help_format">%1$s &lt;NAME&gt;</string>
     <string name="remove_help_arguments_name">Name of a specific destination to remove. Must match exactly.</string>
 
-    <!-- ServerPassword -->
-    <string name="no_previous_password_found">No previous password found. New password not saved.</string>
-    <string name="confirm_password_update">Please provide current (old) password to confirm changes.</string>
-    <string name="confirm_password_update_failed">Old password was incorrect, please try again.</string>
-    <string name="password_saved">Password saved. You will need to provide this new password if you want to change the default password again.</string>
-    <string name="server_password_help_description">Sets the server's password that incoming connections must provide to connect.</string>
-    <string name="server_password_help_format">%1$s &lt;NEW PASSWORD&gt; &lt;OPTIONAL OLD PASSWORD&gt;</string>
-    <string name="server_password_help_arguments_new">The new server password.</string>
-    <string name="server_password_help_arguments_old">Old password, if previously set.</string>
+    <!-- ServerAccessCode -->
+    <string name="no_previous_access_code_found">No previous access code found. New access code not saved.</string>
+    <string name="confirm_access_code_update">Please provide current (old) access code to confirm changes.</string>
+    <string name="confirm_access_code_update_failed">Old access code was incorrect, please try again.</string>
+    <string name="access_code_saved">Access code saved. You will need to provide this new access code if you want to change the default access code again.</string>
+    <string name="server_access_code_help_description">Sets the server's access_code that incoming connections must provide to connect.</string>
+    <string name="server_access_code_help_format">%1$s &lt;NEW ACCESS CODE&gt; &lt;OPTIONAL OLD ACCESS CODE&gt;</string>
+    <string name="server_access_code_help_arguments_new">The new server access code.</string>
+    <string name="server_access_code_help_arguments_old">Old access code, if previously set.</string>
 
     <!-- Server -->
-    <string name="server_init_cannot_start_no_password">Cannot start server: _no server password set. Set it with the `server-password` command.</string>
+    <string name="server_init_cannot_start_no_access_code">Cannot start server: _no server access code set. Set it with the `server-accesscode` command.</string>
     <string name="server_init_cannot_start_no_dump_path">Cannot start server: No dump path set (directory path to store files from clients). Set it with the `dump` command.</string>
     <string name="server_init_server_started">Server started. ⏳ Waiting for clients.</string>
     <string name="server_init_server_already_started">Server already started.</string>

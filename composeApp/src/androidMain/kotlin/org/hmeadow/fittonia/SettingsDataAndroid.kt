@@ -45,7 +45,7 @@ data class SettingsDataAndroid(
     val dumpPath: DumpPath = DumpPath(),
     val defaultPort: Int = DEFAULT_PORT,
     val temporaryPort: Int? = null,
-    val serverPassword: String? = null,
+    val serverAccessCode: String? = null,
     val nextAutoJobName: Long = 0,
     val debugSettings: DebugSettings = DebugSettings(),
 ) {
@@ -69,7 +69,7 @@ data class SettingsDataAndroid(
         val defaultSendThrottle: Double = 2.0,
         val defaultNewDestinationName: String = "NewDestination",
         val defaultNewDestinationPort: Int = 12345,
-        val defaultNewDestinationPassword: String = "password123",
+        val defaultNewDestinationAccessCode: String = "accesscode123",
         val defaultNewDestinationIP: String = "0.0.0.0",
     )
 }

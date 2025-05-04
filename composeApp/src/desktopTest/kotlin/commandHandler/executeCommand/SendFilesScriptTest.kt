@@ -7,13 +7,13 @@ import UnitTest
 import commandHandler.FileTransfer
 import commandHandler.FileTransfer.Companion.toName
 import commandHandler.SendFilesCommand
+import commandHandler.accessCodeArguments
 import commandHandler.executeCommand.sendExecution.fileNamesTooLong
 import commandHandler.executeCommand.sendExecution.helpers.FileZipper
 import commandHandler.executeCommand.sendExecution.helpers.SourceFileListManager
 import commandHandler.executeCommand.sendExecution.sendFilesCollecting
 import commandHandler.executeCommand.sendExecution.sendFilesExecution
 import commandHandler.ipArguments
-import commandHandler.passwordArguments
 import commandHandler.portArguments
 import commandHandler.setupSendCommandClient
 import fileOperations.FileOperations
@@ -37,7 +37,7 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
 
     @BeforeEach
     fun setup() {
-        every { SettingsManagerDesktop.settingsManager.checkPassword(any()) } returns true
+        every { SettingsManagerDesktop.settingsManager.checkAccessCode(any()) } returns true
         every { SettingsManagerDesktop.settingsManager.settings.dumpPath } returns "dump path"
         coEvery { SettingsManagerDesktop.settingsManager.getAutoJobName() } returns "job name"
 
@@ -67,7 +67,7 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
             sendFilesExecution(
                 command = SendFilesCommand().also {
                     it.addArg(argumentName = ipArguments.first(), value = "ip code")
-                    it.addArg(argumentName = passwordArguments.first(), value = "password")
+                    it.addArg(argumentName = accessCodeArguments.first(), value = "accesscode")
                     it.addArg(argumentName = portArguments.first(), value = "1234")
                     it.setFiles(listOf("file1", "file2"))
                 },
@@ -90,7 +90,7 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
             sendFilesExecution(
                 command = SendFilesCommand().also {
                     it.addArg(argumentName = ipArguments.first(), value = "ip code")
-                    it.addArg(argumentName = passwordArguments.first(), value = "password")
+                    it.addArg(argumentName = accessCodeArguments.first(), value = "accesscode")
                     it.addArg(argumentName = portArguments.first(), value = "1234")
                     it.setFiles(listOf("file1", "file2"))
                 },
@@ -113,7 +113,7 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
             sendFilesExecution(
                 command = SendFilesCommand().also {
                     it.addArg(argumentName = ipArguments.first(), value = "ip code")
-                    it.addArg(argumentName = passwordArguments.first(), value = "password")
+                    it.addArg(argumentName = accessCodeArguments.first(), value = "accesscode")
                     it.addArg(argumentName = portArguments.first(), value = "1234")
                     it.setFiles(listOf("file1", "file2"))
                 },
@@ -136,7 +136,7 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
             sendFilesExecution(
                 command = SendFilesCommand().also {
                     it.addArg(argumentName = ipArguments.first(), value = "ip code")
-                    it.addArg(argumentName = passwordArguments.first(), value = "password")
+                    it.addArg(argumentName = accessCodeArguments.first(), value = "accesscode")
                     it.addArg(argumentName = portArguments.first(), value = "1234")
                     it.setFiles(listOf("file1", "file2"))
                 },
@@ -159,7 +159,7 @@ private class SendFilesScriptTest : BaseSocketScriptTest() {
             sendFilesExecution(
                 command = SendFilesCommand().also {
                     it.addArg(argumentName = ipArguments.first(), value = "ip code")
-                    it.addArg(argumentName = passwordArguments.first(), value = "password")
+                    it.addArg(argumentName = accessCodeArguments.first(), value = "accesscode")
                     it.addArg(argumentName = portArguments.first(), value = "1234")
                     it.setFiles(listOf("file1", "file2"))
                 },

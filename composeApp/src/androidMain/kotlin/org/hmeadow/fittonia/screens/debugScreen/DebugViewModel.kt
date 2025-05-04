@@ -27,7 +27,7 @@ class DebugScreenViewModel(
     val defaultSendThrottle = InputFlow(initial = "")
     val defaultNewDestinationName = InputFlow(initial = "")
     val defaultNewDestinationPort = InputFlow(initial = "")
-    val defaultNewDestinationPassword = InputFlow(initial = "")
+    val defaultNewDestinationAccessCode = InputFlow(initial = "")
     val defaultNewDestinationIP = InputFlow(initial = "")
     val needToSave = combine(
         mainViewModel.dataStore.data,
@@ -58,7 +58,7 @@ class DebugScreenViewModel(
                 defaultNewDestinationName.text = debugSettings.defaultNewDestinationName
                 defaultNewDestinationPort.text = debugSettings.defaultNewDestinationPort.toString()
                 defaultNewDestinationIP.text = debugSettings.defaultNewDestinationIP
-                defaultNewDestinationPassword.text = debugSettings.defaultNewDestinationPassword
+                defaultNewDestinationAccessCode.text = debugSettings.defaultNewDestinationAccessCode
             }
         }
         refreshIp()
@@ -95,7 +95,7 @@ class DebugScreenViewModel(
             destination = SettingsManager.Destination(
                 name = "$defaultNewDestinationName ${abs(Random.nextInt() % 100)}",
                 ip = "${getIpNum()}.${getIpNum()}.${getIpNum()}.${getIpNum()}",
-                password = defaultNewDestinationPassword.text,
+                accessCode = defaultNewDestinationAccessCode.text,
             ),
         )
     }

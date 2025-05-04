@@ -2,31 +2,31 @@ package commandHandler.executeCommand
 
 import OutputIO.printlnIO
 import SettingsManagerDesktop
-import commandHandler.ServerPasswordCommand
+import commandHandler.ServerAccessCodeCommand
 import fittonia.composeapp.generated.resources.Res
-import fittonia.composeapp.generated.resources.confirm_password_update
-import fittonia.composeapp.generated.resources.confirm_password_update_failed
-import fittonia.composeapp.generated.resources.no_previous_password_found
-import fittonia.composeapp.generated.resources.password_saved
+import fittonia.composeapp.generated.resources.access_code_saved
+import fittonia.composeapp.generated.resources.confirm_access_code_update
+import fittonia.composeapp.generated.resources.confirm_access_code_update_failed
+import fittonia.composeapp.generated.resources.no_previous_access_code_found
 
-suspend fun serverPasswordExecution(command: ServerPasswordCommand) {
+suspend fun serverAccessCodeExecution(command: ServerAccessCodeCommand) {
     val settingsManager = SettingsManagerDesktop.settingsManager
-    if (settingsManager.settings.serverPassword.isNullOrEmpty()) {
-        if (command.getOldPassword() != null) {
-            printlnIO(Res.string.no_previous_password_found)
+    if (settingsManager.settings.serverAccessCode.isNullOrEmpty()) {
+        if (command.getOldAccessCode() != null) {
+            printlnIO(Res.string.no_previous_access_code_found)
             return
         }
     } else {
-        if (command.getOldPassword() == null) {
-            printlnIO(Res.string.confirm_password_update)
+        if (command.getOldAccessCode() == null) {
+            printlnIO(Res.string.confirm_access_code_update)
             return
         }
 
-        if (settingsManager.settings.serverPassword != command.getOldPassword()) {
-            printlnIO(Res.string.confirm_password_update_failed)
+        if (settingsManager.settings.serverAccessCode != command.getOldAccessCode()) {
+            printlnIO(Res.string.confirm_access_code_update_failed)
             return
         }
     }
-    settingsManager.setServerPassword(command.getNewPassword())
-    printlnIO(Res.string.password_saved)
+    settingsManager.setServerAccessCode(command.getNewAccessCode())
+    printlnIO(Res.string.access_code_saved)
 }

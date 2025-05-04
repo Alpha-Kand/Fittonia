@@ -184,11 +184,11 @@ class MainActivity : ComponentActivity() {
     }
 
     var isConnected = false
-    private fun initAndroidServer(port: Int, password: String) {
-        serverLog(text = "initAndroidServer (port = $port) (password = $password)")
+    private fun initAndroidServer(port: Int, accessCode: String) {
+        serverLog(text = "initAndroidServer (port = $port) (accessCode = $accessCode)")
         val intent = Intent(mainActivity, AndroidServer::class.java).apply {
             this.putExtra("org.hmeadow.fittonia.port", port)
-            this.putExtra("org.hmeadow.fittonia.password", password)
+            this.putExtra("org.hmeadow.fittonia.accesscode", accessCode)
         }
         lastServerConnection = serverConnection
         serverLog(text = "serverConnection = $serverConnection")

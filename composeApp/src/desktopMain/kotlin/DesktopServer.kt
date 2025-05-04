@@ -1,11 +1,11 @@
 import commandHandler.FileTransfer
 import fileOperations.FileOperations
-import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import java.nio.file.Path
 import kotlin.io.path.Path
 
@@ -40,13 +40,13 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         }
     }
 
-    override suspend fun onPing(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+    override suspend fun onPing(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         TODO("Not yet implemented") // After release
     }
 
-    override suspend fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
-        if (!clientPasswordSuccess) {
-            logWarning("Client attempted to add this server as destination, password refused.", jobId = jobId)
+    override suspend fun onAddDestination(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientAccessCodeSuccess) {
+            logWarning("Client attempted to add this server as destination, access code refused.", jobId = jobId)
         } else {
             if (server.receiveBoolean()) {
                 log("Client added this server as a destination.", jobId = jobId)
@@ -56,9 +56,9 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         }
     }
 
-    override suspend fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
-        if (!clientPasswordSuccess) {
-            logWarning("Client attempted to send files to this server, password refused.", jobId = jobId)
+    override suspend fun onSendFiles(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientAccessCodeSuccess) {
+            logWarning("Client attempted to send files to this server, access code refused.", jobId = jobId)
         } else {
             log("Client attempting to send files.", jobId = jobId)
             val jobPath = server.getJobName2(flag = server.receiveString(), jobId = jobId)
@@ -81,9 +81,9 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         }
     }
 
-    override suspend fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
-        if (!clientPasswordSuccess) {
-            logWarning("Client attempted to send a message, password refused.", jobId = jobId)
+    override suspend fun onSendMessage(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientAccessCodeSuccess) {
+            logWarning("Client attempted to send a message, access code refused.", jobId = jobId)
         } else {
             log("Client message: ${server.receiveString()}", jobId = jobId)
             server.sendConfirmation()
@@ -98,8 +98,8 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         block(HMeadowSocketServer.createServerFromSocket(serverSocket = mainServerSocket))
     }
 
-    override fun HMeadowSocketServer.passwordIsValid(): Boolean {
-        return SettingsManagerDesktop.settingsManager.checkPassword(receiveString())
+    override fun HMeadowSocketServer.accessCodeIsValid(): Boolean {
+        return SettingsManagerDesktop.settingsManager.checkAccessCode(receiveString())
     }
 
     companion object {

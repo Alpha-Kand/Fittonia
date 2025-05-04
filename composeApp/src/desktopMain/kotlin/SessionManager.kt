@@ -1,8 +1,8 @@
 import commandHandler.Command.Companion.verifyArgumentIsSet
 import commandHandler.SendCommand
+import commandHandler.accessCodeArguments
 import commandHandler.destinationArguments
 import commandHandler.ipArguments
-import commandHandler.passwordArguments
 import commandHandler.portArguments
 import commandHandler.sendFilesCommand
 import commandHandler.sendMessageCommand
@@ -16,7 +16,7 @@ class SessionManager {
             private set
         var ip: String? = null
             private set
-        var password: String? = null
+        var accessCode: String? = null
             private set
 
         fun setSessionParams(command: SendCommand) {
@@ -25,7 +25,7 @@ class SessionManager {
             destination = command.getDestination()
             if (destination == null) {
                 ip = command.getIP()
-                password = command.getPassword()
+                accessCode = command.getAccessCode()
             }
         }
 
@@ -36,7 +36,7 @@ class SessionManager {
             var setPort = true
             var setDestination = true
             var setIP = true
-            var setPassword = true
+            var setAccessCode = true
 
             input.forEach { token ->
                 portArguments.forEach {
@@ -54,13 +54,13 @@ class SessionManager {
                         setIP = false
                     }
                 }
-                passwordArguments.forEach {
+                accessCodeArguments.forEach {
                     if (token.startsWith(it)) {
-                        setPassword = false
+                        setAccessCode = false
                     }
                 }
             }
-            // TODO don't require ip and password if destination is already given. - After release
+            // TODO don't require ip and access code if destination is already given. - After release
             return listOfNotNull(
                 input.first(),
                 // Insert after command name, but before trailing 'send items'.
@@ -70,9 +70,9 @@ class SessionManager {
                 destinationArguments.first().let {
                     "$it=${verifyArgumentIsSet(destination, it)}"
                 }.takeIf { setDestination },
-                passwordArguments.first().let {
-                    "$it=${verifyArgumentIsSet(password, it)}"
-                }.takeIf { setPassword },
+                accessCodeArguments.first().let {
+                    "$it=${verifyArgumentIsSet(accessCode, it)}"
+                }.takeIf { setAccessCode },
                 ipArguments.first().let {
                     "$it=${verifyArgumentIsSet(ip, it)}"
                 }.takeIf { setIP },

@@ -50,7 +50,7 @@ object PuPrKeyCipher {
         }
     }
 
-    // TODO - After release -> Super secure mode: Have to enter a shared password not sent over the network.
+    // TODO - After release -> Super secure mode: Have to enter a shared access code not sent over the network.
     // i.e. communicate it through another channel such as physically talking or another messenger.
 
     fun getPublicKeyFromKeyStore(): HMPublicKey? {

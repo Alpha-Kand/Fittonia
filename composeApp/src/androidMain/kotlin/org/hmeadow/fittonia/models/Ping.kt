@@ -27,7 +27,7 @@ sealed interface PingStatus {
             get() = 1
     }
 
-    data object IncorrectPassword : Failure
+    data object IncorrectAccessCode : Failure
     data object ConnectionRefused : Failure
     data object CouldNotConnect : Failure
     data object InternalBug : Failure

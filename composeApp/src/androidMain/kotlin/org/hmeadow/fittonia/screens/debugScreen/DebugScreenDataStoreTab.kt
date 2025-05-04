@@ -47,7 +47,7 @@ fun DebugScreenDataStoreTab(
             Column {
                 Text(text = "'defaultPort':")
                 Text(text = "'temporaryPort':")
-                Text(text = "'serverPassword':")
+                Text(text = "'serverAccessCode':")
                 Text(text = "'nextAutoJobName':")
                 Text(text = "'DumpPath.dumpUriPath':")
                 Text(text = "'DumpPath.dumpPathReadable':")
@@ -59,7 +59,7 @@ fun DebugScreenDataStoreTab(
             Column {
                 Text(text = data.defaultPort.toString())
                 Text(text = data.temporaryPort.toString())
-                Text(text = data.serverPassword.toString())
+                Text(text = data.serverAccessCode.toString())
                 Text(text = data.nextAutoJobName.toString())
                 Row(
                     modifier = Modifier
@@ -108,7 +108,7 @@ fun DebugScreenDataStoreTab(
                         ),
                 ) {
                     Text(text = "Name: ${destination.name}")
-                    Text(text = "Password: ${destination.password}")
+                    Text(text = "Access Code: ${destination.accessCode}")
                     Text(text = "IP address: ${destination.ip}")
                 }
 

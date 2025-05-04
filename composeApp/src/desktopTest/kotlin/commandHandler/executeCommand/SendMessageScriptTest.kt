@@ -5,9 +5,9 @@ import DesktopServer
 import SettingsManagerDesktop
 import UnitTest
 import commandHandler.SendMessageCommand
+import commandHandler.accessCodeArguments
 import commandHandler.executeCommand.sendExecution.sendMessageExecution
 import commandHandler.ipArguments
-import commandHandler.passwordArguments
 import commandHandler.portArguments
 import commandHandler.setupSendCommandClient
 import io.mockk.every
@@ -19,13 +19,13 @@ private class SendMessageScriptTest : BaseSocketScriptTest() {
         setupBlock = {
             mockkStatic(::setupSendCommandClient)
             every { setupSendCommandClient(any()) } returns generateClient()
-            every { SettingsManagerDesktop.settingsManager.checkPassword(any()) } returns true
+            every { SettingsManagerDesktop.settingsManager.checkAccessCode(any()) } returns true
         },
         {
             sendMessageExecution(
                 command = SendMessageCommand(message = "This is a message.").also {
                     it.addArg(argumentName = ipArguments.first(), value = "ip code")
-                    it.addArg(argumentName = passwordArguments.first(), value = "password")
+                    it.addArg(argumentName = accessCodeArguments.first(), value = "accesscode")
                     it.addArg(argumentName = portArguments.first(), value = "1234")
                 },
             )

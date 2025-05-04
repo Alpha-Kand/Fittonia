@@ -36,7 +36,7 @@ suspend fun addExecution(command: AddCommand) {
         SettingsManagerDesktop.settingsManager.addDestination(
             name = command.getName(),
             ip = command.getIP(),
-            password = command.getPassword(),
+            accessCode = command.getAccessCode(),
         )
         printlnIO("Destination added.")
         client.sendBoolean(true)
