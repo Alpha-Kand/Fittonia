@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
@@ -25,8 +28,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.LocalFocusRequester
 import org.hmeadow.fittonia.MainActivity.Companion.imeHeight
+import org.hmeadow.fittonia.MainActivity.Companion.imeHeightVar
 import org.hmeadow.fittonia.MainActivity.Companion.navBarHeight
+import org.hmeadow.fittonia.MainActivity.Companion.navBarHeightVar
 import org.hmeadow.fittonia.MainActivity.Companion.statusBarsHeight
+import org.hmeadow.fittonia.MainActivity.Companion.statusBarsHeightVar
+import org.hmeadow.fittonia.compose.architecture.appStyleResetHeader
+import org.hmeadow.fittonia.compose.architecture.appStyleResetStatusBar
+import org.hmeadow.fittonia.compose.architecture.appStyleResetStatusFooter
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.utility.InfoBorderState.clearInfoBorderState
 import org.hmeadow.fittonia.utility.applyIf
@@ -43,9 +52,9 @@ fun FittoniaScaffold(
     overlay: @Composable BoxScope.() -> Unit = {},
     scrollable: Boolean = true,
 ) {
-    val imeHeightLocal = imeHeight.collectAsState(initial = 0)
-    val navBarHeightLocal = navBarHeight.collectAsState(initial = 0)
-    val statusBarsHeightLocal = statusBarsHeight.collectAsState(initial = 0)
+    val imeHeightLocal = imeHeight.collectAsState(initial = imeHeightVar)
+    val navBarHeightLocal = navBarHeight.collectAsState(initial = navBarHeightVar)
+    val statusBarsHeightLocal = statusBarsHeight.collectAsState(initial = statusBarsHeightVar)
     val keyboard = LocalSoftwareKeyboardController.current
     val focusRequester = LocalFocusRequester.current
     val systemBottomHeight = if (imeHeightLocal.value > 0) {
@@ -72,18 +81,22 @@ fun FittoniaScaffold(
             val headerPlaceables = subcompose(ScaffoldSectionsEnum.HEADER) {
                 header?.let {
                     Column {
-                        Box(
-                            modifier = Modifier
-                                .requiredHeight(statusBarsHeightLocal.value.toDp())
-                                .fillMaxWidth()
-                                .background(color = currentStyle.statusBarColour),
-                        )
-                        Box(
-                            modifier = Modifier
-                                .requiredHeight(50.dp)
-                                .fillMaxWidth(),
-                        ) {
-                            header()
+                        key(appStyleResetStatusBar) {
+                            Box(
+                                modifier = Modifier
+                                    .requiredHeight(height = statusBarsHeightLocal.value.toDp())
+                                    .fillMaxWidth()
+                                    .background(color = currentStyle.statusBarColour),
+                            )
+                        }
+                        key(appStyleResetHeader) {
+                            Box(
+                                modifier = Modifier
+                                    .requiredHeight(50.dp)
+                                    .fillMaxWidth(),
+                            ) {
+                                header()
+                            }
                         }
                     }
                 } ?: Box {}
@@ -91,11 +104,25 @@ fun FittoniaScaffold(
 
             val footerPlaceables = subcompose(ScaffoldSectionsEnum.FOOTER) {
                 footer?.let {
-                    Column(modifier = Modifier.background(color = currentStyle.footerBackgroundColour)) {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            footer()
+                    key(appStyleResetStatusFooter) {
+                        Column(
+                            modifier = Modifier
+                                .background(
+                                    color = currentStyle.footerBackgroundColour,
+                                    shape = RoundedCornerShape(
+                                        topStart = 20.dp,
+                                        topEnd = 20.dp,
+                                        bottomEnd = 0.dp,
+                                        bottomStart = 0.dp,
+                                    ),
+                                )
+                                .padding(horizontal = 15.dp),
+                        ) {
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                footer()
+                            }
+                            Spacer(modifier = Modifier.requiredHeight(navBarHeightLocal.value.toDp()))
                         }
-                        Spacer(modifier = Modifier.requiredHeight(navBarHeightLocal.value.toDp()))
                     }
                 } ?: Box {}
             }.single().measure(constraints)

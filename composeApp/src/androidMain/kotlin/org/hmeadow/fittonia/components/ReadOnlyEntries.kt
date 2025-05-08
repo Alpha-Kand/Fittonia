@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,8 +39,15 @@ fun ReadOnlyEntries(
     var expanded by remember { mutableStateOf(false) }
     Column(
         modifier = modifier
-            .border(width = 2.dp, color = currentStyle.readOnlyBorderColour)
-            .background(color = currentStyle.readOnlyBackgroundColour)
+            .border(
+                width = 2.dp,
+                color = currentStyle.readOnlyBorderColour,
+                shape = RoundedCornerShape(corner = CornerSize(5.dp)),
+            )
+            .background(
+                color = currentStyle.readOnlyBackgroundColour,
+                shape = RoundedCornerShape(corner = CornerSize(5.dp)),
+            )
             .clickable {
                 if (expandOnClick) {
                     expanded = !expanded

@@ -74,7 +74,7 @@ fun FittoniaModal(
                     .background(color = Color.Black.copy(alpha = 0.5f))
                     .fillMaxHeight()
                     .fillMaxWidth(
-                        if(isLandscape()){
+                        if (isLandscape()) {
                             0.5f
                         } else {
                             0.85f

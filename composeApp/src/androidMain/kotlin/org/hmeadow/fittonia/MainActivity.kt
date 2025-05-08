@@ -177,8 +177,11 @@ class MainActivity : ComponentActivity() {
     private fun initWindowInsetsListener() {
         ViewCompat.setOnApplyWindowInsetsListener(this.window.decorView) { _, insets ->
             navBarHeight.value = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            navBarHeightVar = navBarHeight.value
             imeHeight.value = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            imeHeightVar = imeHeight.value
             statusBarsHeight.value = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            statusBarsHeightVar = statusBarsHeight.value
             WindowInsetsCompat.CONSUMED
         }
     }
@@ -264,8 +267,11 @@ class MainActivity : ComponentActivity() {
         var mainActivityForServer: MainActivity? = null
 
         val imeHeight: MutableStateFlow<Int> = MutableStateFlow(0)
+        var imeHeightVar = 0
         val navBarHeight: MutableStateFlow<Int> = MutableStateFlow(0)
+        var navBarHeightVar = 0
         val statusBarsHeight: MutableStateFlow<Int> = MutableStateFlow(0)
+        var statusBarsHeightVar = 0
     }
 }
 

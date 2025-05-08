@@ -31,10 +31,9 @@ import org.hmeadow.fittonia.components.pager.LazyPager
 import org.hmeadow.fittonia.components.pager.PagerState
 import org.hmeadow.fittonia.components.pager.PagerState.Companion.rememberPagerState
 import org.hmeadow.fittonia.components.pager.PagerTabLabels
-import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
-import org.hmeadow.fittonia.utility.rememberSuspendedAction
 
 @Composable
 fun DebugScreen(
@@ -44,8 +43,8 @@ fun DebugScreen(
     onClearDumpPath: () -> Unit,
     onRemoveDestinationClicked: (SettingsManager.Destination) -> Unit,
     onBackClicked: () -> Unit,
-    debugNewThread: suspend () -> Unit,
     debugNewDestination: () -> Unit,
+    saveColours: () -> Unit,
     pagerState: PagerState = rememberPagerState(),
 ) {
     var debugAlertsState by remember { mutableStateOf(false) }
@@ -60,6 +59,14 @@ fun DebugScreen(
         content = { footerHeight ->
             val debugTabs: List<Pair<String, @Composable (maxWidth: Dp, maxHeight: Dp) -> Unit>> =
                 listOf(
+                    "App's Paint Job" to { maxWidth, maxHeight ->
+                        DebugScreenPaintJobTab(
+                            modifier = Modifier
+                                .width(maxWidth)
+                                .height(maxHeight),
+                            footerHeight = footerHeight,
+                        )
+                    },
                     "Overview" to { maxWidth, maxHeight ->
                         DebugScreenOverviewTab(
                             modifier = Modifier
@@ -151,21 +158,33 @@ fun DebugScreen(
         },
         footer = {
             Footer {
-                Column {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        FittoniaButton(onClick = viewModel.rememberSuspendedAction(debugNewThread)) {
-                            ButtonText(text = "New Thread")
+                if (pagerState.targetPage == 0) {
+                    Column {
+                        Row {
+                            FittoniaButton(onClick = {}) { ButtonText("Primary") }
+                            FittoniaButton(
+                                type = currentStyle.secondaryButtonType,
+                                onClick = {},
+                            ) { ButtonText("Secondary") }
                         }
-                        FittoniaSpacerWeightRow()
-                        FittoniaButton(onClick = debugNewDestination) {
+                        FittoniaButton(onClick = saveColours) { ButtonText("Save Colours") }
+                    }
+                }
+                if (pagerState.targetPage == 2) {
+                    Column {
+                        FittoniaButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = debugNewDestination,
+                        ) {
                             ButtonText(text = "New Destination")
                         }
-                    }
-                    FittoniaButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = onResetSettingsClicked,
-                    ) {
-                        ButtonText(text = "Reset Settings")
+
+                        FittoniaButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = onResetSettingsClicked,
+                        ) {
+                            ButtonText(text = "Reset Settings")
+                        }
                     }
                 }
             }

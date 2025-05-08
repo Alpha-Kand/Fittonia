@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.Center
@@ -37,8 +38,17 @@ fun FittoniaHeader(
 ) {
     Box(
         modifier = Modifier
-            .background(color = currentStyle.headerBackgroundColour)
-            .padding(all = 5.dp),
+            .background(
+                color = currentStyle.headerBackgroundColour,
+                shape = RoundedCornerShape(
+                    topStart = 0.dp,
+                    topEnd = 0.dp,
+                    bottomEnd = 20.dp,
+                    bottomStart = 20.dp,
+                ),
+            )
+            .padding(horizontal = 15.dp)
+            .padding(vertical = 5.dp),
         contentAlignment = Center,
     ) {
         Row(modifier = Modifier.align(CenterStart)) {

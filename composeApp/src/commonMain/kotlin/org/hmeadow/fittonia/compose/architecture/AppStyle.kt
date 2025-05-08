@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,9 +21,9 @@ sealed interface AppStyle {
     val statusBarColour: Color
     val headerBackgroundColour: Color
     val footerBackgroundColour: Color
-    val readOnlyBorderColour : Color
+    val readOnlyBorderColour: Color
     val readOnlyBackgroundColour: Color
-    val readOnlyClearIconColour : Color
+    val readOnlyClearIconColour: Color
     val primaryButtonType: FittoniaButtonType
     val secondaryButtonType: FittoniaButtonType
 
@@ -27,7 +31,78 @@ sealed interface AppStyle {
     fun Background(modifier: Modifier)
 }
 
-val currentStyle: AppStyle = Empty
+val currentStyle: AppStyle = Debug
+var appStyleResetHeader by mutableStateOf<ULong>(0u)
+var appStyleResetStatusBar by mutableStateOf<ULong>(0u)
+var appStyleResetStatusFooter by mutableStateOf<ULong>(0u)
+
+var appStyleResetButton by mutableStateOf<ULong>(0u)
+var appStyleResetBackground by mutableStateOf<ULong>(0u)
+
+data object Debug : AppStyle {
+    var statusBarColourEdit by mutableStateOf(Color(color = 0xFFCCCCCC))
+    var headerBackgroundColourEdit by mutableStateOf(Color(color = 0xFFDDDDDD))
+    var footerBackgroundColourEdit by mutableStateOf(Color(color = 0xFFDDDDDD))
+    override val statusBarColour: Color
+        get() = statusBarColourEdit
+    override val headerBackgroundColour: Color
+        get() = headerBackgroundColourEdit
+    override val footerBackgroundColour: Color
+        get() = footerBackgroundColourEdit
+
+    var readOnlyBorderColourEdit by mutableStateOf(Color(color = 0xFF000000))
+    var readOnlyBackgroundColourEdit by mutableStateOf(Color(color = 0xFFEEEEEE))
+    var readOnlyClearIconColourEdit by mutableStateOf(Color(color = 0xFF000000))
+    override val readOnlyBorderColour: Color
+        get() = readOnlyBorderColourEdit
+    override val readOnlyBackgroundColour: Color
+        get() = readOnlyBackgroundColourEdit
+    override val readOnlyClearIconColour: Color
+        get() = readOnlyClearIconColourEdit
+
+    var primaryButtonBorderColour by mutableStateOf(Color(color = 0xFF000000))
+    var primaryButtonContentColour by mutableStateOf(Color(color = 0xFF000000))
+    var primaryButtonBackgroundColour by mutableStateOf(Color(color = 0xFFFFFFFF))
+    var primaryButtonDisabledBorderColour by mutableStateOf(Color(color = 0xFF000000).copy(alpha = 0.00f))
+    var primaryButtonDisabledContentColour by mutableStateOf(Color(color = 0xFF000000).copy(alpha = 0.5f))
+    var primaryButtonDisabledBackgroundColour by mutableStateOf(Color(color = 0xFFFFFFFF))
+
+    override val primaryButtonType: FittoniaButtonType
+        get() = FittoniaButtonType(
+            borderColour = primaryButtonBorderColour,
+            contentColour = primaryButtonContentColour,
+            backgroundColor = primaryButtonBackgroundColour,
+            disabledBorderColour = primaryButtonDisabledBorderColour,
+            disabledContentColor = primaryButtonDisabledContentColour,
+            disabledBackgroundColor = primaryButtonDisabledBackgroundColour,
+        )
+
+    var secondaryButtonBorderColour by mutableStateOf(Color(color = 0xFF000000))
+    var secondaryButtonContentColour by mutableStateOf(Color(color = 0xFF000000))
+    var secondaryButtonBackgroundColour by mutableStateOf(Color(color = 0xFFFFFFFF))
+    var secondaryButtonDisabledBorderColour by mutableStateOf(Color(color = 0xFF000000).copy(alpha = 0.00f))
+    var secondaryButtonDisabledContentColour by mutableStateOf(Color(color = 0xFF000000).copy(alpha = 0.5f))
+    var secondaryButtonDisabledBackgroundColour by mutableStateOf(Color(color = 0xFFFFFFFF))
+
+    override val secondaryButtonType: FittoniaButtonType
+        get() = FittoniaButtonType(
+            borderColour = secondaryButtonBorderColour,
+            contentColour = secondaryButtonContentColour,
+            backgroundColor = secondaryButtonBackgroundColour,
+            disabledBorderColour = secondaryButtonDisabledBorderColour,
+            disabledContentColor = secondaryButtonDisabledContentColour,
+            disabledBackgroundColor = secondaryButtonDisabledBackgroundColour,
+        )
+
+    var backgroundColourEdit by mutableStateOf(Color(color = 0xFFFFFFFF))
+
+    @Composable
+    override fun Background(modifier: Modifier) {
+        key(appStyleResetBackground) {
+            Box(modifier = modifier.background(backgroundColourEdit).fillMaxSize()) {}
+        }
+    }
+}
 
 data object FittoniaClassic : AppStyle {
     private val backgroundLayer0Colour = Color(color = 0xFF77AA77)
@@ -46,8 +121,8 @@ data object FittoniaClassic : AppStyle {
         borderColour = Color(color = 0xFF550022),
         contentColour = Color(color = 0xFFFFCCFF),
         backgroundColor = Color(color = 0xFF992266),
-        disabledContentColor = Color(color = 0xFFFFCCFF),
         disabledBorderColour = Color(color = 0xFF550022).copy(alpha = 0.00f),
+        disabledContentColor = Color(color = 0xFFFFCCFF),
         disabledBackgroundColor = Color(color = 0xFFDDAADD),
     )
 
@@ -55,8 +130,8 @@ data object FittoniaClassic : AppStyle {
         borderColour = Color(color = 0xFF550022),
         contentColour = Color(color = 0xFF331133),
         backgroundColor = Color(color = 0xFFFFDDFF),
-        disabledContentColor = Color(color = 0xFF331133).copy(alpha = 0.5f),
         disabledBorderColour = Color(color = 0xFF550022).copy(alpha = 0.00f),
+        disabledContentColor = Color(color = 0xFF331133).copy(alpha = 0.5f),
         disabledBackgroundColor = Color(color = 0xFFEECCEE),
     )
 
@@ -96,8 +171,8 @@ data object Empty : AppStyle {
         borderColour = Color(color = 0xFF000000),
         contentColour = Color(color = 0xFF000000),
         backgroundColor = Color(color = 0xFFFFFFFF),
-        disabledContentColor = Color(color = 0xFF000000).copy(alpha = 0.5f),
         disabledBorderColour = Color(color = 0xFF000000).copy(alpha = 0.00f),
+        disabledContentColor = Color(color = 0xFF000000).copy(alpha = 0.5f),
         disabledBackgroundColor = Color(color = 0xFFFFFFFF),
     )
 
@@ -105,8 +180,8 @@ data object Empty : AppStyle {
         borderColour = Color(color = 0xFF000000),
         contentColour = Color(color = 0xFF000000),
         backgroundColor = Color(color = 0xFFFFFFFF),
-        disabledContentColor = Color(color = 0xFF000000).copy(alpha = 0.5f),
         disabledBorderColour = Color(color = 0xFF000000).copy(alpha = 0.00f),
+        disabledContentColor = Color(color = 0xFF000000).copy(alpha = 0.5f),
         disabledBackgroundColor = Color(color = 0xFFFFFFFF),
     )
 

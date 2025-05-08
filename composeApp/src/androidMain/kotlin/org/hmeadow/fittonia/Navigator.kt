@@ -18,9 +18,7 @@ import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.server
 import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.startSending
 import org.hmeadow.fittonia.compose.architecture.dataState
-import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.TransferJob
-import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.screens.AlertsScreen
 import org.hmeadow.fittonia.screens.AlertsScreenViewModel
 import org.hmeadow.fittonia.screens.NewDestinationScreen
@@ -244,30 +242,6 @@ class Navigator(private val mainViewModel: MainViewModel) {
                         onClearDumpPath = instance.mainViewModel::clearDumpPath,
                         onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
                         onBackClicked = instance::pop,
-                        debugNewThread = {
-                            startSending(
-                                newJob = OutgoingJob(
-                                    id = Random.nextInt(),
-                                    description = "Sending PDFs to bob (${abs(Random.nextInt() % 100)})",
-                                    needDescription = false,
-                                    destination = SettingsManager.Destination(
-                                        name = "Bob's PC (${abs(Random.nextInt() % 100)})",
-                                        ip = "192.168.1.1",
-                                        accessCode = "accesscode",
-                                    ),
-                                    items = (0..abs(Random.nextInt() % 100)).map {
-                                        TransferJob.Item(
-                                            name = "File_${abs(Random.nextInt() % 100)}.pdf",
-                                            uriRaw = "https://www.google.com",
-                                            isFile = true,
-                                            sizeBytes = Random.nextLong(),
-                                        )
-                                    },
-                                    port = 5556,
-                                    status = TransferStatus.Sending,
-                                ),
-                            )
-                        },
                         debugNewDestination = {
                             val getIpNum = { abs(Random.nextInt() % 256) }
                             instance.mainViewModel.addDestination(
@@ -278,6 +252,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                                 ),
                             )
                         },
+                        saveColours = instance.mainViewModel::saveColours,
                     )
                 },
             )

@@ -8,6 +8,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -15,6 +16,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.hmeadow.fittonia.compose.architecture.appStyleResetButton
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.utility.InfoBorderState.handleClicks
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBorderActive
@@ -82,35 +84,37 @@ fun FittoniaButton(
     } else {
         false
     }
-    Button(
-        modifier = modifier.infoBorder(onInfo = onInfo, verticalPadding = 0f),
-        shape = RoundedCornerShape(corner = CornerSize(5.dp)),
-        border = BorderStroke(
-            width = 2.dp,
-            color = if (enabled) {
-                type.borderColour
+    key(appStyleResetButton) {
+        Button(
+            modifier = modifier.infoBorder(onInfo = onInfo, verticalPadding = 0f),
+            shape = RoundedCornerShape(corner = CornerSize(5.dp)),
+            border = BorderStroke(
+                width = 2.dp,
+                color = if (enabled) {
+                    type.borderColour
+                } else {
+                    type.disabledBorderColour
+                },
+            ),
+            enabled = if (infoBorderActive) {
+                true
             } else {
-                type.disabledBorderColour
+                enabled
             },
-        ),
-        enabled = if (infoBorderActive) {
-            true
-        } else {
-            enabled
-        },
-        onClick = { handleClicks(onClick = onClick, onInfo = { infoBox = onInfo }) },
-        content = {
-            if (isLoading) {
-                FittoniaLoadingIndicator(colour = type.contentColour)
-            } else {
-                FittoniaButtonScope(type = type, enabled = enabled).content()
-            }
-        },
-        colors = buttonColors(
-            containerColor = type.backgroundColor,
-            contentColor = type.contentColour,
-            disabledContainerColor = type.disabledBackgroundColor,
-            disabledContentColor = type.disabledContentColor,
-        ),
-    )
+            onClick = { handleClicks(onClick = onClick, onInfo = { infoBox = onInfo }) },
+            content = {
+                if (isLoading) {
+                    FittoniaLoadingIndicator(colour = type.contentColour)
+                } else {
+                    FittoniaButtonScope(type = type, enabled = enabled).content()
+                }
+            },
+            colors = buttonColors(
+                containerColor = type.backgroundColor,
+                contentColor = type.contentColour,
+                disabledContainerColor = type.disabledBackgroundColor,
+                disabledContentColor = type.disabledContentColor,
+            ),
+        )
+    }
 }
