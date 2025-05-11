@@ -24,15 +24,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
+import androidx.core.graphics.toColorInt
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.FittoniaIcon
+import org.hmeadow.fittonia.components.FittoniaTextInput
+import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.compose.architecture.Debug
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.appStyleResetBackground
 import org.hmeadow.fittonia.compose.architecture.appStyleResetButton
 import org.hmeadow.fittonia.compose.architecture.appStyleResetHeader
-import org.hmeadow.fittonia.compose.architecture.appStyleResetStatusBar
 import org.hmeadow.fittonia.compose.architecture.appStyleResetStatusFooter
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingMStyle
@@ -61,14 +63,6 @@ fun DebugScreenPaintJobTab(
 
         FittoniaSpacerHeight(height = 35)
 
-        ColourSliderGroup(
-            title = "Status Bar (Top of screen)",
-            color = Debug.statusBarColourEdit,
-            onUpdate = {
-                Debug.statusBarColourEdit = it
-                appStyleResetStatusBar = it.value
-            },
-        )
         HorizontalDivider(modifier = Modifier.padding(vertical = 15.dp))
         ColourSliderGroup(
             title = "Header Background",
@@ -84,6 +78,16 @@ fun DebugScreenPaintJobTab(
             color = Debug.footerBackgroundColourEdit,
             onUpdate = {
                 Debug.footerBackgroundColourEdit = it
+                appStyleResetStatusFooter = it.value
+            },
+        )
+        HorizontalDivider(modifier = Modifier.padding(vertical = 15.dp))
+        ColourSliderGroup(
+            title = "Header/Footer Border",
+            color = Debug.headerFooterBorderColourEdit,
+            onUpdate = {
+                Debug.headerFooterBorderColourEdit = it
+                appStyleResetHeader = it.value
                 appStyleResetStatusFooter = it.value
             },
         )
@@ -150,8 +154,26 @@ fun DebugScreenPaintJobTab(
                 appStyleResetButton = it.value
             },
         )
+        HorizontalDivider(modifier = Modifier.padding(vertical = 15.dp))
+        ColourSliderGroup(
+            title = "Header Text",
+            color = Debug.headerTextColour,
+            onUpdate = {
+                Debug.headerTextColour = it
+                appStyleResetHeader = it.value
+            },
+        )
+        HorizontalDivider(modifier = Modifier.padding(vertical = 15.dp))
+        ColourSliderGroup(
+            title = "Read-only field background",
+            color = Debug.readOnlyBackgroundColourEdit,
+            onUpdate = {
+                Debug.readOnlyBackgroundColourEdit = it
+                appStyleResetHeader = it.value
+            },
+        )
 
-        FittoniaSpacerHeight(footerHeight)
+        FittoniaSpacerHeight(height = footerHeight)
     }
 }
 
@@ -170,23 +192,50 @@ fun ColourSliderGroup(title: String, color: Color, onUpdate: (Color) -> Unit) {
                     .background(color),
             ) {}
         }
+        val colourFlow = remember {
+            InputFlow(color.toHex) {
+                try {
+                    onUpdate(Color("#$it".toColorInt()))
+                } catch (e: Throwable) {
+                    println(e.message)
+                }
+            }
+        }
+        val nullString: String? = null
+        FittoniaTextInput(inputFlow = colourFlow, label = nullString)
         ColourSlider(
             text = "Red",
             sliderPosition = color.red,
-            onUpdate = { newRed -> onUpdate(Color(newRed, color.green, color.blue)) },
+            onUpdate = { newRed ->
+                val newColour = Color(newRed, color.green, color.blue)
+                onUpdate(newColour)
+                colourFlow.text = newColour.toHex
+            },
         )
         ColourSlider(
             text = "Green",
             sliderPosition = color.green,
-            onUpdate = { newGreen -> onUpdate(Color(color.red, newGreen, color.blue)) },
+            onUpdate = { newGreen ->
+                val newColour = Color(color.red, newGreen, color.blue)
+                onUpdate(newColour)
+                colourFlow.text = newColour.toHex
+            },
         )
         ColourSlider(
             text = "Blue",
             sliderPosition = color.blue,
-            onUpdate = { newBlue -> onUpdate(Color(color.red, color.green, newBlue)) },
+            onUpdate = { newBlue ->
+                val newColour = Color(color.red, color.green, newBlue)
+                onUpdate(newColour)
+                colourFlow.text = newColour.toHex
+            },
         )
     }
 }
+
+@OptIn(ExperimentalStdlibApi::class)
+private val Color.toHex: String
+    get() = this.value.toHexString(format = HexFormat.UpperCase).dropLast(8)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -253,6 +253,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                             )
                         },
                         saveColours = instance.mainViewModel::saveColours,
+                        cancelColourChanges = instance.mainViewModel::loadColours,
                     )
                 },
             )

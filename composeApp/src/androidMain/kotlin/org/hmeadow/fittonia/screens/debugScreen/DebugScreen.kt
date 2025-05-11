@@ -45,6 +45,7 @@ fun DebugScreen(
     onBackClicked: () -> Unit,
     debugNewDestination: () -> Unit,
     saveColours: () -> Unit,
+    cancelColourChanges: () -> Unit,
     pagerState: PagerState = rememberPagerState(),
 ) {
     var debugAlertsState by remember { mutableStateOf(false) }
@@ -162,12 +163,17 @@ fun DebugScreen(
                     Column {
                         Row {
                             FittoniaButton(onClick = {}) { ButtonText("Primary") }
+                            FittoniaSpacerWidth(10)
                             FittoniaButton(
                                 type = currentStyle.secondaryButtonType,
                                 onClick = {},
                             ) { ButtonText("Secondary") }
                         }
-                        FittoniaButton(onClick = saveColours) { ButtonText("Save Colours") }
+                        Row {
+                            FittoniaButton(onClick = saveColours) { ButtonText("Save Colours") }
+                            FittoniaSpacerWidth(10)
+                            FittoniaButton(onClick = cancelColourChanges) { ButtonText("Cancel Changes") }
+                        }
                     }
                 }
                 if (pagerState.targetPage == 2) {
