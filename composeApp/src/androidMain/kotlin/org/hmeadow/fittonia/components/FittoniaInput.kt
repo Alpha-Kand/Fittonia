@@ -30,7 +30,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import inputHintColour
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_LETTERS
 import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_SYMBOLS
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
@@ -39,14 +43,27 @@ import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBorderActive
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBox
 import org.hmeadow.fittonia.utility.infoBorder
+import kotlin.coroutines.CoroutineContext
 
 private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
 
 class InputFlow(
     val textState: TextFieldState,
     private val onValueChange: (String) -> Unit = {},
-) : Flow<String> by snapshotFlow(block = { textState.text.toString().also { onValueChange(it) } }) {
+) : Flow<String> by snapshotFlow(block = { textState.text.toString() }), CoroutineScope {
     constructor(initial: String, onValueChange: (String) -> Unit = {}) : this(TextFieldState(initial), onValueChange)
+
+    override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
+        println("InputFlow error: ${throwable.message}") // TODO - handle errors, crashlytics? before release
+    }
+
+    init {
+        launch {
+            while (true) {
+                collect { onValueChange(it) }
+            }
+        }
+    }
 
     var text: String
         get() = textState.text.toString()
