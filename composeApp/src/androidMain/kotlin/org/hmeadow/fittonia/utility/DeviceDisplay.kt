@@ -4,6 +4,7 @@ import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.SCREENLAYOUT_SIZE_MASK
 import android.content.res.Configuration.SCREENLAYOUT_SIZE_XLARGE
 import android.util.TypedValue
+import android.util.TypedValue.COMPLEX_UNIT_DIP
 import android.util.TypedValue.COMPLEX_UNIT_IN
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
@@ -32,6 +33,14 @@ fun MainActivity.inchesToPx(inches: Float): Float {
     return TypedValue.applyDimension(
         /* unit = */ COMPLEX_UNIT_IN,
         /* value = */ inches,
+        /* metrics = */ resources.displayMetrics,
+    )
+}
+
+fun MainActivity.dpToFloat(dp: Dp): Float {
+    return TypedValue.applyDimension(
+        /* unit = */ COMPLEX_UNIT_DIP,
+        /* value = */ dp.value,
         /* metrics = */ resources.displayMetrics,
     )
 }
