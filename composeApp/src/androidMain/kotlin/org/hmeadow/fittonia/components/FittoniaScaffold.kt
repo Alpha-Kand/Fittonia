@@ -21,7 +21,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
@@ -29,16 +35,21 @@ import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.LocalFocusRequester
 import org.hmeadow.fittonia.MainActivity.Companion.imeHeight
 import org.hmeadow.fittonia.MainActivity.Companion.imeHeightVar
+import org.hmeadow.fittonia.MainActivity.Companion.mainActivity
 import org.hmeadow.fittonia.MainActivity.Companion.navBarHeight
 import org.hmeadow.fittonia.MainActivity.Companion.navBarHeightVar
 import org.hmeadow.fittonia.MainActivity.Companion.statusBarsHeight
 import org.hmeadow.fittonia.MainActivity.Companion.statusBarsHeightVar
+import org.hmeadow.fittonia.components.HeaderAndFooterDrawingConstants.BORDER_WIDTH
+import org.hmeadow.fittonia.components.HeaderAndFooterDrawingConstants.CORNER_RADIUS
+import org.hmeadow.fittonia.components.HeaderAndFooterDrawingConstants.shadowColours
 import org.hmeadow.fittonia.compose.architecture.appStyleResetHeader
 import org.hmeadow.fittonia.compose.architecture.appStyleResetStatusBar
 import org.hmeadow.fittonia.compose.architecture.appStyleResetStatusFooter
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.utility.InfoBorderState.clearInfoBorderState
 import org.hmeadow.fittonia.utility.applyIf
+import org.hmeadow.fittonia.utility.dpToFloat
 
 private enum class ScaffoldSectionsEnum {
     HEADER, FOOTER, CONTENT, OVERLAY,
@@ -86,7 +97,12 @@ fun FittoniaScaffold(
                                 modifier = Modifier
                                     .requiredHeight(height = statusBarsHeightLocal.value.toDp())
                                     .fillMaxWidth()
-                                    .background(color = currentStyle.statusBarColour),
+                                    .background(color = currentStyle.headerBackgroundColour)
+                                    .drawWithCache {
+                                        onDrawBehind {
+                                            statusBarDraw()
+                                        }
+                                    },
                             )
                         }
                         key(appStyleResetHeader) {
@@ -110,12 +126,17 @@ fun FittoniaScaffold(
                                 .background(
                                     color = currentStyle.footerBackgroundColour,
                                     shape = RoundedCornerShape(
-                                        topStart = 20.dp,
-                                        topEnd = 20.dp,
+                                        topStart = CORNER_RADIUS.dp,
+                                        topEnd = CORNER_RADIUS.dp,
                                         bottomEnd = 0.dp,
                                         bottomStart = 0.dp,
                                     ),
                                 )
+                                .drawWithCache {
+                                    onDrawBehind {
+                                        footerDraw()
+                                    }
+                                }
                                 .padding(horizontal = 15.dp),
                         ) {
                             Box(modifier = Modifier.fillMaxWidth()) {
@@ -165,5 +186,181 @@ fun FittoniaScaffold(
                 overlayPlaceables.place(x = 0, y = 0, zIndex = 2f)
             }
         }
+    }
+}
+
+private fun DrawScope.statusBarDraw() {
+    val shadowWidth = mainActivity.dpToFloat(CORNER_RADIUS.dp)
+    val width = this.size.width
+    val height = this.size.height
+
+    // Left side.
+    run {
+        // Shadow.
+        drawRect(
+            brush = Brush.linearGradient(
+                colors = shadowColours,
+                start = Offset(x = shadowWidth, y = 0f),
+                end = Offset.Zero,
+            ),
+            topLeft = Offset.Zero,
+            size = Size(width = shadowWidth, height = height),
+        )
+        // Border.
+        drawLine(
+            color = currentStyle.headerAndFooterBorderColour,
+            start = Offset.Zero,
+            end = Offset(x = 0f, y = height),
+            strokeWidth = BORDER_WIDTH,
+        )
+    }
+
+    // Right side.
+    run {
+        // Shadow.
+        drawRect(
+            brush = Brush.linearGradient(
+                colors = shadowColours,
+                start = Offset(x = width - shadowWidth, y = 0f),
+                end = Offset(x = width, y = 0f),
+            ),
+            topLeft = Offset(x = width - shadowWidth, y = 0f),
+            size = Size(width = shadowWidth, height = height),
+        )
+        // Border.
+        drawLine(
+            color = currentStyle.headerAndFooterBorderColour,
+            start = Offset(x = width, y = 0f),
+            end = Offset(x = width, y = height),
+            strokeWidth = BORDER_WIDTH,
+        )
+    }
+}
+
+private fun DrawScope.footerDraw() {
+    val cornerRadius = mainActivity.dpToFloat(CORNER_RADIUS.dp)
+    val cornerDiameter = cornerRadius * 2
+    val width = this.size.width
+    val height = this.size.height
+    val sidesHeight = height - cornerRadius
+    val cornerSize = Size(width = cornerDiameter, height = cornerDiameter)
+
+    // Left side.
+    run {
+        // Shadow.
+        drawRect(
+            brush = Brush.linearGradient(
+                colors = shadowColours,
+                start = Offset(x = cornerRadius, y = 0f),
+                end = Offset.Zero,
+            ),
+            topLeft = Offset(x = 0f, y = cornerRadius),
+            size = Size(width = width, height = sidesHeight),
+        )
+        // Border.
+        drawLine(
+            color = currentStyle.headerAndFooterBorderColour,
+            start = Offset(x = 0f, y = cornerRadius),
+            end = Offset(x = 0f, y = sidesHeight),
+            strokeWidth = BORDER_WIDTH,
+        )
+    }
+
+    // Right side.
+    run {
+        // Shadow.
+        drawRect(
+            brush = Brush.linearGradient(
+                colors = shadowColours,
+                start = Offset(x = width - cornerRadius, y = 0f),
+                end = Offset(x = width, y = 0f),
+            ),
+            topLeft = Offset(x = width - cornerRadius, y = cornerRadius),
+            size = Size(width = cornerRadius, height = sidesHeight),
+        )
+        // Border.
+        drawLine(
+            color = currentStyle.headerAndFooterBorderColour,
+            start = Offset(x = width, y = cornerRadius),
+            end = Offset(x = width, y = sidesHeight),
+            strokeWidth = BORDER_WIDTH,
+        )
+    }
+
+    // Top side.
+    run {
+        // Shadow.
+        drawRect(
+            brush = Brush.linearGradient(
+                colors = shadowColours,
+                start = Offset(x = 0f, y = cornerRadius),
+                end = Offset.Zero,
+            ),
+            topLeft = Offset(x = cornerRadius, y = 0f),
+            size = Size(width = width - cornerDiameter, height = cornerRadius),
+        )
+
+        // Border.
+        drawLine(
+            color = currentStyle.headerAndFooterBorderColour,
+            start = Offset(x = cornerRadius, y = 0f),
+            end = Offset(x = width - cornerRadius, y = 0f),
+            strokeWidth = BORDER_WIDTH,
+        )
+    }
+
+    // Left corner.
+    run {
+        // Shadow.
+        drawArc(
+            brush = Brush.radialGradient(
+                colors = shadowColours,
+                center = Offset(x = cornerRadius, y = cornerRadius),
+                radius = cornerRadius,
+            ),
+            startAngle = 180f,
+            sweepAngle = 90f,
+            useCenter = true,
+            size = cornerSize,
+            topLeft = Offset.Zero,
+        )
+        // Border.
+        drawArc(
+            color = currentStyle.headerAndFooterBorderColour,
+            startAngle = 180f,
+            sweepAngle = 90f,
+            useCenter = false,
+            size = cornerSize,
+            topLeft = Offset.Zero,
+            style = Stroke(width = BORDER_WIDTH),
+        )
+    }
+
+    // Right corner.
+    run {
+        // Shadow.
+        drawArc(
+            brush = Brush.radialGradient(
+                colors = shadowColours,
+                center = Offset(x = width - cornerRadius, y = cornerRadius),
+                radius = cornerRadius,
+            ),
+            startAngle = 270f,
+            sweepAngle = 90f,
+            useCenter = true,
+            size = cornerSize,
+            topLeft = Offset(x = width - cornerDiameter, y = 0f),
+        )
+
+        // Border.
+        drawArc(
+            color = currentStyle.headerAndFooterBorderColour,
+            startAngle = 270f,
+            sweepAngle = 90f,
+            useCenter = false,
+            size = cornerSize,
+            topLeft = Offset(x = width - cornerDiameter, y = 0f),
+            style = Stroke(width = BORDER_WIDTH),
+        )
     }
 }
