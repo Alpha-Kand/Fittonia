@@ -116,6 +116,8 @@ fun NewDestinationScreen(
                     inputFlow = viewModel.accessCodeState,
                     label = "Access Code",
                 )
+
+                FittoniaSpacerHeight(height = 30)
             }
         },
         footer = {

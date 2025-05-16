@@ -181,12 +181,18 @@ class SendFilesScreenViewModel(
     fun onSaveOneTimeDestinationClicked() {
         onSaveOneTimeDestinationCallback(oneTimeIpAddressState.text, oneTimeAccessCodeState.text) { newDestination ->
             selectedDestinationState.value = newDestination
+            if (portState.text.isNotEmpty()) {
+                updatePing(destination = newDestination, port = portState.text.toInt())
+            }
         }
     }
 
     fun onAddNewDestinationClicked() {
         onAddNewDestinationCallback { newDestination ->
             selectedDestinationState.value = newDestination
+            if (portState.text.isNotEmpty()) {
+                updatePing(destination = newDestination, port = portState.text.toInt())
+            }
         }
     }
 
@@ -474,6 +480,7 @@ fun SendFilesScreen(
                         )
                     },
                 )
+                FittoniaSpacerHeight(height = 30)
             }
         },
         footer = {
