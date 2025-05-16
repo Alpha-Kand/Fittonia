@@ -105,7 +105,7 @@ fun NewDestinationScreen(
                             viewModel.ipAddressState.text = MainActivity.mainActivity.getDeviceIpAddress() ?: ""
                         },
                     ) {
-                        ButtonText("<Debug fill IP>")
+                        ButtonText("<Debug fill with this device's IP>")
                     }
                 }
 

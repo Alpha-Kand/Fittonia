@@ -64,6 +64,7 @@ import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.models.mostRecent
 import org.hmeadow.fittonia.screens.overviewScreen.Options
+import org.hmeadow.fittonia.utility.InfoBorderState.infoBoxOverlay
 import org.hmeadow.fittonia.utility.debug
 import org.hmeadow.fittonia.utility.getFileSizeBytes
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
@@ -289,6 +290,19 @@ fun SendFilesScreen(
                             FittoniaSpacerWidth(width = 5)
                             ButtonIcon(drawableRes = R.drawable.ic_add)
                         },
+                        onInfo = {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.send_files_screen_add_item_button_info1),
+                                    style = paragraphTextStyle,
+                                )
+                                FittoniaSpacerHeight(10)
+                                Text(
+                                    text = stringResource(R.string.send_files_screen_add_item_button_info2),
+                                    style = paragraphTextStyle,
+                                )
+                            }
+                        },
                     )
                     Spacer(modifier = Modifier.weight(1.0f))
                 }
@@ -385,6 +399,19 @@ fun SendFilesScreen(
                 } else {
                     FittoniaButton(
                         onClick = viewModel::onAddNewDestinationClicked,
+                        onInfo = {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.send_files_screen_add_destination_button_info1),
+                                    style = paragraphTextStyle,
+                                )
+                                FittoniaSpacerHeight(height = 10)
+                                Text(
+                                    text = stringResource(R.string.send_files_screen_add_destination_button_info2),
+                                    style = paragraphTextStyle,
+                                )
+                            }
+                        },
                     ) {
                         ButtonText(text = "Add new destination")
                     }
@@ -440,6 +467,12 @@ fun SendFilesScreen(
                             )
                         }
                     },
+                    onInfo = {
+                        Text(
+                            text = stringResource(R.string.send_files_screen_description_field_info),
+                            style = paragraphTextStyle,
+                        )
+                    },
                 )
             }
         },
@@ -458,6 +491,7 @@ fun SendFilesScreen(
             )
         },
         overlay = {
+            infoBoxOverlay()
             FittoniaModal(
                 state = destinationPickerActive,
                 onDismiss = { destinationPickerActive = false },
