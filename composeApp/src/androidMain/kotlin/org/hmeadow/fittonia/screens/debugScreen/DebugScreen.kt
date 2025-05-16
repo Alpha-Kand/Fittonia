@@ -32,7 +32,6 @@ import org.hmeadow.fittonia.components.pager.PagerState
 import org.hmeadow.fittonia.components.pager.PagerState.Companion.rememberPagerState
 import org.hmeadow.fittonia.components.pager.PagerTabLabels
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
-import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 
 @Composable
@@ -40,6 +39,7 @@ fun DebugScreen(
     viewModel: DebugScreenViewModel,
     data: SettingsDataAndroid,
     onResetSettingsClicked: () -> Unit,
+    onResetColours: () -> Unit,
     onClearDumpPath: () -> Unit,
     onRemoveDestinationClicked: (SettingsManager.Destination) -> Unit,
     onBackClicked: () -> Unit,
@@ -62,6 +62,7 @@ fun DebugScreen(
                 listOf(
                     "App's Paint Job" to { maxWidth, maxHeight ->
                         DebugScreenPaintJobTab(
+                            onResetColours = onResetColours,
                             modifier = Modifier
                                 .width(maxWidth)
                                 .height(maxHeight),
@@ -160,20 +161,10 @@ fun DebugScreen(
         footer = {
             Footer {
                 if (pagerState.targetPage == 0) {
-                    Column {
-                        Row {
-                            FittoniaButton(onClick = {}) { ButtonText("Primary") }
-                            FittoniaSpacerWidth(10)
-                            FittoniaButton(
-                                type = currentStyle.secondaryButtonType,
-                                onClick = {},
-                            ) { ButtonText("Secondary") }
-                        }
-                        Row {
-                            FittoniaButton(onClick = saveColours) { ButtonText("Save Colours") }
-                            FittoniaSpacerWidth(10)
-                            FittoniaButton(onClick = cancelColourChanges) { ButtonText("Cancel Changes") }
-                        }
+                    Row {
+                        FittoniaButton(onClick = saveColours) { ButtonText("Save Colours") }
+                        FittoniaSpacerWidth(10)
+                        FittoniaButton(onClick = cancelColourChanges) { ButtonText("Cancel Changes") }
                     }
                 }
                 if (pagerState.targetPage == 2) {
@@ -189,7 +180,7 @@ fun DebugScreen(
                             modifier = Modifier.fillMaxWidth(),
                             onClick = onResetSettingsClicked,
                         ) {
-                            ButtonText(text = "Reset Settings")
+                            ButtonText(text = "Reset Settings (except colours)")
                         }
                     }
                 }

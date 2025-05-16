@@ -18,12 +18,12 @@ import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.ButtonIcon
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaScaffold
-import org.hmeadow.fittonia.components.FittoniaTextInput
 import org.hmeadow.fittonia.components.Footer
-import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
+import org.hmeadow.fittonia.compose.components.FittoniaTextInput
+import org.hmeadow.fittonia.compose.components.InputFlow
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.utility.Debug
 

@@ -239,6 +239,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                         viewModel = viewModel,
                         data = data,
                         onResetSettingsClicked = instance.mainViewModel::resetSettings,
+                        onResetColours = instance.mainViewModel::resetColours,
                         onClearDumpPath = instance.mainViewModel::clearDumpPath,
                         onRemoveDestinationClicked = instance.mainViewModel::removeDestination,
                         onBackClicked = instance::pop,

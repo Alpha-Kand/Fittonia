@@ -80,20 +80,23 @@ data class SettingsDataAndroid(
         val defaultNewDestinationPort: Int = 12345,
         val defaultNewDestinationAccessCode: String = "accesscode123",
         val defaultNewDestinationIP: String = "0.0.0.0",
-        val colourSettings: DebugAppStyle = DebugAppStyle(),
+        val colourSettings: DebugAppStyleColours = DebugAppStyleColours(),
     )
 
     @Serializable
-    data class DebugAppStyle(
-        val statusBarColour: SavableColour = 0xFFCCCCCC.savableColour,
+    data class DebugAppStyleColours(
+        val statusBarColour: SavableColour = 0xFFDDDDDD.savableColour,
         val headerBackgroundColour: SavableColour = 0xFFDDDDDD.savableColour,
         val footerBackgroundColour: SavableColour = 0xFFDDDDDD.savableColour,
+        val headerFooterBorderColour: SavableColour = 0xFF9F1555.savableColour,
         val backgroundColour: SavableColour = 0xFFFFFFFF.savableColour,
         val readOnlyBorderColour: SavableColour = 0xFF000000.savableColour,
         val readOnlyBackgroundColour: SavableColour = 0xFFEEEEEE.savableColour,
         val readOnlyClearIconColour: SavableColour = 0xFF000000.savableColour,
         val debugPrimaryButtonColours: DebugPrimaryButtonColours = DebugPrimaryButtonColours(),
         val debugSecondaryButtonColours: DebugSecondaryButtonColours = DebugSecondaryButtonColours(),
+        val debugTextInputColours: DebugTextInputColours = DebugTextInputColours(),
+        val debugTextColours: DebugTextColours = DebugTextColours(),
     )
 
     @Serializable
@@ -122,6 +125,20 @@ data class SettingsDataAndroid(
         val secondaryButtonDisabledBorderColour: SavableColour = 0xFF000000.savableColour,
         val secondaryButtonDisabledContentColour: SavableColour = 0xFF000000.savableColour,
         val secondaryButtonDisabledBackgroundColour: SavableColour = 0xFFFFFFFF.savableColour,
+    )
+
+    @Serializable
+    data class DebugTextInputColours(
+        val border: SavableColour = 0xFF000000.savableColour,
+        val background: SavableColour = 0xFFFFFFFF.savableColour,
+        val content: SavableColour = 0xFF000000.savableColour,
+        val hint: SavableColour = 0xFF999999.savableColour,
+        val label: SavableColour = 0xFF000000.savableColour,
+    )
+
+    @Serializable
+    data class DebugTextColours(
+        val headerTextColour: SavableColour = 0xFF000000.savableColour,
     )
 }
 

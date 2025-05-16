@@ -16,39 +16,47 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.compose.components.FittoniaButtonType
+import org.hmeadow.fittonia.compose.components.TextInputColours
 
 sealed interface AppStyle {
     val statusBarColour: Color
     val headerBackgroundColour: Color
     val footerBackgroundColour: Color
+    val headerAndFooterBorderColour: Color
     val readOnlyBorderColour: Color
     val readOnlyBackgroundColour: Color
     val readOnlyClearIconColour: Color
     val primaryButtonType: FittoniaButtonType
     val secondaryButtonType: FittoniaButtonType
+    val textInputColours: TextInputColours
 
     @Composable
     fun Background(modifier: Modifier)
 }
 
-val currentStyle: AppStyle = Debug
+val currentStyle: AppStyle = DebugAppStyle
 var appStyleResetHeader by mutableStateOf<ULong>(0u)
 var appStyleResetStatusBar by mutableStateOf<ULong>(0u)
 var appStyleResetStatusFooter by mutableStateOf<ULong>(0u)
 
 var appStyleResetButton by mutableStateOf<ULong>(0u)
 var appStyleResetBackground by mutableStateOf<ULong>(0u)
+var appStyleResetTextInput by mutableStateOf<ULong>(0u)
+var appStyleResetReadOnly by mutableStateOf<ULong>(0u)
 
-data object Debug : AppStyle {
-    var statusBarColourEdit by mutableStateOf(Color(color = 0xFFCCCCCC))
+data object DebugAppStyle : AppStyle {
+    var statusBarColourEdit by mutableStateOf(Color(color = 0xFFDDDDDD))
     var headerBackgroundColourEdit by mutableStateOf(Color(color = 0xFFDDDDDD))
     var footerBackgroundColourEdit by mutableStateOf(Color(color = 0xFFDDDDDD))
+    var headerAndFooterBorderColourEdit by mutableStateOf(Color(color = 0xFF9F1555))
     override val statusBarColour: Color
         get() = statusBarColourEdit
     override val headerBackgroundColour: Color
         get() = headerBackgroundColourEdit
     override val footerBackgroundColour: Color
         get() = footerBackgroundColourEdit
+    override val headerAndFooterBorderColour: Color
+        get() = headerAndFooterBorderColourEdit
 
     var readOnlyBorderColourEdit by mutableStateOf(Color(color = 0xFF000000))
     var readOnlyBackgroundColourEdit by mutableStateOf(Color(color = 0xFFEEEEEE))
@@ -94,6 +102,23 @@ data object Debug : AppStyle {
             disabledBackgroundColor = secondaryButtonDisabledBackgroundColour,
         )
 
+    var textInputBorder by mutableStateOf(Color(color = 0xFF000000))
+    var textInputBackground by mutableStateOf(Color(color = 0xFFFFFFFF))
+    var textInputContent by mutableStateOf(Color(color = 0xFF000000))
+    var textInputHint by mutableStateOf(Color(color = 0xFF999999))
+    var textInputLabel by mutableStateOf(Color(color = 0xFF000000))
+
+    override val textInputColours: TextInputColours
+        get() = TextInputColours(
+            border = textInputBorder,
+            background = textInputBackground,
+            content = textInputContent,
+            hint = textInputHint,
+            label = textInputLabel,
+        )
+
+    var headerTextColour by mutableStateOf(Color(color = 0xFF000000))
+
     var backgroundColourEdit by mutableStateOf(Color(color = 0xFFFFFFFF))
 
     @Composable
@@ -112,6 +137,7 @@ data object FittoniaClassic : AppStyle {
     override val statusBarColour = Color(color = 0xAA448844)
     override val headerBackgroundColour = Color(color = 0xAA448844)
     override val footerBackgroundColour = Color(color = 0xAA448844)
+    override val headerAndFooterBorderColour: Color = Color(0xFF000000)
 
     override val readOnlyBorderColour = Color(color = 0xFF446644)
     override val readOnlyBackgroundColour = Color(color = 0xFFDDFFEE)
@@ -133,6 +159,14 @@ data object FittoniaClassic : AppStyle {
         disabledBorderColour = Color(color = 0xFF550022).copy(alpha = 0.00f),
         disabledContentColor = Color(color = 0xFF331133).copy(alpha = 0.5f),
         disabledBackgroundColor = Color(color = 0xFFEECCEE),
+    )
+
+    override val textInputColours = TextInputColours(
+        border = Color(color = 0xFF000000),
+        background = Color(color = 0xFFFFFFFF),
+        content = Color(color = 0xFF000000),
+        hint = Color(color = 0xFF999999),
+        label = Color(color = 0xFF000000),
     )
 
     @Composable
@@ -162,6 +196,7 @@ data object Empty : AppStyle {
     override val statusBarColour = Color(color = 0xFFCCCCCC)
     override val headerBackgroundColour = Color(color = 0xFFDDDDDD)
     override val footerBackgroundColour = Color(color = 0xFFDDDDDD)
+    override val headerAndFooterBorderColour: Color = Color(0xFF000000)
 
     override val readOnlyBorderColour = Color(color = 0xFF000000)
     override val readOnlyBackgroundColour = Color(color = 0xFFEEEEEE)
@@ -185,8 +220,58 @@ data object Empty : AppStyle {
         disabledBackgroundColor = Color(color = 0xFFFFFFFF),
     )
 
+    override val textInputColours = TextInputColours(
+        border = Color(color = 0xFF000000),
+        background = Color(color = 0xFFFFFFFF),
+        content = Color(color = 0xFF000000),
+        hint = Color(color = 0xFF999999),
+        label = Color(color = 0xFF000000),
+    )
+
     @Composable
     override fun Background(modifier: Modifier) {
         Box(modifier = modifier.background(Color(color = 0x00000000))) {}
+    }
+}
+
+data object FittoniaPopping : AppStyle {
+
+    override val statusBarColour = Color(color = 0xFF40A040) // ✅
+    override val headerBackgroundColour = Color(color = 0xFF40A040) // ✅
+    override val footerBackgroundColour = Color(color = 0xFF40A040) // ✅
+    override val headerAndFooterBorderColour: Color = Color(0xFF9F1555) // ✅
+
+    override val readOnlyBorderColour = Color(color = 0xFF000000) // ✅
+    override val readOnlyBackgroundColour = Color(color = 0xFFEEEEEE) // ✅
+    override val readOnlyClearIconColour = Color(color = 0xFF222222)
+
+    override val primaryButtonType = FittoniaButtonType(
+        borderColour = Color(color = 0xFFB73582), // ✅
+        contentColour = Color(color = 0xFF000000), // ✅
+        backgroundColor = Color(color = 0xFFE5FFE5), // ✅
+        disabledBorderColour = Color(color = 0x996F3140), // ✅
+        disabledContentColor = Color(color = 0xFF777777), // ✅
+        disabledBackgroundColor = Color(color = 0xFFF6FFF6), // ✅
+    )
+
+    override val secondaryButtonType = FittoniaButtonType(
+        borderColour = Color(color = 0xFF000000), // ✅
+        contentColour = Color(color = 0xFFF0FFF0), // ✅
+        backgroundColor = Color(color = 0xFF3E6440), // ✅
+        disabledBorderColour = Color(color = 0x88000000), // ✅
+        disabledContentColor = Color(color = 0xFF444444), // ✅
+        disabledBackgroundColor = Color(color = 0xFF809A82), // ✅
+    )
+
+    override val textInputColours = TextInputColours(
+        border = Color(color = 0xFFEA89CF),
+        background = Color(color = 0xFFEEEEEE),
+        content = Color(color = 0xFF000000),
+        hint = Color(color = 0xFF999999),
+        label = Color(color = 0xFF000000),
+    )
+
+    @Composable
+    override fun Background(modifier: Modifier) {
     }
 }

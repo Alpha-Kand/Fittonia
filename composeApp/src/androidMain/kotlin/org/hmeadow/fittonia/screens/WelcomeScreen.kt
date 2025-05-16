@@ -21,14 +21,14 @@ import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.components.FittoniaHeader
-import org.hmeadow.fittonia.components.FittoniaNumberInput
 import org.hmeadow.fittonia.components.FittoniaScaffold
-import org.hmeadow.fittonia.components.FittoniaTextInput
 import org.hmeadow.fittonia.components.Footer
-import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.components.ReadOnlyEntries
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.components.FittoniaButton
+import org.hmeadow.fittonia.compose.components.FittoniaNumberInput
+import org.hmeadow.fittonia.compose.components.FittoniaTextInput
+import org.hmeadow.fittonia.compose.components.InputFlow
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.design.fonts.paragraphParagraphStyle
@@ -190,6 +190,7 @@ private fun AccessCodeField(serverAccessCodeState: InputFlow, modifier: Modifier
     val info1 = stringResource(R.string.welcome_screen_access_code_field_info_1)
     val info2 = stringResource(R.string.welcome_screen_access_code_field_info_2)
     val info3 = stringResource(R.string.welcome_screen_access_code_field_info_3)
+    val paraSpanStyle = paragraphSpanStyle
     FittoniaTextInput(
         modifier = modifier,
         inputFlow = serverAccessCodeState,
@@ -197,7 +198,7 @@ private fun AccessCodeField(serverAccessCodeState: InputFlow, modifier: Modifier
             Text(
                 text = buildAnnotatedString {
                     withStyle(style = paragraphParagraphStyle) {
-                        withStyle(style = paragraphSpanStyle) {
+                        withStyle(style = paraSpanStyle) {
                             append(text = info1)
                             append(text = " ")
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) { append(text = info2) }

@@ -40,17 +40,17 @@ import org.hmeadow.fittonia.components.ButtonIcon
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaModal
-import org.hmeadow.fittonia.components.FittoniaNumberInput
 import org.hmeadow.fittonia.components.FittoniaScaffold
-import org.hmeadow.fittonia.components.FittoniaTextInput
 import org.hmeadow.fittonia.components.HorizontalLine
-import org.hmeadow.fittonia.components.InputFlow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.compose.components.FittoniaLoadingIndicator
+import org.hmeadow.fittonia.compose.components.FittoniaNumberInput
+import org.hmeadow.fittonia.compose.components.FittoniaTextInput
+import org.hmeadow.fittonia.compose.components.InputFlow
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
@@ -284,7 +284,6 @@ fun SendFilesScreen(
                 Row {
                     FittoniaButton(
                         onClick = viewModel::onUserSelectItem,
-                        type = currentStyle.secondaryButtonType,
                         content = {
                             ButtonText(text = "Add")
                             FittoniaSpacerWidth(width = 5)
@@ -385,7 +384,6 @@ fun SendFilesScreen(
                     }
                 } else {
                     FittoniaButton(
-                        type = currentStyle.secondaryButtonType,
                         onClick = viewModel::onAddNewDestinationClicked,
                     ) {
                         ButtonText(text = "Add new destination")

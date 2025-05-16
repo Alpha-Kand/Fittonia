@@ -86,6 +86,7 @@ fun FittoniaHeader(
                 Text(
                     text = headerText,
                     style = headerStyle,
+                    color = DebugAppStyle.headerTextColour,
                 )
                 FittoniaSpacerWeightRow()
             }

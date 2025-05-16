@@ -1,4 +1,4 @@
-package org.hmeadow.fittonia.components
+package org.hmeadow.fittonia.compose.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -29,16 +30,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import inputHintColour
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_LETTERS
-import org.hmeadow.fittonia.components.FittoniaInputFilter.NO_SYMBOLS
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
+import org.hmeadow.fittonia.compose.architecture.appStyleResetTextInput
+import org.hmeadow.fittonia.compose.architecture.currentStyle
+import org.hmeadow.fittonia.compose.components.FittoniaInputFilter.NO_LETTERS
+import org.hmeadow.fittonia.compose.components.FittoniaInputFilter.NO_SYMBOLS
 import org.hmeadow.fittonia.design.fonts.inputHintStyle
+import org.hmeadow.fittonia.design.fonts.inputInputStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBorderActive
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBox
@@ -74,6 +77,14 @@ class InputFlow(
     val isEmpty: Boolean
         get() = textState.text.isEmpty()
 }
+
+data class TextInputColours(
+    val border: Color,
+    val background: Color,
+    val content: Color,
+    val hint: Color,
+    val label: Color,
+)
 
 @Composable
 fun FittoniaTextInput(
@@ -187,6 +198,7 @@ private fun BaseFittoniaInput(
                 Text(
                     text = label,
                     style = inputLabelStyle,
+                    color = currentStyle.textInputColours.label,
                 )
             }
         },
@@ -210,40 +222,43 @@ private fun BaseFittoniaInput(
     if (interactionSource.collectIsPressedAsState().value && onInfo != null && infoBorderActive) {
         infoBox = onInfo
     }
-    Column {
-        label?.let {
-            it()
-            FittoniaSpacerHeight(height = 7)
-        }
-        BasicTextField(
-            modifier = modifier
-                .focusRequester(focusRequester)
-                .onFocusEvent {
-                    if (infoBorderActive) {
-                        focusRequester.freeFocus()
-                    } else if (it.isFocused) {
-                        keyboard?.show()
+    key(appStyleResetTextInput) {
+        Column {
+            label?.let {
+                it()
+                FittoniaSpacerHeight(height = 7)
+            }
+            BasicTextField(
+                modifier = modifier
+                    .focusRequester(focusRequester)
+                    .onFocusEvent {
+                        if (infoBorderActive) {
+                            focusRequester.freeFocus()
+                        } else if (it.isFocused) {
+                            keyboard?.show()
+                        }
                     }
-                }
-                .infoBorder(onInfo = onInfo),
-            interactionSource = interactionSource,
-            readOnly = infoBorderActive,
-            state = inputFlow.textState,
-            lineLimits = lineLimits,
-            inputTransformation = {
-                if (!filters.success(input = inputFlow.textState)) {
-                    revertAllChanges()
-                }
-            },
-            decorator = { inputField ->
-                InputDecorationContent(
-                    hint = hint,
-                    inputFlow = inputFlow,
-                    inputField = inputField,
-                )
-            },
-            keyboardOptions = keyboardOptions,
-        )
+                    .infoBorder(onInfo = onInfo),
+                interactionSource = interactionSource,
+                readOnly = infoBorderActive,
+                state = inputFlow.textState,
+                lineLimits = lineLimits,
+                inputTransformation = {
+                    if (!filters.success(input = inputFlow.textState)) {
+                        revertAllChanges()
+                    }
+                },
+                decorator = { inputField ->
+                    InputDecorationContent(
+                        hint = hint,
+                        inputFlow = inputFlow,
+                        inputField = inputField,
+                    )
+                },
+                keyboardOptions = keyboardOptions,
+                textStyle = inputInputStyle(color = currentStyle.textInputColours.content),
+            )
+        }
     }
 }
 
@@ -256,19 +271,18 @@ private fun InputDecorationContent(
     Box(
         modifier = Modifier
             .requiredHeight(40.dp)
-            .border(width = 1.dp, color = Color(0xFF555555), shape = inputShape)
-            .background(color = Color(0xFFDDDDDD), shape = inputShape)
+            .border(width = 1.dp, color = currentStyle.textInputColours.border, shape = inputShape)
+            .background(color = currentStyle.textInputColours.background, shape = inputShape)
             .clip(shape = inputShape)
-            .padding(horizontal = 5.dp),
+            .padding(horizontal = 10.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
         hint?.let {
             if (inputFlow.isEmpty) {
                 Text(
-                    modifier = Modifier.padding(start = 5.dp),
                     text = hint,
                     style = inputHintStyle,
-                    color = inputHintColour,
+                    color = currentStyle.textInputColours.hint,
                 )
             }
         }

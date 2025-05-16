@@ -1,5 +1,6 @@
 package org.hmeadow.fittonia.screens.overviewScreen
 
+import SettingsManager
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.UserAlert
+import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.components.FittoniaComingSoon
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
@@ -40,16 +42,21 @@ import org.hmeadow.fittonia.components.Footer
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
+import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.TransferJob
+import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.utility.Debug
 import org.hmeadow.fittonia.utility.createJobDirectory
 import org.hmeadow.fittonia.utility.isLandscape
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.math.abs
+import kotlin.random.Random
 
 @Composable
 fun rememberPercentageFormat(
@@ -102,6 +109,31 @@ class OverviewScreenViewModel(
         needDumpAccess.update { false }
         MainActivity.mainActivity.unAlert<UserAlert.DumpLocationLost>()
     }
+
+    fun addNewDebugJob() = launch {
+        AndroidServer.server.value?.registerTransferJob(
+            OutgoingJob(
+                id = Random.nextInt(),
+                description = "Sending PDFs to bob (${abs(Random.nextInt() % 100)})",
+                needDescription = false,
+                destination = SettingsManager.Destination(
+                    name = "Bob's PC (${abs(Random.nextInt() % 100)})",
+                    ip = "192.168.1.1",
+                    accessCode = "accesscode",
+                ),
+                items = (0..abs(Random.nextInt() % 20)).map {
+                    TransferJob.Item(
+                        name = "File_${abs(Random.nextInt() % 100)}.pdf",
+                        uriRaw = "https://www.google.com",
+                        isFile = true,
+                        sizeBytes = Random.nextLong(),
+                    )
+                },
+                port = 5556,
+                status = TransferStatus.Sending,
+            ),
+        )
+    }
 }
 
 @Composable
@@ -127,7 +159,13 @@ fun OverviewScreen(
             Column(modifier = Modifier.padding(all = 16.dp)) {
                 FittoniaSpacerHeight(height = 15)
 
-                TransferList(onTransferJobClicked = onTransferJobClicked)
+                OverviewTransferList(onTransferJobClicked = onTransferJobClicked)
+
+                FittoniaButton(
+                    onClick = viewModel::addNewDebugJob,
+                    type = currentStyle.primaryButtonType,
+                    content = { ButtonText(text = "<Add line>") },
+                )
             }
         },
         footer = {
@@ -136,26 +174,12 @@ fun OverviewScreen(
                     FittoniaButton(
                         modifier = Modifier.weight(1.0f),
                         onClick = onSendFilesClicked,
+                        type = currentStyle.secondaryButtonType,
                         content = { ButtonText(text = "Send files") },
                     )
-                    FittoniaSpacerWidth(width = 20)
-                    Debug(
-                        releaseBlock = {
-                            if (isLandscape()) {
-                                FittoniaSpacerWeightRow(weight = 1.0f)
-                            }
-                        },
-                        debugBlock = {
-                            FittoniaComingSoon(
-                                modifier = Modifier.weight(1.0f),
-                            ) {
-                                FittoniaButton(
-                                    onClick = { /* TODO - After release */ },
-                                    content = { ButtonText(text = "Send Message") },
-                                )
-                            }
-                        },
-                    )
+                    if (isLandscape()) {
+                        FittoniaSpacerWeightRow(weight = 1.0f)
+                    }
                 }
             }
         },

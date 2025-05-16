@@ -12,7 +12,7 @@ import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.PuPrKeyCipher.ENCRYPT_MAX_BYTES_ALLOWED
-import org.hmeadow.fittonia.components.InputFlow
+import org.hmeadow.fittonia.compose.components.InputFlow
 import org.hmeadow.fittonia.hmeadowSocket.AESCipher
 import org.hmeadow.fittonia.utility.createJobDirectory
 import kotlin.math.abs

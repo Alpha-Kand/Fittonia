@@ -9,7 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.serverLog
-import org.hmeadow.fittonia.compose.architecture.Debug
+import org.hmeadow.fittonia.compose.architecture.DebugAppStyle
 import kotlin.coroutines.CoroutineContext
 
 class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel(), CoroutineScope {
@@ -18,36 +18,53 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
     }
 
     init {
-        launch {
-            dataStore.data.collect {
-                it.debugSettings.colourSettings.run {
-                    Debug.statusBarColourEdit = statusBarColour.unserialize
-                    Debug.headerBackgroundColourEdit = headerBackgroundColour.unserialize
-                    Debug.footerBackgroundColourEdit = footerBackgroundColour.unserialize
-                    Debug.backgroundColourEdit = backgroundColour.unserialize
+        loadColours()
+    }
 
-                    Debug.readOnlyBackgroundColourEdit = readOnlyBackgroundColour.unserialize
-                    Debug.readOnlyBorderColourEdit = readOnlyBorderColour.unserialize
-                    Debug.readOnlyClearIconColourEdit = readOnlyClearIconColour.unserialize
+    fun loadColours() = launch {
+        dataStore.data.collect {
+            it.debugSettings.colourSettings.run {
+                DebugAppStyle.statusBarColourEdit = statusBarColour.unserialize
+                DebugAppStyle.headerBackgroundColourEdit = headerBackgroundColour.unserialize
+                DebugAppStyle.footerBackgroundColourEdit = footerBackgroundColour.unserialize
+                DebugAppStyle.headerAndFooterBorderColourEdit = headerFooterBorderColour.unserialize
+                DebugAppStyle.backgroundColourEdit = backgroundColour.unserialize
 
-                    debugPrimaryButtonColours.run {
-                        Debug.primaryButtonBorderColour = primaryButtonBorderColour.unserialize
-                        Debug.primaryButtonContentColour = primaryButtonContentColour.unserialize
-                        Debug.primaryButtonBackgroundColour = primaryButtonBackgroundColour.unserialize
-                        Debug.primaryButtonDisabledBorderColour = primaryButtonDisabledBorderColour.unserialize
-                        Debug.primaryButtonDisabledContentColour = primaryButtonDisabledContentColour.unserialize
-                        Debug.primaryButtonDisabledBackgroundColour = primaryButtonDisabledBackgroundColour.unserialize
-                    }
+                DebugAppStyle.readOnlyBackgroundColourEdit = readOnlyBackgroundColour.unserialize
+                DebugAppStyle.readOnlyBorderColourEdit = readOnlyBorderColour.unserialize
+                DebugAppStyle.readOnlyClearIconColourEdit = readOnlyClearIconColour.unserialize
 
-                    debugSecondaryButtonColours.run {
-                        Debug.secondaryButtonBorderColour = secondaryButtonBorderColour.unserialize
-                        Debug.secondaryButtonContentColour = secondaryButtonContentColour.unserialize
-                        Debug.secondaryButtonBackgroundColour = secondaryButtonBackgroundColour.unserialize
-                        Debug.secondaryButtonDisabledBorderColour = secondaryButtonDisabledBorderColour.unserialize
-                        Debug.secondaryButtonDisabledContentColour = secondaryButtonDisabledContentColour.unserialize
-                        Debug.secondaryButtonDisabledBackgroundColour =
-                            secondaryButtonDisabledBackgroundColour.unserialize
-                    }
+                debugPrimaryButtonColours.run {
+                    DebugAppStyle.primaryButtonBorderColour = primaryButtonBorderColour.unserialize
+                    DebugAppStyle.primaryButtonContentColour = primaryButtonContentColour.unserialize
+                    DebugAppStyle.primaryButtonBackgroundColour = primaryButtonBackgroundColour.unserialize
+                    DebugAppStyle.primaryButtonDisabledBorderColour = primaryButtonDisabledBorderColour.unserialize
+                    DebugAppStyle.primaryButtonDisabledContentColour = primaryButtonDisabledContentColour.unserialize
+                    DebugAppStyle.primaryButtonDisabledBackgroundColour =
+                        primaryButtonDisabledBackgroundColour.unserialize
+                }
+
+                debugSecondaryButtonColours.run {
+                    DebugAppStyle.secondaryButtonBorderColour = secondaryButtonBorderColour.unserialize
+                    DebugAppStyle.secondaryButtonContentColour = secondaryButtonContentColour.unserialize
+                    DebugAppStyle.secondaryButtonBackgroundColour = secondaryButtonBackgroundColour.unserialize
+                    DebugAppStyle.secondaryButtonDisabledBorderColour = secondaryButtonDisabledBorderColour.unserialize
+                    DebugAppStyle.secondaryButtonDisabledContentColour =
+                        secondaryButtonDisabledContentColour.unserialize
+                    DebugAppStyle.secondaryButtonDisabledBackgroundColour =
+                        secondaryButtonDisabledBackgroundColour.unserialize
+                }
+
+                debugTextInputColours.run {
+                    DebugAppStyle.textInputBorder = border.unserialize
+                    DebugAppStyle.textInputBackground = background.unserialize
+                    DebugAppStyle.textInputContent = content.unserialize
+                    DebugAppStyle.textInputHint = hint.unserialize
+                    DebugAppStyle.textInputLabel = label.unserialize
+                }
+
+                debugTextColours.run {
+                    DebugAppStyle.headerTextColour = headerTextColour.unserialize
                 }
             }
         }
@@ -125,7 +142,15 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
 
     fun resetSettings() = launch {
         dataStore.updateData {
-            SettingsDataAndroid()
+            val oldColours = it.debugSettings.colourSettings
+            val resetSettings = SettingsDataAndroid()
+            resetSettings.copy(debugSettings = resetSettings.debugSettings.copy(colourSettings = oldColours))
+        }
+    }
+
+    fun resetColours() = launch {
+        dataStore.updateData {
+            it.copy(debugSettings = it.debugSettings.copy(colourSettings = SettingsDataAndroid.DebugAppStyleColours()))
         }
     }
 
@@ -133,29 +158,39 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         dataStore.updateData { data ->
             data.copy(
                 debugSettings = data.debugSettings.copy(
-                    colourSettings = SettingsDataAndroid.DebugAppStyle(
-                        statusBarColour = Debug.statusBarColourEdit.serialize,
-                        headerBackgroundColour = Debug.headerBackgroundColourEdit.serialize,
-                        footerBackgroundColour = Debug.footerBackgroundColourEdit.serialize,
-                        backgroundColour = Debug.backgroundColourEdit.serialize,
-                        readOnlyBorderColour = Debug.readOnlyBorderColourEdit.serialize,
-                        readOnlyBackgroundColour = Debug.readOnlyBackgroundColourEdit.serialize,
-                        readOnlyClearIconColour = Debug.readOnlyClearIconColourEdit.serialize,
+                    colourSettings = SettingsDataAndroid.DebugAppStyleColours(
+                        statusBarColour = DebugAppStyle.statusBarColourEdit.serialize,
+                        headerBackgroundColour = DebugAppStyle.headerBackgroundColourEdit.serialize,
+                        footerBackgroundColour = DebugAppStyle.footerBackgroundColourEdit.serialize,
+                        backgroundColour = DebugAppStyle.backgroundColourEdit.serialize,
+                        readOnlyBorderColour = DebugAppStyle.readOnlyBorderColourEdit.serialize,
+                        readOnlyBackgroundColour = DebugAppStyle.readOnlyBackgroundColourEdit.serialize,
+                        readOnlyClearIconColour = DebugAppStyle.readOnlyClearIconColourEdit.serialize,
                         debugPrimaryButtonColours = SettingsDataAndroid.DebugPrimaryButtonColours(
-                            primaryButtonBorderColour = Debug.primaryButtonBorderColour.serialize,
-                            primaryButtonContentColour = Debug.primaryButtonContentColour.serialize,
-                            primaryButtonBackgroundColour = Debug.primaryButtonBackgroundColour.serialize,
-                            primaryButtonDisabledBorderColour = Debug.primaryButtonDisabledBorderColour.serialize,
-                            primaryButtonDisabledContentColour = Debug.primaryButtonDisabledContentColour.serialize,
-                            primaryButtonDisabledBackgroundColour = Debug.primaryButtonDisabledBackgroundColour.serialize,
+                            primaryButtonBorderColour = DebugAppStyle.primaryButtonBorderColour.serialize,
+                            primaryButtonContentColour = DebugAppStyle.primaryButtonContentColour.serialize,
+                            primaryButtonBackgroundColour = DebugAppStyle.primaryButtonBackgroundColour.serialize,
+                            primaryButtonDisabledBorderColour = DebugAppStyle.primaryButtonDisabledBorderColour.serialize,
+                            primaryButtonDisabledContentColour = DebugAppStyle.primaryButtonDisabledContentColour.serialize,
+                            primaryButtonDisabledBackgroundColour = DebugAppStyle.primaryButtonDisabledBackgroundColour.serialize,
                         ),
                         debugSecondaryButtonColours = SettingsDataAndroid.DebugSecondaryButtonColours(
-                            secondaryButtonBorderColour = Debug.secondaryButtonBorderColour.serialize,
-                            secondaryButtonContentColour = Debug.secondaryButtonContentColour.serialize,
-                            secondaryButtonBackgroundColour = Debug.secondaryButtonBackgroundColour.serialize,
-                            secondaryButtonDisabledBorderColour = Debug.secondaryButtonDisabledBorderColour.serialize,
-                            secondaryButtonDisabledContentColour = Debug.secondaryButtonDisabledContentColour.serialize,
-                            secondaryButtonDisabledBackgroundColour = Debug.secondaryButtonDisabledBackgroundColour.serialize,
+                            secondaryButtonBorderColour = DebugAppStyle.secondaryButtonBorderColour.serialize,
+                            secondaryButtonContentColour = DebugAppStyle.secondaryButtonContentColour.serialize,
+                            secondaryButtonBackgroundColour = DebugAppStyle.secondaryButtonBackgroundColour.serialize,
+                            secondaryButtonDisabledBorderColour = DebugAppStyle.secondaryButtonDisabledBorderColour.serialize,
+                            secondaryButtonDisabledContentColour = DebugAppStyle.secondaryButtonDisabledContentColour.serialize,
+                            secondaryButtonDisabledBackgroundColour = DebugAppStyle.secondaryButtonDisabledBackgroundColour.serialize,
+                        ),
+                        debugTextInputColours = SettingsDataAndroid.DebugTextInputColours(
+                            border = DebugAppStyle.textInputBorder.serialize,
+                            background = DebugAppStyle.textInputBackground.serialize,
+                            content = DebugAppStyle.textInputContent.serialize,
+                            hint = DebugAppStyle.textInputHint.serialize,
+                            label = DebugAppStyle.textInputLabel.serialize,
+                        ),
+                        debugTextColours = SettingsDataAndroid.DebugTextColours(
+                            headerTextColour = DebugAppStyle.headerTextColour.serialize,
                         ),
                     ),
                 ),
