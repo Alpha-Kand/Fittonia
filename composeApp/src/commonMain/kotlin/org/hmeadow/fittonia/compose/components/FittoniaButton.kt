@@ -12,12 +12,14 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.hmeadow.fittonia.compose.architecture.appStyleResetButton
 import org.hmeadow.fittonia.compose.architecture.currentStyle
+import org.hmeadow.fittonia.compose.components.FittoniaButtonConstants.BORDER_WIDTH
+import org.hmeadow.fittonia.compose.components.FittoniaButtonConstants.BUTTON_ICON_SIZE
+import org.hmeadow.fittonia.compose.components.FittoniaButtonConstants.CORNER_RADIUS
+import org.hmeadow.fittonia.compose.components.FittoniaButtonConstants.buttonTextStyle
 import org.hmeadow.fittonia.utility.InfoBorderState.handleClicks
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBorderActive
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBox
@@ -38,19 +40,14 @@ data class FittoniaButtonScope(
             } else {
                 type.disabledContentColor
             },
-            style = TextStyle(
-                fontSize = 17.sp,
-                lineHeight = 23.sp,
-                letterSpacing = (0.08f).sp,
-                fontWeight = FontWeight(weight = 600),
-            ),
+            style = buttonTextStyle,
         )
     }
 
     @Composable
-    fun ButtonIcon(painter: Painter) {
+    fun ButtonIcon(painter: Painter, size: Dp?) {
         FittoniaIcon(
-            modifier = Modifier.requiredSize(17.dp),
+            modifier = Modifier.requiredSize(size = size ?: BUTTON_ICON_SIZE.dp),
             painter = painter,
             tint = if (enabled) {
                 type.contentColour
@@ -87,9 +84,9 @@ fun FittoniaButton(
     key(appStyleResetButton) {
         Button(
             modifier = modifier.infoBorder(onInfo = onInfo, verticalPadding = 0f),
-            shape = RoundedCornerShape(corner = CornerSize(5.dp)),
+            shape = RoundedCornerShape(corner = CornerSize(CORNER_RADIUS.dp)),
             border = BorderStroke(
-                width = 2.dp,
+                width = BORDER_WIDTH.dp,
                 color = if (enabled) {
                     type.borderColour
                 } else {

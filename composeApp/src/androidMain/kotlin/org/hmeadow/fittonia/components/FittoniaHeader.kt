@@ -2,14 +2,11 @@ package org.hmeadow.fittonia.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +33,7 @@ import org.hmeadow.fittonia.compose.architecture.DebugAppStyle
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
+import org.hmeadow.fittonia.compose.components.FittoniaCircleButton
 import org.hmeadow.fittonia.design.fonts.headerStyle
 import org.hmeadow.fittonia.utility.Debug
 import org.hmeadow.fittonia.utility.InfoBorderState
@@ -70,19 +68,13 @@ fun FittoniaHeader(
     ) {
         Row(modifier = Modifier.align(CenterStart)) {
             onBackClicked?.let {
-                FittoniaIcon(
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .clickable(onClick = onBackClicked),
-                    drawableRes = R.drawable.ic_back_arrow,
-                )
+                FittoniaCircleButton(onClick = onBackClicked) {
+                    CircleButtonIcon(drawableRes = R.drawable.ic_back_arrow)
+                }
             }
-            FittoniaIcon(
-                modifier = Modifier
-                    .padding(5.dp)
-                    .clickable(onClick = InfoBorderState::enableInfoBorder),
-                drawableRes = R.drawable.ic_info,
-            )
+            FittoniaCircleButton(onClick = InfoBorderState::enableInfoBorder) {
+                CircleButtonIcon(drawableRes = R.drawable.ic_info)
+            }
         }
         Row(
             modifier = Modifier
@@ -100,14 +92,9 @@ fun FittoniaHeader(
         }
         Row(modifier = Modifier.align(CenterEnd)) {
             onOptionsClicked?.let {
-                Box(
-                    modifier = Modifier
-                        .requiredSize(40.dp)
-                        .border(1.dp, currentStyle.primaryButtonType.borderColour, CircleShape)
-                        .background(currentStyle.primaryButtonType.backgroundColor, CircleShape)
-                        .clickable(onClick = onOptionsClicked),
-                    contentAlignment = Center,
-                ) { Text(text = "•••", color = currentStyle.primaryButtonType.contentColour) }
+                FittoniaCircleButton(onClick = onOptionsClicked) {
+                    CircleButtonIcon(drawableRes = R.drawable.ic_options)
+                }
             }
             onAlertsClicked?.let {
                 Image(
