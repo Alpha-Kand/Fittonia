@@ -5,14 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.Center
-import androidx.compose.ui.Alignment.Companion.CenterEnd
-import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -66,54 +63,78 @@ fun FittoniaHeader(
             .padding(vertical = 5.dp),
         contentAlignment = Center,
     ) {
-        Row(modifier = Modifier.align(CenterStart)) {
-            onBackClicked?.let {
-                FittoniaCircleButton(onClick = onBackClicked) {
-                    CircleButtonIcon(drawableRes = R.drawable.ic_back_arrow)
-                }
-            }
-            FittoniaCircleButton(onClick = InfoBorderState::enableInfoBorder) {
-                CircleButtonIcon(drawableRes = R.drawable.ic_info)
-            }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Center),
-        ) {
+        Row {
+            BackButton(onBackClicked = onBackClicked)
+            InfoButton()
             FittoniaSpacerWeightRow()
-            headerText?.let {
-                Text(
-                    text = headerText,
-                    style = headerStyle,
-                    color = DebugAppStyle.headerTextColour,
-                )
+            HeaderHeading(headerText = headerText)
+            if (headerText != null) {
                 FittoniaSpacerWeightRow()
             }
-        }
-        Row(modifier = Modifier.align(CenterEnd)) {
-            onOptionsClicked?.let {
-                FittoniaCircleButton(onClick = onOptionsClicked) {
-                    CircleButtonIcon(drawableRes = R.drawable.ic_options)
-                }
-            }
-            onAlertsClicked?.let {
-                Image(
-                    modifier = Modifier.clickable(onClick = onAlertsClicked),
-                    painter = painterResource(id = R.drawable.ic_warning_yellow),
-                    contentDescription = "", // TODO - After release
-                )
-            }
+            OptionsButton(onOptionsClicked = onOptionsClicked)
+            AlertsButton(onAlertsClicked = onAlertsClicked)
             Debug {
                 FittoniaSpacerWidth(width = 5)
-                FittoniaIcon(
-                    modifier = Modifier.clickable(onClick = Navigator::goToDebugScreen),
-                    drawableRes = R.drawable.ic_debug,
-                    tint = Color.Cyan,
-                )
+                DebugMenuButton()
             }
         }
     }
+}
+
+@Composable
+private fun BackButton(onBackClicked: (() -> Unit)?) {
+    onBackClicked?.let {
+        FittoniaCircleButton(onClick = onBackClicked) {
+            CircleButtonIcon(drawableRes = R.drawable.ic_back_arrow)
+        }
+    }
+}
+
+@Composable
+private fun InfoButton() {
+    FittoniaCircleButton(onClick = InfoBorderState::enableInfoBorder) {
+        CircleButtonIcon(drawableRes = R.drawable.ic_info)
+    }
+}
+
+@Composable
+private fun HeaderHeading(headerText: String?) {
+    headerText?.let {
+        Text(
+            text = headerText,
+            style = headerStyle,
+            color = DebugAppStyle.headerTextColour,
+        )
+    }
+}
+
+@Composable
+private fun OptionsButton(onOptionsClicked: (() -> Unit)?) {
+    onOptionsClicked?.let {
+        FittoniaCircleButton(onClick = onOptionsClicked) {
+            CircleButtonIcon(drawableRes = R.drawable.ic_options)
+        }
+    }
+}
+
+@Composable
+private fun AlertsButton(onAlertsClicked: (() -> Unit)?) {
+    onAlertsClicked?.let {
+        Image(
+            modifier = Modifier.clickable(onClick = onAlertsClicked),
+            painter = painterResource(id = R.drawable.ic_warning_yellow),
+            contentDescription = "", // TODO - After release
+        )
+    }
+}
+
+@Composable
+private fun DebugMenuButton() {
+    FittoniaIcon(
+        modifier = Modifier.clickable(onClick = Navigator::goToDebugScreen),
+        drawableRes = R.drawable.ic_debug,
+        tint = Color.Cyan,
+    )
 }
 
 private fun DrawScope.headerDraw() {
