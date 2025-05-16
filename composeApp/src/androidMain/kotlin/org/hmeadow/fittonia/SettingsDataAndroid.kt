@@ -44,9 +44,9 @@ object SettingsDataAndroidSerializer : Serializer<SettingsDataAndroid> {
 val Long.savableColour: SavableColour
     get() = Color(this).serialize
 val Color.serialize: SavableColour
-    get() = SavableColour(red = red, green = green, blue = blue)
+    get() = SavableColour(alpha = alpha, red = red, green = green, blue = blue)
 val SavableColour.unserialize: Color
-    get() = Color(red = red, green = green, blue = blue)
+    get() = Color(alpha = alpha, red = red, green = green, blue = blue)
 
 @Serializable
 data class SettingsDataAndroid(
@@ -98,6 +98,7 @@ data class SettingsDataAndroid(
 
     @Serializable
     data class SavableColour(
+        val alpha: Float,
         val red: Float,
         val green: Float,
         val blue: Float,
