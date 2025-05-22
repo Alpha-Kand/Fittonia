@@ -145,15 +145,34 @@ fun FittoniaScaffold(
                             Spacer(modifier = Modifier.requiredHeight(navBarHeightLocal.value.toDp()))
                         }
                     }
-                } ?: Box {}
+                } ?: Box(
+                    modifier = Modifier
+                        .requiredHeight(navBarHeightLocal.value.toDp())
+                        .fillMaxWidth()
+                        .background(
+                            color = currentStyle.footerBackgroundColour,
+                            shape = RoundedCornerShape(
+                                topStart = CORNER_RADIUS.dp,
+                                topEnd = CORNER_RADIUS.dp,
+                                bottomEnd = 0.dp,
+                                bottomStart = 0.dp,
+                            ),
+                        )
+                        .drawWithCache {
+                            onDrawBehind {
+                                footerDraw()
+                            }
+                        },
+                ) {}
             }.single().measure(constraints)
 
             val contentPlaceables = subcompose(ScaffoldSectionsEnum.CONTENT) {
                 val scrollState = rememberScrollState()
                 Column(
-                    modifier = Modifier.applyIf(scrollable) {
-                        verticalScroll(scrollState)
-                    },
+                    modifier = Modifier
+                        .applyIf(scrollable) {
+                            verticalScroll(scrollState)
+                        },
                 ) {
                     content(footerPlaceables.height.toDp())
                     Spacer(modifier = Modifier.requiredHeight(height = footerPlaceables.height.toDp()))
