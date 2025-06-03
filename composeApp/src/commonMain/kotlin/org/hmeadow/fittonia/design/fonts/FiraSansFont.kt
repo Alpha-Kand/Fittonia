@@ -22,7 +22,7 @@ val headerStyle: TextStyle
     get() = TextStyle(
         fontSize = 25.sp,
         lineHeight = 33.sp,
-        letterSpacing = (-0.2f).sp,
+        letterSpacing = (-0.1f).sp,
         fontWeight = FontWeight(weight = 500),
         fontFamily = firaSansFont,
     )
@@ -32,7 +32,7 @@ val headingLStyle: TextStyle
     get() = TextStyle(
         fontSize = 30.sp,
         lineHeight = 38.sp,
-        letterSpacing = (-0.2f).sp,
+        letterSpacing = (-0.1f).sp,
         fontWeight = FontWeight(weight = 500),
         fontFamily = firaSansFont,
     )
@@ -42,7 +42,7 @@ val headingMStyle: TextStyle
     get() = TextStyle(
         fontSize = 23.sp,
         lineHeight = 38.sp,
-        letterSpacing = (-0.2f).sp,
+        letterSpacing = (-0.1f).sp,
         fontWeight = FontWeight(weight = 450),
         fontFamily = firaSansFont,
     )
@@ -52,7 +52,7 @@ val headingSStyle: TextStyle
     get() = TextStyle(
         fontSize = 20.sp,
         lineHeight = 38.sp,
-        letterSpacing = (-0.2f).sp,
+        letterSpacing = (-0.1f).sp,
         fontWeight = FontWeight(weight = 500),
         fontFamily = firaSansFont,
     )
@@ -62,7 +62,7 @@ val paragraphTextStyle: TextStyle
     get() = TextStyle(
         fontSize = 17.sp,
         lineHeight = 23.sp,
-        letterSpacing = (-0.2f).sp,
+        letterSpacing = (-0.1f).sp,
         fontWeight = FontWeight(weight = 400),
         fontFamily = firaSansFont,
     )
@@ -71,7 +71,7 @@ val paragraphSpanStyle: SpanStyle
     @Composable
     get() = SpanStyle(
         fontSize = 17.sp,
-        letterSpacing = (-0.2f).sp,
+        letterSpacing = (-0.1f).sp,
         fontWeight = FontWeight(weight = 400),
         fontFamily = firaSansFont,
     )
@@ -81,7 +81,7 @@ val psstStyle: TextStyle
     get() = TextStyle(
         fontSize = 14.sp,
         lineHeight = 23.sp,
-        letterSpacing = (-0.2f).sp,
+        letterSpacing = (-0.1f).sp,
         fontWeight = FontWeight(weight = 300),
         fontFamily = firaSansFont,
     )
@@ -93,7 +93,6 @@ val inputLabelStyle: TextStyle
     get() = TextStyle(
         fontSize = 17.sp,
         lineHeight = 23.sp,
-        letterSpacing = (-0.2f).sp,
         fontWeight = FontWeight(weight = 500),
         fontStyle = FontStyle.Italic,
         fontFamily = firaSansFont,
@@ -103,7 +102,7 @@ val inputLabelStyle: TextStyle
 fun inputInputStyle(color: Color) = TextStyle(
     fontSize = 17.sp,
     lineHeight = 23.sp,
-    letterSpacing = (-0.2f).sp,
+    letterSpacing = (-0.1f).sp,
     fontWeight = FontWeight(weight = 200),
     fontFamily = firaSansFont,
     color = color,
@@ -114,7 +113,7 @@ val inputHintStyle: TextStyle
     get() = TextStyle(
         fontSize = 17.sp,
         lineHeight = 23.sp,
-        letterSpacing = (-0.2f).sp,
+        letterSpacing = (-0.1f).sp,
         fontWeight = FontWeight(weight = 200),
         fontFamily = firaSansFont,
     )
