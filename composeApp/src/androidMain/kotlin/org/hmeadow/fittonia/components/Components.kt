@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.hmeadow.fittonia.design.Spacing.spacing32
 import org.hmeadow.fittonia.utility.isLandscape
 
 @Composable
@@ -52,7 +53,8 @@ fun FittoniaModal(
                 Column(
                     modifier = Modifier
                         .align(alignment = alignment)
-                        .padding(all = 30.dp)
+                        .padding(horizontal = spacing32)
+                        .padding(vertical = 50.dp)
                         .clip(RoundedCornerShape(corner = CornerSize(5.dp)))
                         .background(color = Color.White)
                         .fillMaxWidth()
