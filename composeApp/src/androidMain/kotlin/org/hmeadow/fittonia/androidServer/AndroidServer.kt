@@ -34,6 +34,7 @@ import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.UserAlert
+import org.hmeadow.fittonia.dataStore
 import org.hmeadow.fittonia.hmeadowSocket.AESCipher
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
@@ -44,6 +45,7 @@ import org.hmeadow.fittonia.models.Ping
 import org.hmeadow.fittonia.models.PingStatus
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
+import org.hmeadow.fittonia.models.toCompletedJob
 import org.hmeadow.fittonia.utility.createJobDirectory
 import org.hmeadow.fittonia.utility.subDivide
 import org.hmeadow.fittonia.utility.toString
@@ -391,6 +393,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                 }
             }
             currentJob = updateTransferJob(currentJob.copy(status = TransferStatus.Done))
+            saveCompletedJob(job = currentJob)
         } else {
             updateTransferJob(currentJob.copy(status = TransferStatus.Error))
         }
@@ -468,6 +471,12 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     updateTransferJob(job = it)
                 }
             }
+        }
+    }
+
+    private fun saveCompletedJob(job: TransferJob) = launch {
+        dataStore.updateData {
+            it.copy(completedJobs = it.completedJobs + job.toCompletedJob)
         }
     }
 

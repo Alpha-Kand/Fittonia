@@ -2,6 +2,7 @@ package org.hmeadow.fittonia.models
 
 import SettingsManager
 import android.net.Uri
+import kotlinx.serialization.Serializable
 import org.hmeadow.fittonia.models.TransferJob.Item
 import java.util.Objects
 import kotlin.math.min
@@ -58,6 +59,44 @@ data class OutgoingJob(
 ) : TransferJob {
     fun updateItem(item: Item): OutgoingJob = this.copy(items = getUpdatedItemList(item))
 }
+
+@Serializable
+data class CompletedJob(
+    val id: Int,
+    val description: String,
+    val items: List<CompletedItem>,
+    val direction: Direction,
+) {
+    enum class Direction {
+        Incoming,
+        Outgoing,
+    }
+}
+
+@Serializable
+data class CompletedItem(
+    val name: String,
+    val isFile: Boolean,
+    val sizeBytes: Long,
+)
+
+val TransferJob.toCompletedJob: CompletedJob
+    get() = CompletedJob(
+        id = id,
+        items = items.map { it.toCompletedItem },
+        direction = when (this) {
+            is OutgoingJob -> CompletedJob.Direction.Outgoing
+            is IncomingJob -> CompletedJob.Direction.Incoming
+        },
+        description = description,
+    )
+
+val Item.toCompletedItem: CompletedItem
+    get() = CompletedItem(
+        name = name,
+        isFile = isFile,
+        sizeBytes = sizeBytes,
+    )
 
 data class IncomingJob(
     override val id: Int,

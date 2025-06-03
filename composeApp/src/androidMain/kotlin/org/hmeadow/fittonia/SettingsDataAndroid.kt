@@ -12,6 +12,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.hmeadow.fittonia.SettingsDataAndroid.SavableColour
+import org.hmeadow.fittonia.models.CompletedJob
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -56,6 +57,7 @@ data class SettingsDataAndroid(
     val temporaryPort: Int? = null,
     val serverAccessCode: String? = null,
     val nextAutoJobName: Long = 0,
+    val completedJobs: List<CompletedJob> = persistentListOf(),
     val debugSettings: DebugSettings = DebugSettings(),
 ) {
     @Serializable
