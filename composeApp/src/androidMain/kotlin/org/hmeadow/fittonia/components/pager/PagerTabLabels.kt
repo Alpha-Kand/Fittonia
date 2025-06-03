@@ -247,7 +247,12 @@ fun DefaultIndicator(leftOffset: Dp, width: Dp) {
             .height(height = 5.dp)
             .background(
                 color = Color.Black,
-                shape = RoundedCornerShape(topStartPercent = 100, topEndPercent = 100),
+                shape = RoundedCornerShape(
+                    topStartPercent = 40,
+                    topEndPercent = 40,
+                    bottomStartPercent = 40,
+                    bottomEndPercent = 40,
+                ),
             ),
     )
 }
