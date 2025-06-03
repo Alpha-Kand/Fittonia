@@ -13,47 +13,14 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.utility.isLandscape
-
-@Composable
-fun FittoniaComingSoon(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Box(modifier = modifier) {
-        SubcomposeLayout { constraints ->
-            val foo = subcompose("foo") {
-                content()
-            }.single().measure(constraints)
-
-            val comingSoon = subcompose("comingSoon") {
-                Text(
-                    text = "Coming soon",
-                    modifier = Modifier
-                        .background(color = Color.Black.copy(alpha = 0.66f))
-                        .requiredWidth(foo.measuredWidth.toDp()),
-                    color = Color.Yellow,
-                    textAlign = TextAlign.Center,
-                )
-            }.single().measure(constraints)
-
-            layout(foo.width, foo.height) {
-                foo.place(x = 0, y = 0)
-                comingSoon.place(x = 0, y = foo.height - (foo.height / 2) - (comingSoon.height / 2))
-            }
-        }
-    }
-}
 
 @Composable
 fun FittoniaModal(
