@@ -8,11 +8,20 @@ object DebugTurnOff {
     var allowDebug = true
 }
 
+sealed interface Switch
+data object On : Switch
+data object Off : Switch
+
+val Switch.isOn: Boolean
+    get() = this is On
+
 @Composable
-fun Debug(releaseBlock: @Composable () -> Unit = {}, debugBlock: @Composable () -> Unit) {
-    if (isDebug() && allowDebug) {
-        debugBlock()
-    } else {
-        releaseBlock()
+fun Debug(debug: Switch = On, releaseBlock: @Composable () -> Unit = {}, debugBlock: @Composable () -> Unit) {
+    if (debug.isOn) {
+        if (isDebug() && allowDebug) {
+            debugBlock()
+        } else {
+            releaseBlock()
+        }
     }
 }
