@@ -14,9 +14,9 @@ kotlinxSerializationJson = "1.7.3"
 kotlinxCollectionsImmutable = "0.3.5"
 
 # Android
-datastore = "1.1.4"
-fragmentKtx = "1.8.6"
-documentfile = "1.0.1"
+datastore = "1.1.7"
+fragmentKtx = "1.8.7"
+documentfile = "1.1.0"
 androidx-activityCompose = "1.10.1"
 
 # Unit Tests
@@ -36,6 +36,7 @@ kotterJvm = "1.1.1"
 material3 = "1.3.2"
 material3Android = "1.3.2"
 securityCryptoKtx = "1.0.0"
+uiTextGoogleFonts = "1.8.2"
 
 [libraries]
 
@@ -73,6 +74,7 @@ kotter-library = { module = "com.varabyte.kotter:kotter-jvm", version.ref = "kot
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCryptoKtx" }
 androidx-material3-common = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
+androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 
 [plugins]
 
