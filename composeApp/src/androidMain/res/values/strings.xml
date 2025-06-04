@@ -18,7 +18,7 @@
 
     <!-- Welcome Screen -->
     <string name="welcome_screen_title">Welcome to Fittonia!</string>
-    <string name="welcome_screen_body">To get started, you just need an access code, socket port, and a place to put incoming files.</string>
+    <string name="welcome_screen_body">To get started, you just need an access code, and a place to put incoming files.</string>
     <string name="welcome_screen_you_can_change_these_later">(You can change these later)</string>
     <string name="welcome_screen_new_server_access_code_label">Access Code</string>
     <string name="welcome_screen_new_server_port_label">Custom default port.</string>
@@ -61,6 +61,6 @@
     <string name="send_files_screen_add_item_button_info1">Select individual files that you want to send. Fittonia doesn\'t support folders, yet.</string>
     <string name="send_files_screen_add_item_button_info2">Each file is encrypted before sending.</string>
     <string name="send_files_screen_add_destination_button_info1">If you plan on sending files to the same device more than once, you can add it as a saved \'Destination\' so you don\'t have to enter its info each time.</string>
-    <string name="send_files_screen_add_destination_button_info2">If the device\'s IP address changes, the \'Destination\' does not automatically update.</string>
+    <string name="send_files_screen_add_destination_button_info2">If the device\'s IP address changes, the saved \'Destination\' does not automatically update.</string>
     <string name="send_files_screen_description_field_info">You can give your group of files a name so it\'s easier to keep track of them.</string>
 </resources>
