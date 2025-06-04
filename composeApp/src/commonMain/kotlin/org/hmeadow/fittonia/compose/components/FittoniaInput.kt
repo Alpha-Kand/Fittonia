@@ -40,6 +40,9 @@ import org.hmeadow.fittonia.compose.architecture.appStyleResetTextInput
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaInputFilter.NO_LETTERS
 import org.hmeadow.fittonia.compose.components.FittoniaInputFilter.NO_SYMBOLS
+import org.hmeadow.fittonia.design.Spacing.spacing32
+import org.hmeadow.fittonia.design.Spacing.spacing4
+import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.inputHintStyle
 import org.hmeadow.fittonia.design.fonts.inputInputStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
@@ -226,7 +229,7 @@ private fun BaseFittoniaInput(
         Column {
             label?.let {
                 it()
-                FittoniaSpacerHeight(height = 7)
+                FittoniaSpacerHeight(height = spacing4)
             }
             BasicTextField(
                 modifier = modifier
@@ -270,11 +273,11 @@ private fun InputDecorationContent(
 ) {
     Box(
         modifier = Modifier
-            .requiredHeight(40.dp)
+            .requiredHeight(height = spacing32)
             .border(width = 1.dp, color = currentStyle.textInputColours.border, shape = inputShape)
             .background(color = currentStyle.textInputColours.background, shape = inputShape)
             .clip(shape = inputShape)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = spacing8),
         contentAlignment = Alignment.CenterStart,
     ) {
         hint?.let {
