@@ -122,15 +122,17 @@ class OverviewScreenViewModel(
                     accessCode = "accesscode",
                 ),
                 items = (0..abs(Random.nextInt() % 20)).map {
+                    val totalSize = abs(Random.nextLong())
                     TransferJob.Item(
                         name = "File_${abs(Random.nextInt() % 100)}.pdf",
                         uriRaw = "https://www.google.com",
                         isFile = true,
-                        sizeBytes = Random.nextLong(),
+                        sizeBytes = totalSize,
+                        progressBytes = Random.nextLong(from = 0, until = totalSize),
                     )
                 },
                 port = 5556,
-                status = TransferStatus.Sending,
+                status = TransferStatus.entries.random(),
             ),
         )
     }
