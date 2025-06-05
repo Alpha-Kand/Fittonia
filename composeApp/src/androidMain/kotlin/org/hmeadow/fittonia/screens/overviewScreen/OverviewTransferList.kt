@@ -128,10 +128,8 @@ private fun HeaderRow(
                 style = headingSStyle,
                 text = "Status",
             )
-            if (!noTransfers) {
-                VerticalLine()
-                FittoniaSpacerWidth(width = 20)
-            }
+            VerticalLine()
+            FittoniaSpacerWidth(width = 20)
         }
         HorizontalLine()
     }

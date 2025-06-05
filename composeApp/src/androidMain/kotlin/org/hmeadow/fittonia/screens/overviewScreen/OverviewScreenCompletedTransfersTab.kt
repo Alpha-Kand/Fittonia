@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.components.HorizontalLine
@@ -128,6 +129,7 @@ private fun CompleteTransferRow(
                 .requiredWidth(width = itemCountWidth),
             text = itemCount,
             style = readOnlyFieldSmallTextStyle,
+            textAlign = TextAlign.Right,
         )
     }
 }

@@ -49,7 +49,6 @@ import org.hmeadow.fittonia.components.pager.PagerTabLabels
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
-import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.Spacing.spacing16
 import org.hmeadow.fittonia.design.fonts.headingMStyle
@@ -212,7 +211,6 @@ fun OverviewScreen(
                     FittoniaButton(
                         modifier = Modifier.weight(1.0f),
                         onClick = onSendFilesClicked,
-                        type = currentStyle.secondaryButtonType,
                         content = { ButtonText(text = "Send files") },
                     )
                     if (isLandscape()) {
