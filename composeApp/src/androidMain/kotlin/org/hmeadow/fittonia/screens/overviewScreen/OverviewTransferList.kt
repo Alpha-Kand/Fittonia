@@ -30,6 +30,8 @@ import org.hmeadow.fittonia.components.VerticalLine
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.appStyleResetReadOnly
 import org.hmeadow.fittonia.compose.architecture.currentStyle
+import org.hmeadow.fittonia.design.Spacing.spacing32
+import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldSmallTextStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
@@ -55,18 +57,27 @@ fun OverviewTransferList(
             val maxProgressWidth = measureTextWidth(text = "100.0%", style = readOnlyFieldTextStyle)
             val maxStatusWidth = measureTextWidth(text = "Status", style = readOnlyFieldTextStyle)
 
+            val androidServer = AndroidServer.server.collectAsState().value
+            val transferJobs = androidServer?.transferJobs?.collectAsState()?.value ?: emptyList()
+
             HeaderRow(
+                noTransfers = transferJobs.isEmpty(),
                 maxProgressWidth = maxProgressWidth,
                 maxStatusWidth = maxStatusWidth,
             )
 
-            val androidServer = AndroidServer.server.collectAsState().value
-            val transferJobs = androidServer?.transferJobs?.collectAsState()?.value ?: emptyList()
+            if (transferJobs.isEmpty()) {
+                TransferRow(text = "No transfers active.")
+                HorizontalLine()
+                TransferRow()
+                HorizontalLine()
+                TransferRow()
+            }
             transferJobs.forEachIndexed { index, job ->
                 Row(
                     modifier = Modifier
-                        .requiredHeight(30.dp)
-                        .padding(horizontal = 5.dp)
+                        .requiredHeight(height = spacing32)
+                        .padding(horizontal = spacing8)
                         .clickable { onTransferJobClicked(job) },
                     verticalAlignment = CenterVertically,
                 ) {
@@ -131,14 +142,15 @@ fun OverviewTransferList(
 
 @Composable
 private fun HeaderRow(
+    noTransfers: Boolean,
     maxProgressWidth: Dp,
     maxStatusWidth: Dp,
 ) {
     Column {
         Row(
             modifier = Modifier
-                .requiredHeight(30.dp)
-                .padding(horizontal = 5.dp),
+                .requiredHeight(height = spacing32)
+                .padding(horizontal = spacing8),
             verticalAlignment = CenterVertically,
         ) {
             Text(
@@ -161,9 +173,84 @@ private fun HeaderRow(
                 style = headingSStyle,
                 text = "Status",
             )
-            VerticalLine()
-            FittoniaSpacerWidth(width = 20)
+            if (!noTransfers) {
+                VerticalLine()
+                FittoniaSpacerWidth(width = 20)
+            }
         }
         HorizontalLine()
+    }
+}
+
+@Composable
+private fun TransferRow(
+    text: String? = null,
+    onClick: (() -> Unit)? = null,
+    progress: Double? = null,
+    status: TransferStatus? = null,
+) {
+    val maxProgressWidth = measureTextWidth(text = "100.0%", style = readOnlyFieldTextStyle)
+    val maxStatusWidth = measureTextWidth(text = "Status", style = readOnlyFieldTextStyle)
+    Row(
+        modifier = Modifier
+            .requiredHeight(height = spacing32)
+            .padding(horizontal = spacing8)
+            .clickable(enabled = onClick != null) { onClick?.invoke() },
+        verticalAlignment = CenterVertically,
+    ) {
+        Text(
+            modifier = Modifier.weight(1.0f),
+            text = text ?: "",
+            style = readOnlyFieldSmallTextStyle,
+            overflow = TextOverflow.Ellipsis,
+        )
+        VerticalLine()
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 5.dp)
+                .requiredWidth(width = maxProgressWidth),
+            horizontalAlignment = CenterHorizontally,
+        ) {
+            progress?.let {
+                Text(
+                    text = rememberPercentageFormat(percentage = it, minFraction = 1, maxFraction = 1),
+                    style = readOnlyFieldTextStyle,
+                )
+            }
+        }
+        VerticalLine()
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 5.dp)
+                .requiredWidth(maxStatusWidth),
+            horizontalAlignment = CenterHorizontally,
+        ) {
+            status?.let {
+                FittoniaIcon(
+                    modifier = Modifier.padding(all = 3.dp),
+                    drawableRes = when (it) {
+                        TransferStatus.Sending -> R.drawable.ic_arrow_send
+                        TransferStatus.Receiving -> R.drawable.ic_arrow_receive
+                        TransferStatus.Error -> R.drawable.ic_alert
+                        TransferStatus.Done -> R.drawable.ic_checkmark
+                    },
+                    tint = when (it) {
+                        TransferStatus.Sending -> Color(0xFF0000FF)
+                        TransferStatus.Receiving -> Color(0xFF0000FF)
+                        TransferStatus.Error -> Color(0xFFFFCC44)
+                        TransferStatus.Done -> Color(0xFF00FF00)
+                    },
+                )
+            }
+        }
+        if (onClick != null) {
+            VerticalLine()
+            FittoniaIcon(
+                modifier = Modifier
+                    .requiredWidth(20.dp)
+                    .padding(3.dp),
+                drawableRes = R.drawable.ic_chevron_right,
+            )
+        }
     }
 }
