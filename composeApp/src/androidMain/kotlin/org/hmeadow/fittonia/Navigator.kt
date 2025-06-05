@@ -1,6 +1,7 @@
 package org.hmeadow.fittonia
 
 import SettingsManager
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -217,8 +218,10 @@ class Navigator(private val mainViewModel: MainViewModel) {
     }
 
     private fun pop() {
-        screenStack.removeAt(screenStack.lastIndex)
-        currentScreen = screenStack.last()
+        if (screenStack.size > 1) {
+            screenStack.removeAt(screenStack.lastIndex)
+            currentScreen = screenStack.last()
+        }
     }
 
     @Composable
@@ -228,6 +231,13 @@ class Navigator(private val mainViewModel: MainViewModel) {
 
     companion object {
         private lateinit var instance: Navigator
+
+        @Composable
+        fun NavigatorBackHandler() {
+            BackHandler(enabled = instance.screenStack.size > 1) {
+                instance.pop()
+            }
+        }
 
         fun goToDebugScreen() {
             instance.push(

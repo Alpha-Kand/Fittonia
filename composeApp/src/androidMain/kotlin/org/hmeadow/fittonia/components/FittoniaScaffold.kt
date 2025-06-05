@@ -40,6 +40,7 @@ import org.hmeadow.fittonia.MainActivity.Companion.navBarHeight
 import org.hmeadow.fittonia.MainActivity.Companion.navBarHeightVar
 import org.hmeadow.fittonia.MainActivity.Companion.statusBarsHeight
 import org.hmeadow.fittonia.MainActivity.Companion.statusBarsHeightVar
+import org.hmeadow.fittonia.Navigator.Companion.NavigatorBackHandler
 import org.hmeadow.fittonia.components.HeaderAndFooterDrawingConstants.BORDER_WIDTH
 import org.hmeadow.fittonia.components.HeaderAndFooterDrawingConstants.CORNER_RADIUS
 import org.hmeadow.fittonia.components.HeaderAndFooterDrawingConstants.shadowColours
@@ -63,6 +64,8 @@ fun FittoniaScaffold(
     overlay: @Composable BoxScope.() -> Unit = {},
     scrollable: Boolean = true,
 ) {
+    NavigatorBackHandler()
+
     val imeHeightLocal = imeHeight.collectAsState(initial = imeHeightVar)
     val navBarHeightLocal = navBarHeight.collectAsState(initial = navBarHeightVar)
     val statusBarsHeightLocal = statusBarsHeight.collectAsState(initial = statusBarsHeightVar)
