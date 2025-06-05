@@ -2,7 +2,7 @@
     <string name="app_name">Fittonia</string>
     <string name="app_version">1.0</string>
     <string name="about_modal_name_format">%1$s, %2$s</string>
-    <string name="last_built_date">Built March 4, 2025</string>
+    <string name="last_built_date">Built June 5, 2025</string>
     <string name="credits">By Hunter Wiesman</string>
 
     <!-- Send/Receive Files Channel -->
@@ -37,7 +37,7 @@
     <string name="overview_screen_dump_permission_lost_notice">Permission was lost for your previously selected \'incoming transfers\' folder. Please reselect or choose another folder.</string>
 
     <!-- New Destination Screen -->
-    <string name="new_destination_screen_body">If you plan on sending files/messages to a remote device often, saving it as a destination can save you having to remember its details.</string>
+    <string name="new_destination_screen_body">If you plan on sending files/messages to a remote device often, making it a Destination can help you from having to remember its details every time.</string>
 
     <!-- Transfer Details Screen -->
     <string name="transfer_details_screen_progress">%1$s - %2$d out of %3$d items %4$s.</string>
