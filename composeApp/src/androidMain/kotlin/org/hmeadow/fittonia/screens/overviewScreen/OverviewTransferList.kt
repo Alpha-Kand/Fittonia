@@ -3,6 +3,7 @@ package org.hmeadow.fittonia.screens.overviewScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +19,6 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -74,66 +74,21 @@ fun OverviewTransferList(
                 TransferRow()
             }
             transferJobs.forEachIndexed { index, job ->
-                Row(
-                    modifier = Modifier
-                        .requiredHeight(height = spacing32)
-                        .padding(horizontal = spacing8)
-                        .clickable { onTransferJobClicked(job) },
-                    verticalAlignment = CenterVertically,
-                ) {
-                    Text(
-                        modifier = Modifier.weight(1.0f),
-                        text = job.description,
-                        style = readOnlyFieldSmallTextStyle,
-                        textAlign = TextAlign.Center,
-                        overflow = TextOverflow.Ellipsis,
-                        //color = currentStyle.primaryButtonType.contentColour,
-                    )
-                    VerticalLine()
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 5.dp)
-                            .requiredWidth(maxProgressWidth),
-                        horizontalAlignment = CenterHorizontally,
-                    ) {
-                        Text(
-                            text = rememberPercentageFormat(job.progressPercentage, minFraction = 1, maxFraction = 1),
-                            style = readOnlyFieldTextStyle,
-                        )
-                    }
-                    VerticalLine()
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 5.dp)
-                            .requiredWidth(maxStatusWidth),
-                        horizontalAlignment = CenterHorizontally,
-                    ) {
-                        FittoniaIcon(
-                            modifier = Modifier.padding(3.dp),
-                            drawableRes = when (job.status) {
-                                TransferStatus.Sending -> R.drawable.ic_arrow_send
-                                TransferStatus.Receiving -> R.drawable.ic_arrow_receive
-                                TransferStatus.Error -> R.drawable.ic_alert
-                                TransferStatus.Done -> R.drawable.ic_checkmark
-                            },
-                            tint = when (job.status) {
-                                TransferStatus.Sending -> Color(0xFF0000FF)
-                                TransferStatus.Receiving -> Color(0xFF0000FF)
-                                TransferStatus.Error -> Color(0xFFFFCC44)
-                                TransferStatus.Done -> Color(0xFF00FF00)
-                            },
-                        )
-                    }
-                    VerticalLine()
-                    FittoniaIcon(
-                        modifier = Modifier
-                            .requiredWidth(20.dp)
-                            .padding(3.dp),
-                        drawableRes = R.drawable.ic_chevron_right,
-                    )
-                }
+                TransferRow(
+                    text = job.description,
+                    onClick = { onTransferJobClicked(job) },
+                    progress = job.progressPercentage,
+                    status = job.status,
+                )
                 if (index != transferJobs.lastIndex) {
                     HorizontalLine()
+                }
+            }
+
+            if (transferJobs.size in 1..2) {
+                repeat(times = 3 - transferJobs.size) {
+                    HorizontalLine()
+                    TransferRow()
                 }
             }
         }
@@ -243,14 +198,18 @@ private fun TransferRow(
                 )
             }
         }
+        VerticalLine()
         if (onClick != null) {
-            VerticalLine()
             FittoniaIcon(
                 modifier = Modifier
-                    .requiredWidth(20.dp)
-                    .padding(3.dp),
+                    .requiredWidth(width = 20.dp)
+                    .padding(all = 3.dp),
                 drawableRes = R.drawable.ic_chevron_right,
             )
+        } else {
+            Box(
+                modifier = Modifier.requiredWidth(width = 20.dp),
+            ) {}
         }
     }
 }

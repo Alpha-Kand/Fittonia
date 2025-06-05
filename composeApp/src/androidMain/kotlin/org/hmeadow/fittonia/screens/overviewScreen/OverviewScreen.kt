@@ -3,11 +3,13 @@ package org.hmeadow.fittonia.screens.overviewScreen
 import SettingsManager
 import android.net.Uri
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,19 +33,25 @@ import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
+import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.androidServer.AndroidServer
-import org.hmeadow.fittonia.components.FittoniaComingSoon
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaModal
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.Footer
+import org.hmeadow.fittonia.components.HorizontalLine
+import org.hmeadow.fittonia.components.pager.LazyPager
+import org.hmeadow.fittonia.components.pager.PagerState
+import org.hmeadow.fittonia.components.pager.PagerState.Companion.rememberPagerState
+import org.hmeadow.fittonia.components.pager.PagerTabLabels
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
+import org.hmeadow.fittonia.design.Spacing.spacing16
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.models.OutgoingJob
@@ -52,7 +60,6 @@ import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.utility.Debug
 import org.hmeadow.fittonia.utility.createJobDirectory
 import org.hmeadow.fittonia.utility.isLandscape
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.abs
@@ -141,16 +148,18 @@ class OverviewScreenViewModel(
 @Composable
 fun OverviewScreen(
     viewModel: OverviewScreenViewModel,
+    data: SettingsDataAndroid,
     onSendFilesClicked: () -> Unit,
     onTransferJobClicked: (TransferJob) -> Unit,
     onAlertsClicked: () -> Unit,
+    pagerState: PagerState = rememberPagerState(),
 ) {
     var optionsState by remember { mutableStateOf(false) }
     var aboutState by remember { mutableStateOf(false) }
     FittoniaScaffold(
+        scrollable = false,
         header = {
             FittoniaHeader(
-                headerText = "Ongoing transfers",
                 onOptionsClicked = { optionsState = true },
                 onAlertsClicked = onAlertsClicked.takeIf {
                     UserAlert.hasAlerts.collectAsState(false).value
@@ -158,16 +167,43 @@ fun OverviewScreen(
             )
         },
         content = {
-            Column(modifier = Modifier.padding(all = 16.dp)) {
-                FittoniaSpacerHeight(height = 15)
-
-                OverviewTransferList(onTransferJobClicked = onTransferJobClicked)
-
-                FittoniaButton(
-                    onClick = viewModel::addNewDebugJob,
-                    type = currentStyle.primaryButtonType,
-                    content = { ButtonText(text = "<Add line>") },
+            val overviewTabs: List<Pair<String, @Composable (maxWidth: Dp, maxHeight: Dp) -> Unit>> =
+                listOf(
+                    "Active transfers" to { maxWidth, maxHeight ->
+                        OverviewScreenActiveTransfersTab(
+                            maxWidth = maxWidth,
+                            maxHeight = maxHeight,
+                            onTransferJobClicked = onTransferJobClicked,
+                            addNewDebugJob = viewModel::addNewDebugJob,
+                        )
+                    },
+                    "Completed transfers" to { maxWidth, maxHeight ->
+                        OverviewScreenCompletedTransfersTab(
+                            maxWidth = maxWidth,
+                            maxHeight = maxHeight,
+                            data.completedJobs,
+                        )
+                    },
                 )
+
+            BoxWithConstraints {
+                val box = this
+                Column {
+                    PagerTabLabels(
+                        position = pagerState.pagePosition,
+                        tabs = remember(overviewTabs) { overviewTabs.map { it.first } },
+                        onTabSelected = pagerState::goToPage,
+                        modifier = Modifier.padding(bottom = spacing16),
+                    )
+                    LazyPager(
+                        pagerState = pagerState,
+                        spacing = 16.dp,
+                    ) {
+                        items(overviewTabs) {
+                            it.second.invoke(box.maxWidth, box.maxHeight)
+                        }
+                    }
+                }
             }
         },
         footer = {
@@ -194,8 +230,8 @@ fun OverviewScreen(
                     Row {
                         FittoniaIcon(
                             drawableRes = R.drawable.ic_access_folder,
-                            modifier = Modifier.requiredSize(40.dp),
-                            tint = Color(0xFFA00000),
+                            modifier = Modifier.requiredSize(size = 40.dp),
+                            tint = Color(color = 0xFFA00000),
                         )
                         FittoniaSpacerWidth(width = 10)
                         Text(
@@ -225,12 +261,12 @@ fun OverviewScreen(
                     ),
                     style = headingMStyle,
                 )
-                FittoniaSpacerHeight(10)
+                FittoniaSpacerHeight(height = 10)
                 Text(
                     text = stringResource(R.string.last_built_date),
                     style = paragraphTextStyle,
                 )
-                FittoniaSpacerHeight(10)
+                FittoniaSpacerHeight(height = 10)
                 Text(
                     text = stringResource(R.string.credits),
                     style = paragraphTextStyle,
@@ -241,32 +277,33 @@ fun OverviewScreen(
                 alignment = Alignment.TopStart,
                 onDismiss = { optionsState = false },
             ) { onDismiss ->
-                listOf(
+                val list = listOf(
                     Options(
-                        name = "Settings",
+                        name = "Settings (TODO)",
                         onClick = {},
                     ),
                     Options(
                         name = "About",
                         onClick = { aboutState = true },
                     ),
-                ).forEach {
-                    if (it.name == "Settings") {
+                )
+                list.forEachIndexed { index, option ->
+                    if (option.name == "Settings") {
                         Debug {
-                            FittoniaComingSoon {
-                                Row {
-                                    Text(
-                                        text = it.name,
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
-                                        style = paragraphTextStyle,
-                                    )
-                                    FittoniaSpacerWeightRow()
-                                    FittoniaIcon(
-                                        modifier = Modifier.align(CenterVertically),
-                                        drawableRes = R.drawable.ic_chevron_right,
-                                        tint = Color(0xFF222222),
-                                    )
-                                }
+                            Row {
+                                Text(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
+                                    text = option.name,
+                                    style = paragraphTextStyle,
+                                )
+                                FittoniaSpacerWeightRow()
+                                FittoniaIcon(
+                                    modifier = Modifier
+                                        .align(alignment = CenterVertically)
+                                        .requiredSize(size = 20.dp),
+                                    drawableRes = R.drawable.ic_chevron_right,
+                                    tint = Color(color = 0xFF222222),
+                                )
                             }
                         }
                     } else {
@@ -275,38 +312,30 @@ fun OverviewScreen(
                                 .clickable(
                                     onClick = {
                                         onDismiss()
-                                        it.onClick()
+                                        option.onClick()
                                     },
                                 ),
                         ) {
                             Text(
-                                text = it.name,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
+                                text = option.name,
                                 style = paragraphTextStyle,
                             )
                             FittoniaSpacerWeightRow()
                             FittoniaIcon(
                                 modifier = Modifier
-                                    .align(CenterVertically)
-                                    .requiredSize(20.dp),
+                                    .align(alignment = CenterVertically)
+                                    .requiredSize(size = 20.dp),
                                 drawableRes = R.drawable.ic_chevron_right,
-                                tint = Color(0xFF222222), // TODO no hard coded colors - After release
+                                tint = Color(color = 0xFF222222), // TODO no hard coded colors - After release
                             )
                         }
+                    }
+                    if (list.lastIndex != index) {
+                        HorizontalLine()
                     }
                 }
             }
         },
-    )
-}
-
-@Composable
-@Preview
-private fun Preview() {
-    OverviewScreen(
-        viewModel = OverviewScreenViewModel(onUpdateDumpPath = {}),
-        onSendFilesClicked = {},
-        onTransferJobClicked = {},
-        onAlertsClicked = {},
     )
 }

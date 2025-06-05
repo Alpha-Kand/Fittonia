@@ -89,9 +89,10 @@ class Navigator(private val mainViewModel: MainViewModel) {
         viewModel = OverviewScreenViewModel(
             onUpdateDumpPath = mainViewModel::updateDumpPath,
         ),
-    ) { _, viewModel ->
+    ) { data, viewModel ->
         OverviewScreen(
             viewModel = viewModel,
+            data = data,
             onSendFilesClicked = {
                 push(sendFilesScreen())
             },
