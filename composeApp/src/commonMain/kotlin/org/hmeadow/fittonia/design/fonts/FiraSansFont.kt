@@ -1,7 +1,6 @@
 package org.hmeadow.fittonia.design.fonts
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -95,25 +94,5 @@ val inputLabelStyle: TextStyle
         lineHeight = 23.sp,
         fontWeight = FontWeight(weight = 500),
         fontStyle = FontStyle.Italic,
-        fontFamily = firaSansFont,
-    )
-
-@Composable
-fun inputInputStyle(color: Color) = TextStyle(
-    fontSize = 17.sp,
-    lineHeight = 23.sp,
-    letterSpacing = (-0.1f).sp,
-    fontWeight = FontWeight(weight = 200),
-    fontFamily = firaSansFont,
-    color = color,
-)
-
-val inputHintStyle: TextStyle
-    @Composable
-    get() = TextStyle(
-        fontSize = 17.sp,
-        lineHeight = 23.sp,
-        letterSpacing = (-0.1f).sp,
-        fontWeight = FontWeight(weight = 200),
         fontFamily = firaSansFont,
     )
