@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -47,8 +46,8 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
+import org.hmeadow.fittonia.compose.components.FittoniaCheckbox
 import org.hmeadow.fittonia.compose.components.FittoniaLoadingIndicator
-import org.hmeadow.fittonia.compose.components.FittoniaNumberInput
 import org.hmeadow.fittonia.compose.components.FittoniaTextInput
 import org.hmeadow.fittonia.compose.components.InputFlow
 import org.hmeadow.fittonia.design.fonts.headingMStyle
@@ -83,7 +82,7 @@ class SendFilesScreenViewModel(
     val itemListState = MutableStateFlow<List<TransferJob.Item>>(emptyList())
     val selectedDestinationState = MutableStateFlow<SettingsManager.Destination?>(null)
     val portState: InputFlow = InputFlow(
-        initial = debug(debugValue = "12345", releaseValue = ""),
+        initial = debug(debugValue = "44556", releaseValue = ""),
         onValueChange = { port ->
             if (port.isNotEmpty()) {
                 selectedDestinationState.value?.let {
@@ -318,18 +317,8 @@ fun SendFilesScreen(
                     style = headingMStyle,
                 )
                 FittoniaSpacerHeight(height = 10)
-                Row(
-                    modifier = Modifier.clickable { oneTimeDestinationState = !oneTimeDestinationState },
-                    verticalAlignment = CenterVertically,
-                ) {
-                    Checkbox(
-                        checked = oneTimeDestinationState,
-                        onCheckedChange = null,
-                    )
-                    Text(
-                        text = "One-time destination",
-                        style = psstStyle,
-                    )
+                FittoniaCheckbox(label = "One-time destination") { state ->
+                    oneTimeDestinationState = state
                 }
                 FittoniaSpacerHeight(height = 10)
                 if (oneTimeDestinationState) {
@@ -445,14 +434,6 @@ fun SendFilesScreen(
                         style = paragraphTextStyle,
                     )
                 }
-
-                FittoniaSpacerHeight(height = 30)
-
-                FittoniaNumberInput(
-                    modifier = Modifier.fillMaxWidth(),
-                    inputFlow = viewModel.portState,
-                    label = "Port",
-                )
 
                 FittoniaSpacerHeight(height = 30)
 

@@ -26,6 +26,11 @@ fun FittoniaSpacerWidth(width: Int) {
 }
 
 @Composable
+fun FittoniaSpacerWidth(width: Dp) {
+    Spacer(modifier = Modifier.width(width))
+}
+
+@Composable
 fun ColumnScope.FittoniaSpacerWeightColumn(weight: Float = 1.0f) {
     Spacer(modifier = Modifier.weight(weight))
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.hmeadow.fittonia.compose.components.CheckboxColours
 import org.hmeadow.fittonia.compose.components.FittoniaButtonType
 import org.hmeadow.fittonia.compose.components.TextInputColours
 
@@ -29,12 +30,13 @@ sealed interface AppStyle {
     val primaryButtonType: FittoniaButtonType
     val secondaryButtonType: FittoniaButtonType
     val textInputColours: TextInputColours
+    val checkboxColours: CheckboxColours
 
     @Composable
     fun Background(modifier: Modifier)
 }
 
-val currentStyle: AppStyle = DebugAppStyle
+val currentStyle: AppStyle = FittoniaPopping
 var appStyleResetHeader by mutableStateOf<ULong>(0u)
 var appStyleResetStatusBar by mutableStateOf<ULong>(0u)
 var appStyleResetStatusFooter by mutableStateOf<ULong>(0u)
@@ -117,6 +119,16 @@ data object DebugAppStyle : AppStyle {
             label = textInputLabel,
         )
 
+    var checkedColour by mutableStateOf(Color(0xFF000000))
+    var uncheckedColour by mutableStateOf(Color(0xFF000000))
+    var checkmarkColour by mutableStateOf(Color(0xFF000000))
+    override val checkboxColours: CheckboxColours
+        get() = CheckboxColours(
+            checkedColour = checkedColour,
+            uncheckedColour = uncheckedColour,
+            checkmarkColour = checkmarkColour,
+        )
+
     var headerTextColour by mutableStateOf(Color(color = 0xFF000000))
 
     var backgroundColourEdit by mutableStateOf(Color(color = 0xFFFFFFFF))
@@ -168,6 +180,9 @@ data object FittoniaClassic : AppStyle {
         hint = Color(color = 0xFF999999),
         label = Color(color = 0xFF000000),
     )
+
+    override val checkboxColours: CheckboxColours
+        get() = TODO("Not yet implemented")
 
     @Composable
     override fun Background(modifier: Modifier) {
@@ -228,6 +243,13 @@ data object Empty : AppStyle {
         label = Color(color = 0xFF000000),
     )
 
+    override val checkboxColours: CheckboxColours
+        get() = CheckboxColours(
+            checkedColour = Color(0xFF444444),
+            uncheckedColour = Color(0xFFFFFFFF),
+            checkmarkColour = Color(0xFF000000),
+        )
+
     @Composable
     override fun Background(modifier: Modifier) {
         Box(modifier = modifier.background(Color(color = 0x00000000))) {}
@@ -249,7 +271,7 @@ data object FittoniaPopping : AppStyle {
         borderColour = Color(color = 0xFFB73582), // ✅
         contentColour = Color(color = 0xFF000000), // ✅
         backgroundColor = Color(color = 0xFFE5FFE5), // ✅
-        disabledBorderColour = Color(color = 0x996F3140), // ✅
+        disabledBorderColour = Color(color = 0x556F3140), // ✅
         disabledContentColor = Color(color = 0xFF777777), // ✅
         disabledBackgroundColor = Color(color = 0xFFF6FFF6), // ✅
     )
@@ -269,6 +291,12 @@ data object FittoniaPopping : AppStyle {
         content = Color(color = 0xFF000000),
         hint = Color(color = 0xFF999999),
         label = Color(color = 0xFF000000),
+    )
+
+    override val checkboxColours = CheckboxColours(
+        checkedColour = Color(color = 0xFF3E6440),
+        uncheckedColour = Color(color = 0xFF3E6440),
+        checkmarkColour = Color(color = 0xFFF0FFF0),
     )
 
     @Composable
