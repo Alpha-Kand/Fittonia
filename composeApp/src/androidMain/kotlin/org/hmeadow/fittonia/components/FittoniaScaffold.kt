@@ -261,7 +261,6 @@ private fun DrawScope.footerDraw() {
     val cornerDiameter = cornerRadius * 2
     val width = this.size.width
     val height = this.size.height
-    val sidesHeight = height - cornerRadius
     val cornerSize = Size(width = cornerDiameter, height = cornerDiameter)
 
     // Left side.
@@ -274,13 +273,13 @@ private fun DrawScope.footerDraw() {
                 end = Offset.Zero,
             ),
             topLeft = Offset(x = 0f, y = cornerRadius),
-            size = Size(width = width, height = sidesHeight),
+            size = Size(width = width, height = height),
         )
         // Border.
         drawLine(
             color = currentStyle.headerAndFooterBorderColour,
             start = Offset(x = 0f, y = cornerRadius),
-            end = Offset(x = 0f, y = sidesHeight),
+            end = Offset(x = 0f, y = height),
             strokeWidth = BORDER_WIDTH,
         )
     }
@@ -295,13 +294,13 @@ private fun DrawScope.footerDraw() {
                 end = Offset(x = width, y = 0f),
             ),
             topLeft = Offset(x = width - cornerRadius, y = cornerRadius),
-            size = Size(width = cornerRadius, height = sidesHeight),
+            size = Size(width = cornerRadius, height = height),
         )
         // Border.
         drawLine(
             color = currentStyle.headerAndFooterBorderColour,
             start = Offset(x = width, y = cornerRadius),
-            end = Offset(x = width, y = sidesHeight),
+            end = Offset(x = width, y = height),
             strokeWidth = BORDER_WIDTH,
         )
     }
