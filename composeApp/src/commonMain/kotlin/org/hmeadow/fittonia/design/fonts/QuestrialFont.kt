@@ -26,7 +26,7 @@ val readOnlyFieldTextStyle: TextStyle
         fontFamily = questrialFont,
         lineHeightStyle = LineHeightStyle(
             alignment = LineHeightStyle.Alignment.Center,
-            trim = LineHeightStyle.Trim.None,
+            trim = LineHeightStyle.Trim.LastLineBottom,
         ),
         baselineShift = BaselineShift(multiplier = 0.4f),
     )
@@ -41,7 +41,7 @@ val readOnlyFieldSmallTextStyle: TextStyle
         fontFamily = questrialFont,
         lineHeightStyle = LineHeightStyle(
             alignment = LineHeightStyle.Alignment.Center,
-            trim = LineHeightStyle.Trim.None,
+            trim = LineHeightStyle.Trim.LastLineBottom,
         ),
     )
 
@@ -55,7 +55,7 @@ val readOnlyFieldLightTextStyle: TextStyle
         fontFamily = questrialFont,
         lineHeightStyle = LineHeightStyle(
             alignment = LineHeightStyle.Alignment.Top,
-            trim = LineHeightStyle.Trim.None,
+            trim = LineHeightStyle.Trim.LastLineBottom,
         ),
         baselineShift = BaselineShift(multiplier = 0.4f),
     )

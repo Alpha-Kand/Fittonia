@@ -50,6 +50,9 @@ import org.hmeadow.fittonia.compose.components.FittoniaCheckbox
 import org.hmeadow.fittonia.compose.components.FittoniaLoadingIndicator
 import org.hmeadow.fittonia.compose.components.FittoniaTextInput
 import org.hmeadow.fittonia.compose.components.InputFlow
+import org.hmeadow.fittonia.design.Spacing.spacing2
+import org.hmeadow.fittonia.design.Spacing.spacing4
+import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
@@ -344,36 +347,40 @@ fun SendFilesScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(width = 1.dp, color = Color(0xFF446644))
-                            .background(color = Color(0xFFDDFFEE))
-                            .padding(5.dp)
+                            .border(width = 1.dp, color = currentStyle.primaryButtonType.borderColour)
+                            .background(color = currentStyle.primaryButtonType.backgroundColor)
+                            .padding(spacing4)
                             .clickable(onClick = { destinationPickerActive = true }),
                     ) {
                         val selectedDestination = viewModel.selectedDestinationState.collectAsState()
                         Row(
+                            modifier = Modifier.padding(start = spacing4),
                             verticalAlignment = CenterVertically,
                         ) {
                             Text(
                                 text = selectedDestination.value?.name ?: "Select destination...",
                                 style = readOnlyFieldTextStyle,
+                                color = currentStyle.primaryButtonType.contentColour,
                             )
                             FittoniaSpacerWeightRow()
                             FittoniaIcon(
                                 modifier = Modifier.requiredSize(10.dp),
                                 drawableRes = R.drawable.ic_chevron_down,
-                                tint = Color(0xFF222222),
+                                tint = currentStyle.primaryButtonType.contentColour,
                             )
                         }
                         selectedDestination.value?.let { destination ->
-                            HorizontalLine(modifier = Modifier.padding(vertical = 4.dp))
+                            FittoniaSpacerHeight(height = spacing4)
+                            HorizontalLine()
+                            FittoniaSpacerHeight(height = spacing8)
                             listOf(
                                 "IP Address: ${destination.ip}",
                                 "Access Code: • • • • • • • • • • • •",
                             ).fastForEach {
                                 Text(
                                     modifier = Modifier
-                                        .padding(start = 5.dp)
-                                        .padding(vertical = 4.dp),
+                                        .padding(start = spacing4)
+                                        .padding(vertical = spacing2),
                                     text = it,
                                     style = readOnlyFieldLightTextStyle,
                                 )
