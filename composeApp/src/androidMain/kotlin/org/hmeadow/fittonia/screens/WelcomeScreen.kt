@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.combine
@@ -92,8 +93,10 @@ fun WelcomeScreen(
                 FittoniaSpacerHeight(height = spacing32)
 
                 Text(
+                    modifier = Modifier.fillMaxWidth(),
                     text = stringResource(id = R.string.welcome_screen_title),
                     style = headingLStyle,
+                    textAlign = TextAlign.Center,
                 )
 
                 Debug(Off) {

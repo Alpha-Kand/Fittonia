@@ -95,8 +95,10 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     private fun initServerFromIntent(intent: Intent?): Boolean {
         serverLog(text = "initServerFromIntent (intent = $intent)")
         intent?.let {
-            accessCode =
-                it.getStringExtra("org.hmeadow.fittonia.accesscode") ?: throw Exception("No access code provided")
+            updateAccessCode(
+                newAccessCode = it.getStringExtra("org.hmeadow.fittonia.accesscode")
+                    ?: throw Exception("No access code provided"),
+            )
             serverLog(text = "init access code $accessCode") // TODO - before release
             it.getIntExtra("org.hmeadow.fittonia.port", 0).let { port ->
                 serverLog(text = "init port $port")
@@ -109,8 +111,11 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         return true
     }
 
+    fun updateAccessCode(newAccessCode: String) {
+        accessCode = newAccessCode
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        println("onStartCommand")
         ServiceCompat.startForeground(
             this,
             NOTIFICATION_ID,
@@ -120,13 +125,11 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         if (serverSocket == null) {
             if (initServerFromIntent(intent = intent)) {
                 launchServerJob()
-                println("START_STICKY")
                 return START_STICKY // If the service is killed, it will be automatically restarted.
             }
             stopForeground(STOP_FOREGROUND_REMOVE)
             MainActivity.mainActivityForServer?.unbindFromServer()
             stopSelf()
-            println("START_NOT_STICKY")
             return START_NOT_STICKY
         }
         return START_STICKY // If the service is killed, it will be automatically restarted.
@@ -199,13 +202,6 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                                         onSendMessageCommand = ::onSendMessage2,
                                         onInvalidCommand = ::onInvalidCommand,
                                     )
-
-                                    /*
-                                    handleCommand(
-                                        server = server,
-                                        jobId = getAndIncrementJobId(),
-                                    )
-                                     */
                                 }
                             }
                         } catch (e: SocketException) {

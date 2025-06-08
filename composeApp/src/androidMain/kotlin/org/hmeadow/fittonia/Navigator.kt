@@ -34,6 +34,8 @@ import org.hmeadow.fittonia.screens.debugScreen.DebugScreen
 import org.hmeadow.fittonia.screens.debugScreen.DebugScreenViewModel
 import org.hmeadow.fittonia.screens.overviewScreen.OverviewScreen
 import org.hmeadow.fittonia.screens.overviewScreen.OverviewScreenViewModel
+import org.hmeadow.fittonia.screens.settings.SettingsScreen
+import org.hmeadow.fittonia.screens.settings.SettingsScreenViewModel
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -103,6 +105,9 @@ class Navigator(private val mainViewModel: MainViewModel) {
             onAlertsClicked = {
                 push(alertsScreen())
             },
+            onGoToSettingsClicked = {
+                push(settingsScreen())
+            },
         )
     }
 
@@ -160,6 +165,15 @@ class Navigator(private val mainViewModel: MainViewModel) {
     ) = Screen(viewModel = TransferDetailsScreenViewModel(transferJob = transferJob)) { _, viewModel ->
         TransferDetailsScreen(
             transferJobState = viewModel.currentTransferJob.dataState,
+            onBackClicked = ::pop,
+        )
+    }
+
+    private fun settingsScreen() = Screen(
+        viewModel = SettingsScreenViewModel(mainViewModel = mainViewModel),
+    ) { _, viewModel ->
+        SettingsScreen(
+            viewModel = viewModel,
             onBackClicked = ::pop,
         )
     }

@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.serverLog
 import org.hmeadow.fittonia.compose.architecture.DebugAppStyle
 import kotlin.coroutines.CoroutineContext
@@ -95,9 +96,13 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         updateTemporaryPort(port = null)
     }
 
-    fun updateServerAccessCode(accessCode: String) = launch {
-        dataStore.updateData {
-            it.copy(serverAccessCode = accessCode)
+    fun updateServerAccessCode(accessCode: String) {
+        launch {
+            dataStore.updateData {
+                it.copy(serverAccessCode = accessCode).also {
+                    AndroidServer.server.value?.updateAccessCode(accessCode)
+                }
+            }
         }
     }
 

@@ -56,7 +56,6 @@ import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
-import org.hmeadow.fittonia.utility.Debug
 import org.hmeadow.fittonia.utility.createJobDirectory
 import org.hmeadow.fittonia.utility.isLandscape
 import java.text.NumberFormat
@@ -151,6 +150,7 @@ fun OverviewScreen(
     onSendFilesClicked: () -> Unit,
     onTransferJobClicked: (TransferJob) -> Unit,
     onAlertsClicked: () -> Unit,
+    onGoToSettingsClicked: () -> Unit,
     pagerState: PagerState = rememberPagerState(),
 ) {
     var optionsState by remember { mutableStateOf(false) }
@@ -277,8 +277,8 @@ fun OverviewScreen(
             ) { onDismiss ->
                 val list = listOf(
                     Options(
-                        name = "Settings (TODO)",
-                        onClick = {},
+                        name = "Settings",
+                        onClick = onGoToSettingsClicked,
                     ),
                     Options(
                         name = "About",
@@ -286,48 +286,28 @@ fun OverviewScreen(
                     ),
                 )
                 list.forEachIndexed { index, option ->
-                    if (option.name == "Settings") {
-                        Debug {
-                            Row {
-                                Text(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
-                                    text = option.name,
-                                    style = paragraphTextStyle,
-                                )
-                                FittoniaSpacerWeightRow()
-                                FittoniaIcon(
-                                    modifier = Modifier
-                                        .align(alignment = CenterVertically)
-                                        .requiredSize(size = 20.dp),
-                                    drawableRes = R.drawable.ic_chevron_right,
-                                    tint = Color(color = 0xFF222222),
-                                )
-                            }
-                        }
-                    } else {
-                        Row(
+                    Row(
+                        modifier = Modifier
+                            .clickable(
+                                onClick = {
+                                    onDismiss()
+                                    option.onClick()
+                                },
+                            ),
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(horizontal = spacing16, vertical = spacing16),
+                            text = option.name,
+                            style = paragraphTextStyle,
+                        )
+                        FittoniaSpacerWeightRow()
+                        FittoniaIcon(
                             modifier = Modifier
-                                .clickable(
-                                    onClick = {
-                                        onDismiss()
-                                        option.onClick()
-                                    },
-                                ),
-                        ) {
-                            Text(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
-                                text = option.name,
-                                style = paragraphTextStyle,
-                            )
-                            FittoniaSpacerWeightRow()
-                            FittoniaIcon(
-                                modifier = Modifier
-                                    .align(alignment = CenterVertically)
-                                    .requiredSize(size = 20.dp),
-                                drawableRes = R.drawable.ic_chevron_right,
-                                tint = Color(color = 0xFF222222), // TODO no hard coded colors - After release
-                            )
-                        }
+                                .align(alignment = CenterVertically)
+                                .requiredSize(size = spacing16),
+                            drawableRes = R.drawable.ic_chevron_right,
+                            tint = Color(color = 0xFF222222), // TODO no hard coded colors - After release
+                        )
                     }
                     if (list.lastIndex != index) {
                         HorizontalLine()
