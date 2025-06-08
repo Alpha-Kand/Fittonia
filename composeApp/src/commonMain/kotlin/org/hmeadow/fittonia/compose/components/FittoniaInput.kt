@@ -97,6 +97,28 @@ fun FittoniaTextInput(
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
     onInfo: (@Composable () -> Unit)? = null,
+) {
+    val noLabel: String? = null
+    BaseFittoniaInput(
+        inputFlow = inputFlow,
+        hint = hint,
+        modifier = modifier,
+        label = noLabel,
+        lineLimits = lineLimits,
+        filters = filters,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        onInfo = onInfo,
+    )
+}
+
+@Composable
+fun FittoniaTextInput(
+    inputFlow: InputFlow,
+    modifier: Modifier = Modifier,
+    hint: String? = null,
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
+    filters: List<FittoniaInputFilter> = emptyList(),
+    onInfo: (@Composable () -> Unit)? = null,
     label: String? = null,
 ) {
     BaseFittoniaInput(
