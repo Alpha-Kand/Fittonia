@@ -92,13 +92,13 @@ class PagerState(initialPage: Int = 0, val shouldAnimate: Boolean) {
      * @param onSuccess Called only when the pager scrolls to a new page. Passes the new index to the callback.
      */
     suspend fun performSwipeScroll(requirement: Boolean, onSuccess: (Int) -> Unit) {
-        if(requirement) {
+        if (requirement) {
             val index = listState.findByIndex(capturedVisiblePage?.index)?.let {
                 it.index - it.offset.sign
             } ?: listState.minAbsOffset?.index ?: 0
             onSuccess(index)
             scrollToPage(index = index)
-        }else {
+        } else {
             capturedVisiblePage?.index?.let {
                 scrollToPage(index = it)
             }

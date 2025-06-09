@@ -254,14 +254,13 @@ fun TransferDetailsScreen(
                                         }
                                         if (pathExpandedState) {
                                             Row {
+                                                val progress = rememberPercentageFormat(
+                                                    percentage = file.progressPercentage,
+                                                    minFraction = 1,
+                                                    maxFraction = 2,
+                                                )
                                                 Text(
-                                                    text = "$transferStatus${
-                                                        rememberPercentageFormat(
-                                                            percentage = file.progressPercentage,
-                                                            minFraction = 1,
-                                                            maxFraction = 2,
-                                                        )
-                                                    }",
+                                                    text = "$transferStatus$progress",
                                                     style = readOnlyFieldTextStyle,
                                                 )
                                                 FittoniaSpacerWeightRow()

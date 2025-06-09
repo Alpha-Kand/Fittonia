@@ -15,7 +15,6 @@ fun InputStream.subDivide(maxBlockSize: Int, expectedStreamSize: Long, block: (B
     }
 }
 
-
 /**
  * VIRTUAL COPY AND PASTE OF OFFICIAL 'readNBytes' METHOD FOR ANDROID JAVA 8 COMPATIBILITY.
  *

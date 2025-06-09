@@ -59,7 +59,7 @@ fun DebugScreenEncryptionTestTab(
             encodedAES = encodedAES,
             decodedAES = decodedAES,
             onEncryptMessageAES = onEncryptMessageAES,
-            onDecryptMessageAES = onDecryptMessageAES
+            onDecryptMessageAES = onDecryptMessageAES,
         )
 
         FittoniaSpacerHeight(footerHeight)
@@ -87,10 +87,10 @@ private fun PublicPrivateKeyEncryptionDemo(
 
         ReadOnlyEntries(
             entries =
-                listOf(
-                    "Encoded Size: ${encodedPuPr.size} -> ${encodedPuPr.toList()}",
-                    encodedPuPr.decodeToString().let { "Decrypted? -> Size: ${it.length} -> $it" },
-                ),
+            listOf(
+                "Encoded Size: ${encodedPuPr.size} -> ${encodedPuPr.toList()}",
+                encodedPuPr.decodeToString().let { "Decrypted? -> Size: ${it.length} -> $it" },
+            ),
         )
 
         FittoniaSpacerHeight(height = 10)
@@ -126,10 +126,10 @@ private fun AESKeyEncryptionDemo(
 
         ReadOnlyEntries(
             entries =
-                listOf(
-                    "Encoded Size: ${encodedAES.size} -> ${encodedAES.toList()}",
-                    encodedAES.decodeToString().let { "Decrypted? -> Size: ${it.length} -> $it" },
-                ),
+            listOf(
+                "Encoded Size: ${encodedAES.size} -> ${encodedAES.toList()}",
+                encodedAES.decodeToString().let { "Decrypted? -> Size: ${it.length} -> $it" },
+            ),
         )
 
         FittoniaSpacerHeight(height = 10)

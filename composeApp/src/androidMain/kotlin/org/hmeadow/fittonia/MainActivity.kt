@@ -158,7 +158,7 @@ class MainActivity : ComponentActivity() {
 
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
         return event?.let {
-            //gestureDetector.onTouchEvent(event) // TODO - After release
+            // gestureDetector.onTouchEvent(event) // TODO - After release
             super.dispatchTouchEvent(event)
         } ?: false
     }

@@ -7,7 +7,7 @@ import kotlin.coroutines.CoroutineContext
 
 open class BaseViewModel : CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
-        println("BaseViewModel error.message: ${throwable.message}") // TODO - handle errors, crashlytics? before release
+        println("BaseViewModel error.message: ${throwable.message}") // TODO handle errors, crashlytics? before release
         println("BaseViewModel error.cause: ${throwable.cause}")
     }
 }

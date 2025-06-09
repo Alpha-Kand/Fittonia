@@ -107,7 +107,10 @@ fun DebugScreen(
                     "Admin Create" to { maxWidth, maxHeight ->
                         DebugScreenAdminCreateTab(
                             nextAutoJobName = viewModel.nextAutoJobName.collectAsState(initial = -1).value,
-                            nextAutoJobNameMessage = viewModel.nextAutoJobNameMessage.collectAsState(initial = "").value,
+                            nextAutoJobNameMessage = viewModel
+                                .nextAutoJobNameMessage
+                                .collectAsState(initial = "")
+                                .value,
                             onCreateNewDestination = viewModel::createNewDestination,
                             onCreateJobDirectory = viewModel::createJobDirectory,
                             modifier = Modifier

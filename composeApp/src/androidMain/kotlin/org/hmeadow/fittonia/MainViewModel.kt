@@ -175,17 +175,29 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
                             primaryButtonBorderColour = DebugAppStyle.primaryButtonBorderColour.serialize,
                             primaryButtonContentColour = DebugAppStyle.primaryButtonContentColour.serialize,
                             primaryButtonBackgroundColour = DebugAppStyle.primaryButtonBackgroundColour.serialize,
-                            primaryButtonDisabledBorderColour = DebugAppStyle.primaryButtonDisabledBorderColour.serialize,
-                            primaryButtonDisabledContentColour = DebugAppStyle.primaryButtonDisabledContentColour.serialize,
-                            primaryButtonDisabledBackgroundColour = DebugAppStyle.primaryButtonDisabledBackgroundColour.serialize,
+                            primaryButtonDisabledBorderColour = DebugAppStyle
+                                .primaryButtonDisabledBorderColour
+                                .serialize,
+                            primaryButtonDisabledContentColour = DebugAppStyle
+                                .primaryButtonDisabledContentColour
+                                .serialize,
+                            primaryButtonDisabledBackgroundColour = DebugAppStyle
+                                .primaryButtonDisabledBackgroundColour
+                                .serialize,
                         ),
                         debugSecondaryButtonColours = SettingsDataAndroid.DebugSecondaryButtonColours(
                             secondaryButtonBorderColour = DebugAppStyle.secondaryButtonBorderColour.serialize,
                             secondaryButtonContentColour = DebugAppStyle.secondaryButtonContentColour.serialize,
                             secondaryButtonBackgroundColour = DebugAppStyle.secondaryButtonBackgroundColour.serialize,
-                            secondaryButtonDisabledBorderColour = DebugAppStyle.secondaryButtonDisabledBorderColour.serialize,
-                            secondaryButtonDisabledContentColour = DebugAppStyle.secondaryButtonDisabledContentColour.serialize,
-                            secondaryButtonDisabledBackgroundColour = DebugAppStyle.secondaryButtonDisabledBackgroundColour.serialize,
+                            secondaryButtonDisabledBorderColour = DebugAppStyle
+                                .secondaryButtonDisabledBorderColour
+                                .serialize,
+                            secondaryButtonDisabledContentColour = DebugAppStyle
+                                .secondaryButtonDisabledContentColour
+                                .serialize,
+                            secondaryButtonDisabledBackgroundColour = DebugAppStyle
+                                .secondaryButtonDisabledBackgroundColour
+                                .serialize,
                         ),
                         debugTextInputColours = SettingsDataAndroid.DebugTextInputColours(
                             border = DebugAppStyle.textInputBorder.serialize,

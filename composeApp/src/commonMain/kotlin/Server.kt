@@ -9,7 +9,7 @@ interface Server {
     var jobId: Int
     val jobIdMutex: Mutex
 
-    suspend fun getAndIncrementJobId():Int {
+    suspend fun getAndIncrementJobId(): Int {
         return jobIdMutex.withLock {
             val id = jobId
             jobId++

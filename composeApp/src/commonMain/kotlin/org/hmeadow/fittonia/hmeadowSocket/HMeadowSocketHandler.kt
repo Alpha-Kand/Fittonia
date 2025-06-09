@@ -104,7 +104,7 @@ open class HMeadowSocketHandler {
         sendString(
             message = name.takeIf {
                 it.isNotEmpty()
-            } ?: throw IllegalArgumentException("Name should not be empty.")
+            } ?: throw IllegalArgumentException("Name should not be empty."),
         )
 
         // 3. Send the file.
