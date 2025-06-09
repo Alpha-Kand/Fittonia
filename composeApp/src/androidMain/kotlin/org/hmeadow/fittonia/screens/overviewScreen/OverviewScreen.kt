@@ -252,24 +252,26 @@ fun OverviewScreen(
                 state = aboutState,
                 onDismiss = { aboutState = false },
             ) { _ ->
-                Text(
-                    text = stringResource(
-                        R.string.about_modal_name_format,
-                        stringResource(R.string.app_name),
-                        stringResource(R.string.app_version),
-                    ),
-                    style = headingMStyle,
-                )
-                FittoniaSpacerHeight(height = 10)
-                Text(
-                    text = stringResource(R.string.last_built_date),
-                    style = paragraphTextStyle,
-                )
-                FittoniaSpacerHeight(height = 10)
-                Text(
-                    text = stringResource(R.string.credits),
-                    style = paragraphTextStyle,
-                )
+                Column(modifier = Modifier.padding(vertical = spacing16)) {
+                    Text(
+                        text = stringResource(
+                            R.string.about_modal_name_format,
+                            stringResource(R.string.app_name),
+                            stringResource(R.string.app_version),
+                        ),
+                        style = headingMStyle,
+                    )
+                    FittoniaSpacerHeight(height = 10)
+                    Text(
+                        text = stringResource(R.string.last_built_date),
+                        style = paragraphTextStyle,
+                    )
+                    FittoniaSpacerHeight(height = 10)
+                    Text(
+                        text = stringResource(R.string.credits),
+                        style = paragraphTextStyle,
+                    )
+                }
             }
             FittoniaModal(
                 state = optionsState,
