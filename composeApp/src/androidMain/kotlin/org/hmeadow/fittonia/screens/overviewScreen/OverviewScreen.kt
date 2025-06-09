@@ -49,6 +49,7 @@ import org.hmeadow.fittonia.components.pager.PagerTabLabels
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.Spacing.spacing16
 import org.hmeadow.fittonia.design.fonts.headingMStyle
@@ -273,6 +274,8 @@ fun OverviewScreen(
             FittoniaModal(
                 state = optionsState,
                 alignment = Alignment.TopStart,
+                contentBackgroundColour = currentStyle.primaryButtonType.backgroundColor,
+                contentBorderColour = currentStyle.primaryButtonType.borderColour,
                 onDismiss = { optionsState = false },
             ) { onDismiss ->
                 val list = listOf(
@@ -296,9 +299,12 @@ fun OverviewScreen(
                             ),
                     ) {
                         Text(
-                            modifier = Modifier.padding(horizontal = spacing16, vertical = spacing16),
+                            modifier = Modifier
+                                .padding(vertical = spacing16)
+                                .padding(end = spacing16),
                             text = option.name,
                             style = paragraphTextStyle,
+                            color = currentStyle.primaryButtonType.contentColour,
                         )
                         FittoniaSpacerWeightRow()
                         FittoniaIcon(
@@ -306,11 +312,11 @@ fun OverviewScreen(
                                 .align(alignment = CenterVertically)
                                 .requiredSize(size = spacing16),
                             drawableRes = R.drawable.ic_chevron_right,
-                            tint = Color(color = 0xFF222222), // TODO no hard coded colors - After release
+                            tint = currentStyle.primaryButtonType.contentColour,
                         )
                     }
                     if (list.lastIndex != index) {
-                        HorizontalLine()
+                        HorizontalLine(color = currentStyle.primaryButtonType.contentColour)
                     }
                 }
             }
