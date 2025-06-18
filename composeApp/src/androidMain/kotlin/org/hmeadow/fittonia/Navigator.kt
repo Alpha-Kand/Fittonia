@@ -171,9 +171,10 @@ class Navigator(private val mainViewModel: MainViewModel) {
 
     private fun settingsScreen() = Screen(
         viewModel = SettingsScreenViewModel(mainViewModel = mainViewModel),
-    ) { _, viewModel ->
+    ) { data, viewModel ->
         SettingsScreen(
             viewModel = viewModel,
+            data = data,
             onBackClicked = ::pop,
         )
     }
