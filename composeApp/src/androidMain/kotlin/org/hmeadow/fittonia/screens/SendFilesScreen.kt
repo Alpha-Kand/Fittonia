@@ -248,6 +248,7 @@ fun SendFilesScreen(
         header = {
             FittoniaHeader(
                 headerText = "Send files",
+                includeInfoButton = true,
                 onBackClicked = onBackClicked,
             )
         },

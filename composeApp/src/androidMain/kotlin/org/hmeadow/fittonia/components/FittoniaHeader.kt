@@ -39,6 +39,7 @@ import org.hmeadow.fittonia.utility.dpToFloat
 @Composable
 fun FittoniaHeader(
     headerText: String? = null,
+    includeInfoButton: Boolean = false,
     onBackClicked: (() -> Unit)? = null,
     onOptionsClicked: (() -> Unit)? = null,
     onAlertsClicked: (() -> Unit)? = null,
@@ -65,7 +66,9 @@ fun FittoniaHeader(
     ) {
         Row {
             BackButton(onBackClicked = onBackClicked)
-            InfoButton()
+            if (includeInfoButton) {
+                InfoButton()
+            }
             FittoniaSpacerWeightRow()
             HeaderHeading(headerText = headerText)
             if (headerText != null) {

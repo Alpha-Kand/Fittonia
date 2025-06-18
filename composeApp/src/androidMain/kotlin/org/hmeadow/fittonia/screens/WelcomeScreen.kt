@@ -87,7 +87,7 @@ fun WelcomeScreen(
     onClearDumpPath: () -> Unit,
 ) {
     FittoniaScaffold(
-        header = { FittoniaHeader() },
+        header = { FittoniaHeader(includeInfoButton = true) },
         content = {
             Column(modifier = Modifier.padding(horizontal = spacing16)) {
                 FittoniaSpacerHeight(height = spacing32)
