@@ -2,6 +2,7 @@
 
 # Core
 agp = "8.8.2"
+firebaseBom = "34.1.0"
 kotlin = "2.1.10"
 compose-plugin = "1.6.11"
 android-minSdk = "29"
@@ -35,8 +36,7 @@ jacksonModuleKotlin = "2.12.7"
 kotterJvm = "1.1.1"
 material3 = "1.3.2"
 material3Android = "1.3.2"
-securityCryptoKtx = "1.0.0"
-uiTextGoogleFonts = "1.8.2"
+securityCryptoKtx = "1.1.0"
 
 [libraries]
 
@@ -53,6 +53,9 @@ androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "d
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activityCompose" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Unit Tests
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -74,7 +77,6 @@ kotter-library = { module = "com.varabyte.kotter:kotter-jvm", version.ref = "kot
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCryptoKtx" }
 androidx-material3-common = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
-androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 
 [plugins]
 

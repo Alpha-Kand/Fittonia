@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinMultiplatform)
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 val testAttribute: Attribute<String> = Attribute.of("key", String::class.java)
@@ -175,6 +177,9 @@ dependencies {
     androidTestImplementation(libs.mockk.library)
     androidTestImplementation(libs.junit.jupiter.api)
     androidTestImplementation(libs.junit.jupiter.platformlauncher)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 }
 
 kover {
