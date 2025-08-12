@@ -67,11 +67,11 @@ fun OverviewTransferList(
             )
 
             if (transferJobs.isEmpty()) {
-                TransferRow(text = "No transfers active.")
+                TransferRow(text = "No transfers active.", hideChevronColumn = true)
                 HorizontalLine()
-                TransferRow()
+                TransferRow(hideChevronColumn = true)
                 HorizontalLine()
-                TransferRow()
+                TransferRow(hideChevronColumn = true)
             }
             transferJobs.forEachIndexed { index, job ->
                 TransferRow(
@@ -128,8 +128,10 @@ private fun HeaderRow(
                 style = headingSStyle,
                 text = "Status",
             )
-            VerticalLine()
-            FittoniaSpacerWidth(width = 20)
+            if (!noTransfers) {
+                VerticalLine()
+                FittoniaSpacerWidth(width = 20)
+            }
         }
         HorizontalLine()
     }
@@ -141,6 +143,7 @@ private fun TransferRow(
     onClick: (() -> Unit)? = null,
     progress: Double? = null,
     status: TransferStatus? = null,
+    hideChevronColumn: Boolean = false,
 ) {
     val maxProgressWidth = measureTextWidth(text = "100.0%", style = readOnlyFieldTextStyle)
     val maxStatusWidth = measureTextWidth(text = "Status", style = readOnlyFieldTextStyle)
@@ -196,18 +199,20 @@ private fun TransferRow(
                 )
             }
         }
-        VerticalLine()
-        if (onClick != null) {
-            FittoniaIcon(
-                modifier = Modifier
-                    .requiredWidth(width = 20.dp)
-                    .padding(all = 3.dp),
-                drawableRes = R.drawable.ic_chevron_right,
-            )
-        } else {
-            Box(
-                modifier = Modifier.requiredWidth(width = 20.dp),
-            ) {}
+        if (!hideChevronColumn) {
+            VerticalLine()
+            if (onClick != null) {
+                FittoniaIcon(
+                    modifier = Modifier
+                        .requiredWidth(width = 20.dp)
+                        .padding(all = 3.dp),
+                    drawableRes = R.drawable.ic_chevron_right,
+                )
+            } else {
+                Box(
+                    modifier = Modifier.requiredWidth(width = 20.dp),
+                ) {}
+            }
         }
     }
 }
