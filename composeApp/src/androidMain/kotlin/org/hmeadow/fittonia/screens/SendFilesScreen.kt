@@ -148,7 +148,7 @@ class SendFilesScreenViewModel(
                 updatePingAtomically(
                     newPing = onPing(
                         ip,
-                        port, // TODO make Port type. - After release
+                        port, // TODO remove Port type. - After release
                         accessCode, // TODO before release - check if access code should be string and not bytearray.
                         Instant.now().toEpochMilli().let { now ->
                             if (now == timestamp) {

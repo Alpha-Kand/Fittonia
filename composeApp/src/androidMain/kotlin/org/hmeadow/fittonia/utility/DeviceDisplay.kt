@@ -22,25 +22,25 @@ fun isXLARGE(): Boolean {
 
 fun MainActivity.inchesToDp(inches: Float): Dp {
     val dimension = TypedValue.applyDimension(
-        /* unit = */ COMPLEX_UNIT_IN,
-        /* value = */ inches,
-        /* metrics = */ resources.displayMetrics,
+        COMPLEX_UNIT_IN, // Unit.
+        inches, // Value.
+        resources.displayMetrics, // Metrics.
     )
     return (dimension / resources.displayMetrics.density).dp
 }
 
 fun MainActivity.inchesToPx(inches: Float): Float {
     return TypedValue.applyDimension(
-        /* unit = */ COMPLEX_UNIT_IN,
-        /* value = */ inches,
-        /* metrics = */ resources.displayMetrics,
+        COMPLEX_UNIT_IN, // Unit.
+        inches, // Value.
+        resources.displayMetrics, // Metrics.
     )
 }
 
 fun MainActivity.dpToFloat(dp: Dp): Float {
     return TypedValue.applyDimension(
-        /* unit = */ COMPLEX_UNIT_DIP,
-        /* value = */ dp.value,
-        /* metrics = */ resources.displayMetrics,
+        COMPLEX_UNIT_DIP, // Unit.
+        dp.value, // Value.
+        resources.displayMetrics, // Metrics.
     )
 }

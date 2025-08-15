@@ -49,6 +49,7 @@ import org.hmeadow.fittonia.models.toCompletedJob
 import org.hmeadow.fittonia.utility.createJobDirectory
 import org.hmeadow.fittonia.utility.subDivide
 import org.hmeadow.fittonia.utility.toString
+import org.hmeadow.fittonia.utility.tryOrNull
 import recordThrowable
 import java.io.BufferedInputStream
 import java.io.File
