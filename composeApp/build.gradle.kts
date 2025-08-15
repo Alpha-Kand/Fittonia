@@ -195,7 +195,7 @@ kover {
 val ktlintOutputDir = "${project.layout.buildDirectory}/reports/ktlint/"
 val ktlintInputFiles = project.fileTree(mapOf("dir" to "src", "include" to "**/*.kt"))
 
-val ktlintCheck by tasks.creating(JavaExec::class) {
+tasks.register("ktlintCheck", JavaExec::class) {
     inputs.files(ktlintInputFiles)
     outputs.dir(ktlintOutputDir)
 

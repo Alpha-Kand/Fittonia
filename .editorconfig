@@ -6,4 +6,3 @@ trim_trailing_whitespace = true
 end_of_line = lf
 ij_kotlin_allow_trailing_comma_on_call_site = true
 ij_kotlin_allow_trailing_comma = true
-ktlint_disabled_rules = filename
