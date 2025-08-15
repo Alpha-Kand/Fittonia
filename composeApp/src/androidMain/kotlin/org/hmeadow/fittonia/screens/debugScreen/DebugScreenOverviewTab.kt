@@ -47,7 +47,7 @@ fun DebugScreenOverviewTab(
                 Text(text = "Orientation:")
                 Text(text = "Device Size:")
             }
-            FittoniaSpacerHeight(height = 10)
+            FittoniaSpacerWidth(width = 10)
             Column {
                 Row {
                     Text(text = viewModel.deviceIp.collectAsState().value)
