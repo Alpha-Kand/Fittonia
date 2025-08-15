@@ -11,11 +11,13 @@ import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.serverLog
 import org.hmeadow.fittonia.compose.architecture.DebugAppStyle
+import recordThrowable
 import kotlin.coroutines.CoroutineContext
 
 class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel(), CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
-        println("BaseViewModel error: ${throwable.message}") // TODO - handle errors, crashlytics? before release
+        recordThrowable(throwable = throwable)
+        println("BaseViewModel error: ${throwable.message}")
     }
 
     init {

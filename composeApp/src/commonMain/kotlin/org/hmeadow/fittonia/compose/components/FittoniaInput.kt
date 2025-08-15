@@ -49,6 +49,7 @@ import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBorderActive
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBox
 import org.hmeadow.fittonia.utility.infoBorder
+import recordThrowable
 import kotlin.coroutines.CoroutineContext
 
 private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
@@ -60,7 +61,8 @@ class InputFlow(
     constructor(initial: String, onValueChange: (String) -> Unit = {}) : this(TextFieldState(initial), onValueChange)
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
-        println("InputFlow error: ${throwable.message}") // TODO - handle errors, crashlytics? before release
+        recordThrowable(throwable = throwable)
+        println("InputFlow error: ${throwable.message}")
     }
 
     init {

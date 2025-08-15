@@ -49,6 +49,7 @@ import org.hmeadow.fittonia.models.toCompletedJob
 import org.hmeadow.fittonia.utility.createJobDirectory
 import org.hmeadow.fittonia.utility.subDivide
 import org.hmeadow.fittonia.utility.toString
+import recordThrowable
 import java.io.BufferedInputStream
 import java.io.File
 import java.net.BindException
@@ -61,7 +62,8 @@ import kotlin.coroutines.CoroutineContext
 class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
-        println("AndroidServer error: ${throwable.message}") // TODO - handle errors, crashlytics? before release
+        recordThrowable(throwable = throwable)
+        println("AndroidServer error: ${throwable.message}")
     }
     override var jobId: Int = 100
     override val jobIdMutex = Mutex()
