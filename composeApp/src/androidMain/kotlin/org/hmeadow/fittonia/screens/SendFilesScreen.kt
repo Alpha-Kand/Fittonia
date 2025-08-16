@@ -28,6 +28,7 @@ import androidx.documentfile.provider.DocumentFile
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -36,11 +37,14 @@ import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.components.ButtonIcon
+import org.hmeadow.fittonia.components.EquivalentIPCode
+import org.hmeadow.fittonia.components.EquivalentIpCodeText
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaModal
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.HorizontalLine
+import org.hmeadow.fittonia.components.decipherIpAndCode
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
@@ -50,7 +54,9 @@ import org.hmeadow.fittonia.compose.components.FittoniaCheckbox
 import org.hmeadow.fittonia.compose.components.FittoniaLoadingIndicator
 import org.hmeadow.fittonia.compose.components.FittoniaTextInput
 import org.hmeadow.fittonia.compose.components.InputFlow
+import org.hmeadow.fittonia.design.Spacing.spacing16
 import org.hmeadow.fittonia.design.Spacing.spacing2
+import org.hmeadow.fittonia.design.Spacing.spacing32
 import org.hmeadow.fittonia.design.Spacing.spacing4
 import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingMStyle
@@ -100,6 +106,8 @@ class SendFilesScreenViewModel(
     )
     val descriptionState = InputFlow(initial = "")
 
+    val equivelentIpOrCode: MutableStateFlow<EquivalentIPCode> = MutableStateFlow(value = EquivalentIPCode.Neither)
+
     val oneTimeIpAddressState: InputFlow = InputFlow(
         initial = "",
         onValueChange = { ip ->
@@ -108,6 +116,7 @@ class SendFilesScreenViewModel(
                 accessCode = oneTimeAccessCodeState.text,
                 port = portState.text.toInt(),
             )
+            equivelentIpOrCode.update { decipherIpAndCode(ip = ip) }
         },
     )
     val oneTimeAccessCodeState = InputFlow(
@@ -163,7 +172,7 @@ class SendFilesScreenViewModel(
         }
     }
 
-    val ping = MutableStateFlow(Ping(PingStatus.NoPing))
+    val ping = MutableStateFlow(value = Ping(PingStatus.NoPing))
     private val pingMutex = Mutex()
     private suspend fun updatePingAtomically(newPing: Ping) {
         pingMutex.withLock {
@@ -323,6 +332,9 @@ fun SendFilesScreen(
                 FittoniaSpacerHeight(height = 10)
                 FittoniaCheckbox(label = "One-time destination") { state ->
                     oneTimeDestinationState = state
+                    if (!state) {
+                        viewModel.ping.update { Ping(PingStatus.NoPing) }
+                    }
                 }
                 FittoniaSpacerHeight(height = 10)
                 if (oneTimeDestinationState) {
@@ -334,7 +346,11 @@ fun SendFilesScreen(
                         label = "IP Address/Code",
                     )
 
-                    FittoniaSpacerHeight(height = 15)
+                    FittoniaSpacerHeight(height = spacing4)
+
+                    EquivalentIpCodeText(equivalentIPCode = viewModel.equivelentIpOrCode.collectAsState().value)
+
+                    FittoniaSpacerHeight(height = spacing16)
 
                     FittoniaTextInput(
                         modifier = Modifier.fillMaxWidth(),
@@ -342,7 +358,7 @@ fun SendFilesScreen(
                         label = "Access Code",
                     )
 
-                    FittoniaSpacerHeight(height = 10)
+                    FittoniaSpacerHeight(height = spacing32)
                 }
                 if (data.destinations.isNotEmpty() && !oneTimeDestinationState) {
                     Column(
@@ -422,6 +438,7 @@ fun SendFilesScreen(
 
                 FittoniaSpacerHeight(height = 10)
 
+                // TODO move the ping status somewhere you can see it as you type ip and code.
                 when (viewModel.ping.collectAsState(Ping(PingStatus.NoPing)).value.pingStatus) {
                     is PingStatus.NoPing -> Unit
                     is PingStatus.Processing -> Row {

@@ -11,19 +11,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.ButtonIcon
+import org.hmeadow.fittonia.components.EquivalentIPCode
+import org.hmeadow.fittonia.components.EquivalentIpCodeText
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.Footer
+import org.hmeadow.fittonia.components.decipherIpAndCode
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.compose.components.FittoniaTextInput
 import org.hmeadow.fittonia.compose.components.InputFlow
+import org.hmeadow.fittonia.design.Spacing.spacing4
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.utility.Debug
 
@@ -33,7 +39,10 @@ class NewDestinationScreenViewModel(
     private val onSaveNewDestinationCallback: (SettingsManager.Destination) -> Unit,
 ) : BaseViewModel() {
     val nameState = InputFlow(initial = "")
-    val ipAddressState = InputFlow(initial = oneTimeIp ?: "")
+    val equivelentIpOrCode: MutableStateFlow<EquivalentIPCode> = MutableStateFlow(value = EquivalentIPCode.Neither)
+    val ipAddressState = InputFlow(initial = oneTimeIp ?: "") { ip ->
+        equivelentIpOrCode.update { decipherIpAndCode(ip = ip) }
+    }
     val accessCodeState = InputFlow(initial = oneTimeAccessCode ?: "")
 
     val canAddDestination = combine(
@@ -98,6 +107,10 @@ fun NewDestinationScreen(
                     inputFlow = viewModel.ipAddressState,
                     label = "IP Address/Code",
                 )
+
+                FittoniaSpacerHeight(height = spacing4)
+
+                EquivalentIpCodeText(equivalentIPCode = viewModel.equivelentIpOrCode.collectAsState().value)
 
                 Debug {
                     FittoniaButton(

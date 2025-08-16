@@ -47,6 +47,7 @@ import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.models.toCompletedJob
 import org.hmeadow.fittonia.utility.createJobDirectory
+import org.hmeadow.fittonia.utility.decodeIpAddress
 import org.hmeadow.fittonia.utility.subDivide
 import org.hmeadow.fittonia.utility.toString
 import org.hmeadow.fittonia.utility.tryOrNull
@@ -542,7 +543,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     val client: HMeadowSocketClient
                     try {
                         client = HMeadowSocketClient(
-                            ipAddress = ip,
+                            ipAddress = tryOrNull { decodeIpAddress(ipAddress = ip) } ?: ip,
                             port = port,
                             operationTimeoutMillis = 2000,
                             handshakeTimeoutMillis = 2000,

@@ -16,6 +16,11 @@
         <item quantity="other">%1$d transfers active.</item>
     </plurals>
 
+    <!-- Encode/Decode IP address and code -->
+    <string name="encode_decode_matching_code">Matching code: %1$s</string>
+    <string name="encode_decode_matching_ip">Matching IP: %1$s</string>
+
+
     <!-- Welcome Screen -->
     <string name="welcome_screen_title">Welcome to Fittonia!</string>
     <string name="welcome_screen_body">To get started, you just need an access code, and a place to put incoming files.</string>

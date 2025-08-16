@@ -22,6 +22,7 @@ import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.utility.DebugTurnOff.allowDebug
+import org.hmeadow.fittonia.utility.encodeIpAddress
 import org.hmeadow.fittonia.utility.isLandscape
 import org.hmeadow.fittonia.utility.isXLARGE
 
@@ -44,6 +45,7 @@ fun DebugScreenOverviewTab(
         Row {
             Column {
                 Text(text = "Current device IP:")
+                Text(text = "Current device code:")
                 Text(text = "Orientation:")
                 Text(text = "Device Size:")
             }
@@ -51,6 +53,15 @@ fun DebugScreenOverviewTab(
             Column {
                 Row {
                     Text(text = viewModel.deviceIp.collectAsState().value)
+                    FittoniaSpacerWidth(width = 10)
+                    Text(
+                        modifier = Modifier.clickable(onClick = viewModel::refreshIp),
+                        text = "Refresh",
+                        color = Color.Cyan,
+                    )
+                }
+                Row {
+                    Text(text = encodeIpAddress(ipAddress = viewModel.deviceIp.collectAsState().value))
                     FittoniaSpacerWidth(width = 10)
                     Text(
                         modifier = Modifier.clickable(onClick = viewModel::refreshIp),
