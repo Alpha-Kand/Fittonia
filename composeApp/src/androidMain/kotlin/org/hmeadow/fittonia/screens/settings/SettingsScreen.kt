@@ -128,7 +128,9 @@ fun SettingsScreen(
                         },
                         content = {
                             ButtonText(
-                                text = stringResource(id = R.string.welcome_screen_new_destination_select_folder_button),
+                                text = stringResource(
+                                    id = R.string.welcome_screen_new_destination_select_folder_button,
+                                ),
                             )
                         },
                     )

@@ -271,7 +271,7 @@ abstract class BaseSocketScriptTest : DesktopBaseMockkTest() {
         override fun debugCheckpoint() {
             thisList.add(Communication(flag = TestFlags.DEBUG_CHECKPOINT, value = "\uD83C\uDFF4\u200D☠\uFE0F"))
         }
-        */
+         */
 
         private fun send(flag: TestFlags, message: String) {
             Communication(flag = flag, value = message.filter { it != '\n' }).let {
