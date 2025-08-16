@@ -38,6 +38,8 @@ import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.compose.components.FittoniaNumberInput
 import org.hmeadow.fittonia.compose.components.InputFlow
 import org.hmeadow.fittonia.description
+import org.hmeadow.fittonia.design.Spacing.spacing16
+import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.title
@@ -132,13 +134,13 @@ private fun PortInputDialog(
     inputFlow: InputFlow,
     onAccept: () -> Unit,
 ) {
-    Column(modifier = Modifier.padding(all = 16.dp)) {
+    Column(modifier = Modifier.padding(all = spacing16)) {
         FittoniaNumberInput(
             label = label,
             modifier = Modifier.fillMaxWidth(),
             inputFlow = inputFlow,
         )
-        FittoniaSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = spacing8)
         Row {
             FittoniaSpacerWeightRow()
             FittoniaButton(onClick = onAccept) {

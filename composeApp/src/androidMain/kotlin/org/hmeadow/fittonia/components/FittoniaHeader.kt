@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -31,6 +32,8 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaCircleButton
+import org.hmeadow.fittonia.design.Spacing.spacing16
+import org.hmeadow.fittonia.design.Spacing.spacing4
 import org.hmeadow.fittonia.design.fonts.headerStyle
 import org.hmeadow.fittonia.utility.Debug
 import org.hmeadow.fittonia.utility.InfoBorderState
@@ -60,11 +63,11 @@ fun FittoniaHeader(
                     headerDraw()
                 }
             }
-            .padding(horizontal = 15.dp)
-            .padding(vertical = 5.dp),
+            .padding(horizontal = spacing16)
+            .padding(vertical = spacing4),
         contentAlignment = Center,
     ) {
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             BackButton(onBackClicked = onBackClicked)
             if (includeInfoButton) {
                 InfoButton()

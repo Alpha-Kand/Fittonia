@@ -17,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
@@ -33,6 +32,9 @@ import org.hmeadow.fittonia.components.pager.PagerState.Companion.rememberPagerS
 import org.hmeadow.fittonia.components.pager.PagerTabLabels
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
+import org.hmeadow.fittonia.design.Spacing.spacing16
+import org.hmeadow.fittonia.design.Spacing.spacing4
+import org.hmeadow.fittonia.design.Spacing.spacing8
 
 @Composable
 fun DebugScreen(
@@ -148,11 +150,11 @@ fun DebugScreen(
                         position = pagerState.pagePosition,
                         tabs = remember(debugTabs) { debugTabs.map { it.first } },
                         onTabSelected = pagerState::goToPage,
-                        modifier = Modifier.padding(bottom = 16.dp),
+                        modifier = Modifier.padding(bottom = spacing16),
                     )
                     LazyPager(
                         pagerState = pagerState,
-                        spacing = 16.dp,
+                        spacing = spacing16,
                     ) {
                         items(debugTabs) {
                             it.second.invoke(box.maxWidth, box.maxHeight)
@@ -166,7 +168,7 @@ fun DebugScreen(
                 if (pagerState.targetPage == 0) {
                     Row {
                         FittoniaButton(onClick = saveColours) { ButtonText("Save Colours") }
-                        FittoniaSpacerWidth(10)
+                        FittoniaSpacerWidth(width = spacing8)
                         FittoniaButton(onClick = cancelColourChanges) { ButtonText("Cancel Changes") }
                     }
                 }
@@ -202,7 +204,7 @@ fun DebugScreen(
                         },
                     ) {
                         ButtonIcon(drawableRes = R.drawable.ic_add)
-                        FittoniaSpacerWidth(width = 5)
+                        FittoniaSpacerWidth(width = spacing4)
                         ButtonText(text = "UserAlert.PortInUse")
                     }
                 }

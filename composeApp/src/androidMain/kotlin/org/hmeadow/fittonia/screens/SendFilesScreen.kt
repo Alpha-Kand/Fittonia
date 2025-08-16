@@ -262,14 +262,14 @@ fun SendFilesScreen(
             )
         },
         content = {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                FittoniaSpacerHeight(height = 15)
+            Column(modifier = Modifier.padding(horizontal = spacing16)) {
+                FittoniaSpacerHeight(height = spacing16)
 
                 Text(
                     text = "Select files/folders to send.",
                     style = headingMStyle,
                 )
-                FittoniaSpacerHeight(height = 5)
+                FittoniaSpacerHeight(height = spacing4)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -279,7 +279,7 @@ fun SendFilesScreen(
                     val fileList = viewModel.itemListState.collectAsState()
                     fileList.value.forEachIndexed { index, file ->
                         Row(
-                            modifier = Modifier.padding(all = 5.dp),
+                            modifier = Modifier.padding(all = spacing4),
                             verticalAlignment = CenterVertically,
                         ) {
                             Text(text = file.name)
@@ -299,13 +299,13 @@ fun SendFilesScreen(
                         }
                     }
                 }
-                FittoniaSpacerHeight(height = 5)
+                FittoniaSpacerHeight(height = spacing4)
                 Row {
                     FittoniaButton(
                         onClick = viewModel::onUserSelectItem,
                         content = {
                             ButtonText(text = "Add")
-                            FittoniaSpacerWidth(width = 5)
+                            FittoniaSpacerWidth(width = spacing4)
                             ButtonIcon(drawableRes = R.drawable.ic_add)
                         },
                         onInfo = {
@@ -314,7 +314,7 @@ fun SendFilesScreen(
                                     text = stringResource(R.string.send_files_screen_add_item_button_info1),
                                     style = paragraphTextStyle,
                                 )
-                                FittoniaSpacerHeight(10)
+                                FittoniaSpacerHeight(height = spacing8)
                                 Text(
                                     text = stringResource(R.string.send_files_screen_add_item_button_info2),
                                     style = paragraphTextStyle,
@@ -324,21 +324,21 @@ fun SendFilesScreen(
                     )
                     Spacer(modifier = Modifier.weight(1.0f))
                 }
-                FittoniaSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = spacing32)
                 Text(
                     text = "Destination",
                     style = headingMStyle,
                 )
-                FittoniaSpacerHeight(height = 10)
+                FittoniaSpacerHeight(height = spacing8)
                 FittoniaCheckbox(label = "One-time destination") { state ->
                     oneTimeDestinationState = state
                     if (!state) {
                         viewModel.ping.update { Ping(PingStatus.NoPing) }
                     }
                 }
-                FittoniaSpacerHeight(height = 10)
+                FittoniaSpacerHeight(height = spacing8)
                 if (oneTimeDestinationState) {
-                    FittoniaSpacerHeight(height = 15)
+                    FittoniaSpacerHeight(height = spacing16)
 
                     FittoniaTextInput(
                         modifier = Modifier.fillMaxWidth(),
@@ -366,7 +366,7 @@ fun SendFilesScreen(
                             .fillMaxWidth()
                             .border(width = 1.dp, color = currentStyle.primaryButtonType.borderColour)
                             .background(color = currentStyle.primaryButtonType.backgroundColor)
-                            .padding(spacing4)
+                            .padding(all = spacing4)
                             .clickable(onClick = { destinationPickerActive = true }),
                     ) {
                         val selectedDestination = viewModel.selectedDestinationState.collectAsState()
@@ -405,14 +405,14 @@ fun SendFilesScreen(
                         }
                     }
                 }
-                FittoniaSpacerHeight(height = 5)
+                FittoniaSpacerHeight(height = spacing4)
                 if (oneTimeDestinationState) {
                     FittoniaButton(
                         type = currentStyle.secondaryButtonType,
                         onClick = viewModel::onSaveOneTimeDestinationClicked,
                     ) {
                         ButtonText(text = "Save as new destination")
-                        FittoniaSpacerWidth(width = 5)
+                        FittoniaSpacerWidth(width = spacing4)
                         ButtonIcon(drawableRes = R.drawable.ic_add)
                     }
                 } else {
@@ -424,7 +424,7 @@ fun SendFilesScreen(
                                     text = stringResource(R.string.send_files_screen_add_destination_button_info1),
                                     style = paragraphTextStyle,
                                 )
-                                FittoniaSpacerHeight(height = 10)
+                                FittoniaSpacerHeight(height = spacing8)
                                 Text(
                                     text = stringResource(R.string.send_files_screen_add_destination_button_info2),
                                     style = paragraphTextStyle,
@@ -436,7 +436,7 @@ fun SendFilesScreen(
                     }
                 }
 
-                FittoniaSpacerHeight(height = 10)
+                FittoniaSpacerHeight(height = spacing8)
 
                 // TODO move the ping status somewhere you can see it as you type ip and code.
                 when (viewModel.ping.collectAsState(Ping(PingStatus.NoPing)).value.pingStatus) {
@@ -460,7 +460,7 @@ fun SendFilesScreen(
                     )
                 }
 
-                FittoniaSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = spacing32)
 
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
@@ -471,7 +471,7 @@ fun SendFilesScreen(
                                 text = "Description",
                                 style = inputLabelStyle,
                             )
-                            FittoniaSpacerWidth(width = 4)
+                            FittoniaSpacerWidth(width = spacing4)
                             Text(
                                 modifier = Modifier.align(alignment = CenterVertically),
                                 text = "(optional)",
@@ -486,14 +486,14 @@ fun SendFilesScreen(
                         )
                     },
                 )
-                FittoniaSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = spacing32)
             }
         },
         footer = {
             FittoniaButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(all = 8.dp),
+                    .padding(all = spacing8),
                 enabled = if (oneTimeDestinationState) {
                     viewModel.canContinueOneTime.collectAsState(initial = false).value
                 } else {
@@ -526,13 +526,13 @@ fun SendFilesScreen(
                             Text(
                                 text = destination.name,
                                 modifier = Modifier
-                                    .padding(horizontal = 10.dp, vertical = 10.dp),
+                                    .padding(horizontal = spacing8, vertical = spacing8),
                                 style = paragraphTextStyle,
                             )
                             FittoniaSpacerWeightRow()
                             FittoniaIcon(
                                 modifier = Modifier
-                                    .requiredSize(10.dp)
+                                    .requiredSize(size = spacing8)
                                     .align(CenterVertically),
                                 drawableRes = R.drawable.ic_chevron_right,
                                 tint = Color(0xFF222222),

@@ -52,6 +52,7 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.Spacing.spacing16
+import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.models.OutgoingJob
@@ -197,7 +198,7 @@ fun OverviewScreen(
                     )
                     LazyPager(
                         pagerState = pagerState,
-                        spacing = 16.dp,
+                        spacing = spacing16,
                     ) {
                         items(overviewTabs) {
                             it.second.invoke(box.maxWidth, box.maxHeight)
@@ -210,7 +211,7 @@ fun OverviewScreen(
             Footer {
                 Row {
                     FittoniaButton(
-                        modifier = Modifier.weight(1.0f),
+                        modifier = Modifier.weight(weight = 1.0f),
                         onClick = onSendFilesClicked,
                         content = { ButtonText(text = "Send files") },
                     )
@@ -225,21 +226,21 @@ fun OverviewScreen(
                 state = viewModel.needDumpAccess.collectAsState(initial = false).value,
                 onDismiss = { viewModel.needDumpAccess.update { false } },
             ) { _ ->
-                Column(modifier = Modifier.padding(all = 16.dp)) {
+                Column(modifier = Modifier.padding(all = spacing16)) {
                     Row {
                         FittoniaIcon(
                             drawableRes = R.drawable.ic_access_folder,
                             modifier = Modifier.requiredSize(size = 40.dp),
                             tint = Color(color = 0xFFA00000),
                         )
-                        FittoniaSpacerWidth(width = 10)
+                        FittoniaSpacerWidth(width = spacing8)
                         Text(
-                            modifier = Modifier.padding(top = 13.dp),
+                            modifier = Modifier.padding(top = spacing16),
                             text = stringResource(R.string.overview_screen_dump_permission_lost_notice),
                             style = paragraphTextStyle,
                         )
                     }
-                    FittoniaSpacerHeight(height = 12)
+                    FittoniaSpacerHeight(height = spacing16)
                     FittoniaButton(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { MainActivity.mainActivity.openFolderPicker(viewModel::onDumpPathPicked) },
@@ -261,12 +262,12 @@ fun OverviewScreen(
                         ),
                         style = headingMStyle,
                     )
-                    FittoniaSpacerHeight(height = 10)
+                    FittoniaSpacerHeight(height = spacing8)
                     Text(
                         text = stringResource(R.string.last_built_date),
                         style = paragraphTextStyle,
                     )
-                    FittoniaSpacerHeight(height = 10)
+                    FittoniaSpacerHeight(height = spacing8)
                     Text(
                         text = stringResource(R.string.credits),
                         style = paragraphTextStyle,

@@ -10,7 +10,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
@@ -29,7 +28,10 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.compose.components.FittoniaTextInput
 import org.hmeadow.fittonia.compose.components.InputFlow
+import org.hmeadow.fittonia.design.Spacing.spacing16
+import org.hmeadow.fittonia.design.Spacing.spacing32
 import org.hmeadow.fittonia.design.Spacing.spacing4
+import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.utility.Debug
 
@@ -77,22 +79,22 @@ fun NewDestinationScreen(
             )
         },
         content = {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                FittoniaSpacerHeight(height = 15)
+            Column(modifier = Modifier.padding(horizontal = spacing16)) {
+                FittoniaSpacerHeight(height = spacing16)
 
                 Text(
                     text = stringResource(R.string.new_destination_screen_body),
                     style = paragraphTextStyle,
                 )
 
-                FittoniaSpacerHeight(height = 7)
+                FittoniaSpacerHeight(height = spacing8)
 
                 Text(
                     text = "The destination will be pinged to confirm its existence.",
                     style = paragraphTextStyle,
                 )
 
-                FittoniaSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = spacing32)
 
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
@@ -100,7 +102,7 @@ fun NewDestinationScreen(
                     label = "Name",
                 )
 
-                FittoniaSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = spacing32)
 
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
@@ -122,7 +124,7 @@ fun NewDestinationScreen(
                     }
                 }
 
-                FittoniaSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = spacing32)
 
                 FittoniaTextInput(
                     modifier = Modifier.fillMaxWidth(),
@@ -130,7 +132,7 @@ fun NewDestinationScreen(
                     label = "Access Code",
                 )
 
-                FittoniaSpacerHeight(height = 30)
+                FittoniaSpacerHeight(height = spacing32)
             }
         },
         footer = {
@@ -141,7 +143,7 @@ fun NewDestinationScreen(
                     enabled = viewModel.canAddDestination.collectAsState(initial = false).value,
                     content = {
                         ButtonText(text = "Save")
-                        FittoniaSpacerWidth(width = 5)
+                        FittoniaSpacerWidth(width = spacing4)
                         ButtonIcon(drawableRes = R.drawable.ic_save)
                     },
                 )

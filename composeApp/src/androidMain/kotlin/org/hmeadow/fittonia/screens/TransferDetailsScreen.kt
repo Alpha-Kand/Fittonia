@@ -38,6 +38,9 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.LoadingCompose
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.compose.components.FittoniaIcon
+import org.hmeadow.fittonia.design.Spacing.spacing32
+import org.hmeadow.fittonia.design.Spacing.spacing4
+import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
@@ -93,7 +96,7 @@ fun TransferDetailsScreen(
                                     text = stringResource(R.string.transfer_details_screen_destination_label),
                                     style = headingMStyle,
                                 )
-                                FittoniaSpacerHeight(height = 5)
+                                FittoniaSpacerHeight(height = spacing4)
                                 ReadOnlyEntries(
                                     entries = listOf(transferJob.destination.name),
                                     textStyle = readOnlyFieldTextStyle,
@@ -105,25 +108,25 @@ fun TransferDetailsScreen(
                                     text = stringResource(R.string.transfer_details_screen_source_label),
                                     style = headingMStyle,
                                 )
-                                FittoniaSpacerHeight(height = 5)
+                                FittoniaSpacerHeight(height = spacing4)
                                 ReadOnlyEntries(
                                     entries = listOf(transferJob.source.name),
                                     textStyle = readOnlyFieldTextStyle,
                                 )
                             }
                         }
-                        FittoniaSpacerHeight(height = 30)
+                        FittoniaSpacerHeight(height = spacing32)
 
                         Text(
                             text = stringResource(R.string.transfer_details_screen_status_label),
                             style = headingMStyle,
                         )
 
-                        FittoniaSpacerHeight(height = 5)
+                        FittoniaSpacerHeight(height = spacing4)
 
                         val statusComposable: @Composable () -> Unit = {
                             Row(
-                                modifier = Modifier.requiredHeight(30.dp),
+                                modifier = Modifier.requiredHeight(height = spacing32),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 FittoniaIcon(
@@ -142,7 +145,7 @@ fun TransferDetailsScreen(
                                         TransferStatus.Done -> Color(0xFF00FF00)
                                     },
                                 )
-                                FittoniaSpacerWidth(width = 10)
+                                FittoniaSpacerWidth(width = spacing8)
 
                                 Text(
                                     text = when (transferJob.status) {
@@ -158,14 +161,14 @@ fun TransferDetailsScreen(
 
                         ReadOnlyEntries(entries = listOf(statusComposable))
 
-                        FittoniaSpacerHeight(height = 30)
+                        FittoniaSpacerHeight(height = spacing32)
 
                         Text(
                             text = stringResource(R.string.transfer_details_screen_progress_label),
                             style = headingMStyle,
                         )
 
-                        FittoniaSpacerHeight(height = 5)
+                        FittoniaSpacerHeight(height = spacing4)
 
                         val status = when (transferJob.status) {
                             TransferStatus.Sending -> "sent"
@@ -187,14 +190,14 @@ fun TransferDetailsScreen(
                             ),
                         )
 
-                        FittoniaSpacerHeight(height = 30)
+                        FittoniaSpacerHeight(height = spacing32)
 
                         Text(
                             text = stringResource(R.string.transfer_details_screen_logs_label),
                             style = headingMStyle,
                         )
 
-                        FittoniaSpacerHeight(height = 5)
+                        FittoniaSpacerHeight(height = spacing4)
 
                         ReadOnlyEntries(
                             entries = transferJob.items.mapIndexed { index, file ->
@@ -203,7 +206,7 @@ fun TransferDetailsScreen(
 
                                     Column(
                                         modifier = Modifier
-                                            .defaultMinSize(minHeight = 30.dp)
+                                            .defaultMinSize(minHeight = spacing32)
                                             .clickable { pathExpandedState = !pathExpandedState }
                                             .fillMaxWidth(),
                                     ) {
@@ -293,14 +296,14 @@ private fun TranferDetailsFooter() {
     Column {
         Row {
             FittoniaButton(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(weight = 1f),
                 onClick = { /*TODO - After release*/ },
             ) {
                 ButtonText(text = "Queue \uD83D\uDD03")
             }
             FittoniaSpacerWidth(width = 5)
             FittoniaButton(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(weight = 1f),
                 onClick = { /*TODO - After release*/ },
             ) {
                 ButtonText(text = "Cancel ❌")

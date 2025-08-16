@@ -228,7 +228,7 @@ private fun AccessCodeField(serverAccessCodeState: InputFlow, modifier: Modifier
 
                 FittoniaIcon(
                     modifier = Modifier
-                        .requiredSize(25.dp)
+                        .requiredSize(size = 25.dp)
                         .clickable(
                             interactionSource = interactionSource,
                             indication = ripple(),
