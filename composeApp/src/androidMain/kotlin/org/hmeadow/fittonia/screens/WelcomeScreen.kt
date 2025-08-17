@@ -140,7 +140,7 @@ fun WelcomeScreen(
                 ReadOnlyEntries(
                     entries = listOf(data.dumpPath.dumpPathReadable),
                     onEntryClearClicked = { onClearDumpPath() },
-                    expandOnClick = true,
+                    expandOnClick = false,
                     textStyle = inputInputStyle(color = Color(color = 0xFF000000)),
                 )
 

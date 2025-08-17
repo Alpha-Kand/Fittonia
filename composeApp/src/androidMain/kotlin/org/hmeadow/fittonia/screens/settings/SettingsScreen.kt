@@ -100,7 +100,7 @@ fun SettingsScreen(
 
                     ReadOnlyEntries(
                         entries = listOf(data.dumpPath.dumpPathReadable),
-                        expandOnClick = true,
+                        expandOnClick = false,
                         textStyle = inputInputStyle(color = Color(color = 0xFF000000)),
                     )
 
