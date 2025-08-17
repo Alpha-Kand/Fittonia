@@ -19,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.focus.FocusRequester
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.datastore.dataStore
@@ -119,6 +120,7 @@ class MainActivity : ComponentActivity() {
     fun attemptStartServer() = viewModel.attemptAndroidServerWithPort(::initAndroidServer)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         mainActivity = this
         mainActivityForServer = this

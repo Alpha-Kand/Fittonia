@@ -168,18 +168,22 @@ dependencies {
     implementation(libs.kotlin.serialization)
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.material3.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.collections.immutable)
 
+    // Firebase & Crashlytics
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+    implementation(platform(libs.firebase.bom))
+
+    // Tests
     androidTestImplementation(libs.junit)
     androidTestImplementation(kotlin("test"))
     androidTestImplementation(libs.mockk.library)
     androidTestImplementation(libs.junit.jupiter.api)
     androidTestImplementation(libs.junit.jupiter.platformlauncher)
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.analytics)
 }
 
 kover {
