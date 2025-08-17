@@ -45,10 +45,10 @@ class LazyPagerScope(
     }
 
     @ExperimentalFoundationApi
-    override fun stickyHeader(key: Any?, contentType: Any?, content: @Composable LazyItemScope.() -> Unit) {
+    override fun stickyHeader(key: Any?, contentType: Any?, content: @Composable LazyItemScope.(Int) -> Unit) {
         scope.stickyHeader(key) {
             Box(this@LazyPagerScope.modifier) {
-                content()
+                content(0)
             }
         }
     }
