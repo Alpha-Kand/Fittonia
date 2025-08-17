@@ -93,7 +93,7 @@ fun SettingsScreen(
                         .padding(all = spacing16),
                 ) {
                     Text(
-                        text = "Change Dump Location",
+                        text = "Change Dump Location", // TODO move to strings.xml.
                         style = headingSStyle,
                     )
                     FittoniaSpacerHeight(height = spacing8)
@@ -128,9 +128,7 @@ fun SettingsScreen(
                         },
                         content = {
                             ButtonText(
-                                text = stringResource(
-                                    id = R.string.welcome_screen_new_destination_select_folder_button,
-                                ),
+                                text = stringResource(R.string.welcome_screen_new_destination_select_folder_button),
                             )
                         },
                     )

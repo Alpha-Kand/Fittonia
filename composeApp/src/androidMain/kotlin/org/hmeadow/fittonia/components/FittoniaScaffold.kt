@@ -119,7 +119,7 @@ fun FittoniaScaffold(
                         }
                     }
                 } ?: Box {}
-            }.single().measure(constraints)
+            }.single().measure(constraints = constraints)
 
             val footerPlaceables = subcompose(ScaffoldSectionsEnum.FOOTER) {
                 footer?.let {
@@ -150,7 +150,7 @@ fun FittoniaScaffold(
                     }
                 } ?: Box(
                     modifier = Modifier
-                        .requiredHeight(navBarHeightLocal.value.toDp())
+                        .requiredHeight(height = navBarHeightLocal.value.toDp())
                         .fillMaxWidth()
                         .background(
                             color = currentStyle.footerBackgroundColour,
@@ -167,13 +167,14 @@ fun FittoniaScaffold(
                             }
                         },
                 ) {}
-            }.single().measure(constraints)
+            }.single().measure(constraints = constraints)
 
             val contentPlaceables = subcompose(ScaffoldSectionsEnum.CONTENT) {
                 val scrollState = rememberScrollState()
                 Column(
+                    // TODO add horizontal padding in landscape mode to avoid in-screen camera aperture.
                     modifier = Modifier
-                        .applyIf(scrollable) {
+                        .applyIf(condition = scrollable) {
                             verticalScroll(scrollState)
                         },
                 ) {
@@ -181,7 +182,7 @@ fun FittoniaScaffold(
                     Spacer(modifier = Modifier.requiredHeight(height = footerPlaceables.height.toDp()))
                 }
             }.single().measure(
-                constraints.copy(
+                constraints = constraints.copy(
                     maxHeight = constraints.maxHeight
                         .minus(headerPlaceables.height)
                         .minus(systemBottomHeight)
@@ -190,7 +191,7 @@ fun FittoniaScaffold(
             )
             val overlayPlaceables = subcompose(ScaffoldSectionsEnum.OVERLAY) {
                 Box(modifier = Modifier.fillMaxSize()) { overlay() }
-            }.single().measure(constraints)
+            }.single().measure(constraints = constraints)
 
             layout(constraints.maxWidth, constraints.maxHeight) {
                 headerPlaceables.place(x = 0, y = 0, zIndex = 1f)
