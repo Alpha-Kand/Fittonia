@@ -21,10 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,13 +64,6 @@ class Options(
     val name: String,
     val onClick: () -> Unit,
 )
-
-@Composable
-fun measureTextWidth(text: String, style: TextStyle): Dp {
-    val textMeasurer = rememberTextMeasurer()
-    val widthInPixels = textMeasurer.measure(text, style).size.width
-    return with(LocalDensity.current) { widthInPixels.toDp() }
-}
 
 class OverviewScreenViewModel(
     private val onUpdateDumpPath: (Uri) -> Unit,

@@ -29,6 +29,7 @@ import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldSmallTextStyle
 import org.hmeadow.fittonia.models.CompletedJob
+import org.hmeadow.fittonia.utility.measureTextWidth
 
 @Composable
 fun OverviewScreenCompletedTransfersTab(
