@@ -60,26 +60,8 @@ import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.utility.createJobDirectory
 import org.hmeadow.fittonia.utility.isLandscape
-import java.text.NumberFormat
-import java.util.Locale
 import kotlin.math.abs
 import kotlin.random.Random
-
-@Composable
-fun rememberPercentageFormat(
-    percentage: Double,
-    minFraction: Int? = null,
-    maxFraction: Int? = 2,
-): String = remember(
-    percentage,
-    minFraction,
-    maxFraction,
-) {
-    NumberFormat.getPercentInstance(Locale.getDefault()).apply {
-        maxFraction?.let { maximumFractionDigits = maxFraction }
-        minFraction?.let { minimumFractionDigits = minFraction }
-    }.format(percentage)
-}
 
 class Options(
     val name: String,

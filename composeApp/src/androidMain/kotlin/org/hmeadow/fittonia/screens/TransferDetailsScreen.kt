@@ -48,7 +48,7 @@ import org.hmeadow.fittonia.models.IncomingJob
 import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
-import org.hmeadow.fittonia.screens.overviewScreen.rememberPercentageFormat
+import org.hmeadow.fittonia.utility.rememberPercentageFormat
 
 class TransferDetailsScreenViewModel(private val transferJob: TransferJob) : BaseViewModel() {
     @OptIn(ExperimentalCoroutinesApi::class)

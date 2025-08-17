@@ -37,6 +37,7 @@ import org.hmeadow.fittonia.design.fonts.readOnlyFieldSmallTextStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
+import org.hmeadow.fittonia.utility.rememberPercentageFormat
 
 @Composable
 fun OverviewTransferList(
