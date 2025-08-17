@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.compose.architecture.appStyleResetReadOnly
 import org.hmeadow.fittonia.compose.architecture.currentStyle
+import org.hmeadow.fittonia.utility.clickable2
 
 @Composable
 fun ReadOnlyEntries(
@@ -51,11 +52,11 @@ fun ReadOnlyEntries(
                     color = currentStyle.readOnlyBackgroundColour,
                     shape = RoundedCornerShape(corner = CornerSize(5.dp)),
                 )
-                .clickable {
-                    if (expandOnClick) {
-                        expanded = !expanded
-                    }
-                },
+                .clickable2(
+                    enabled = expandOnClick,
+                    hideKeyboardAlways = true,
+                    onClick = { expanded = !expanded },
+                ),
         ) {
             entries.forEachIndexed { index, text ->
                 Row(
