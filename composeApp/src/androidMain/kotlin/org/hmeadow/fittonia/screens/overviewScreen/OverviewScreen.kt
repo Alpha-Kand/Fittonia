@@ -1,5 +1,6 @@
 package org.hmeadow.fittonia.screens.overviewScreen
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -43,6 +45,7 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.Spacing.spacing16
+import org.hmeadow.fittonia.design.Spacing.spacing2
 import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
@@ -92,7 +95,15 @@ internal fun OverviewScreen(
                         OverviewScreenCompletedTransfersTab(
                             maxWidth = maxWidth,
                             maxHeight = maxHeight,
-                            data.completedJobs,
+                            completedJobs = data.completedJobs,
+                        )
+                    },
+                    "This Device" to { maxWidth, maxHeight ->
+                        OverviewScreenThisDeviceTab(
+                            maxWidth = maxWidth,
+                            maxHeight = maxHeight,
+                            deviceIp = viewModel.deviceIp.collectAsState().value,
+                            refreshIp = viewModel::refreshIp,
                         )
                     },
                 )

@@ -19,6 +19,7 @@ import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.components.FittoniaButton
+import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.utility.DebugTurnOff.allowDebug
@@ -41,7 +42,7 @@ fun DebugScreenOverviewTab(
             text = "Overview",
             style = headingLStyle,
         )
-        FittoniaSpacerHeight(height = 10)
+        FittoniaSpacerHeight(height = spacing8)
         Row {
             Column {
                 Text(text = "Current device IP:")
@@ -53,7 +54,7 @@ fun DebugScreenOverviewTab(
             Column {
                 Row {
                     Text(text = viewModel.deviceIp.collectAsState().value)
-                    FittoniaSpacerWidth(width = 10)
+                    FittoniaSpacerWidth(width = spacing8)
                     Text(
                         modifier = Modifier.clickable(onClick = viewModel::refreshIp),
                         text = "Refresh",
@@ -62,7 +63,7 @@ fun DebugScreenOverviewTab(
                 }
                 Row {
                     Text(text = encodeIpAddress(ipAddress = viewModel.deviceIp.collectAsState().value))
-                    FittoniaSpacerWidth(width = 10)
+                    FittoniaSpacerWidth(width = spacing8)
                     Text(
                         modifier = Modifier.clickable(onClick = viewModel::refreshIp),
                         text = "Refresh",

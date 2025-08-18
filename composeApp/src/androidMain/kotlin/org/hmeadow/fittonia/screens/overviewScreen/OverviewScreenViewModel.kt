@@ -20,6 +20,7 @@ internal class OverviewScreenViewModel(
     private val onUpdateDumpPath: (Uri) -> Unit,
 ) : BaseViewModel() {
     val needDumpAccess = MutableStateFlow(false)
+    val deviceIp = MutableStateFlow("Unknown")
 
     init {
         launch {
@@ -32,6 +33,11 @@ internal class OverviewScreenViewModel(
                 is MainActivity.CreateDumpDirectory.Success -> MainActivity.mainActivity.deleteDumpDirectory(state.uri)
             }
         }
+        refreshIp()
+    }
+
+    fun refreshIp() {
+        deviceIp.value = MainActivity.mainActivity.getDeviceIpAddress() ?: "Unknown"
     }
 
     fun onDumpPathPicked(path: Uri) {

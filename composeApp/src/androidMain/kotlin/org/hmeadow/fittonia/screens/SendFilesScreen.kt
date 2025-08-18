@@ -344,6 +344,7 @@ fun SendFilesScreen(
                         modifier = Modifier.fillMaxWidth(),
                         inputFlow = viewModel.oneTimeIpAddressState,
                         label = "IP Address/Code",
+                        //todo hint = "Tip: Check destination's \"This Device\" tab",
                     )
 
                     FittoniaSpacerHeight(height = spacing4)
@@ -355,7 +356,7 @@ fun SendFilesScreen(
                     FittoniaTextInput(
                         modifier = Modifier.fillMaxWidth(),
                         inputFlow = viewModel.oneTimeAccessCodeState,
-                        label = "Access Code",
+                        label = "Access Code", // TODO trim whitespace.
                     )
 
                     FittoniaSpacerHeight(height = spacing32)
@@ -391,6 +392,7 @@ fun SendFilesScreen(
                             HorizontalLine()
                             FittoniaSpacerHeight(height = spacing8)
                             listOf(
+                                // TODO fix alignment here.
                                 "IP Address: ${destination.ip}",
                                 "Access Code: • • • • • • • • • • • •",
                             ).fastForEach {
@@ -511,7 +513,7 @@ fun SendFilesScreen(
             ) {
                 listOf(
                     Options(
-                        name = "About",
+                        name = "About", // TODO what is this about?
                         onClick = {},
                     ),
                 ).fastForEach {
