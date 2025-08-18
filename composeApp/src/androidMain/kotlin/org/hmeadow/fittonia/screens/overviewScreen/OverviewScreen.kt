@@ -111,11 +111,26 @@ internal fun OverviewScreen(
             BoxWithConstraints {
                 val box = this
                 Column {
+                    FittoniaSpacerHeight(height = spacing16)
                     PagerTabLabels(
                         position = pagerState.pagePosition,
                         tabs = remember(overviewTabs) { overviewTabs.map { it.first } },
                         onTabSelected = pagerState::goToPage,
-                        modifier = Modifier.padding(bottom = spacing16),
+                        modifier = Modifier
+                            .padding(bottom = spacing16)
+                            .padding(horizontal = spacing16)
+                            .border(
+                                color = currentStyle.headerAndFooterBorderColour,
+                                width = spacing2,
+                                shape = RoundedCornerShape(size = spacing8),
+                            )
+                            .fillMaxWidth(),
+                        tabLabelContent = { label, _ ->
+                            Text(
+                                text = label,
+                                style = paragraphTextStyle,
+                            )
+                        },
                     )
                     LazyPager(
                         pagerState = pagerState,

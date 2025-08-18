@@ -70,7 +70,7 @@ fun LazyPager(
         modifier = modifier
             .graphicsLayer { this.clip = true }
             .nestedScroll(
-                object : NestedScrollConnection {
+                connection = object : NestedScrollConnection {
                     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                         pagerState.captureCurrentVisiblePage()
                         swipeOffset -= available.x

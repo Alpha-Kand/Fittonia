@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.lerp
@@ -31,9 +32,12 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEachIndexed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -43,6 +47,9 @@ import kotlinx.coroutines.withContext
 import org.hmeadow.fittonia.components.pager.PagerConstants.SCROLL_INDICATOR_INTO_VIEW_DELAY
 import org.hmeadow.fittonia.components.pager.PagerConstants.indicatorHorizontalPadding
 import org.hmeadow.fittonia.components.pager.PagerConstants.renderedTextPadding
+import org.hmeadow.fittonia.compose.architecture.currentStyle
+import org.hmeadow.fittonia.design.Spacing.spacing2
+import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
@@ -87,7 +94,7 @@ fun PagerTabLabels(
 
     Box(
         modifier = Modifier.nestedScroll(
-            object : NestedScrollConnection {
+            connection = object : NestedScrollConnection {
                 override suspend fun onPreFling(available: Velocity): Velocity {
                     when {
                         // Indicator scrolled off to the left.
@@ -128,7 +135,7 @@ fun PagerTabLabels(
                 var tabNamesCombinedWidth = 0
                 // Render tab names.
                 val tabLayouts = tabs.mapIndexed { index, text ->
-                    subcompose(text) {
+                    subcompose(slotId = text) {
                         TabLabel(
                             isSelected = !position.isNaN() && index == position.roundToInt(),
                             text = text,
@@ -165,15 +172,45 @@ fun PagerTabLabels(
                     indicatorContent(indicatorPosition.left.toDp(), indicatorPosition.width.toDp())
                 }.single().measure(constraints)
 
-                layout(tabNamesCombinedWidth, tabNamesMaxHeight) {
+                val tabSeparators = (0..<tabs.size).map { index ->
+                    subcompose(slotId = "SEPARATOR$index") {
+                        Box(
+                            modifier = Modifier
+                                .background(color = currentStyle.headerAndFooterBorderColour)
+                                .width(width = spacing2)
+                                .height(height = getTabLabelHeight())
+                                .align(alignment = Alignment.CenterEnd),
+                        ) {}
+                    }.single().measure(constraints)
+                }
+
+                layout(width = tabNamesCombinedWidth, height = tabNamesMaxHeight) {
                     var offset = 0
-                    tabLayouts.forEach {
-                        it.placeRelative(x = offset, y = 0)
-                        offset += it.width
+                    tabLayouts.fastForEachIndexed { index, placeable ->
+                        placeable.placeRelative(x = offset, y = 0)
+                        offset += placeable.width
+                        if (index != tabLayouts.lastIndex) {
+                            tabSeparators[index].placeRelative(x = offset, y = 16.dp.toPx().toInt()) // TODO constant
+                        }
                     }
-                    indicator.placeRelative(x = 0, y = tabNamesMaxHeight - indicator.height)
+                    indicator.placeRelative(x = 0, y = tabNamesMaxHeight - (indicator.height * 2))
                 }
             }
+        }
+    }
+}
+
+/**
+ *  Returns height of tab text labels to help draw the tab separators.
+ */
+@Composable
+private fun getTabLabelHeight(): Dp {
+    val density = LocalDensity.current
+    val textStyle = paragraphTextStyle
+    val textMeasurer = rememberTextMeasurer()
+    return remember {
+        with(density) {
+            textMeasurer.measure(text = "I", style = textStyle).size.height.toDp()
         }
     }
 }
