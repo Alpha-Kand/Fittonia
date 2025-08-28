@@ -4,8 +4,8 @@ import FittoniaError
 import FittoniaErrorType
 import ServerFlagsString
 import SessionManager
-import decodeIpAddress
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
+import org.hmeadow.fittonia.utility.decodeIpAddress
 import requireNull
 
 sealed class Command {
@@ -94,8 +94,8 @@ sealed class SendCommand : Command() {
         if (ipArguments.contains(argumentName)) {
             requireNull(ip)
             ip = try {
-                decodeIpAddress(value)
-            } catch (e: Exception) {
+                decodeIpAddress(ipAddress = value)
+            } catch (_: Exception) {
                 null
             } ?: value
             return true

@@ -22,7 +22,6 @@ import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.utility.encodeIpAddress
 
-
 @Composable
 fun OverviewScreenThisDeviceTab(
     maxWidth: Dp,

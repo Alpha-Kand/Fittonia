@@ -34,7 +34,19 @@ fun decodeIpAddress(ipAddress: String): String {
         return "$addressChunk1.$addressChunk2.$addressChunk3.$addressChunk4"
     } catch (_: Exception) {
         throw IllegalArgumentException(
-            "ipAddress \"$ipAddress\" was not in expected format. (word-word-number)",
+            "ipAddress \"$ipAddress\" was not in expected format: (word-word-number)",
         )
     }
+}
+
+fun String.verifyIPAddress(): String {
+    return tryOrNull {
+        decodeIpAddress(ipAddress = this)
+    } ?: tryOrNull {
+        encodeIpAddress(ipAddress = this)
+    } ?: throw IllegalArgumentException(
+        "IP address was not in expected format: ${
+            this.replace(Regex("[a-zA-Z]"), "*").replace(Regex("[0-9]"), "#")
+        }",
+    )
 }
