@@ -2,8 +2,8 @@
 
 # Core
 agp = "8.12.2"
-firebaseBom = "34.1.0"
 kotlin = "2.2.10"
+firebaseBom = "34.2.0"
 compose-plugin = "1.8.2"
 android-minSdk = "29"
 android-targetSdk = "36"
@@ -18,8 +18,8 @@ kotlinxCollectionsImmutable = "0.4.0"
 datastore = "1.1.7"
 fragmentKtx = "1.8.9"
 documentfile = "1.1.0"
-androidx-activityCompose = "1.10.1"
 coreSplashscreen = "1.0.1"
+androidx-activityCompose = "1.10.1"
 
 # Unit Tests
 mockk = "1.14.5"
@@ -31,7 +31,7 @@ jupiterPlatform = "1.13.4"
 kotlinx-coroutines-core = "1.10.2"
 
 # Settings Writing/Reading
-jacksonModuleKotlin = "2.19.2"
+jacksonModuleKotlin = "2.20.0"
 
 # Libraries
 kotterJvm = "1.2.1"
@@ -43,9 +43,9 @@ securityCryptoKtx = "1.1.0"
 
 # Core
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 
 # Shared
-androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlinSerialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
@@ -55,8 +55,11 @@ androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "d
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activityCompose" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
-firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCryptoKtx" }
+androidx-material3-common = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Unit Tests
@@ -76,9 +79,6 @@ jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-
 
 # Libraries
 kotter-library = { module = "com.varabyte.kotter:kotter-jvm", version.ref = "kotterJvm" }
-androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCryptoKtx" }
-androidx-material3-common = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 
 [plugins]
 
