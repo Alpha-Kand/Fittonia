@@ -74,8 +74,10 @@ import org.hmeadow.fittonia.models.mostRecent
 import org.hmeadow.fittonia.screens.overviewScreen.Options
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBoxOverlay
 import org.hmeadow.fittonia.utility.debug
+import org.hmeadow.fittonia.utility.decodeIpAddress
 import org.hmeadow.fittonia.utility.getFileSizeBytes
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
+import org.hmeadow.fittonia.utility.tryOrNull
 import java.time.Instant
 
 class SendFilesScreenViewModel(
@@ -185,8 +187,13 @@ class SendFilesScreenViewModel(
         oneTimeIpAddressState,
         oneTimeAccessCodeState,
         portState,
-    ) { itemList, ip, accessCode, port ->
-        itemList.isNotEmpty() && ip.isNotEmpty() && accessCode.isNotEmpty() && port.isNotEmpty()
+        ping,
+    ) { itemList, ip, accessCode, port, pingStatus ->
+        itemList.isNotEmpty()
+            .and(ip.isNotEmpty())
+            .and(port.isNotEmpty())
+            .and(accessCode.isNotEmpty())
+            .and(pingStatus.pingStatus is PingStatus.Success)
     }
 
     fun onSaveOneTimeDestinationClicked() {
@@ -233,7 +240,7 @@ class SendFilesScreenViewModel(
                 needDescription = descriptionState.text.isEmpty(),
                 destination = selectedDestinationState.value ?: SettingsManager.Destination(
                     name = "-",
-                    ip = oneTimeIpAddressState.text,
+                    ip = oneTimeIpAddressState.text.let { tryOrNull { decodeIpAddress(ipAddress = it) } ?: it },
                     accessCode = oneTimeAccessCodeState.text,
                 ), // TODO - After release
                 items = itemListState.value,
