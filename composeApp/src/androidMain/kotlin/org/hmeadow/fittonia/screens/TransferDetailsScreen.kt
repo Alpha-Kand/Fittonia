@@ -1,5 +1,6 @@
 package org.hmeadow.fittonia.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -29,15 +32,16 @@ import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.server
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaScaffold
-import org.hmeadow.fittonia.components.HorizontalLine
 import org.hmeadow.fittonia.components.ReadOnlyEntries
 import org.hmeadow.fittonia.compose.architecture.ComposeDataState
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
-import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
+import org.hmeadow.fittonia.compose.architecture.HorizontalScrollableContent
 import org.hmeadow.fittonia.compose.architecture.LoadingCompose
+import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.compose.components.FittoniaIcon
+import org.hmeadow.fittonia.design.Spacing.spacing16
 import org.hmeadow.fittonia.design.Spacing.spacing32
 import org.hmeadow.fittonia.design.Spacing.spacing4
 import org.hmeadow.fittonia.design.Spacing.spacing8
@@ -48,6 +52,7 @@ import org.hmeadow.fittonia.models.IncomingJob
 import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
+import org.hmeadow.fittonia.utility.measureTextWidth
 import org.hmeadow.fittonia.utility.rememberPercentageFormat
 
 class TransferDetailsScreenViewModel(private val transferJob: TransferJob) : BaseViewModel() {
@@ -202,81 +207,10 @@ fun TransferDetailsScreen(
                         ReadOnlyEntries(
                             entries = transferJob.items.mapIndexed { index, file ->
                                 val composable = @Composable {
-                                    var pathExpandedState by remember { mutableStateOf(false) }
-
-                                    Column(
-                                        modifier = Modifier
-                                            .defaultMinSize(minHeight = spacing32)
-                                            .clickable { pathExpandedState = !pathExpandedState }
-                                            .fillMaxWidth(),
-                                    ) {
-                                        val transferStatus = when (transferJob.status) {
-                                            TransferStatus.Sending -> ""
-                                            TransferStatus.Receiving -> ""
-                                            TransferStatus.Error -> " Error"
-                                            TransferStatus.Done -> " Done"
-                                        }
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                        ) {
-                                            if (pathExpandedState) {
-                                                Text(
-                                                    text = file.name, // TODO long path? - After release
-                                                )
-                                                FittoniaSpacerWeightRow()
-                                            } else {
-                                                Text(
-                                                    text = stringResource(
-                                                        id = R.string.transfer_details_screen_item_transfer_status,
-                                                        file.name,
-                                                        transferStatus,
-                                                    ),
-                                                    style = readOnlyFieldTextStyle,
-                                                )
-                                                FittoniaSpacerWeightRow()
-                                                Text(
-                                                    text = rememberPercentageFormat(
-                                                        percentage = file.progressPercentage,
-                                                        minFraction = 1,
-                                                        maxFraction = 2,
-                                                    ),
-                                                    style = readOnlyFieldTextStyle,
-                                                )
-                                            }
-                                            FittoniaIcon(
-                                                modifier = Modifier.requiredHeight(20.dp),
-                                                painter = painterResource(
-                                                    if (pathExpandedState) {
-                                                        R.drawable.ic_chevron_up
-                                                    } else {
-                                                        R.drawable.ic_chevron_down
-                                                    },
-                                                ),
-                                                tint = Color(0xFF222222),
-                                            )
-                                        }
-                                        if (pathExpandedState) {
-                                            Row {
-                                                val progress = rememberPercentageFormat(
-                                                    percentage = file.progressPercentage,
-                                                    minFraction = 1,
-                                                    maxFraction = 2,
-                                                )
-                                                Text(
-                                                    text = "$transferStatus$progress",
-                                                    style = readOnlyFieldTextStyle,
-                                                )
-                                                FittoniaSpacerWeightRow()
-                                                Text(
-                                                    text = "${file.progressBytes}b/${file.sizeBytes}b",
-                                                    style = readOnlyFieldTextStyle,
-                                                )
-                                            }
-                                        }
-                                    }
-                                    if (index != transferJob.items.lastIndex) {
-                                        HorizontalLine()
-                                    }
+                                    ItemInfoBox(
+                                        transferJob = transferJob,
+                                        file = file,
+                                    )
                                 }
                                 composable
                             },
@@ -289,6 +223,97 @@ fun TransferDetailsScreen(
             // TODO TranferDetailsFooter() - After release
         },
     )
+}
+
+val TransferStatus.text: String
+    get() = when (this) {
+        TransferStatus.Done -> " Done"
+        TransferStatus.Error -> " Error"
+        TransferStatus.Sending -> "Sending"
+        TransferStatus.Receiving -> "Receiving"
+    }
+
+@Composable
+private fun ItemInfoBox(
+    transferJob: TransferJob,
+    file: TransferJob.Item,
+) {
+    val percentageTextWidth = measureTextWidth(text = "%100.00", style = readOnlyFieldTextStyle)
+    var pathExpandedState by remember { mutableStateOf(value = false) }
+    Column(
+        modifier = Modifier
+            .defaultMinSize(minHeight = spacing32)
+            .clickable { pathExpandedState = !pathExpandedState }
+            .fillMaxWidth()
+            .background(color = currentStyle.readOnlyBackgroundColour), // TODO
+    ) {
+        HorizontalScrollableContent(
+            modifier = Modifier
+                .fillMaxWidth()
+                .requiredHeight(height = spacing32),
+            content = {
+                Text(
+                    text = stringResource(
+                        id = R.string.transfer_details_screen_item_transfer_status,
+                        file.name,
+                        transferJob.status.text,
+                    ),
+                    style = readOnlyFieldTextStyle,
+                )
+            },
+            endContent = {
+                Row(modifier = Modifier.requiredWidth(width = percentageTextWidth + spacing16)) {
+                    Text(
+                        modifier = Modifier.requiredWidth(width = percentageTextWidth),
+                        textAlign = TextAlign.End,
+                        text = rememberPercentageFormat(
+                            percentage = file.progressPercentage,
+                            minFraction = 1,
+                            maxFraction = 2,
+                        ),
+                        style = readOnlyFieldTextStyle,
+                    )
+                    FittoniaIcon(
+                        modifier = Modifier
+                            .requiredHeight(height = spacing32)
+                            .align(alignment = Alignment.CenterVertically),
+                        painter = painterResource(
+                            if (pathExpandedState) {
+                                R.drawable.ic_chevron_up
+                            } else {
+                                R.drawable.ic_chevron_down
+                            },
+                        ),
+                        tint = Color(0xFF222222), // TODO
+                    )
+                }
+            },
+        )
+        if (pathExpandedState) {
+            HorizontalScrollableContent(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredHeight(height = spacing32),
+                content = {
+                    Text(
+                        text = "${file.progressBytes}b/${file.sizeBytes}b", // TODO
+                        style = readOnlyFieldTextStyle,
+                    )
+                },
+                endContent = {
+                    val statusTextWidth = measureTextWidth(
+                        text = "Status: ${transferJob.status.text}", // TODO
+                        style = readOnlyFieldTextStyle,
+                    )
+                    Text(
+                        modifier = Modifier.requiredWidth(width = statusTextWidth),
+                        text = "Status: ${transferJob.status.text}",
+                        style = readOnlyFieldTextStyle,
+                    )
+                },
+            )
+        }
+    }
 }
 
 @Composable
