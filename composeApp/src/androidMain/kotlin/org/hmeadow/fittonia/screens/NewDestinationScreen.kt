@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import org.hmeadow.fittonia.BaseViewModel
-import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.ButtonIcon
 import org.hmeadow.fittonia.components.EquivalentIPCode
@@ -33,7 +32,6 @@ import org.hmeadow.fittonia.design.Spacing.spacing32
 import org.hmeadow.fittonia.design.Spacing.spacing4
 import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
-import org.hmeadow.fittonia.utility.Debug
 
 class NewDestinationScreenViewModel(
     oneTimeIp: String?,
@@ -113,16 +111,6 @@ fun NewDestinationScreen(
                 FittoniaSpacerHeight(height = spacing4)
 
                 EquivalentIpCodeText(equivalentIPCode = viewModel.equivelentIpOrCode.collectAsState().value)
-
-                Debug {
-                    FittoniaButton(
-                        onClick = {
-                            viewModel.ipAddressState.text = MainActivity.mainActivity.getDeviceIpAddress() ?: ""
-                        },
-                    ) {
-                        ButtonText("<Debug fill with this device's IP>")
-                    }
-                }
 
                 FittoniaSpacerHeight(height = spacing32)
 
