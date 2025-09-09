@@ -68,7 +68,12 @@ fun FittoniaHeader(
         contentAlignment = Center,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            BackButton(onBackClicked = onBackClicked)
+            BackButton(
+                onBackClicked = {
+                    InfoBorderState.clearInfoBorderState()
+                    onBackClicked?.invoke()
+                },
+            )
             if (includeInfoButton) {
                 InfoButton()
             }
@@ -88,11 +93,9 @@ fun FittoniaHeader(
 }
 
 @Composable
-private fun BackButton(onBackClicked: (() -> Unit)?) {
-    onBackClicked?.let {
-        FittoniaCircleButton(onClick = onBackClicked) {
-            CircleButtonIcon(drawableRes = R.drawable.ic_back_arrow)
-        }
+private fun BackButton(onBackClicked: () -> Unit) {
+    FittoniaCircleButton(onClick = onBackClicked) {
+        CircleButtonIcon(drawableRes = R.drawable.ic_back_arrow)
     }
 }
 
