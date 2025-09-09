@@ -1,4 +1,4 @@
-package org.hmeadow.fittonia.screens
+package org.hmeadow.fittonia.screens.transferDetailsScreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,14 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.R
-import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.server
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.ReadOnlyEntries
@@ -55,17 +48,8 @@ import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.utility.measureTextWidth
 import org.hmeadow.fittonia.utility.rememberPercentageFormat
 
-class TransferDetailsScreenViewModel(private val transferJob: TransferJob) : BaseViewModel() {
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val currentTransferJob: Flow<TransferJob?> = server.flatMapLatest { androidServer ->
-        androidServer?.transferJobs?.map { transferJobs ->
-            transferJobs.firstOrNull { it.id == transferJob.id }
-        } ?: flow { emit(null) }
-    }
-}
-
 @Composable
-fun TransferDetailsScreen(
+internal fun TransferDetailsScreen(
     transferJobState: ComposeDataState<TransferJob?>,
     onBackClicked: () -> Unit,
 ) {

@@ -8,17 +8,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.BaseViewModel
-import org.hmeadow.fittonia.MainActivity
-import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.PuPrKeyCipher.ENCRYPT_MAX_BYTES_ALLOWED
 import org.hmeadow.fittonia.compose.components.InputFlow
 import org.hmeadow.fittonia.hmeadowSocket.AESCipher
+import org.hmeadow.fittonia.mainActivity.MainActivity
+import org.hmeadow.fittonia.mainActivity.MainViewModel
 import org.hmeadow.fittonia.utility.createJobDirectory
 import kotlin.math.abs
 import kotlin.random.Random
 
-class DebugScreenViewModel(
+internal class DebugScreenViewModel(
     private val mainViewModel: MainViewModel,
 ) : BaseViewModel() {
     val deviceIp = MutableStateFlow("Unknown")

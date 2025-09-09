@@ -30,15 +30,15 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
-import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.UserAlert
-import org.hmeadow.fittonia.dataStore
 import org.hmeadow.fittonia.hmeadowSocket.AESCipher
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
+import org.hmeadow.fittonia.mainActivity.MainActivity
+import org.hmeadow.fittonia.mainActivity.dataStore
 import org.hmeadow.fittonia.models.IncomingJob
 import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.Ping

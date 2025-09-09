@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.hmeadow.fittonia.MainActivity
+import org.hmeadow.fittonia.mainActivity.MainActivity
 
 @Composable
 fun isLandscape() = LocalConfiguration.current.orientation == ORIENTATION_LANDSCAPE

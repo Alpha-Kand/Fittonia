@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import org.hmeadow.fittonia.LocalFocusRequester
+import org.hmeadow.fittonia.mainActivity.LocalFocusRequester
 import org.hmeadow.fittonia.utility.InfoBorderState.clearInfoBorderState
 
 /**

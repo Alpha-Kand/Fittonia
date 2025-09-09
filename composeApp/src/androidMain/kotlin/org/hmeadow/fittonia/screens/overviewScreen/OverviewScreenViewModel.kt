@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.BaseViewModel
-import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.androidServer.AndroidServer
+import org.hmeadow.fittonia.mainActivity.MainActivity
 import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus

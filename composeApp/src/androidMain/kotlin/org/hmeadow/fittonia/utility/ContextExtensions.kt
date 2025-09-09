@@ -4,8 +4,8 @@ import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import kotlinx.coroutines.flow.first
-import org.hmeadow.fittonia.MainActivity.CreateDumpDirectory
-import org.hmeadow.fittonia.dataStore
+import org.hmeadow.fittonia.mainActivity.MainActivity.CreateDumpDirectory
+import org.hmeadow.fittonia.mainActivity.dataStore
 
 fun Context.getFileSizeBytes(uri: Uri): Long {
     return contentResolver

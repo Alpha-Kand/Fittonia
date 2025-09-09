@@ -1,4 +1,4 @@
-package org.hmeadow.fittonia
+package org.hmeadow.fittonia.mainActivity
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -27,6 +27,12 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.hmeadow.fittonia.Navigator
+import org.hmeadow.fittonia.PuPrKeyCipher
+import org.hmeadow.fittonia.R
+import org.hmeadow.fittonia.SettingsDataAndroid
+import org.hmeadow.fittonia.SettingsDataAndroidSerializer
+import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.serverLog
 
@@ -67,7 +73,7 @@ class MainActivity : ComponentActivity() {
     }
 
     fun getDeviceIpAddress(): String? {
-        return (getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager)?.let { conman ->
+        return (getSystemService(CONNECTIVITY_SERVICE) as? ConnectivityManager)?.let { conman ->
             conman.getLinkProperties(conman.activeNetwork)
                 ?.linkAddresses
                 ?.find { it.toString().contains('.') }
@@ -234,13 +240,13 @@ class MainActivity : ComponentActivity() {
     )[MainViewModel::class.java]
 
     inline fun <reified T : UserAlert> alert(alert: T) {
-        if (UserAlert.userAlerts.value.filterIsInstance<T>().size < alert.numAllowed) {
-            UserAlert.userAlerts.value += alert
+        if (UserAlert.Companion.userAlerts.value.filterIsInstance<T>().size < alert.numAllowed) {
+            UserAlert.Companion.userAlerts.value += alert
         }
     }
 
     inline fun <reified T : UserAlert> unAlert() {
-        UserAlert.userAlerts.value = UserAlert.userAlerts.value.filter {
+        UserAlert.Companion.userAlerts.value = UserAlert.Companion.userAlerts.value.filter {
             it !is T
         }
     }

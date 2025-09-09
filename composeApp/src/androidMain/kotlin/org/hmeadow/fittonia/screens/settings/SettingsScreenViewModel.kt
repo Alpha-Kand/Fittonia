@@ -2,10 +2,10 @@ package org.hmeadow.fittonia.screens.settings
 
 import android.net.Uri
 import org.hmeadow.fittonia.BaseViewModel
-import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.compose.components.InputFlow
+import org.hmeadow.fittonia.mainActivity.MainViewModel
 
-class SettingsScreenViewModel(
+internal class SettingsScreenViewModel(
     private val mainViewModel: MainViewModel,
 ) : BaseViewModel() {
     val serverAccessCodeState = InputFlow(initial = "")

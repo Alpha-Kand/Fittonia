@@ -12,6 +12,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.hmeadow.fittonia.SettingsDataAndroid.SavableColour
+import org.hmeadow.fittonia.mainActivity.MainActivity
 import org.hmeadow.fittonia.models.CompletedJob
 import java.io.InputStream
 import java.io.OutputStream

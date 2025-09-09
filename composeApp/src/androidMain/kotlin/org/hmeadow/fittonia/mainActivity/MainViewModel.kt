@@ -1,4 +1,4 @@
-package org.hmeadow.fittonia
+package org.hmeadow.fittonia.mainActivity
 
 import SettingsManager
 import android.net.Uri
@@ -8,9 +8,13 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.SettingsDataAndroid
+import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.serverLog
 import org.hmeadow.fittonia.compose.architecture.DebugAppStyle
+import org.hmeadow.fittonia.serialize
+import org.hmeadow.fittonia.unserialize
 import recordThrowable
 import kotlin.coroutines.CoroutineContext
 

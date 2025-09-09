@@ -1,6 +1,5 @@
-package org.hmeadow.fittonia.screens
+package org.hmeadow.fittonia.screens.alertsScreen
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,8 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
-import org.hmeadow.fittonia.BaseViewModel
-import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.components.FittoniaHeader
@@ -42,29 +39,13 @@ import org.hmeadow.fittonia.design.Spacing.spacing16
 import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
+import org.hmeadow.fittonia.mainActivity.MainActivity
 import org.hmeadow.fittonia.title
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-class AlertsScreenViewModel(
-    private val onUpdateDumpPath: (Uri) -> Unit,
-    private val onTemporaryPortAcceptedCallback: suspend (port: Int) -> Unit,
-    private val onNewDefaultPortAcceptedCallback: suspend (port: Int) -> Unit,
-) : BaseViewModel() {
-    val temporaryPort = InputFlow(initial = "")
-    val newDefaultPort = InputFlow(initial = "")
-
-    suspend fun onTemporaryPortAccepted() = onTemporaryPortAcceptedCallback(temporaryPort.text.toInt())
-    suspend fun onNewDefaultPortAccepted() = onNewDefaultPortAcceptedCallback(newDefaultPort.text.toInt())
-
-    fun onDumpPathPicked(path: Uri) {
-        onUpdateDumpPath(path)
-        MainActivity.mainActivity.unAlert<UserAlert.DumpLocationLost>()
-    }
-}
-
 @Composable
-fun AlertsScreen(
+internal fun AlertsScreen(
     viewModel: AlertsScreenViewModel,
     onBackClicked: () -> Unit,
 ) {

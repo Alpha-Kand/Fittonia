@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.components.ButtonIcon
@@ -32,10 +31,11 @@ import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.inputInputStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
+import org.hmeadow.fittonia.mainActivity.MainActivity
 import org.hmeadow.fittonia.utility.InfoBorderState.InfoBoxOverlay
 
 @Composable
-fun SettingsScreen(
+internal fun SettingsScreen(
     viewModel: SettingsScreenViewModel,
     data: SettingsDataAndroid,
     onBackClicked: () -> Unit,

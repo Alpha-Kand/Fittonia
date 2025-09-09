@@ -4,7 +4,7 @@ import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
-import org.hmeadow.fittonia.MainActivity
+import org.hmeadow.fittonia.mainActivity.MainActivity
 import org.hmeadow.fittonia.utility.inchesToPx
 import kotlin.math.absoluteValue
 

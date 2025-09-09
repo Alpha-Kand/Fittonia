@@ -17,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.UserAlert
@@ -35,9 +34,10 @@ import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.Spacing.spacing16
 import org.hmeadow.fittonia.design.Spacing.spacing4
 import org.hmeadow.fittonia.design.Spacing.spacing8
+import org.hmeadow.fittonia.mainActivity.MainActivity
 
 @Composable
-fun DebugScreen(
+internal fun DebugScreen(
     viewModel: DebugScreenViewModel,
     data: SettingsDataAndroid,
     onResetSettingsClicked: () -> Unit,

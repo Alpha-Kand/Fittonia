@@ -25,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.update
-import org.hmeadow.fittonia.MainActivity
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.UserAlert
@@ -49,6 +48,7 @@ import org.hmeadow.fittonia.design.Spacing.spacing2
 import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
+import org.hmeadow.fittonia.mainActivity.MainActivity
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.utility.isLandscape
 

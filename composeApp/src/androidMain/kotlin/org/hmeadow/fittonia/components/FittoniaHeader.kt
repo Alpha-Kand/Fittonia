@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import org.hmeadow.fittonia.MainActivity.Companion.mainActivity
 import org.hmeadow.fittonia.Navigator
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.HeaderAndFooterDrawingConstants.BORDER_WIDTH
@@ -35,6 +34,7 @@ import org.hmeadow.fittonia.compose.components.FittoniaCircleButton
 import org.hmeadow.fittonia.design.Spacing.spacing16
 import org.hmeadow.fittonia.design.Spacing.spacing4
 import org.hmeadow.fittonia.design.fonts.headerStyle
+import org.hmeadow.fittonia.mainActivity.MainActivity.Companion.mainActivity
 import org.hmeadow.fittonia.utility.Debug
 import org.hmeadow.fittonia.utility.InfoBorderState
 import org.hmeadow.fittonia.utility.dpToFloat

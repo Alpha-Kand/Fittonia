@@ -1,6 +1,5 @@
-package org.hmeadow.fittonia.screens
+package org.hmeadow.fittonia.screens.welcomeScreen
 
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -24,10 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.combine
-import org.hmeadow.fittonia.BaseViewModel
-import org.hmeadow.fittonia.MainActivity
-import org.hmeadow.fittonia.MainViewModel
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.components.FittoniaHeader
@@ -50,38 +45,14 @@ import org.hmeadow.fittonia.design.fonts.paragraphParagraphStyle
 import org.hmeadow.fittonia.design.fonts.paragraphSpanStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.design.fonts.psstStyle
+import org.hmeadow.fittonia.mainActivity.MainActivity
 import org.hmeadow.fittonia.utility.Debug
 import org.hmeadow.fittonia.utility.InfoBorderState
 import org.hmeadow.fittonia.utility.InfoBorderState.InfoBoxOverlay
 import org.hmeadow.fittonia.utility.Off
 
-class WelcomeScreenViewModel(
-    private val mainViewModel: MainViewModel,
-    private val onContinueCallback: (accessCode: String, port: Int) -> Unit,
-) : BaseViewModel() {
-    val serverAccessCodeState = InputFlow(initial = "")
-
-    val canContinue = combine(
-        serverAccessCodeState,
-        mainViewModel.dataStore.data,
-    ) { accessCodeState, dumpPathState ->
-        accessCodeState.isNotEmpty() && dumpPathState.dumpPath.dumpUriPath.isNotEmpty()
-    }
-
-    fun onContinue() {
-        onContinueCallback(
-            serverAccessCodeState.text,
-            44556, // TODO - after release somewhere to put constants.
-        )
-    }
-
-    fun onDumpPathPicked(path: Uri) {
-        mainViewModel.updateDumpPath(path)
-    }
-}
-
 @Composable
-fun WelcomeScreen(
+internal fun WelcomeScreen(
     viewModel: WelcomeScreenViewModel,
     data: SettingsDataAndroid,
     onClearDumpPath: () -> Unit,
