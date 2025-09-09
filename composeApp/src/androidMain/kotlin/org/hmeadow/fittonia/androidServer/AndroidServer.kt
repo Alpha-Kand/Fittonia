@@ -51,6 +51,7 @@ import org.hmeadow.fittonia.utility.decodeIpAddress
 import org.hmeadow.fittonia.utility.subDivide
 import org.hmeadow.fittonia.utility.toString
 import org.hmeadow.fittonia.utility.tryOrNull
+import org.hmeadow.fittonia.utility.verifyIPAddress
 import recordThrowable
 import java.io.BufferedInputStream
 import java.io.File
@@ -506,7 +507,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         block()
                     } catch (e: HMeadowSocket.HMeadowSocketError) { // TODO Better error handling & messaging. - After R
                         e.hmMessage?.let { logError(it) }
-                        e.message?.let { logError(it) }
+                        e.message?.let { logError("${e.javaClass::class} $it") }
                     } catch (e: Exception) {
                         // TODO before release make this more widespread.
                         e.message?.let { logError("${e.javaClass} - $it") }
@@ -526,11 +527,10 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         block()
                     } catch (e: HMeadowSocket.HMeadowSocketError) {
                         // TODO Better error handling & messaging. - After release
-                        e.hmMessage?.let { logError(it) }
-                        e.message?.let { logError(it) }
+                        e.cause?.let { recordThrowable(throwable = it) }
                         onError()
                     } catch (e: Exception) {
-                        e.message?.let { logError("${e.javaClass} - $it") }
+                        recordThrowable(throwable = e)
                         onError()
                     }
                 }.await()
@@ -550,11 +550,14 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         )
                     } catch (socketError: SocketTimeoutException) {
                         socketError.message?.let { logError(it) }
+                        recordThrowable(throwable = socketError)
                         return@bootStrap PingStatus.CouldNotConnect
                     } catch (e: HMeadowSocket.HMeadowSocketError) {
-                        e.hmMessage?.let { logError(it) }
-                        e.message?.let { logError(it) }
+                        e.cause?.let { recordThrowable(throwable = it) }
                         return@bootStrap PingStatus.InternalBug
+                    } catch (e: Exception) {
+                        recordThrowable(e)
+                        return@bootStrap PingStatus.CouldNotConnect
                     }
                     val theirPublicKey = clientSharePublicKeys(client)
                     client.sendCommandFlag(commandFlag = ServerCommandFlag.PING, theirPublicKey = theirPublicKey)
@@ -648,8 +651,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     finishTransferJob(currentJob)
                     updateNotification()
                 } catch (e: HMeadowSocket.HMeadowSocketError) {
-                    e.hmMessage?.let { logError(it) }
-                    e.message?.let { logError(it) }
+                    e.cause?.let { recordThrowable(throwable = it) }
                     return@bootStrap
                 }
             }
@@ -658,7 +660,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 }
 
 fun OutgoingJob.createClient() = HMeadowSocketClient(
-    ipAddress = destination.ip,
+    ipAddress = destination.ip.verifyIPAddress(),
     port = port,
     operationTimeoutMillis = 1000 * 30,
     handshakeTimeoutMillis = 1000 * 5,

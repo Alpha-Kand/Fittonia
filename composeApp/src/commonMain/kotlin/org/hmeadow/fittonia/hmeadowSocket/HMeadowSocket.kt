@@ -356,15 +356,19 @@ constructor(
     private val socket: Socket = socketInterface.bindToSocket {
         val timeLimit = Instant.now().toEpochMilli() + handshakeTimeoutMillis
         var trySocket: Socket? = null
+        var exceptions = mutableListOf<String>()
+        var wow: IOException? = null // TODO
         do {
             try {
                 trySocket = Socket().also { it.connect(InetSocketAddress(ipAddress, port), handshakeTimeoutMillis) }
                 break
             } catch (e: IOException) {
+                wow = e
+                e.message?.let { message -> exceptions.add(message) }
                 sleep(handshakeTimeoutMillis / 10L)
             }
         } while (Instant.now().toEpochMilli() < timeLimit)
-        trySocket ?: throw ClientSetupException(Exception())
+        trySocket ?: throw ClientSetupException(wow ?: Exception())
     }
 
     init {
