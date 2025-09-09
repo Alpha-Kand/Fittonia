@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Fittonia</string>
-    <string name="app_version">1.0</string>
+    <string name="app_version">0.1.1</string>
     <string name="about_modal_name_format">%1$s, %2$s</string>
-    <string name="last_built_date">Built June 5, 2025</string>
+    <string name="last_built_date">Built September 9, 2025</string>
     <string name="credits">By Hunter Wiesman</string>
 
     <!-- Send/Receive Files Channel -->

@@ -187,6 +187,7 @@ internal fun OverviewScreen(
             }
             FittoniaModal(
                 state = aboutState,
+                contentBorderColour = currentStyle.headerBackgroundColour,
                 onDismiss = { aboutState = false },
             ) { _ ->
                 Column(modifier = Modifier.padding(vertical = spacing16)) {

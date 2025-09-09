@@ -210,7 +210,6 @@ class Navigator(private val mainViewModel: MainViewModel) {
         )
     }
 
-    // TODO FOR REAL default splash screen?
     private var currentScreen by mutableStateOf<Screen<out BaseViewModel>>(loadingScreen())
     private val screenStack = mutableListOf<Screen<out BaseViewModel>>()
 
