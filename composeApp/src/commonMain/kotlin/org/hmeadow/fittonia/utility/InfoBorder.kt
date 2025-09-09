@@ -68,7 +68,7 @@ object InfoBorderState {
     }
 
     @Composable
-    fun BoxScope.infoBoxOverlay() {
+    fun BoxScope.InfoBoxOverlay() {
         infoBox?.let {
             val interactionSource = remember { MutableInteractionSource() }
             Box(

@@ -72,7 +72,7 @@ import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.models.mostRecent
 import org.hmeadow.fittonia.screens.overviewScreen.Options
-import org.hmeadow.fittonia.utility.InfoBorderState.infoBoxOverlay
+import org.hmeadow.fittonia.utility.InfoBorderState.InfoBoxOverlay
 import org.hmeadow.fittonia.utility.debug
 import org.hmeadow.fittonia.utility.decodeIpAddress
 import org.hmeadow.fittonia.utility.getFileSizeBytes
@@ -513,7 +513,7 @@ fun SendFilesScreen(
             )
         },
         overlay = {
-            infoBoxOverlay()
+            InfoBoxOverlay()
             FittoniaModal(
                 state = destinationPickerActive,
                 onDismiss = { destinationPickerActive = false },

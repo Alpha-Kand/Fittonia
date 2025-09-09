@@ -32,7 +32,7 @@ import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.inputInputStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
-import org.hmeadow.fittonia.utility.InfoBorderState.infoBoxOverlay
+import org.hmeadow.fittonia.utility.InfoBorderState.InfoBoxOverlay
 
 @Composable
 fun SettingsScreen(
@@ -137,7 +137,7 @@ fun SettingsScreen(
         },
         footer = { },
         overlay = {
-            infoBoxOverlay()
+            InfoBoxOverlay()
         },
     )
 }

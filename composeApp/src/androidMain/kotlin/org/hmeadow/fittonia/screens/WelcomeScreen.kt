@@ -52,7 +52,7 @@ import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.design.fonts.psstStyle
 import org.hmeadow.fittonia.utility.Debug
 import org.hmeadow.fittonia.utility.InfoBorderState
-import org.hmeadow.fittonia.utility.InfoBorderState.infoBoxOverlay
+import org.hmeadow.fittonia.utility.InfoBorderState.InfoBoxOverlay
 import org.hmeadow.fittonia.utility.Off
 
 class WelcomeScreenViewModel(
@@ -187,7 +187,7 @@ fun WelcomeScreen(
             }
         },
         overlay = {
-            infoBoxOverlay()
+            InfoBoxOverlay()
         },
     )
 }
