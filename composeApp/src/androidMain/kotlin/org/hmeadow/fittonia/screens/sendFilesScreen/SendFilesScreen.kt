@@ -160,7 +160,7 @@ internal fun SendFilesScreen(
                         modifier = Modifier.fillMaxWidth(),
                         inputFlow = viewModel.oneTimeIpAddressState,
                         label = "IP Address/Code",
-                        //todo hint = "Tip: Check destination's \"This Device\" tab",
+                        // todo hint = "Tip: Check destination's \"This Device\" tab",
                     )
 
                     FittoniaSpacerHeight(height = spacing4)

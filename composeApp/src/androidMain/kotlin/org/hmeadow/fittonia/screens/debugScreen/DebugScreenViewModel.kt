@@ -84,7 +84,8 @@ internal class DebugScreenViewModel(
                     nextAutoJobNameMessage.update {
                         nextAutoJobName.first().let { nextAutoJobName ->
                             if (nextAutoJobName != expectedJobNumber + 1) {
-                                "Success! Job$expectedJobNumber already existed so created Job${nextAutoJobName - 1} instead."
+                                "Success! Job$expectedJobNumber already existed so created " +
+                                    "Job${nextAutoJobName - 1} instead."
                             } else {
                                 "Success! Created Job${nextAutoJobName - 1}"
                             }

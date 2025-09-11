@@ -61,7 +61,8 @@ fun terminalMain() = session {
                         false -> ""
                         true -> "⏳ "
                     }
-                    text("$serverStatus> "); input()
+                    text("$serverStatus> ")
+                    input()
                 }
             }.runUntilInputEntered {
                 onKeyPressed {

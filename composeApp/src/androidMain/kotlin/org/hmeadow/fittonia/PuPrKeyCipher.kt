@@ -72,8 +72,8 @@ object PuPrKeyCipher {
 
     fun generateKeyPairs(): KeyPair {
         val parameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(
-            /* keystoreAlias = */ KEYSTORE_ALIAS,
-            /* purposes = */ PURPOSE_ENCRYPT or PURPOSE_DECRYPT,
+            KEYSTORE_ALIAS,
+            PURPOSE_ENCRYPT or PURPOSE_DECRYPT,
         ).run {
             setDigests(DIGEST_SHA256, DIGEST_SHA384, DIGEST_SHA512)
             setAlgorithmParameterSpec(RSAKeyGenParameterSpec(KEY_SIZE, F4))
@@ -82,8 +82,8 @@ object PuPrKeyCipher {
             build()
         }
         return KeyPairGenerator.getInstance(
-            /* algorithm = */ ALGORITHM,
-            /* provider = */ ANDROID_KEY_STORE,
+            ALGORITHM,
+            ANDROID_KEY_STORE,
         ).run {
             initialize(parameterSpec)
             generateKeyPair()
@@ -109,7 +109,7 @@ object PuPrKeyCipher {
     }
 
     private fun getCipher(): Cipher = Cipher.getInstance(
-        /* transformation = */ "$ALGORITHM/$BLOCK_MODE/$PADDING",
+        "$ALGORITHM/$BLOCK_MODE/$PADDING",
     )
 
     class HMPublicKey(val encoded: ByteArray)
