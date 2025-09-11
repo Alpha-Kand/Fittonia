@@ -11,8 +11,8 @@ internal class AlertsScreenViewModel(
     private val onTemporaryPortAcceptedCallback: suspend (port: Int) -> Unit,
     private val onNewDefaultPortAcceptedCallback: suspend (port: Int) -> Unit,
 ) : BaseViewModel() {
-    val temporaryPort = InputFlow(initial = "")
-    val newDefaultPort = InputFlow(initial = "")
+    val temporaryPort: InputFlow = initInputFlow(initial = "")
+    val newDefaultPort: InputFlow = initInputFlow(initial = "")
 
     suspend fun onTemporaryPortAccepted() = onTemporaryPortAcceptedCallback(temporaryPort.text.toInt())
     suspend fun onNewDefaultPortAccepted() = onNewDefaultPortAcceptedCallback(newDefaultPort.text.toInt())

@@ -48,27 +48,68 @@ import org.hmeadow.fittonia.design.fonts.inputInputStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBorderActive
 import org.hmeadow.fittonia.utility.InfoBorderState.infoBox
+import org.hmeadow.fittonia.utility.debug
 import org.hmeadow.fittonia.utility.infoBorder
 import recordThrowable
 import kotlin.coroutines.CoroutineContext
 
 private val inputShape = RoundedCornerShape(corner = CornerSize(5.dp))
 
+/**
+ * Launching the flow collection coroutines in the [InputFlow] constructors can lead to a race condition if those
+ * coroutines reference other [InputFlow]s that haven't been initialized yet. The intent here is to prepare all the
+ * [InputFlow]s coroutines and only launch them when all [InputFlow]s are ready.
+ */
+class InputFlowCollectionLauncher() {
+    private val flowCollectionCallbacks = mutableListOf<() -> Unit>()
+    var hasLaunched = false
+        private set
+    val hasCallbacks: Boolean
+        get() = flowCollectionCallbacks.isNotEmpty()
+
+    fun add(block: () -> Unit) {
+        flowCollectionCallbacks.add(block)
+    }
+
+    fun launch() {
+        hasLaunched = true
+        flowCollectionCallbacks.forEach {
+            it()
+        }
+    }
+}
+
 class InputFlow(
     val textState: TextFieldState,
-    private val onValueChange: (String) -> Unit = {},
+    private val onValueChange: ((String) -> Unit)? = null,
+    launcher: InputFlowCollectionLauncher,
 ) : Flow<String> by snapshotFlow(block = { textState.text.toString() }), CoroutineScope {
-    constructor(initial: String, onValueChange: (String) -> Unit = {}) : this(TextFieldState(initial), onValueChange)
+
+    constructor(
+        initial: String,
+        onValueChange: ((String) -> Unit)? = null,
+        launcher: InputFlowCollectionLauncher,
+    ) : this(
+        textState = TextFieldState(initial),
+        onValueChange = onValueChange,
+        launcher = launcher,
+    )
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
         recordThrowable(throwable = throwable)
-        println("InputFlow error: ${throwable.message}")
+        debug {
+            println("InputFlow error: ${throwable.message}")
+        }
     }
 
     init {
-        launch {
-            while (true) {
-                collect { onValueChange(it) }
+        onValueChange?.let {
+            launcher.add {
+                launch {
+                    while (true) {
+                        collect { onValueChange(it) }
+                    }
+                }
             }
         }
     }

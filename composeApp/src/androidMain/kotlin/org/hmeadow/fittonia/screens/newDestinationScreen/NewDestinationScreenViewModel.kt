@@ -7,19 +7,18 @@ import kotlinx.coroutines.flow.update
 import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.components.EquivalentIPCode
 import org.hmeadow.fittonia.components.decipherIpAndCode
-import org.hmeadow.fittonia.compose.components.InputFlow
 
 internal class NewDestinationScreenViewModel(
     oneTimeIp: String?,
     oneTimeAccessCode: String?,
     private val onSaveNewDestinationCallback: (SettingsManager.Destination) -> Unit,
 ) : BaseViewModel() {
-    val nameState = InputFlow(initial = "")
+    val nameState = initInputFlow(initial = "")
     val equivelentIpOrCode: MutableStateFlow<EquivalentIPCode> = MutableStateFlow(value = EquivalentIPCode.Neither)
-    val ipAddressState = InputFlow(initial = oneTimeIp ?: "") { ip ->
+    val ipAddressState = initInputFlow(initial = oneTimeIp ?: "") { ip ->
         equivelentIpOrCode.update { decipherIpAndCode(ip = ip) }
     }
-    val accessCodeState = InputFlow(initial = oneTimeAccessCode ?: "")
+    val accessCodeState = initInputFlow(initial = oneTimeAccessCode ?: "")
 
     val canAddDestination = combine(
         nameState,
@@ -37,5 +36,9 @@ internal class NewDestinationScreenViewModel(
                 accessCode = accessCodeState.text,
             ),
         )
+    }
+
+    init {
+        launchInputFlows()
     }
 }

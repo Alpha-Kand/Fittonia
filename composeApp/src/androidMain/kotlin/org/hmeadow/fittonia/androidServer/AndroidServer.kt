@@ -47,6 +47,7 @@ import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.models.toCompletedJob
 import org.hmeadow.fittonia.utility.createJobDirectory
+import org.hmeadow.fittonia.utility.debug
 import org.hmeadow.fittonia.utility.decodeIpAddress
 import org.hmeadow.fittonia.utility.subDivide
 import org.hmeadow.fittonia.utility.toString
@@ -66,7 +67,9 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val mLogs = mutableListOf<Log>()
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
         recordThrowable(throwable = throwable)
-        println("AndroidServer error: ${throwable.message}")
+        debug {
+            println("AndroidServer error: ${throwable.message}")
+        }
     }
     override var jobId: Int = 100
     override val jobIdMutex = Mutex()

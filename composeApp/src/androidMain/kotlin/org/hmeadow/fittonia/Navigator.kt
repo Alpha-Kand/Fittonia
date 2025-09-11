@@ -47,6 +47,8 @@ class Navigator(private val mainViewModel: MainViewModel) {
         private val viewModel: T,
         private val compose: @Composable (SettingsDataAndroid, T) -> Unit,
     ) {
+        val screenName: String? = viewModel::class.simpleName
+
         @Composable
         fun Render(data: SettingsDataAndroid) {
             compose(data, viewModel)
@@ -254,6 +256,9 @@ class Navigator(private val mainViewModel: MainViewModel) {
                 instance.pop()
             }
         }
+
+        val currentScreenName: String
+            get() = instance.currentScreen.screenName ?: "???"
 
         fun goToDebugScreen() {
             instance.push(

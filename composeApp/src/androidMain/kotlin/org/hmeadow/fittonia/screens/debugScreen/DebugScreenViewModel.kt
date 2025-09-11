@@ -11,6 +11,7 @@ import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.PuPrKeyCipher.ENCRYPT_MAX_BYTES_ALLOWED
 import org.hmeadow.fittonia.compose.components.InputFlow
+import org.hmeadow.fittonia.compose.components.InputFlowCollectionLauncher
 import org.hmeadow.fittonia.hmeadowSocket.AESCipher
 import org.hmeadow.fittonia.mainActivity.MainActivity
 import org.hmeadow.fittonia.mainActivity.MainViewModel
@@ -21,14 +22,21 @@ import kotlin.random.Random
 internal class DebugScreenViewModel(
     private val mainViewModel: MainViewModel,
 ) : BaseViewModel() {
+    fun initDebugInputFlow(initial: String, onValueChange: ((String) -> Unit)? = null): InputFlow {
+        val inputFlowCollectionLauncher = InputFlowCollectionLauncher()
+        return InputFlow(initial = initial, onValueChange, inputFlowCollectionLauncher).also {
+            inputFlowCollectionLauncher.launch()
+        }
+    }
+
     val deviceIp = MutableStateFlow("Unknown")
 
     // Defaults
-    val defaultSendThrottle = InputFlow(initial = "")
-    val defaultNewDestinationName = InputFlow(initial = "")
-    val defaultNewDestinationPort = InputFlow(initial = "")
-    val defaultNewDestinationAccessCode = InputFlow(initial = "")
-    val defaultNewDestinationIP = InputFlow(initial = "")
+    val defaultSendThrottle = initInputFlow(initial = "")
+    val defaultNewDestinationName = initInputFlow(initial = "")
+    val defaultNewDestinationPort = initInputFlow(initial = "")
+    val defaultNewDestinationAccessCode = initInputFlow(initial = "")
+    val defaultNewDestinationIP = initInputFlow(initial = "")
     val needToSave = combine(
         mainViewModel.dataStore.data,
         defaultNewDestinationPort,

@@ -64,11 +64,12 @@ internal fun DebugScreen(
                 listOf(
                     "App's Paint Job" to { maxWidth, maxHeight ->
                         DebugScreenPaintJobTab(
-                            onResetColours = onResetColours,
                             modifier = Modifier
                                 .width(maxWidth)
                                 .height(maxHeight),
+                            onResetColours = onResetColours,
                             footerHeight = footerHeight,
+                            viewModel = viewModel,
                         )
                     },
                     "Overview" to { maxWidth, maxHeight ->

@@ -3,14 +3,13 @@ package org.hmeadow.fittonia.screens.welcomeScreen
 import android.net.Uri
 import kotlinx.coroutines.flow.combine
 import org.hmeadow.fittonia.BaseViewModel
-import org.hmeadow.fittonia.compose.components.InputFlow
 import org.hmeadow.fittonia.mainActivity.MainViewModel
 
 internal class WelcomeScreenViewModel(
     private val mainViewModel: MainViewModel,
     private val onContinueCallback: (accessCode: String, port: Int) -> Unit,
 ) : BaseViewModel() {
-    val serverAccessCodeState = InputFlow(initial = "")
+    val serverAccessCodeState = initInputFlow(initial = "")
 
     val canContinue = combine(
         serverAccessCodeState,

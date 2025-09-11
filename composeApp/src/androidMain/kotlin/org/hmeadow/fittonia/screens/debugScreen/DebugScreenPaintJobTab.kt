@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -47,7 +46,6 @@ import org.hmeadow.fittonia.compose.architecture.appStyleResetTextInput
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.compose.components.FittoniaTextInput
-import org.hmeadow.fittonia.compose.components.InputFlow
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 
@@ -60,9 +58,10 @@ enum class ColourGroup {
 }
 
 @Composable
-fun DebugScreenPaintJobTab(
+internal fun DebugScreenPaintJobTab(
     onResetColours: () -> Unit,
     footerHeight: Dp,
+    viewModel: DebugScreenViewModel,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -137,11 +136,11 @@ fun DebugScreenPaintJobTab(
         HorizontalDivider(modifier = Modifier.padding(vertical = 15.dp))
 
         when (colourGroup) {
-            ColourGroup.STRUCTURE -> Structure()
-            ColourGroup.BUTTONS -> Buttons()
-            ColourGroup.INPUT_FIELDS -> InputFields()
-            ColourGroup.READ_ONLY -> ReadOnly()
-            ColourGroup.TEXT -> Text()
+            ColourGroup.STRUCTURE -> Structure(viewModel = viewModel)
+            ColourGroup.BUTTONS -> Buttons(viewModel = viewModel)
+            ColourGroup.INPUT_FIELDS -> InputFields(viewModel = viewModel)
+            ColourGroup.READ_ONLY -> ReadOnly(viewModel = viewModel)
+            ColourGroup.TEXT -> Text(viewModel = viewModel)
         }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 15.dp))
@@ -151,7 +150,7 @@ fun DebugScreenPaintJobTab(
 }
 
 @Composable
-fun ColourSliderGroup(title: String, color: Color, onUpdate: (Color) -> Unit) {
+private fun ColourSliderGroup(title: String, color: Color, viewModel: DebugScreenViewModel, onUpdate: (Color) -> Unit) {
     Column {
         Row {
             Text(
@@ -166,7 +165,7 @@ fun ColourSliderGroup(title: String, color: Color, onUpdate: (Color) -> Unit) {
             ) {}
         }
         val colourFlow = remember {
-            InputFlow(color.toHex) {
+            viewModel.initDebugInputFlow(color.toHex) {
                 try {
                     if (it.length == 8) {
                         onUpdate(Color("#$it".toColorInt()))
@@ -209,11 +208,12 @@ fun ColourSliderGroup(title: String, color: Color, onUpdate: (Color) -> Unit) {
 }
 
 @Composable
-private fun Structure() {
+private fun Structure(viewModel: DebugScreenViewModel) {
     Column {
         ColourSliderGroup(
             title = "Header Background",
             color = DebugAppStyle.headerBackgroundColourEdit,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.headerBackgroundColourEdit = it
                 appStyleResetHeader = it.value
@@ -223,6 +223,7 @@ private fun Structure() {
         ColourSliderGroup(
             title = "Footer Background",
             color = DebugAppStyle.footerBackgroundColourEdit,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.footerBackgroundColourEdit = it
                 appStyleResetStatusFooter = it.value
@@ -232,6 +233,7 @@ private fun Structure() {
         ColourSliderGroup(
             title = "Header/Footer Border",
             color = DebugAppStyle.headerAndFooterBorderColourEdit,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.headerAndFooterBorderColourEdit = it
                 appStyleResetHeader = it.value
@@ -242,6 +244,7 @@ private fun Structure() {
         ColourSliderGroup(
             title = "App Background",
             color = DebugAppStyle.backgroundColourEdit,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.backgroundColourEdit = it
                 appStyleResetBackground = it.value
@@ -251,7 +254,7 @@ private fun Structure() {
 }
 
 @Composable
-private fun Buttons() {
+private fun Buttons(viewModel: DebugScreenViewModel) {
     Column {
         Row {
             FittoniaButton(onClick = {}) { ButtonText("Primary") }
@@ -274,6 +277,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Primary Button Border",
             color = DebugAppStyle.primaryButtonBorderColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.primaryButtonBorderColour = it
                 appStyleResetButton = it.value
@@ -283,6 +287,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Primary Button Content",
             color = DebugAppStyle.primaryButtonContentColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.primaryButtonContentColour = it
                 appStyleResetButton = it.value
@@ -292,6 +297,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Primary Button Background",
             color = DebugAppStyle.primaryButtonBackgroundColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.primaryButtonBackgroundColour = it
                 appStyleResetButton = it.value
@@ -300,6 +306,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Primary Button Border Disabled",
             color = DebugAppStyle.primaryButtonDisabledBorderColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.primaryButtonDisabledBorderColour = it
                 appStyleResetButton = it.value
@@ -309,6 +316,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Primary Button Content Disabled",
             color = DebugAppStyle.primaryButtonDisabledContentColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.primaryButtonDisabledContentColour = it
                 appStyleResetButton = it.value
@@ -318,6 +326,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Primary Button Background Disabled",
             color = DebugAppStyle.primaryButtonDisabledBackgroundColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.primaryButtonDisabledBackgroundColour = it
                 appStyleResetButton = it.value
@@ -327,6 +336,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Secondary Button Border",
             color = DebugAppStyle.secondaryButtonBorderColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.secondaryButtonBorderColour = it
                 appStyleResetButton = it.value
@@ -336,6 +346,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Secondary Button Content",
             color = DebugAppStyle.secondaryButtonContentColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.secondaryButtonContentColour = it
                 appStyleResetButton = it.value
@@ -345,6 +356,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Secondary Button Background",
             color = DebugAppStyle.secondaryButtonBackgroundColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.secondaryButtonBackgroundColour = it
                 appStyleResetButton = it.value
@@ -354,6 +366,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Secondary Button Border Disabled",
             color = DebugAppStyle.secondaryButtonDisabledBorderColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.secondaryButtonDisabledBorderColour = it
                 appStyleResetButton = it.value
@@ -363,6 +376,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Secondary Button Content Disabled",
             color = DebugAppStyle.secondaryButtonDisabledContentColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.secondaryButtonDisabledContentColour = it
                 appStyleResetButton = it.value
@@ -372,6 +386,7 @@ private fun Buttons() {
         ColourSliderGroup(
             title = "Secondary Button Background Disabled",
             color = DebugAppStyle.secondaryButtonDisabledBackgroundColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.secondaryButtonDisabledBackgroundColour = it
                 appStyleResetButton = it.value
@@ -381,9 +396,9 @@ private fun Buttons() {
 }
 
 @Composable
-private fun InputFields() {
+private fun InputFields(viewModel: DebugScreenViewModel) {
     Column {
-        val inputFlow = remember { InputFlow(TextFieldState()) }
+        val inputFlow = remember { viewModel.initDebugInputFlow("") }
         FittoniaTextInput(
             modifier = Modifier
                 .fillMaxWidth()
@@ -393,12 +408,13 @@ private fun InputFields() {
             label = "Hint Text Field",
         )
 
-        val inputFlow2 = remember { InputFlow(TextFieldState("This is input text")) }
+        val inputFlow2 = remember { viewModel.initDebugInputFlow("This is input text") }
         FittoniaTextInput(modifier = Modifier.fillMaxWidth(), inputFlow = inputFlow2, label = "Input text field")
         HorizontalDivider(modifier = Modifier.padding(vertical = 15.dp))
         ColourSliderGroup(
             title = "Text Input Border",
             color = DebugAppStyle.textInputBorder,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.textInputBorder = it
                 appStyleResetTextInput = it.value
@@ -408,6 +424,7 @@ private fun InputFields() {
         ColourSliderGroup(
             title = "Text Input Background",
             color = DebugAppStyle.textInputBackground,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.textInputBackground = it
                 appStyleResetTextInput = it.value
@@ -417,6 +434,7 @@ private fun InputFields() {
         ColourSliderGroup(
             title = "Text Input Content",
             color = DebugAppStyle.textInputContent,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.textInputContent = it
                 appStyleResetTextInput = it.value
@@ -426,6 +444,7 @@ private fun InputFields() {
         ColourSliderGroup(
             title = "Text Input Hint",
             color = DebugAppStyle.textInputHint,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.textInputHint = it
                 appStyleResetTextInput = it.value
@@ -435,6 +454,7 @@ private fun InputFields() {
         ColourSliderGroup(
             title = "Text Input Hint",
             color = DebugAppStyle.textInputHint,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.textInputHint = it
                 appStyleResetTextInput = it.value
@@ -444,6 +464,7 @@ private fun InputFields() {
         ColourSliderGroup(
             title = "Text Input Label",
             color = DebugAppStyle.textInputLabel,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.textInputLabel = it
                 appStyleResetTextInput = it.value
@@ -453,12 +474,13 @@ private fun InputFields() {
 }
 
 @Composable
-private fun ReadOnly() {
+private fun ReadOnly(viewModel: DebugScreenViewModel) {
     Column {
         ReadOnlyEntries(modifier = Modifier.padding(vertical = 20.dp), entries = listOf("Example Read-only field"))
         ColourSliderGroup(
             title = "Read-only field background",
             color = DebugAppStyle.readOnlyBackgroundColourEdit,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.readOnlyBackgroundColourEdit = it
                 appStyleResetHeader = it.value
@@ -468,6 +490,7 @@ private fun ReadOnly() {
         ColourSliderGroup(
             title = "Read-only field border",
             color = DebugAppStyle.readOnlyBorderColourEdit,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.readOnlyBorderColourEdit = it
                 appStyleResetHeader = it.value
@@ -477,11 +500,12 @@ private fun ReadOnly() {
 }
 
 @Composable
-private fun Text() {
+private fun Text(viewModel: DebugScreenViewModel) {
     Column {
         ColourSliderGroup(
             title = "Header Text",
             color = DebugAppStyle.headerTextColour,
+            viewModel = viewModel,
             onUpdate = {
                 DebugAppStyle.headerTextColour = it
                 appStyleResetHeader = it.value
