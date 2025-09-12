@@ -6,3 +6,4 @@ composeApp/build/*
 *gradle-wrapper.jar
 composeApp/property(org.gradle.api.file.Directory
 build*
+/composeApp/release/composeApp-release.aab
