@@ -34,6 +34,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.appStyleResetTextInput
@@ -106,7 +107,7 @@ class InputFlow(
         onValueChange?.let {
             launcher.add {
                 launch {
-                    while (true) {
+                    while (isActive) {
                         collect { onValueChange(it) }
                     }
                 }

@@ -1,8 +1,10 @@
 package org.hmeadow.fittonia
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.compose.components.InputFlow
@@ -14,11 +16,15 @@ import kotlin.coroutines.CoroutineContext
 open class BaseViewModel : CoroutineScope {
     val inputFlowCollectionLauncher = InputFlowCollectionLauncher()
 
+    private class ShutdownCoroutinesException : CancellationException()
+
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
-        recordThrowable(throwable = throwable)
-        debug {
-            println("BaseViewModel error.message: ${throwable.message}")
-            println("BaseViewModel error.cause: ${throwable.cause}")
+        if (throwable !is ShutdownCoroutinesException) {
+            recordThrowable(throwable = throwable)
+            debug {
+                println("BaseViewModel error.message: ${throwable.message}")
+                println("BaseViewModel error.cause: ${throwable.cause}")
+            }
         }
     }
 
@@ -28,6 +34,10 @@ open class BaseViewModel : CoroutineScope {
 
     fun launchInputFlows() {
         inputFlowCollectionLauncher.launch()
+    }
+
+    fun shutdown() {
+        coroutineContext.cancel(ShutdownCoroutinesException())
     }
 
     init {

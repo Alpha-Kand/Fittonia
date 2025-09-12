@@ -53,6 +53,8 @@ class Navigator(private val mainViewModel: MainViewModel) {
         fun Render(data: SettingsDataAndroid) {
             compose(data, viewModel)
         }
+
+        fun shutdown() = viewModel.shutdown()
     }
 
     class LoadingScreenViewModel : BaseViewModel()
@@ -237,7 +239,9 @@ class Navigator(private val mainViewModel: MainViewModel) {
 
     private fun pop() {
         if (screenStack.size > 1) {
-            screenStack.removeAt(screenStack.lastIndex)
+            screenStack
+                .removeAt(screenStack.lastIndex)
+                .shutdown()
             currentScreen = screenStack.last()
         }
     }
