@@ -26,7 +26,7 @@ object PuPrKeyCipher {
     const val ENCRYPT_OUT_BYTES = 256
 
     private const val ANDROID_KEY_STORE = "AndroidKeyStore"
-    private const val KEYSTORE_ALIAS = "FittoniaKeysTest5"
+    private const val KEYSTORE_ALIAS = "FittoniaKeys"
     private const val KEY_SIZE = 2048
 
     // Parameters.

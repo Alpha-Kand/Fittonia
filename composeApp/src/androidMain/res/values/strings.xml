@@ -20,7 +20,6 @@
     <string name="encode_decode_matching_code">Matching code: %1$s</string>
     <string name="encode_decode_matching_ip">Matching IP: %1$s</string>
 
-
     <!-- Welcome Screen -->
     <string name="welcome_screen_title">Welcome to Fittonia!</string>
     <string name="welcome_screen_body">To get started, you just need an access code, and a place to put incoming files.</string>
@@ -60,6 +59,21 @@
     <string name="notification_default_dump_permission_lost_description">The permission to access your previously selected \'Incoming files\' destination has been lost or the destination has been moved/deleted. Please select a new destination or try to select your previous destination.</string>
 
     <!-- Send Files Screen -->
+    <string name="send_files_screen_heading">Send files</string>
+    <string name="send_files_screen_select_files_folders">Select files/folders to send.</string>
+    <string name="send_files_screen_add_file">Add</string>
+
+    <string name="send_files_screen_destination">Destination</string>
+    <string name="send_files_screen_select_destination">Select destination…</string>
+    <string name="send_files_screen_one_time_destination">One-time destination</string>
+    <string name="send_files_screen_ip_address_code">IP Address/Code</string>
+    <string name="send_files_screen_access_code">Access Code</string>
+    <string name="send_files_screen_save_new_destination">Save as new destination</string>
+    <string name="send_files_screen_add_destination">Add new destination</string>
+    <string name="send_files_screen_description">Description</string>
+    <string name="send_files_screen_description_optional">(optional)</string>
+    <string name="send_files_screen_confirm">Confirm</string>
+
     <string name="send_files_screen_ping_success">✅ Connection success</string>
     <string name="send_files_screen_ping_processing">📶 Trying to connect</string>
     <string name="send_files_screen_ping_failure">❌ Connection failure</string>

@@ -72,7 +72,7 @@ internal fun SendFilesScreen(
     FittoniaScaffold(
         header = {
             FittoniaHeader(
-                headerText = "Send files",
+                headerText = stringResource(R.string.send_files_screen_heading),
                 includeInfoButton = true,
                 onBackClicked = onBackClicked,
             )
@@ -82,7 +82,7 @@ internal fun SendFilesScreen(
                 FittoniaSpacerHeight(height = spacing16)
 
                 Text(
-                    text = "Select files/folders to send.",
+                    text = stringResource(R.string.send_files_screen_select_files_folders),
                     style = headingMStyle,
                 )
                 FittoniaSpacerHeight(height = spacing4)
@@ -120,7 +120,7 @@ internal fun SendFilesScreen(
                     FittoniaButton(
                         onClick = viewModel::onUserSelectItem,
                         content = {
-                            ButtonText(text = "Add")
+                            ButtonText(text = stringResource(R.string.send_files_screen_add_file))
                             FittoniaSpacerWidth(width = spacing4)
                             ButtonIcon(drawableRes = R.drawable.ic_add)
                         },
@@ -142,11 +142,11 @@ internal fun SendFilesScreen(
                 }
                 FittoniaSpacerHeight(height = spacing32)
                 Text(
-                    text = "Destination",
+                    text = stringResource(R.string.send_files_screen_add_destination),
                     style = headingMStyle,
                 )
                 FittoniaSpacerHeight(height = spacing8)
-                FittoniaCheckbox(label = "One-time destination") { state ->
+                FittoniaCheckbox(label = stringResource(R.string.send_files_screen_one_time_destination)) { state ->
                     oneTimeDestinationState = state
                     if (!state) {
                         viewModel.ping.update { Ping(PingStatus.NoPing) }
@@ -159,7 +159,7 @@ internal fun SendFilesScreen(
                     FittoniaTextInput(
                         modifier = Modifier.fillMaxWidth(),
                         inputFlow = viewModel.oneTimeIpAddressState,
-                        label = "IP Address/Code",
+                        label = stringResource(R.string.send_files_screen_ip_address_code),
                         // todo hint = "Tip: Check destination's \"This Device\" tab",
                     )
 
@@ -172,7 +172,7 @@ internal fun SendFilesScreen(
                     FittoniaTextInput(
                         modifier = Modifier.fillMaxWidth(),
                         inputFlow = viewModel.oneTimeAccessCodeState,
-                        label = "Access Code", // TODO trim whitespace.
+                        label = stringResource(R.string.send_files_screen_access_code), // TODO trim whitespace.
                     )
 
                     FittoniaSpacerHeight(height = spacing32)
@@ -192,7 +192,8 @@ internal fun SendFilesScreen(
                             verticalAlignment = CenterVertically,
                         ) {
                             Text(
-                                text = selectedDestination.value?.name ?: "Select destination...",
+                                text = selectedDestination.value?.name
+                                    ?: stringResource(R.string.send_files_screen_select_destination),
                                 style = readOnlyFieldTextStyle,
                                 color = currentStyle.primaryButtonType.contentColour,
                             )
@@ -229,7 +230,7 @@ internal fun SendFilesScreen(
                         type = currentStyle.secondaryButtonType,
                         onClick = viewModel::onSaveOneTimeDestinationClicked,
                     ) {
-                        ButtonText(text = "Save as new destination")
+                        ButtonText(text = stringResource(R.string.send_files_screen_save_new_destination))
                         FittoniaSpacerWidth(width = spacing4)
                         ButtonIcon(drawableRes = R.drawable.ic_add)
                     }
@@ -250,7 +251,7 @@ internal fun SendFilesScreen(
                             }
                         },
                     ) {
-                        ButtonText(text = "Add new destination")
+                        ButtonText(text = stringResource(R.string.send_files_screen_add_destination))
                     }
                 }
 
@@ -286,13 +287,13 @@ internal fun SendFilesScreen(
                     label = {
                         Row {
                             Text(
-                                text = "Description",
+                                text = stringResource(R.string.send_files_screen_description),
                                 style = inputLabelStyle,
                             )
                             FittoniaSpacerWidth(width = spacing4)
                             Text(
                                 modifier = Modifier.align(alignment = CenterVertically),
-                                text = "(optional)",
+                                text = stringResource(R.string.send_files_screen_description_optional),
                                 style = psstStyle,
                             )
                         }
@@ -317,7 +318,7 @@ internal fun SendFilesScreen(
                 } else {
                     viewModel.canContinue.collectAsState(initial = false).value
                 },
-                content = { ButtonText(text = "Confirm") },
+                content = { ButtonText(text = stringResource(R.string.send_files_screen_confirm)) },
                 onClick = viewModel.rememberSuspendedAction(viewModel::onConfirmClicked),
             )
         },
