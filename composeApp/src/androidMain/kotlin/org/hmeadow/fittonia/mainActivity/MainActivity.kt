@@ -27,6 +27,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.hmeadow.fittonia.AppLogs
 import org.hmeadow.fittonia.Navigator
 import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.R
@@ -34,7 +35,6 @@ import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.SettingsDataAndroidSerializer
 import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.androidServer.AndroidServer
-import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.serverLog
 
 val Context.dataStore by dataStore("fittonia.json", SettingsDataAndroidSerializer)
 
@@ -196,13 +196,13 @@ class MainActivity : ComponentActivity() {
 
     var isConnected = false
     private fun initAndroidServer(port: Int, accessCode: String) {
-        serverLog(text = "initAndroidServer (port = $port) (accessCode = $accessCode)")
+        AppLogs.logDebug("initAndroidServer (port = $port) (accessCode = $accessCode)")
         val intent = Intent(mainActivity, AndroidServer::class.java).apply {
             this.putExtra("org.hmeadow.fittonia.port", port)
             this.putExtra("org.hmeadow.fittonia.accesscode", accessCode)
         }
         lastServerConnection = serverConnection
-        serverLog(text = "serverConnection = $serverConnection")
+        AppLogs.logDebug("serverConnection = $serverConnection")
         if (serverConnection == null) {
             serverConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -214,17 +214,17 @@ class MainActivity : ComponentActivity() {
                     isConnected = false
                 }
             }.also {
-                serverLog(text = "Attempting to `startForegroundService(intent)`.")
+                AppLogs.logDebug("Attempting to `startForegroundService(intent)`.")
                 startForegroundService(intent)
-                serverLog(text = "`startForegroundService(intent)` complete.")
-                serverLog(text = "Attempting to `bindService`.")
+                AppLogs.logDebug("`startForegroundService(intent)` complete.")
+                AppLogs.logDebug("Attempting to `bindService`.")
                 bindService(
                     intent,
                     it,
                     0,
                 )
                 hasBoundServer = true
-                serverLog(text = "`bindService` complete. `bindService` called ${++testBind} times this session.")
+                AppLogs.logDebug("`bindService` complete. `bindService` called ${++testBind} times this session.")
             }
         }
     }

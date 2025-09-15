@@ -59,6 +59,12 @@ class Log(
         time.format(DateTimeFormatter.ofPattern("ss")),
     )
 
+    val timeStampShort: String = "%1\$sh%2\$sm%3\$ss".format(
+        time.format(DateTimeFormatter.ofPattern("HH")),
+        time.format(DateTimeFormatter.ofPattern("mm")),
+        time.format(DateTimeFormatter.ofPattern("ss")),
+    )
+
     init {
         // TODO Need a better way to see logs in app, don't want to expose them to system.out. - After release
         val typeString = when (type) {

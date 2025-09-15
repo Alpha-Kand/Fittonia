@@ -24,12 +24,14 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
+import org.hmeadow.fittonia.AppLogs
 import org.hmeadow.fittonia.PuPrKeyCipher
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.UserAlert
@@ -68,7 +70,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
         recordThrowable(throwable = throwable)
         debug {
-            println("AndroidServer error: ${throwable.message}")
+            AppLogs.logError("AndroidServer error: ${throwable.message}")
         }
     }
     override var jobId: Int = 100
@@ -90,26 +92,25 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     private val transferJobsMutex = Mutex()
 
     override fun onBind(intent: Intent): IBinder {
-        serverLog(text = "onBind")
         return binder
     }
 
     override fun onCreate() {
-        serverLog(text = "onCreate")
+        AppLogs.logDebug("onCreate")
         super.onCreate()
         server.value = this
     }
 
     private fun initServerFromIntent(intent: Intent?): Boolean {
-        serverLog(text = "initServerFromIntent (intent = $intent)")
+        AppLogs.logDebug("initServerFromIntent (intent = $intent)")
         intent?.let {
             updateAccessCode(
                 newAccessCode = it.getStringExtra("org.hmeadow.fittonia.accesscode")
                     ?: throw Exception("No access code provided"),
             )
-            serverLog(text = "init access code $accessCode") // TODO - before release
+            AppLogs.logDebug("init access code")
             it.getIntExtra("org.hmeadow.fittonia.port", 0).let { port ->
-                serverLog(text = "init port $port")
+                AppLogs.logDebug("init port $port")
                 if (!startServerSocket(port = port)) {
                     return false
                 }
@@ -144,18 +145,19 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     private fun startServerSocket(port: Int): Boolean {
-        serverLog(text = "startServerSocket")
+        AppLogs.logDebug("startServerSocket")
         if (port == 0) throw Exception("No port provided")
         try {
-            serverLog(text = "Starting server on port $port.")
+            AppLogs.logDebug("Starting server on port $port.")
             serverSocket?.close() // Just in case.
             serverSocket = ServerSocket()
             serverSocket?.reuseAddress = true
             serverSocket?.bind(InetSocketAddress(port))
-            serverLog(text = "Started server success!")
+            AppLogs.logDebug("Started server success!")
+            AppLogs.log("Server started (port = $port)")
         } catch (e: BindException) {
             serverSocket = null
-            serverLog(text = "e.message: $port " + e.message)
+            AppLogs.logDebug("e.message: $port " + e.message)
             if (e.message?.contains(other = "Address already in use") == true) {
                 MainActivity.mainActivityForServer?.alert(UserAlert.PortInUse(port = port))
                 return false
@@ -193,12 +195,14 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         try {
             serverSocket?.let { server ->
                 serverJob = launch {
-                    while (true) {
+                    while (isActive) {
                         yield()
                         try {
+                            AppLogs.log("Server waiting for client connection...")
                             HMeadowSocketServer.createServerFromSocket(server).let { server ->
                                 launch {
-                                    log("Connected to client.")
+                                    AppLogs.logDebug("Connected to client.")
+                                    AppLogs.log("Client attempting to connect.")
                                     val theirPublicKey = serverSharePublicKeys(server = server, jobId = jobId)
                                     handleCommand2(
                                         jobId = jobId,
@@ -213,10 +217,10 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                                 }
                             }
                         } catch (e: SocketException) {
-                            log(e.message ?: "Unknown server SocketException")
+                            AppLogs.logDebug(e.message ?: "Unknown server SocketException")
                             // TODO: Don't worry! - After release
                         } catch (e: HMeadowSocket.HMeadowSocketError) {
-                            log(e.message ?: "HMeadowSocket.HMeadowSocketError")
+                            AppLogs.logDebug(e.message ?: "HMeadowSocket.HMeadowSocketError")
                         }
                     }
                 }
@@ -227,7 +231,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     fun restartServerSocket(port: Int) {
-        println("Restarting server on port $port")
+        AppLogs.log("Restarting Server on port $port")
         serverJob?.cancel()
         serverSocket?.close()
         startServerSocket(port = port)
@@ -264,7 +268,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     override fun onDestroy() {
         super.onDestroy()
-        println("onDestroy")
+        AppLogs.logDebug("onDestroy")
         serverSocket?.close()
         serverJob?.cancel()
         server.value = null
@@ -310,9 +314,9 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     suspend fun onPing2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
-        println("Server waiting for PingClientData")
+        AppLogs.logDebug("Server waiting for PingClientData")
         val clientData = server.receiveAndDecrypt<PingClientData>()
-        println("onPing2.clientData.accessCode: ${clientData.accessCode}")
+        AppLogs.logDebug("onPing2.clientData.accessCode: ${clientData.accessCode}")
         server.encryptAndSend(
             data = PingServerData(isAccessCodeCorrect = clientData.accessCode == accessCode),
             theirPublicKey = theirPublicKey,
@@ -324,16 +328,16 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     suspend fun onSendFiles2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
-        println("onSendFiles2()")
+        AppLogs.logDebug("onSendFiles2()")
         var currentJob = IncomingJob(id = jobId)
         registerTransferJob(currentJob)
-
+        AppLogs.log("Receiving client data.")
         val clientData = server.receiveAndDecrypt<SendFileClientData>()
         if (clientData.accessCode != accessCode) return
         currentJob = updateTransferJob(currentJob.copy(items = clientData.items, currentItem = 1))
         val newJobDirectory = createJobDirectory(
             jobName = clientData.jobName,
-            print = { this.logDebug(it, jobId = jobId) },
+            print = { AppLogs.logDebug(it, jobId = jobId) },
         )
 
         if (newJobDirectory is MainActivity.CreateDumpDirectory.Success) {
@@ -350,9 +354,10 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     isAccessCodeCorrect = false,
                 )
             }
+            AppLogs.log("Sending server data.")
             server.encryptAndSend(data = serverData, theirPublicKey = theirPublicKey)
             currentJob = updateTransferJob(job = currentJob.copy(description = newJobDirectory.name))
-            logDebug("jobPath: ${newJobDirectory.uri}", jobId = jobId)
+            AppLogs.logDebug("jobPath: ${newJobDirectory.uri}", jobId = jobId)
             val decryptionFileCache = createTempFile()
             currentJob.cloneItems().fastForEach { item ->
                 if (item.isFile) { // Is a file...
@@ -409,20 +414,23 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     override suspend fun onPing(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientAccessCodeSuccess) {
-            logWarning("Client attempted to ping this server, access code refused.", jobId = jobId)
+            AppLogs.logWarning("Client attempted to ping this server, access code refused.", jobId = jobId)
         } else {
-            log("Client successfully pinged this server.", jobId = jobId)
+            AppLogs.logWarning("Client successfully pinged this server.", jobId = jobId)
         }
     }
 
     override suspend fun onAddDestination(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientAccessCodeSuccess) {
-            logWarning("Client attempted to add this server as destination, access code refused.", jobId = jobId)
+            AppLogs.logWarning(
+                "Client attempted to add this server as destination, access code refused.",
+                jobId = jobId,
+            )
         } else {
             if (server.receiveBoolean()) {
-                log("Client added this server as a destination.", jobId = jobId)
+                AppLogs.log("Client added this server as a destination.", jobId = jobId)
             } else {
-                logWarning("Client failed to add this server as a destination.", jobId = jobId)
+                AppLogs.logWarning("Client failed to add this server as a destination.", jobId = jobId)
             }
         }
     }
@@ -433,15 +441,15 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
 
     override suspend fun onSendMessage(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
         if (!clientAccessCodeSuccess) {
-            logWarning("Client attempted to send a message, access code refused.", jobId = jobId)
+            AppLogs.logWarning("Client attempted to send a message, access code refused.", jobId = jobId)
         } else {
-            log("Client message: ${server.receiveString()}", jobId = jobId)
+            AppLogs.log("Client message: ${server.receiveString()}", jobId = jobId)
             server.sendConfirmation()
         }
     }
 
     override suspend fun onInvalidCommand(unknownCommand: String) {
-        logWarning("Received invalid server command from client: $unknownCommand", jobId = jobId)
+        AppLogs.logWarning("Received invalid server command from client: $unknownCommand", jobId = jobId)
     }
 
     private fun createFile(path: Uri, fileName: String): Uri? {
@@ -492,12 +500,6 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         var socketLogDebug = false
         var server: MutableStateFlow<AndroidServer?> = MutableStateFlow(null)
 
-        fun serverLog(text: String) {
-            if (socketLogDebug) {
-                println("Server Debug: $text")
-            }
-        }
-
         private suspend fun bootStrap(block: suspend AndroidServer.() -> Unit) {
             val mainActivity = MainActivity.mainActivityForServer ?: return
             if (server.value == null) {
@@ -509,11 +511,11 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     try {
                         block()
                     } catch (e: HMeadowSocket.HMeadowSocketError) { // TODO Better error handling & messaging. - After R
-                        e.hmMessage?.let { logError(it) }
-                        e.message?.let { logError("${e.javaClass::class} $it") }
+                        e.hmMessage?.let { AppLogs.logError(it) }
+                        e.message?.let { AppLogs.logError("${e.javaClass::class} $it") }
                     } catch (e: Exception) {
                         // TODO before release make this more widespread.
-                        e.message?.let { logError("${e.javaClass} - $it") }
+                        e.message?.let { AppLogs.logError("${e.javaClass} - $it") }
                     }
                 }
             }
@@ -552,7 +554,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                             handshakeTimeoutMillis = 2000,
                         )
                     } catch (socketError: SocketTimeoutException) {
-                        socketError.message?.let { logError(it) }
+                        socketError.message?.let { AppLogs.logError(it) }
                         recordThrowable(throwable = socketError)
                         return@bootStrap PingStatus.CouldNotConnect
                     } catch (e: HMeadowSocket.HMeadowSocketError) {
@@ -674,8 +676,8 @@ fun AndroidServer.communicateCommand(client: HMeadowSocketClient, currentJob: Ou
         commandFlag = ServerCommandFlag.SEND_FILES,
         accessCode = currentJob.destination.accessCode,
         onSuccess = { },
-        onAccessCodeRefused = { logError("Server refused access code.") },
-        onFailure = { logError("Connected, but request refused.") },
+        onAccessCodeRefused = { AppLogs.logError("Server refused access code.") },
+        onFailure = { AppLogs.logError("Connected, but request refused.") },
     )
 }
 

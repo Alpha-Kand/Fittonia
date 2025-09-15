@@ -8,10 +8,10 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.hmeadow.fittonia.AppLogs
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.androidServer.AndroidServer
-import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.serverLog
 import org.hmeadow.fittonia.compose.architecture.DebugAppStyle
 import org.hmeadow.fittonia.serialize
 import org.hmeadow.fittonia.unserialize
@@ -81,21 +81,21 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
     }
 
     fun attemptAndroidServerWithPort(initServer: (port: Int, accessCode: String) -> Unit) = launch {
-        serverLog(text = "attemptAndroidServerWithPort")
+        AppLogs.logDebug("attemptAndroidServerWithPort")
         dataStore.data.collect { data ->
-            serverLog(text = "attemptAndroidServerWithPort data loaded")
+            AppLogs.logDebug("attemptAndroidServerWithPort data loaded")
             data.temporaryPort?.let { port ->
-                serverLog(text = "attemptAndroidServerWithPort temp port loaded ($port)")
+                AppLogs.logDebug("attemptAndroidServerWithPort temp port loaded ($port)")
                 data.serverAccessCode?.let { accessCode ->
-                    serverLog(text = "attemptAndroidServerWithPort server access code loaded ($accessCode)")
+                    AppLogs.logDebug("attemptAndroidServerWithPort server access code loaded ($accessCode)")
                     if (port in 1025..59999) {
                         initServer(port, accessCode)
                     }
                 }
             } ?: data.defaultPort.let { port ->
-                serverLog(text = "attemptAndroidServerWithPort default port loaded ($port)")
+                AppLogs.logDebug("attemptAndroidServerWithPort default port loaded ($port)")
                 data.serverAccessCode?.let { accessCode ->
-                    serverLog(text = "attemptAndroidServerWithPort server access code loaded ($accessCode)")
+                    AppLogs.logDebug("attemptAndroidServerWithPort server access code loaded ($accessCode)")
                     if (port in 1025..59999) {
                         initServer(port, accessCode)
                     }

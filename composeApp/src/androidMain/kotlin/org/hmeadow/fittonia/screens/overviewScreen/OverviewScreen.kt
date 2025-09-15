@@ -106,6 +106,12 @@ internal fun OverviewScreen(
                             refreshIp = viewModel::refreshIp,
                         )
                     },
+                    "Logs" to { maxWidth, maxHeight ->
+                        OverviewScreenLogsTab(
+                            maxWidth = maxWidth,
+                            maxHeight = maxHeight,
+                        )
+                    },
                 )
 
             BoxWithConstraints {
