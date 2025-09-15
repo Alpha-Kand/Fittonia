@@ -6,6 +6,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -171,15 +173,18 @@ fun FittoniaScaffold(
 
             val contentPlaceables = subcompose(ScaffoldSectionsEnum.CONTENT) {
                 val scrollState = rememberScrollState()
-                Column(
-                    // TODO add horizontal padding in landscape mode to avoid in-screen camera aperture.
-                    modifier = Modifier
-                        .applyIf(condition = scrollable) {
-                            verticalScroll(scrollState)
-                        },
-                ) {
-                    content(footerPlaceables.height.toDp())
-                    Spacer(modifier = Modifier.requiredHeight(height = footerPlaceables.height.toDp()))
+                BoxWithConstraints {
+                    Column(
+                        // TODO add horizontal padding in landscape mode to avoid in-screen camera aperture.
+                        modifier = Modifier
+                            .applyIf(condition = scrollable) {
+                                verticalScroll(state = scrollState)
+                            }
+                            .requiredWidth(width = this.maxWidth)
+                            .requiredHeight(height = this.maxHeight - footerPlaceables.height.toDp()),
+                    ) {
+                        content(footerPlaceables.height.toDp())
+                    }
                 }
             }.single().measure(
                 constraints = constraints.copy(
