@@ -195,6 +195,7 @@ internal class SendFilesScreenViewModel(
                 items = itemListState.value,
                 port = portState.text.toInt(),
                 status = TransferStatus.Sending,
+                bytesPerSecond = 0,
             ),
         )
     }

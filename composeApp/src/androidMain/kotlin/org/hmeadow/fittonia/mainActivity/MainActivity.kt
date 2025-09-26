@@ -1,13 +1,17 @@
 package org.hmeadow.fittonia.mainActivity
 
+import LogType
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.net.ConnectivityManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.view.GestureDetector
@@ -19,6 +23,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.focus.FocusRequester
+import androidx.core.content.getSystemService
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -49,7 +54,6 @@ class MainActivity : ComponentActivity() {
     var hasBoundServer = false
         private set
 
-    private var lastServerConnection: ServiceConnection? = null
     private var serverConnection: ServiceConnection? = null
 
     fun openFilePicker(onSelectItem: (Uri) -> Unit) {
@@ -196,13 +200,12 @@ class MainActivity : ComponentActivity() {
 
     var isConnected = false
     private fun initAndroidServer(port: Int, accessCode: String) {
-        AppLogs.logDebug("initAndroidServer (port = $port) (accessCode = $accessCode)")
+        AppLogs.logDebug("Attempting to initialize server.")
         val intent = Intent(mainActivity, AndroidServer::class.java).apply {
             this.putExtra("org.hmeadow.fittonia.port", port)
             this.putExtra("org.hmeadow.fittonia.accesscode", accessCode)
         }
-        lastServerConnection = serverConnection
-        AppLogs.logDebug("serverConnection = $serverConnection")
+        AppLogs.logDebug("'Intent' created.")
         if (serverConnection == null) {
             serverConnection = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -214,17 +217,40 @@ class MainActivity : ComponentActivity() {
                     isConnected = false
                 }
             }.also {
-                AppLogs.logDebug("Attempting to `startForegroundService(intent)`.")
-                startForegroundService(intent)
-                AppLogs.logDebug("`startForegroundService(intent)` complete.")
-                AppLogs.logDebug("Attempting to `bindService`.")
-                bindService(
-                    intent,
-                    it,
-                    0,
-                )
-                hasBoundServer = true
-                AppLogs.logDebug("`bindService` complete. `bindService` called ${++testBind} times this session.")
+                AppLogs.logDebug(log = "'ServiceConnection' created.")
+                AppLogs.logBlockResult(
+                    log = "Attempting to start service'...",
+                    type = LogType.DEBUG,
+                ) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val operation = PendingIntent.getForegroundService(
+                            this,
+                            69,
+                            intent,
+                            PendingIntent.FLAG_IMMUTABLE,
+                        )
+                        val alarmManager = this.getSystemService<AlarmManager>()!!
+                        if (AndroidServer.server.value != null) {
+                            alarmManager.cancel(operation)
+                        } else {
+                            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, 2000, operation)
+                        }
+                    } else {
+                        startForegroundService(intent)
+                    }
+                }
+                AppLogs.logBlockResult(
+                    log = "Attempting to bind service...",
+                    type = LogType.DEBUG,
+                ) {
+                    bindService(
+                        intent,
+                        it,
+                        0,
+                    )
+                    hasBoundServer = true
+                }
+                AppLogs.logDebug(log = "'bindService' called ${++testBind} times this session.")
             }
         }
     }
