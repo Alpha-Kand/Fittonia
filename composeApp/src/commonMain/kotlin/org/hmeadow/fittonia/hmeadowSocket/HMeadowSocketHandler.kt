@@ -2,6 +2,7 @@ package org.hmeadow.fittonia.hmeadowSocket
 
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler.Now.now
 import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler.Sleeper.sleep
+import org.hmeadow.fittonia.utility.debug
 import org.hmeadow.fittonia.utility.readNBytesHM
 import java.io.BufferedInputStream
 import java.io.DataInputStream
@@ -93,6 +94,7 @@ open class HMeadowSocketHandler {
         progressPrecision: Double,
         onProgressUpdate: (bytes: Long) -> Unit,
     ) {
+        val startTime: Long = System.nanoTime()
         val bufferedReadFile = BufferedInputStream(stream)
 
         // 1. Send file size in bytes.
@@ -112,9 +114,13 @@ open class HMeadowSocketHandler {
 
         var throttle = sendBytesPerSecond
         var now = now()
+        var writingPerformance: Long = 0
+        var readingPerformance: Long = 0
         while (remainingBytes > 0) {
             val nextBytes = minOf(remainingBytes, BUFFER_SIZE_LONG)
-            val readBytes = bufferedReadFile.readNBytes(nextBytes.toInt())
+            val readBytesStartTime: Long = System.nanoTime()
+            val readBytes: ByteArray = bufferedReadFile.readNBytesHM(nextBytes.toInt())
+            readingPerformance += System.nanoTime() - readBytesStartTime
             remainingBytes -= nextBytes
             if ((size - remainingBytes) > currentStep) {
                 currentStep += step
@@ -122,7 +128,9 @@ open class HMeadowSocketHandler {
             }
 
             throttle -= BUFFER_SIZE_LONG
+            val writeBytesStartTime: Long = System.nanoTime()
             mDataOutput.write(readBytes)
+            writingPerformance += System.nanoTime() - writeBytesStartTime
 
             if (throttle <= 0L) {
                 onProgressUpdate(size - remainingBytes)
@@ -133,6 +141,17 @@ open class HMeadowSocketHandler {
         }
         bufferedReadFile.close()
         onProgressUpdate(size)
+        debug {
+            val writingSeconds = writingPerformance / 1_000_000_000f
+            val readingSeconds = readingPerformance / 1_000_000_000f
+            val totalSeconds = (System.nanoTime() - startTime) / 1_000_000_000f
+            println("PERFORMANCE")
+            println("Time sending file: $totalSeconds")
+            println("Time spent writing to network: $writingSeconds")
+            println("Percentage of time writing to network: ${writingSeconds / totalSeconds} ")
+            println("Time reading from disk: $readingSeconds")
+            println("Percentage of reading from disk: ${readingSeconds / totalSeconds} ")
+        }
     }
 
     open fun sendFile(
@@ -193,6 +212,8 @@ open class HMeadowSocketHandler {
         beforeDownload: (totalBytes: Long, fileName: String) -> Unit,
         onProgressUpdate: (progress: Long) -> Unit,
     ) {
+        val startTime: Long = System.nanoTime()
+
         // 1. Get total file size in bytes.
         val size = receiveLong()
         var transferByteCount = size
@@ -202,15 +223,22 @@ open class HMeadowSocketHandler {
         // 3. Receive and write file data.
         val step = (transferByteCount * progressPrecision).toLong()
         var currentStep = step
+
+        var readingPerformance: Long = 0
+        var writingPerformance: Long = 0
         onOutputStream(fileName)?.use { stream ->
             if (transferByteCount == 0L) {
                 // File to transfer is empty, just create a new empty file.
             } else {
                 while (transferByteCount > 0) {
                     val nextBytes = minOf(transferByteCount, BUFFER_SIZE_LONG)
+                    val readBytesStartTime = System.nanoTime()
                     val readBytes = mDataInput.readNBytesHM(nextBytes.toInt())
+                    readingPerformance += System.nanoTime() - readBytesStartTime
                     transferByteCount -= nextBytes
+                    val writeBytesStartTime = System.nanoTime()
                     stream.write(readBytes)
+                    writingPerformance += System.nanoTime() - writeBytesStartTime
                     if ((size - transferByteCount) > currentStep) {
                         currentStep += step
                         onProgressUpdate(size - transferByteCount)
@@ -219,6 +247,17 @@ open class HMeadowSocketHandler {
             }
         }
         onProgressUpdate(size)
+        debug {
+            val readingSeconds = readingPerformance / 1_000_000_000f
+            val writingSeconds = writingPerformance / 1_000_000_000f
+            val totalSeconds = (System.nanoTime() - startTime) / 1_000_000_000f
+            println("PERFORMANCE")
+            println("Time receiving file: $totalSeconds")
+            println("Time spent reading from network: $readingSeconds")
+            println("Percentage of time reading from network: ${readingSeconds / totalSeconds} ")
+            println("Time spent writing to disk: $writingSeconds")
+            println("Percentage of time writing to disk: ${writingSeconds / totalSeconds} ")
+        }
     }
 
     open fun sendContinue() = sendBoolean(message = true)
