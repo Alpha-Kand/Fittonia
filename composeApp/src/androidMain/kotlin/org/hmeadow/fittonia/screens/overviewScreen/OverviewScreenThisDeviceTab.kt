@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
+import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
@@ -37,6 +39,19 @@ fun OverviewScreenThisDeviceTab(
     ) {
         FittoniaSpacerHeight(height = spacing16)
 
+        ThisDeviceSection(deviceIp = deviceIp)
+
+        FittoniaSpacerHeight(height = spacing32)
+
+        ServerStatusSection()
+
+        FittoniaSpacerHeight(height = spacing32)
+    }
+}
+
+@Composable
+private fun ThisDeviceSection(deviceIp: String) {
+    Column {
         Text(
             text = "Device Info",
             style = headingMStyle,
@@ -90,6 +105,46 @@ fun OverviewScreenThisDeviceTab(
                 }
             }
         }
-        FittoniaSpacerHeight(height = spacing32)
+    }
+}
+
+@Composable
+private fun ServerStatusSection() {
+    Column {
+        Text(
+            text = "Server Status",
+            style = headingMStyle,
+        )
+
+        FittoniaSpacerHeight(height = spacing16)
+
+        Column(
+            modifier = Modifier
+                .border(
+                    width = spacing2,
+                    shape = RoundedCornerShape(size = spacing8),
+                    color = currentStyle.headerBackgroundColour,
+                )
+                .padding(all = spacing8),
+        ) {
+            Row {
+                Column {
+                    Text(
+                        text = "Status:",
+                        style = paragraphTextStyle,
+                    )
+                }
+                Column {
+                    Text(
+                        text = when (AndroidServer.server.collectAsState().value) { // TODO status for starting server
+                            null -> "Offline ❌"
+                            else -> "Online ✅"
+                        },
+                        style = paragraphTextStyle,
+                    )
+                }
+            }
+            // TODO restart server button.
+        }
     }
 }
