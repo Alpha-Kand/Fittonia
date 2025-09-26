@@ -1,9 +1,8 @@
 package org.hmeadow.fittonia.androidServer
 
-import Log
+import LogType
 import Server
 import ServerCommandFlag
-import ServerLogs
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.Service
@@ -15,7 +14,6 @@ import android.os.IBinder
 import androidx.compose.ui.util.fastForEach
 import androidx.core.app.ServiceCompat
 import androidx.documentfile.provider.DocumentFile
-import communicateCommandBoolean
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -58,6 +56,7 @@ import org.hmeadow.fittonia.utility.verifyIPAddress
 import recordThrowable
 import java.io.BufferedInputStream
 import java.io.File
+import java.io.OutputStream
 import java.net.BindException
 import java.net.InetSocketAddress
 import java.net.ServerSocket
@@ -65,8 +64,7 @@ import java.net.SocketException
 import java.net.SocketTimeoutException
 import kotlin.coroutines.CoroutineContext
 
-class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
-    override val mLogs = mutableListOf<Log>()
+internal class AndroidServer : Service(), CoroutineScope, Server {
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
         recordThrowable(throwable = throwable)
         debug {
@@ -75,7 +73,6 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
     override var jobId: Int = 100
     override val jobIdMutex = Mutex()
-    override val logsMutex = Mutex()
     private val binder = AndroidServerBinder()
     var serverSocket: ServerSocket? = null
     var serverJob: Job? = null
@@ -96,22 +93,27 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     override fun onCreate() {
-        AppLogs.logDebug("onCreate")
+        AppLogs.logDebug("Server created.")
         super.onCreate()
         server.value = this
     }
 
     private fun initServerFromIntent(intent: Intent?): Boolean {
         AppLogs.logDebug("initServerFromIntent (intent = $intent)")
+        AppLogs.logBlock("Checking for Intent...", type = LogType.DEBUG) { intent != null }
         intent?.let {
             updateAccessCode(
                 newAccessCode = it.getStringExtra("org.hmeadow.fittonia.accesscode")
-                    ?: throw Exception("No access code provided"),
+                    ?: throw IllegalStateException("No access code provided"),
             )
-            AppLogs.logDebug("init access code")
+            AppLogs.logDebug("Loaded access code.")
             it.getIntExtra("org.hmeadow.fittonia.port", 0).let { port ->
-                AppLogs.logDebug("init port $port")
-                if (!startServerSocket(port = port)) {
+                AppLogs.logDebug("Loaded port $port.")
+                if (!AppLogs.logBlock(
+                        log = "Starting server socket...",
+                        type = LogType.DEBUG,
+                    ) { startServerSocket(port = port) }
+                ) {
                     return false
                 }
             }
@@ -145,19 +147,15 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     private fun startServerSocket(port: Int): Boolean {
-        AppLogs.logDebug("startServerSocket")
-        if (port == 0) throw Exception("No port provided")
+        if (port == 0) throw IllegalStateException("No port provided")
         try {
-            AppLogs.logDebug("Starting server on port $port.")
             serverSocket?.close() // Just in case.
             serverSocket = ServerSocket()
             serverSocket?.reuseAddress = true
             serverSocket?.bind(InetSocketAddress(port))
-            AppLogs.logDebug("Started server success!")
-            AppLogs.log("Server started (port = $port)")
         } catch (e: BindException) {
             serverSocket = null
-            AppLogs.logDebug("e.message: $port " + e.message)
+            AppLogs.logError("Error starting server socket: " + e.message)
             if (e.message?.contains(other = "Address already in use") == true) {
                 MainActivity.mainActivityForServer?.alert(UserAlert.PortInUse(port = port))
                 return false
@@ -201,9 +199,8 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                             AppLogs.log("Server waiting for client connection...")
                             HMeadowSocketServer.createServerFromSocket(server).let { server ->
                                 launch {
-                                    AppLogs.logDebug("Connected to client.")
                                     AppLogs.log("Client attempting to connect.")
-                                    val theirPublicKey = serverSharePublicKeys(server = server, jobId = jobId)
+                                    val theirPublicKey = server.serverSharePublicKeys(jobId = jobId)
                                     handleCommand2(
                                         jobId = jobId,
                                         server = server,
@@ -231,7 +228,10 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     fun restartServerSocket(port: Int) {
-        AppLogs.log("Restarting Server on port $port")
+        debug(
+            releaseBlock = { AppLogs.log("Restarting Server") },
+            debugBlock = { AppLogs.logDebug("Restarting Server on port $port") },
+        )
         serverJob?.cancel()
         serverSocket?.close()
         startServerSocket(port = port)
@@ -314,9 +314,12 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     suspend fun onPing2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
-        AppLogs.logDebug("Server waiting for PingClientData")
-        val clientData = server.receiveAndDecrypt<PingClientData>()
-        AppLogs.logDebug("onPing2.clientData.accessCode: ${clientData.accessCode}")
+        val clientData: PingClientData = AppLogs.logBlockResult(
+            log = "Server waiting for PingClientData.",
+            type = LogType.DEBUG,
+        ) {
+            server.receiveAndDecrypt<PingClientData>()
+        }
         server.encryptAndSend(
             data = PingServerData(isAccessCodeCorrect = clientData.accessCode == accessCode),
             theirPublicKey = theirPublicKey,
@@ -328,20 +331,31 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
     }
 
     suspend fun onSendFiles2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
-        AppLogs.logDebug("onSendFiles2()")
         var currentJob = IncomingJob(id = jobId)
         registerTransferJob(currentJob)
-        AppLogs.log("Receiving client data.")
-        val clientData = server.receiveAndDecrypt<SendFileClientData>()
-        if (clientData.accessCode != accessCode) return
-        currentJob = updateTransferJob(currentJob.copy(items = clientData.items, currentItem = 1))
-        val newJobDirectory = createJobDirectory(
-            jobName = clientData.jobName,
-            print = { AppLogs.logDebug(it, jobId = jobId) },
-        )
+        val clientData: SendFileClientData = AppLogs.logBlockResult(
+            log = "Receiving client data.",
+            type = LogType.NORMAL,
+        ) {
+            server.receiveAndDecrypt<SendFileClientData>()
+        }
+        if (clientData.accessCode != accessCode) {
+            AppLogs.logError(log = "Client sent incorrect accesscode.")
+            return
+        }
+        currentJob = updateTransferJob(job = currentJob.copy(items = clientData.items, currentItem = 1))
+        val newJobDirectory: MainActivity.CreateDumpDirectory = AppLogs.logBlockResultS(
+            log = "Creating incoming data folder",
+            type = LogType.NORMAL,
+        ) {
+            createJobDirectory(
+                jobName = clientData.jobName,
+                print = { AppLogs.logDebug(log = it, jobId = jobId) },
+            )
+        }
 
         if (newJobDirectory is MainActivity.CreateDumpDirectory.Success) {
-            val serverData = if (clientData.accessCode == accessCode) {
+            val serverData: SendFileServerData = if (clientData.accessCode == accessCode) {
                 SendFileServerData(
                     jobName = newJobDirectory.name,
                     pathLimit = 128,
@@ -354,57 +368,65 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                     isAccessCodeCorrect = false,
                 )
             }
-            AppLogs.log("Sending server data.")
-            server.encryptAndSend(data = serverData, theirPublicKey = theirPublicKey)
+            AppLogs.logBlockResultS(log = "Sending server data...", type = LogType.NORMAL) {
+                server.encryptAndSend(data = serverData, theirPublicKey = theirPublicKey)
+            }
             currentJob = updateTransferJob(job = currentJob.copy(description = newJobDirectory.name))
-            AppLogs.logDebug("jobPath: ${newJobDirectory.uri}", jobId = jobId)
-            val decryptionFileCache = createTempFile()
+            AppLogs.logDebug(log = "New job path: ${newJobDirectory.uri}", jobId = jobId)
+            val decryptionFileCache: File = createTempFile()
             currentJob.cloneItems().fastForEach { item ->
-                if (item.isFile) { // Is a file...
-                    decryptionFileCache.outputStream().use { output ->
-                        server.receiveFile(
-                            onOutputStream = { output },
-                            progressPrecision = 0.01,
-                            onProgressUpdate = { progress ->
-                                currentJob = safelyUpdateJobItem(
-                                    job = currentJob,
-                                    item = item,
-                                    itemBytes = item.progressBytes + progress,
-                                )
-                            },
-                        )
-                        currentJob = safelyUpdateJobItem(job = currentJob, item = item, itemBytes = item.sizeBytes)
+                if (item.isFile) {
+                    AppLogs.logBlock("Receiving encrypted file...") {
+                        decryptionFileCache.outputStream().use { output ->
+                            server.receiveFile(
+                                onOutputStream = { output },
+                                progressPrecision = 0.01,
+                                onProgressUpdate = { progress ->
+                                    currentJob = safelyUpdateJobItem(
+                                        job = currentJob,
+                                        item = item,
+                                        itemBytes = item.progressBytes + progress,
+                                    )
+                                },
+                            )
+                            currentJob = safelyUpdateJobItem(job = currentJob, item = item, itemBytes = item.sizeBytes)
+                        }
+                        true
                     }
-                    val decryptedFile = getUriOutputStream(
-                        uri = createFile(
-                            path = newJobDirectory.uri,
-                            fileName = item.name,
-                        )!!,
-                    )
-                    val encryptedSize = decryptionFileCache.length()
-                    BufferedInputStream(decryptionFileCache.inputStream()).use {
-                        it.subDivide(
-                            maxBlockSize = ENCRYPTED_AES_BLOCK_SIZE,
-                            expectedStreamSize = encryptedSize,
-                            block = { bytes ->
-                                decryptedFile?.write(
-                                    AESCipher.decryptBytes(
-                                        bytes = bytes,
-                                        secretKeyBytes = clientData.aesKey,
-                                    ),
-                                )
-                            },
+                    AppLogs.logBlock("Decrypting file...") {
+                        val decryptedFile: OutputStream? = getUriOutputStream(
+                            uri = createFile(
+                                path = newJobDirectory.uri,
+                                fileName = item.name,
+                            )!!,
                         )
+                        val encryptedSize = decryptionFileCache.length()
+                        BufferedInputStream(decryptionFileCache.inputStream()).use {
+                            it.subDivide(
+                                maxBlockSize = ENCRYPTED_AES_BLOCK_SIZE,
+                                expectedStreamSize = encryptedSize,
+                                block = { bytes ->
+                                    decryptedFile?.write(
+                                        AESCipher.decryptBytes(
+                                            bytes = bytes,
+                                            secretKeyBytes = clientData.aesKey,
+                                        ),
+                                    )
+                                },
+                            )
+                        }
+                        decryptedFile?.close()
+                        true
                     }
-                    decryptedFile?.close()
-                    currentJob = updateTransferJob(currentJob.copy(currentItem = currentJob.nextItem))
+                    currentJob = updateTransferJob(job = currentJob.copy(currentItem = currentJob.nextItem))
                     server.sendContinue()
                 }
             }
             currentJob = updateTransferJob(currentJob.copy(status = TransferStatus.Done))
             saveCompletedJob(job = currentJob)
+            AppLogs.log(log = "Transfer job complete.")
         } else {
-            updateTransferJob(currentJob.copy(status = TransferStatus.Error))
+            updateTransferJob(job = currentJob.copy(status = TransferStatus.Error))
         }
     }
 
@@ -476,11 +498,16 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
         }
     }
 
-    private fun safelyUpdateJobItem(job: OutgoingJob, item: TransferJob.Item, itemBytes: Long): OutgoingJob {
+    private fun safelyUpdateJobItem(
+        job: OutgoingJob,
+        item: TransferJob.Item,
+        itemBytes: Long,
+        bytesPerSecond: Long,
+    ): OutgoingJob {
         return runBlocking {
             progressUpdateMutex.withLock {
                 job.updateItem(item.copy(progressBytes = itemBytes)).also {
-                    updateTransferJob(job = it)
+                    updateTransferJob(job = it.copy(bytesPerSecond = bytesPerSecond))
                 }
             }
         }
@@ -570,7 +597,6 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                         data = PingClientData(accessCode = accessCode),
                         theirPublicKey = theirPublicKey,
                     )
-                    println("Client awaiting PingServerData")
                     if (client.receiveAndDecrypt<PingServerData>().isAccessCodeCorrect) {
                         PingStatus.Success
                     } else {
@@ -673,16 +699,6 @@ fun OutgoingJob.createClient() = HMeadowSocketClient(
     operationTimeoutMillis = 1000 * 30,
     handshakeTimeoutMillis = 1000 * 5,
 )
-
-fun AndroidServer.communicateCommand(client: HMeadowSocketClient, currentJob: OutgoingJob): Boolean {
-    return client.communicateCommandBoolean(
-        commandFlag = ServerCommandFlag.SEND_FILES,
-        accessCode = currentJob.destination.accessCode,
-        onSuccess = { },
-        onAccessCodeRefused = { AppLogs.logError("Server refused access code.") },
-        onFailure = { AppLogs.logError("Connected, but request refused.") },
-    )
-}
 
 fun OutgoingJob.getInitialDescriptionText() = if (needDescription) "Connecting..." else description
 
