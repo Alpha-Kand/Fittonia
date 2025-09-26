@@ -418,6 +418,7 @@ internal class AndroidServer : Service(), CoroutineScope, Server {
                         decryptedFile?.close()
                         true
                     }
+                    decryptionFileCache.delete()
                     currentJob = updateTransferJob(job = currentJob.copy(currentItem = currentJob.nextItem))
                     server.sendContinue()
                 }
@@ -680,6 +681,7 @@ internal class AndroidServer : Service(), CoroutineScope, Server {
                             }
                             client.receiveContinue()
                         }
+                        encryptionFileCache.delete()
                         updateTransferJobCurrentItem(job = currentJob) // TODO needed? - After release
                     }
                     finishTransferJob(currentJob)
