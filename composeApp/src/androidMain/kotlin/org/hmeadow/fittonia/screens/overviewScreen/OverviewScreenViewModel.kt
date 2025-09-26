@@ -70,6 +70,7 @@ internal class OverviewScreenViewModel(
                 },
                 port = 5556,
                 status = TransferStatus.entries.random(),
+                bytesPerSecond = 0,
             ),
         )
     }

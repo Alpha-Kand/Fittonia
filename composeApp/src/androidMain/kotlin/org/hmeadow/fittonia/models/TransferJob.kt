@@ -13,6 +13,7 @@ sealed interface TransferJob {
     val description: String
     val currentItem: Int
     val items: List<Item>
+    val bytesPerSecond: Long
     val totalItems: Int
         get() = items.size
     val progressPercentage: Double
@@ -53,6 +54,7 @@ data class OutgoingJob(
     override val description: String,
     override val currentItem: Int = 1,
     override val items: List<Item>,
+    override val bytesPerSecond: Long,
     val port: Int,
     val destination: SettingsManager.Destination,
     val needDescription: Boolean,
@@ -104,6 +106,7 @@ data class IncomingJob(
     override val description: String,
     override val currentItem: Int = 1,
     override val items: List<Item>,
+    override val bytesPerSecond: Long,
     val source: Source,
 ) : TransferJob {
     constructor(id: Int) : this(
@@ -112,6 +115,7 @@ data class IncomingJob(
         description = "",
         currentItem = 0,
         items = emptyList(),
+        bytesPerSecond = 0,
         source = Source(),
     )
 

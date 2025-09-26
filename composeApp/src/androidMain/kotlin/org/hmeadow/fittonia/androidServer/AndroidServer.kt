@@ -630,6 +630,7 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                                     }
                                 }
                                 BufferedInputStream(encryptionFileCache.inputStream()).use {
+                                    var bytesPerSecondTime: Long = System.nanoTime()
                                     client.sendFile(
                                         stream = it,
                                         name = item.name,
@@ -640,12 +641,14 @@ class AndroidServer : Service(), CoroutineScope, ServerLogs, Server {
                                             job = currentJob,
                                             item = item,
                                             itemBytes = progressBytes,
+                                            bytesPerSecond = (progressBytes / ((System.nanoTime() - bytesPerSecondTime)) / 1_000_000_000),
                                         )
                                     }
                                     currentJob = safelyUpdateJobItem(
                                         job = currentJob,
                                         item = item,
                                         itemBytes = item.sizeBytes,
+                                        bytesPerSecond = 0,
                                     )
                                 }
                             }
