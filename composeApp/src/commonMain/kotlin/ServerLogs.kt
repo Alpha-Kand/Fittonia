@@ -1,3 +1,5 @@
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,27 +48,27 @@ enum class LogType {
     DEBUG,
 }
 
-class Log(
-    private val time: ZonedDateTime,
+data class Log(
+    val time: ZonedDateTime,
     val message: String,
     val type: LogType,
     val jobId: Int?,
+    val success: MutableState<Boolean?>,
 ) {
-    val timeStamp: String = "%1\$s %2\$sh %3\$sm %4\$ss".format(
+    val timeStamp: String = $$"%1$s %2$sh %3$sm %4$ss".format(
         time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
         time.format(DateTimeFormatter.ofPattern("HH")),
         time.format(DateTimeFormatter.ofPattern("mm")),
         time.format(DateTimeFormatter.ofPattern("ss")),
     )
 
-    val timeStampShort: String = "%1\$sh%2\$sm%3\$ss".format(
+    val timeStampShort: String = $$"%1$sh%2$sm%3$ss".format(
         time.format(DateTimeFormatter.ofPattern("HH")),
         time.format(DateTimeFormatter.ofPattern("mm")),
         time.format(DateTimeFormatter.ofPattern("ss")),
     )
 
     init {
-        // TODO Need a better way to see logs in app, don't want to expose them to system.out. - After release
         val typeString = when (type) {
             LogType.NORMAL -> ""
             LogType.WARNING -> "WARNING "
@@ -81,10 +83,11 @@ class Log(
         }
     }
 
-    constructor(message: String, type: LogType = LogType.NORMAL, jobId: Int? = null) : this(
+    constructor(message: String, type: LogType = LogType.NORMAL, jobId: Int? = null, success: Boolean? = null) : this(
         time = ZonedDateTime.now(),
         message = message,
         type = type,
         jobId = jobId,
+        success = mutableStateOf(value = success),
     )
 }

@@ -8,8 +8,8 @@ import kotlin.math.min
 fun InputStream.subDivide(maxBlockSize: Int, expectedStreamSize: Long, block: (ByteArray) -> Unit) {
     var offset = 0L
     while (offset < expectedStreamSize) {
-        val nextBlockSize = min(maxBlockSize.toLong(), expectedStreamSize - offset).toInt()
-        val nextBlock = this.readNBytesHM(length = nextBlockSize)
+        val nextBlockSize: Int = min(maxBlockSize.toLong(), expectedStreamSize - offset).toInt()
+        val nextBlock: ByteArray = this.readNBytesHM(length = nextBlockSize)
         offset += nextBlockSize
         block(nextBlock)
     }
