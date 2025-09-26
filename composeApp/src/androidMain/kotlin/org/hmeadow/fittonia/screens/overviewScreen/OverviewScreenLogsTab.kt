@@ -3,6 +3,7 @@ package org.hmeadow.fittonia.screens.overviewScreen
 import LogType
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -42,34 +43,45 @@ internal fun OverviewScreenLogsTab(
             state = lazyListState,
         ) {
             itemsIndexed(AppLogs.logs) { index, log ->
-                Text(
-                    modifier = Modifier
-                        .background(color = if (index % 2 == 0) Color.White else Color(0xFFEEEEEE))
-                        .padding(vertical = spacing4)
-                        .fillMaxWidth(),
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                color = when (log.type) {
-                                    LogType.NORMAL -> Color(0xFF666666)
-                                    LogType.WARNING -> Color.Yellow
-                                    LogType.ERROR -> Color.Red
-                                    LogType.DEBUG -> Color.Blue
-                                },
-                            ),
-                        ) {
-                            append(
-                                log.timeStampShort + " " + when (log.type) {
-                                    LogType.NORMAL -> ""
-                                    LogType.WARNING -> "WARNING "
-                                    LogType.ERROR -> "ERROR "
-                                    LogType.DEBUG -> "DEBUG "
-                                },
-                            )
-                        }
-                        append(log.message)
-                    },
-                )
+                Row {
+                    Text(
+                        modifier = Modifier
+                            .background(color = if (index % 2 == 0) Color.White else Color(0xFFEEEEEE))
+                            .padding(vertical = spacing4)
+                            .fillMaxWidth(),
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    color = when (log.type) {
+                                        LogType.NORMAL -> Color(0xFF666666)
+                                        LogType.WARNING -> Color.Yellow
+                                        LogType.ERROR -> Color.Red
+                                        LogType.DEBUG -> Color.Blue
+                                    },
+                                ),
+                            ) {
+                                append(
+                                    log.timeStampShort + " " + when (log.type) {
+                                        LogType.NORMAL -> ""
+                                        LogType.WARNING -> "WARNING "
+                                        LogType.ERROR -> "ERROR "
+                                        LogType.DEBUG -> "DEBUG "
+                                    },
+                                )
+                            }
+                            append(log.message)
+                            log.success.value?.let { success ->
+                                append(
+                                    if (success) {
+                                        "✅"
+                                    } else {
+                                        "❌"
+                                    },
+                                )
+                            }
+                        },
+                    )
+                }
             }
         }
 
