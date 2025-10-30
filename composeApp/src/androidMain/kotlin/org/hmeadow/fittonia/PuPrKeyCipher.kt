@@ -9,6 +9,8 @@ import android.security.keystore.KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
 import android.security.keystore.KeyProperties.KEY_ALGORITHM_RSA
 import android.security.keystore.KeyProperties.PURPOSE_DECRYPT
 import android.security.keystore.KeyProperties.PURPOSE_ENCRYPT
+import org.hmeadow.fittonia.utility.debug
+import recordThrowable
 import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -65,7 +67,10 @@ object PuPrKeyCipher {
                     HMPublicKey(encoded = it)
                 }
         } catch (e: KeyStoreException) {
-            println(e.message)
+            recordThrowable(throwable = e)
+            debug {
+                println(e.message)
+            }
             null
         }
     }
@@ -99,7 +104,10 @@ object PuPrKeyCipher {
                     (getEntry(KEYSTORE_ALIAS, null) as KeyStore.PrivateKeyEntry)
                 }
         } catch (e: KeyStoreException) {
-            println(e.message)
+            recordThrowable(throwable = e)
+            debug {
+                println(e.message)
+            }
             null
         }
     }

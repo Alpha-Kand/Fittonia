@@ -79,7 +79,7 @@ internal class DebugScreenViewModel(
     fun createJobDirectory() {
         launch {
             val expectedJobNumber = nextAutoJobName.first()
-            when (MainActivity.mainActivity.createJobDirectory(jobName = null, print = ::println)) {
+            when (MainActivity.mainActivity.createJobDirectory(jobName = null)) {
                 is MainActivity.CreateDumpDirectory.Success -> {
                     nextAutoJobNameMessage.update {
                         nextAutoJobName.first().let { nextAutoJobName ->

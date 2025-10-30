@@ -327,7 +327,7 @@ internal class AndroidServer : Service(), CoroutineScope, Server {
     }
 
     suspend fun onAddDestination2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
-        println("onAddDestination2()")
+        // println("onAddDestination2()") // todo is this needed?
     }
 
     suspend fun onSendFiles2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
@@ -348,10 +348,7 @@ internal class AndroidServer : Service(), CoroutineScope, Server {
             log = "Creating incoming data folder",
             type = LogType.NORMAL,
         ) {
-            createJobDirectory(
-                jobName = clientData.jobName,
-                print = { AppLogs.logDebug(log = it, jobId = jobId) },
-            )
+            createJobDirectory(jobName = clientData.jobName)
         }
 
         if (newJobDirectory is MainActivity.CreateDumpDirectory.Success) {
@@ -432,7 +429,7 @@ internal class AndroidServer : Service(), CoroutineScope, Server {
     }
 
     suspend fun onSendMessage2(theirPublicKey: PuPrKeyCipher.HMPublicKey, server: HMeadowSocketServer, jobId: Int) {
-        println("onSendMessage2()")
+        // println("onSendMessage2()") // todo
     }
 
     override suspend fun onPing(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
@@ -603,7 +600,9 @@ internal class AndroidServer : Service(), CoroutineScope, Server {
                     } else {
                         PingStatus.IncorrectAccessCode
                     }.also {
-                        println("Client received PingServerData: $it")
+                        debug {
+                            println("Client received PingServerData: $it")
+                        }
                     }
                 },
                 requestTimestamp = requestTimestamp,

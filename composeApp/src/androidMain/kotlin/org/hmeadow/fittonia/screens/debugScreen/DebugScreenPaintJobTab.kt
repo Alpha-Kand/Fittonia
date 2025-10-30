@@ -48,6 +48,7 @@ import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.compose.components.FittoniaTextInput
 import org.hmeadow.fittonia.design.fonts.headingLStyle
 import org.hmeadow.fittonia.design.fonts.headingMStyle
+import org.hmeadow.fittonia.utility.debug
 
 enum class ColourGroup {
     STRUCTURE,
@@ -171,7 +172,9 @@ private fun ColourSliderGroup(title: String, color: Color, viewModel: DebugScree
                         onUpdate(Color("#$it".toColorInt()))
                     }
                 } catch (e: Throwable) {
-                    println(e.message)
+                    debug {
+                        println(e.message)
+                    }
                 }
             }
         }

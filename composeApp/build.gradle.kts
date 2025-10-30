@@ -123,11 +123,11 @@ android {
     }
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // isMinifyEnabled = true
+            // isShrinkResources = true
             isDebuggable = false
             signingConfig = signingConfigs.getByName("debug")
-            proguardFiles.add(file("proguard-rules.pro"))
+            // proguardFiles.add(file("proguard-rules.pro"))
         }
         getByName("debug") {
             isMinifyEnabled = false

@@ -13,7 +13,7 @@ fun Context.getFileSizeBytes(uri: Uri): Long {
         .use { file -> file?.length?.takeIf { it > 0 } ?: 0 }
 }
 
-suspend fun Context.createJobDirectory(jobName: String?, print: (String) -> Unit = {}): CreateDumpDirectory {
+suspend fun Context.createJobDirectory(jobName: String?): CreateDumpDirectory {
     val data = dataStore.data.first()
     try {
         var limit = 100

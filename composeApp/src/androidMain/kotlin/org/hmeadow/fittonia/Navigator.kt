@@ -191,7 +191,6 @@ class Navigator(private val mainViewModel: MainViewModel) {
             onTemporaryPortAcceptedCallback = { newPort ->
                 mainViewModel.updateTemporaryPort(port = newPort)
                 MainActivity.mainActivity.unAlert<UserAlert.PortInUse>()
-                println("onTemporaryPortAcceptedCallback server.value = ${server.value}")
                 if (server.value == null) {
                     MainActivity.mainActivity.attemptStartServer()
                 } else {
@@ -201,7 +200,6 @@ class Navigator(private val mainViewModel: MainViewModel) {
             onNewDefaultPortAcceptedCallback = { newPort ->
                 mainViewModel.updateServerPort(port = newPort)
                 MainActivity.mainActivity.unAlert<UserAlert.PortInUse>()
-                println("onNewDefaultPortAcceptedCallback server.value = ${server.value}")
                 if (server.value == null) {
                     MainActivity.mainActivity.attemptStartServer()
                 } else {

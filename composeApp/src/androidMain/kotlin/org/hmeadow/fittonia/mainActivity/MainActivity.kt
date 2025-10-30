@@ -40,6 +40,7 @@ import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.SettingsDataAndroidSerializer
 import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.androidServer.AndroidServer
+import org.hmeadow.fittonia.utility.debug
 
 val Context.dataStore by dataStore("fittonia.json", SettingsDataAndroidSerializer)
 
@@ -155,7 +156,9 @@ class MainActivity : ComponentActivity() {
         serverConnection?.let {
             if (isConnected) {
                 unbindService(it).also {
-                    println("testUnbind = ${++testUnbind}")
+                    debug {
+                        println("testUnbind = ${++testUnbind}")
+                    }
                 }
             }
         }

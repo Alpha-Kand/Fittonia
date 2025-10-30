@@ -1,9 +1,11 @@
 package org.hmeadow.fittonia.utility
 
 inline fun <reified T> T.printMe(prefix: String = ""): T {
-    if (prefix.isNotEmpty()) {
-        print(prefix)
+    debug {
+        if (prefix.isNotEmpty()) {
+            print(prefix)
+        }
+        println(this)
     }
-    println(this)
     return this
 }
