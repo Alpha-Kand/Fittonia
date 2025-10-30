@@ -38,7 +38,7 @@ internal class SendFilesScreenViewModel(
     val itemListState = MutableStateFlow<List<TransferJob.Item>>(emptyList())
     val selectedDestinationState = MutableStateFlow<SettingsManager.Destination?>(null)
     val portState: InputFlow = initInputFlow(
-        initial = debug(debugValue = "44556", releaseValue = ""),
+        initial = debug(debugValue = "44556", releaseValue = "44556"), // TODO
         onValueChange = { port ->
             if (port.isNotEmpty()) {
                 selectedDestinationState.value?.let {
@@ -69,11 +69,13 @@ internal class SendFilesScreenViewModel(
     val oneTimeAccessCodeState: InputFlow = initInputFlow(
         initial = "",
         onValueChange = { accessCode ->
-            updatePing(
-                ip = oneTimeIpAddressState.text,
-                accessCode = accessCode,
-                port = portState.text.toInt(),
-            )
+            if (portState.text.isNotBlank()) {
+                updatePing(
+                    ip = oneTimeIpAddressState.text,
+                    accessCode = accessCode,
+                    port = portState.text.toInt(),
+                )
+            }
         },
     )
 
