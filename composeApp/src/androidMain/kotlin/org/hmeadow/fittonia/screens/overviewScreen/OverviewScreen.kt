@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -21,7 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.update
@@ -45,6 +52,7 @@ import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.Spacing.spacing16
 import org.hmeadow.fittonia.design.Spacing.spacing2
+import org.hmeadow.fittonia.design.Spacing.spacing32
 import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
@@ -206,15 +214,22 @@ internal fun OverviewScreen(
                         style = headingMStyle,
                     )
                     FittoniaSpacerHeight(height = spacing8)
+
                     Text(
                         text = stringResource(R.string.last_built_date),
                         style = paragraphTextStyle,
                     )
+
                     FittoniaSpacerHeight(height = spacing8)
+
                     Text(
                         text = stringResource(R.string.credits),
                         style = paragraphTextStyle,
                     )
+
+                    FittoniaSpacerHeight(height = spacing32)
+
+                    NameAcronym()
                 }
             }
             FittoniaModal(
@@ -267,5 +282,54 @@ internal fun OverviewScreen(
                 }
             }
         },
+    )
+}
+
+@Composable
+private fun NameAcronym() {
+    val words = stringArrayResource(R.array.fittonia_name_explain)
+    val bold = remember { SpanStyle(fontWeight = FontWeight.Bold) }
+    Column {
+        Row {
+            Text(
+                modifier = Modifier.width(width = spacing16),
+                text = buildAnnotatedString {
+                    withStyle(style = bold) {
+                        append(words[0].uppercase().take(2))
+                    }
+                },
+                style = paragraphTextStyle,
+                textAlign = TextAlign.Center,
+            )
+
+            FittoniaSpacerWidth(width = spacing8)
+
+            Text(text = words[0])
+        }
+
+        FittoniaSpacerHeight(spacing2)
+
+        words.drop(1).forEach {
+            Row {
+                BoldFirstLetter(style = bold, word = it)
+                FittoniaSpacerWidth(width = spacing8)
+                Text(text = it)
+            }
+            FittoniaSpacerHeight(height = spacing2)
+        }
+    }
+}
+
+@Composable
+private fun BoldFirstLetter(style: SpanStyle, word: String) {
+    Text(
+        modifier = Modifier.width(width = spacing16),
+        text = buildAnnotatedString {
+            withStyle(style = style) {
+                append(word[0])
+            }
+        },
+        style = paragraphTextStyle,
+        textAlign = TextAlign.Center,
     )
 }
