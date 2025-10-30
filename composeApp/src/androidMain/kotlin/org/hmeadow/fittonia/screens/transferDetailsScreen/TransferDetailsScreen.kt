@@ -79,6 +79,10 @@ internal fun TransferDetailsScreen(
 
                         FittoniaSpacerHeight(height = 40)
 
+                        // Text(text= "${transferJob.bytesPerSecond / (1024f * 1024f)}") TODO
+
+                        // FittoniaSpacerHeight(height = 40)
+
                         when (transferJob) {
                             is OutgoingJob -> {
                                 Text(
