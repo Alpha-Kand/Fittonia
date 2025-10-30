@@ -68,12 +68,14 @@ fun FittoniaHeader(
         contentAlignment = Center,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            BackButton(
-                onBackClicked = {
-                    InfoBorderState.clearInfoBorderState()
-                    onBackClicked?.invoke()
-                },
-            )
+            onBackClicked?.let {
+                BackButton(
+                    onBackClicked = {
+                        InfoBorderState.clearInfoBorderState()
+                        onBackClicked.invoke()
+                    },
+                )
+            }
             if (includeInfoButton) {
                 InfoButton()
             }
