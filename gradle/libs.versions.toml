@@ -1,10 +1,10 @@
 [versions]
 
 # Core
-agp = "8.13.0"
+agp = "8.13.1"
 kotlin = "2.2.21"
-firebaseBom = "34.4.0"
-compose-plugin = "1.9.1"
+firebaseBom = "34.5.0"
+compose-plugin = "1.9.3"
 android-minSdk = "29"
 android-targetSdk = "36"
 android-compileSdk = "36"
@@ -18,7 +18,7 @@ kotlinxCollectionsImmutable = "0.4.0"
 datastore = "1.1.7"
 fragmentKtx = "1.8.9"
 documentfile = "1.1.0"
-coreSplashscreen = "1.0.1"
+coreSplashscreen = "1.2.0"
 androidx-activityCompose = "1.11.0"
 
 # Unit Tests
@@ -26,12 +26,12 @@ mockk = "1.14.6"
 junit = "4.13.2"
 kover = "0.9.3"
 ktlint = "0.50.0"
-junitJupiterApi = "6.0.0"
-jupiterPlatform = "6.0.0"
+junitJupiterApi = "6.0.1"
+jupiterPlatform = "6.0.1"
 kotlinx-coroutines-core = "1.10.2"
 
 # Settings Writing/Reading
-jacksonModuleKotlin = "2.20.0"
+jacksonModuleKotlin = "2.20.1"
 
 # Libraries
 kotterJvm = "1.2.1"
