@@ -67,6 +67,7 @@ object AppLogs {
         jobId: Int? = null,
         block: suspend () -> T,
     ): T {
+        if (!isDebug() && type == LogType.DEBUG) return block()
         val newLog = Log(message = log, type = type, jobId = jobId)
         logs.add(newLog)
         return block().also {
