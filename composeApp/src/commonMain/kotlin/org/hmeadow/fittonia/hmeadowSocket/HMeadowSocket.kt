@@ -59,6 +59,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketHandler) {
             this.close()
             debug {
                 println(e.message)
+                e.printStackTrace()
                 history.forEach { println(it) }
             }
             throw FailedToReceiveException(e)
@@ -73,6 +74,7 @@ sealed class HMeadowSocket(open val socketInterface: HMeadowSocketHandler) {
             this.close()
             debug {
                 println(e.message)
+                e.printStackTrace()
                 history.forEach { println(it) }
             }
             throw FailedToSendException(e)

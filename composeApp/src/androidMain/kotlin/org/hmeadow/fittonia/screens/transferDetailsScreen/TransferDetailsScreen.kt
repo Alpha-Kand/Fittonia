@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.components.FittoniaHeader
@@ -45,6 +47,7 @@ import org.hmeadow.fittonia.models.IncomingJob
 import org.hmeadow.fittonia.models.OutgoingJob
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
+import org.hmeadow.fittonia.utility.bytesToMegaBytes
 import org.hmeadow.fittonia.utility.measureTextWidth
 import org.hmeadow.fittonia.utility.rememberPercentageFormat
 
@@ -193,7 +196,7 @@ internal fun TransferDetailsScreen(
                         FittoniaSpacerHeight(height = spacing4)
 
                         ReadOnlyEntries(
-                            entries = transferJob.items.mapIndexed { index, file ->
+                            entries = transferJob.items.map { file ->
                                 val composable = @Composable {
                                     ItemInfoBox(
                                         transferJob = transferJob,
@@ -283,19 +286,37 @@ private fun ItemInfoBox(
                     .fillMaxWidth()
                     .requiredHeight(height = spacing32),
                 content = {
-                    Text(
-                        text = "${file.progressBytes}b/${file.sizeBytes}b", // TODO
+                    val sizeBytes = bytesToMegaBytes(bytes = file.sizeBytes)
+                    val statusTextWidth = measureTextWidth(
+                        text = "$sizeBytes MB",
                         style = readOnlyFieldTextStyle,
                     )
+                    Row {
+                        Text(
+                            modifier = Modifier.width(width = statusTextWidth * 3),
+                            text = "${bytesToMegaBytes(bytes = file.progressBytes)}/$sizeBytes MB",
+                            style = readOnlyFieldTextStyle,
+                        )
+
+                        FittoniaSpacerWidth(width = spacing32)
+
+                        if (transferJob.status != TransferStatus.Done) {
+                            Text(
+                                text = "${bytesToMegaBytes(bytes = transferJob.bytesPerSecond)}MB/s",
+                                style = readOnlyFieldTextStyle,
+                            )
+                        }
+                    }
                 },
                 endContent = {
-                    val statusTextWidth = measureTextWidth(
-                        text = "Status: ${transferJob.status.text}", // TODO
+                    val text = "Status: ${transferJob.status.text}"
+                    val statusTextWidth: Dp = measureTextWidth(
+                        text = text,
                         style = readOnlyFieldTextStyle,
                     )
                     Text(
                         modifier = Modifier.requiredWidth(width = statusTextWidth),
-                        text = "Status: ${transferJob.status.text}",
+                        text = text,
                         style = readOnlyFieldTextStyle,
                     )
                 },

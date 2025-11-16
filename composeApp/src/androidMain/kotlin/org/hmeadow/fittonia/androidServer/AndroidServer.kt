@@ -662,12 +662,15 @@ internal class AndroidServer : Service(), CoroutineScope, Server {
                                         name = item.name,
                                         size = encryptionFileCache.length(),
                                         progressPrecision = 0.01,
-                                    ) { progressBytes ->
+                                    ) { progressBytes: Long ->
+                                        val nanoElapsed: Float = (System.nanoTime() - bytesPerSecondTime).toFloat()
+                                        val secondsElapsed: Float = (nanoElapsed / 1_000_000_000f)
+                                        val averageBytes: Long = (progressBytes.toFloat() / secondsElapsed).toLong()
                                         currentJob = safelyUpdateJobItem(
                                             job = currentJob,
                                             item = item,
                                             itemBytes = progressBytes,
-                                            bytesPerSecond = (progressBytes / ((System.nanoTime() - bytesPerSecondTime)) / 1_000_000_000),
+                                            bytesPerSecond = averageBytes,
                                         )
                                     }
                                     currentJob = safelyUpdateJobItem(

@@ -15,4 +15,12 @@ abstract class CommonBaseMockkTest : BaseMockkTest() {
     override fun afterEachBaseMockk() {
         super.afterEachBaseMockk()
     }
+
+    inline fun <reified T> T.printTest(prefix: String = ""): T {
+        if (prefix.isNotEmpty()) {
+            print(prefix)
+        }
+        println(this)
+        return this
+    }
 }
