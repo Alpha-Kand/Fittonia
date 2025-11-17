@@ -57,7 +57,6 @@ import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
 import org.hmeadow.fittonia.mainActivity.MainActivity
-import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.utility.isLandscape
 
 // TODO move this somewhere better.
@@ -71,7 +70,7 @@ internal fun OverviewScreen(
     viewModel: OverviewScreenViewModel,
     data: SettingsDataAndroid,
     onSendFilesClicked: () -> Unit,
-    onTransferJobClicked: (TransferJob) -> Unit,
+    onTransferJobClicked: (Int) -> Unit,
     onAlertsClicked: () -> Unit,
     onGoToSettingsClicked: () -> Unit,
     pagerState: PagerState = rememberPagerState(),
@@ -96,14 +95,8 @@ internal fun OverviewScreen(
                             maxWidth = maxWidth,
                             maxHeight = maxHeight,
                             onTransferJobClicked = onTransferJobClicked,
-                            addNewDebugJob = viewModel::addNewDebugJob,
-                        )
-                    },
-                    "Completed transfers" to { maxWidth, maxHeight ->
-                        OverviewScreenCompletedTransfersTab(
-                            maxWidth = maxWidth,
-                            maxHeight = maxHeight,
                             completedJobs = data.completedJobs,
+                            addNewDebugJob = viewModel::addNewDebugJob,
                         )
                     },
                     "This Device" to { maxWidth, maxHeight ->

@@ -21,7 +21,6 @@ import org.hmeadow.fittonia.androidServer.AndroidServer.Companion.startSending
 import org.hmeadow.fittonia.compose.architecture.dataState
 import org.hmeadow.fittonia.mainActivity.MainActivity
 import org.hmeadow.fittonia.mainActivity.MainViewModel
-import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.screens.alertsScreen.AlertsScreen
 import org.hmeadow.fittonia.screens.alertsScreen.AlertsScreenViewModel
 import org.hmeadow.fittonia.screens.debugScreen.DebugScreen
@@ -105,8 +104,8 @@ class Navigator(private val mainViewModel: MainViewModel) {
             onSendFilesClicked = {
                 push(sendFilesScreen())
             },
-            onTransferJobClicked = { job ->
-                push(transferDetailsScreen(transferJob = job))
+            onTransferJobClicked = { id ->
+                push(transferDetailsScreen(id = id))
             },
             onAlertsClicked = {
                 push(alertsScreen())
@@ -166,9 +165,9 @@ class Navigator(private val mainViewModel: MainViewModel) {
         )
     }
 
-    private fun transferDetailsScreen(
-        transferJob: TransferJob,
-    ) = Screen(viewModel = TransferDetailsScreenViewModel(transferJob = transferJob)) { _, viewModel ->
+    private fun transferDetailsScreen(id: Int) = Screen(
+        viewModel = TransferDetailsScreenViewModel(id = id, mainViewModel = mainViewModel),
+    ) { _, viewModel ->
         TransferDetailsScreen(
             transferJobState = viewModel.currentTransferJob.dataState,
             onBackClicked = ::pop,

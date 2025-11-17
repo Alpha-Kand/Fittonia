@@ -12,7 +12,7 @@ import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.design.Spacing.spacing32
-import org.hmeadow.fittonia.models.TransferJob
+import org.hmeadow.fittonia.models.CompletedJob
 import org.hmeadow.fittonia.utility.Debug
 import org.hmeadow.fittonia.utility.Off
 
@@ -20,7 +20,8 @@ import org.hmeadow.fittonia.utility.Off
 fun OverviewScreenActiveTransfersTab(
     maxWidth: Dp,
     maxHeight: Dp,
-    onTransferJobClicked: (TransferJob) -> Unit,
+    onTransferJobClicked: (Int) -> Unit,
+    completedJobs: List<CompletedJob>,
     addNewDebugJob: () -> Unit,
 ) {
     Column(
@@ -31,7 +32,7 @@ fun OverviewScreenActiveTransfersTab(
     ) {
         FittoniaSpacerHeight(height = spacing32)
 
-        OverviewTransferList(onTransferJobClicked = onTransferJobClicked)
+        OverviewTransferList(completedJobs = completedJobs, onTransferJobClicked = onTransferJobClicked)
 
         Debug(Off) {
             FittoniaButton(

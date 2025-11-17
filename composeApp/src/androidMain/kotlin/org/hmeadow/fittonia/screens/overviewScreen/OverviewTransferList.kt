@@ -35,14 +35,15 @@ import org.hmeadow.fittonia.design.Spacing.spacing8
 import org.hmeadow.fittonia.design.fonts.headingSStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldSmallTextStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
-import org.hmeadow.fittonia.models.TransferJob
+import org.hmeadow.fittonia.models.CompletedJob
 import org.hmeadow.fittonia.models.TransferStatus
 import org.hmeadow.fittonia.utility.measureTextWidth
 import org.hmeadow.fittonia.utility.rememberPercentageFormat
 
 @Composable
 fun OverviewTransferList(
-    onTransferJobClicked: (TransferJob) -> Unit,
+    completedJobs: List<CompletedJob>,
+    onTransferJobClicked: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     key(appStyleResetReadOnly) {
@@ -61,15 +62,14 @@ fun OverviewTransferList(
 
             val androidServer = AndroidServer.server.collectAsState().value
             val transferJobs = androidServer?.transferJobs?.collectAsState()?.value ?: emptyList()
-
             HeaderRow(
-                noTransfers = transferJobs.isEmpty(),
+                noTransfers = transferJobs.isEmpty() && completedJobs.isEmpty(),
                 maxProgressWidth = maxProgressWidth,
                 maxStatusWidth = maxStatusWidth,
             )
 
-            if (transferJobs.isEmpty()) {
-                TransferRow(text = "No transfers active.", hideChevronColumn = true)
+            if (transferJobs.isEmpty() && completedJobs.isEmpty()) {
+                TransferRow(text = "No transfers active or complete.", hideChevronColumn = true)
                 HorizontalLine()
                 TransferRow(hideChevronColumn = true)
                 HorizontalLine()
@@ -78,11 +78,22 @@ fun OverviewTransferList(
             transferJobs.forEachIndexed { index, job ->
                 TransferRow(
                     text = job.description,
-                    onClick = { onTransferJobClicked(job) },
+                    onClick = { onTransferJobClicked(job.id) },
                     progress = job.progressPercentage,
                     status = job.status,
                 )
                 if (index != transferJobs.lastIndex) {
+                    HorizontalLine()
+                }
+            }
+            completedJobs.forEachIndexed { index, job ->
+                TransferRow(
+                    text = job.description,
+                    onClick = { onTransferJobClicked(job.id) },
+                    progress = null,
+                    status = TransferStatus.Done,
+                )
+                if (index != completedJobs.lastIndex) {
                     HorizontalLine()
                 }
             }

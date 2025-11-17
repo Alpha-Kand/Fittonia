@@ -8,7 +8,7 @@ import java.util.Objects
 import kotlin.math.min
 
 sealed interface TransferJob {
-    val id: Int
+    val id: Int // TODO Make into ID class.
     val status: TransferStatus
     val description: String
     val currentItem: Int
@@ -68,6 +68,7 @@ data class CompletedJob(
     val description: String,
     val items: List<CompletedItem>,
     val direction: Direction,
+    val targetName: String,
 ) {
     enum class Direction {
         Incoming,
@@ -91,6 +92,10 @@ val TransferJob.toCompletedJob: CompletedJob
             is IncomingJob -> CompletedJob.Direction.Incoming
         },
         description = description,
+        targetName = when (this) {
+            is OutgoingJob -> destination.name
+            is IncomingJob -> source.name
+        },
     )
 
 val Item.toCompletedItem: CompletedItem
