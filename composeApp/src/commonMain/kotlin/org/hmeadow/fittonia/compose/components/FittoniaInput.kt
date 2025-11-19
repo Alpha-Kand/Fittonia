@@ -24,7 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -141,6 +143,7 @@ fun FittoniaTextInput(
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
     filters: List<FittoniaInputFilter> = emptyList(),
     onInfo: (@Composable () -> Unit)? = null,
+    onFocusChanged: ((FocusState) -> Unit)? = null,
 ) {
     val noLabel: String? = null
     BaseFittoniaInput(
@@ -152,6 +155,7 @@ fun FittoniaTextInput(
         filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         onInfo = onInfo,
+        onFocusChanged = onFocusChanged,
     )
 }
 
@@ -164,6 +168,7 @@ fun FittoniaTextInput(
     filters: List<FittoniaInputFilter> = emptyList(),
     onInfo: (@Composable () -> Unit)? = null,
     label: String? = null,
+    onFocusChanged: ((FocusState) -> Unit)? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
@@ -174,6 +179,7 @@ fun FittoniaTextInput(
         filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         onInfo = onInfo,
+        onFocusChanged = onFocusChanged,
     )
 }
 
@@ -186,6 +192,7 @@ fun FittoniaTextInput(
     filters: List<FittoniaInputFilter> = emptyList(),
     onInfo: (@Composable () -> Unit)? = null,
     label: (@Composable () -> Unit)? = null,
+    onFocusChanged: ((FocusState) -> Unit)? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
@@ -196,6 +203,7 @@ fun FittoniaTextInput(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         onInfo = onInfo,
         label = label,
+        onFocusChanged = onFocusChanged,
     )
 }
 
@@ -208,6 +216,7 @@ fun FittoniaNumberInput(
     filters: List<FittoniaInputFilter> = emptyList(),
     onInfo: (@Composable () -> Unit)? = null,
     label: String? = null,
+    onFocusChanged: ((FocusState) -> Unit)? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
@@ -218,6 +227,7 @@ fun FittoniaNumberInput(
         filters = filters,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         onInfo = onInfo,
+        onFocusChanged = onFocusChanged,
     )
 }
 
@@ -230,6 +240,7 @@ fun FittoniaNumberInput(
     filters: List<FittoniaInputFilter> = emptyList(),
     onInfo: (@Composable () -> Unit)? = null,
     label: (@Composable () -> Unit)? = null,
+    onFocusChanged: ((FocusState) -> Unit)? = null,
 ) {
     BaseFittoniaInput(
         inputFlow = inputFlow,
@@ -240,6 +251,7 @@ fun FittoniaNumberInput(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         onInfo = onInfo,
         label = label,
+        onFocusChanged = onFocusChanged,
     )
 }
 
@@ -252,6 +264,7 @@ private fun BaseFittoniaInput(
     filters: List<FittoniaInputFilter>,
     onInfo: (@Composable () -> Unit)?,
     label: String?,
+    onFocusChanged: ((FocusState) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     BaseFittoniaInput(
@@ -271,6 +284,7 @@ private fun BaseFittoniaInput(
                 )
             }
         },
+        onFocusChanged = onFocusChanged,
     )
 }
 
@@ -283,6 +297,7 @@ private fun BaseFittoniaInput(
     lineLimits: TextFieldLineLimits,
     onInfo: (@Composable () -> Unit)?,
     label: (@Composable () -> Unit)?,
+    onFocusChanged: ((FocusState) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
@@ -307,6 +322,7 @@ private fun BaseFittoniaInput(
                             keyboard?.show()
                         }
                     }
+                    .onFocusChanged { onFocusChanged?.invoke(it) }
                     .infoBorder(onInfo = onInfo),
                 interactionSource = interactionSource,
                 readOnly = infoBorderActive,
