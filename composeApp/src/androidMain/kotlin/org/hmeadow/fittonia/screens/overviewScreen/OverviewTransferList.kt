@@ -75,16 +75,14 @@ fun OverviewTransferList(
                 HorizontalLine()
                 TransferRow(hideChevronColumn = true)
             }
-            transferJobs.forEachIndexed { index, job ->
+            transferJobs.forEach { job ->
                 TransferRow(
                     text = job.description,
                     onClick = { onTransferJobClicked(job.id) },
                     progress = job.progressPercentage,
                     status = job.status,
                 )
-                if (index != transferJobs.lastIndex) {
-                    HorizontalLine()
-                }
+                HorizontalLine()
             }
             completedJobs.forEachIndexed { index, job ->
                 TransferRow(
