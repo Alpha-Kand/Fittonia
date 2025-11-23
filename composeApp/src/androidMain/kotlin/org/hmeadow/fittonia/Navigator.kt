@@ -157,6 +157,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
                 onFinish(newDestination)
                 pop()
             },
+            onPing = AndroidServer::ping,
         ),
     ) { _, viewModel ->
         NewDestinationScreen(

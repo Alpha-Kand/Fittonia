@@ -50,7 +50,13 @@
     <string name="overview_screen_dump_permission_lost_notice">Permission was lost for your previously selected \'incoming transfers\' folder. Please reselect or choose another folder.</string>
 
     <!-- New Destination Screen -->
-    <string name="new_destination_screen_body">If you plan on sending files/messages to a remote device often, making it a Destination can help you from having to remember its details every time.</string>
+    <string name="new_destination_heading">New destination</string>
+    <string name="new_destination_screen_body_1">If you plan on sending files/messages to a remote device often, making it a Destination can help you from having to remember its details every time.</string>
+    <string name="new_destination_screen_body_2">The destination will be pinged to confirm its existence.</string>
+    <string name="new_destination_save_button">Save</string>
+    <string name="new_destination_access_code_label">Access Code</string>
+    <string name="new_destination_ip_address_label">IP Address/Code</string>
+    <string name="new_destination_name_label">Name</string>
 
     <!-- Transfer Details Screen -->
     <string name="transfer_details_screen_progress">%1$s - %2$d out of %3$d items %4$s.</string>
