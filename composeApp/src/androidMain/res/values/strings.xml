@@ -91,4 +91,10 @@
     <string name="send_files_screen_add_destination_button_info1">If you plan on sending files to the same device more than once, you can add it as a saved \'Destination\' so you don\'t have to enter its info each time.</string>
     <string name="send_files_screen_add_destination_button_info2">If the device\'s IP address changes, the saved \'Destination\' does not automatically update.</string>
     <string name="send_files_screen_description_field_info">You can give your group of files a name so it\'s easier to keep track of them.</string>
+
+    <!-- Emoticons -->
+    <string name="success_emoticon">✅</string>
+    <string name="connection_emoticon">📶</string>
+    <string name="failure_emoticon">❌</string>
+    <string name="right_arrow_emoticon">➡️</string>
 </resources>
