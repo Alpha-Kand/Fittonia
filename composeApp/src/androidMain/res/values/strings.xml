@@ -83,9 +83,9 @@
     <string name="send_files_screen_description_optional">(optional)</string>
     <string name="send_files_screen_confirm">Confirm</string>
 
-    <string name="send_files_screen_ping_success">✅ Connection success</string>
-    <string name="send_files_screen_ping_processing">📶 Trying to connect</string>
-    <string name="send_files_screen_ping_failure">❌ Connection failure</string>
+    <string name="send_files_screen_ping_success">Connection success</string>
+    <string name="send_files_screen_ping_processing">Trying to connect</string>
+    <string name="send_files_screen_ping_failure">Connection failure</string>
     <string name="send_files_screen_add_item_button_info1">Select individual files that you want to send. Fittonia doesn\'t support folders, yet.</string>
     <string name="send_files_screen_add_item_button_info2">Each file is encrypted before sending.</string>
     <string name="send_files_screen_add_destination_button_info1">If you plan on sending files to the same device more than once, you can add it as a saved \'Destination\' so you don\'t have to enter its info each time.</string>

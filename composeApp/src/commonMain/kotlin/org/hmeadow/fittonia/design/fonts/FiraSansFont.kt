@@ -96,3 +96,8 @@ val inputLabelStyle: TextStyle
         fontStyle = FontStyle.Italic,
         fontFamily = firaSansFont,
     )
+
+val emoticonStyle = TextStyle(
+    fontSize = 23.sp,
+    lineHeight = 33.sp,
+)
