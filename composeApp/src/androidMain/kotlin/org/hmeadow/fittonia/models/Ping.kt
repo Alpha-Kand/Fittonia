@@ -5,7 +5,9 @@ import java.time.Instant
 data class Ping(
     val pingStatus: PingStatus,
     val requestTimestamp: Long = Instant.now().toEpochMilli(),
-)
+) {
+    val isSuccessful = pingStatus is PingStatus.Success
+}
 
 sealed interface PingStatus {
     val visibilityPriority: Int
