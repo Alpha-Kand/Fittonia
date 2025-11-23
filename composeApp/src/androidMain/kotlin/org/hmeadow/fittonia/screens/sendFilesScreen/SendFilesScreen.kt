@@ -4,6 +4,7 @@ import SettingsManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,6 +53,7 @@ import org.hmeadow.fittonia.design.Spacing.spacing2
 import org.hmeadow.fittonia.design.Spacing.spacing32
 import org.hmeadow.fittonia.design.Spacing.spacing4
 import org.hmeadow.fittonia.design.Spacing.spacing8
+import org.hmeadow.fittonia.design.fonts.emoticonStyle
 import org.hmeadow.fittonia.design.fonts.headingMStyle
 import org.hmeadow.fittonia.design.fonts.inputLabelStyle
 import org.hmeadow.fittonia.design.fonts.paragraphTextStyle
@@ -60,7 +63,6 @@ import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
 import org.hmeadow.fittonia.models.Ping
 import org.hmeadow.fittonia.models.PingStatus
 import org.hmeadow.fittonia.models.TransferJob
-import org.hmeadow.fittonia.screens.overviewScreen.Options
 import org.hmeadow.fittonia.utility.ContinueStatusIcon
 import org.hmeadow.fittonia.utility.InfoBorderState.InfoBoxOverlay
 import org.hmeadow.fittonia.utility.pingStatus
@@ -71,6 +73,7 @@ internal fun SendFilesScreen(
     viewModel: SendFilesScreenViewModel,
     data: SettingsDataAndroid,
     onBackClicked: () -> Unit,
+    onDeleteDestinations: (List<String>) -> Unit,
 ) {
     var destinationPickerActive by remember { mutableStateOf(false) }
     var destinationState by remember { mutableStateOf("Select destination...") }
@@ -225,43 +228,76 @@ internal fun SendFilesScreen(
         },
         overlay = {
             InfoBoxOverlay()
+            var deleteDestinations by remember(data.destinations) {
+                mutableStateOf(List(data.destinations.size) { false })
+            }
             FittoniaModal(
                 state = destinationPickerActive,
-                onDismiss = { destinationPickerActive = false },
+                onDismiss = {
+                    destinationPickerActive = false
+                    deleteDestinations = List(data.destinations.size) { false }
+                },
+                topContent = {
+                    Text(
+                        modifier = Modifier
+                            .align(alignment = Alignment.End)
+                            .alpha(if (deleteDestinations.find { true } == true) 1.0f else 0f)
+                            .padding(top = spacing8, bottom = spacing16)
+                            .clickable {
+                                onDeleteDestinations(
+                                    deleteDestinations.mapIndexed { index, bool ->
+                                        data.destinations[index].name.takeIf { bool }
+                                    }.filterNotNull(),
+                                )
+                            },
+                        text = stringResource(R.string.trash_emoticon),
+                        style = emoticonStyle,
+                    )
+                },
             ) {
-                listOf(
-                    Options(
-                        name = "About", // TODO what is this about?
-                        onClick = {},
-                    ),
-                ).fastForEach {
-                    data.destinations.forEachIndexed { index, destination ->
-                        Row(
-                            modifier = Modifier.clickable {
+                data.destinations.forEachIndexed { index, destination ->
+                    Row(
+                        modifier = Modifier.combinedClickable(
+                            onLongClick = {
+                                deleteDestinations = deleteDestinations
+                                    .toMutableList()
+                                    .apply {
+                                        this[index] = !this[index]
+                                    }
+                            },
+                            onClick = {
                                 destinationState = destination.name
                                 viewModel.updateDestination(destination)
                                 destinationPickerActive = false
                             },
-                        ) {
+                        ),
+                    ) {
+                        if (deleteDestinations[index]) {
                             Text(
-                                text = destination.name,
-                                modifier = Modifier
-                                    .padding(horizontal = spacing8, vertical = spacing8),
+                                text = stringResource(R.string.failure_emoticon),
+                                modifier = Modifier.padding(horizontal = spacing8, vertical = spacing8),
                                 style = paragraphTextStyle,
-                            )
-                            FittoniaSpacerWeightRow()
-                            FittoniaIcon(
-                                modifier = Modifier
-                                    .requiredSize(size = spacing8)
-                                    .align(CenterVertically),
-                                drawableRes = R.drawable.ic_chevron_right,
-                                tint = Color(0xFF222222),
                             )
                         }
 
-                        if (index != data.destinations.lastIndex) {
-                            HorizontalLine()
-                        }
+                        Text(
+                            text = destination.name,
+                            modifier = Modifier
+                                .padding(horizontal = spacing8, vertical = spacing8),
+                            style = paragraphTextStyle,
+                        )
+                        FittoniaSpacerWeightRow()
+                        FittoniaIcon(
+                            modifier = Modifier
+                                .requiredSize(size = spacing8)
+                                .align(CenterVertically),
+                            drawableRes = R.drawable.ic_chevron_right,
+                            tint = Color(0xFF222222),
+                        )
+                    }
+
+                    if (index != data.destinations.lastIndex) {
+                        HorizontalLine()
                     }
                 }
             }
@@ -471,5 +507,6 @@ private fun Preview() {
             ),
         ),
         onBackClicked = { },
+        onDeleteDestinations = {},
     )
 }

@@ -36,6 +36,7 @@ fun FittoniaModal(
     contentBackgroundColour: Color = Color.White,
     contentBorderColour: Color = Color.Black,
     onDismiss: () -> Unit,
+    topContent: @Composable ColumnScope.() -> Unit = {},
     content: @Composable ColumnScope.(() -> Unit) -> Unit,
 ) {
     if (state) {
@@ -73,23 +74,28 @@ fun FittoniaModal(
                     modifier = Modifier
                         .align(alignment = alignment)
                         .padding(horizontal = spacing16)
-                        .padding(vertical = spacing64)
-                        .clip(shape = RoundedCornerShape(corner = CornerSize(5.dp)))
-                        .background(
-                            color = contentBackgroundColour,
-                            shape = RoundedCornerShape(corner = CornerSize(5.dp)),
-                        )
-                        .border(
-                            width = BORDER_WIDTH.dp,
-                            color = contentBorderColour,
-                            shape = RoundedCornerShape(corner = CornerSize(5.dp)),
-                        )
-                        .fillMaxWidth()
-                        .padding(horizontal = spacing16),
-                    content = {
-                        content(onDismiss)
-                    },
-                )
+                        .padding(vertical = spacing64),
+                ) {
+                    topContent()
+                    Column(
+                        modifier = Modifier
+                            .clip(shape = RoundedCornerShape(corner = CornerSize(5.dp)))
+                            .background(
+                                color = contentBackgroundColour,
+                                shape = RoundedCornerShape(corner = CornerSize(5.dp)),
+                            )
+                            .border(
+                                width = BORDER_WIDTH.dp,
+                                color = contentBorderColour,
+                                shape = RoundedCornerShape(corner = CornerSize(5.dp)),
+                            )
+                            .fillMaxWidth()
+                            .padding(horizontal = spacing16),
+                        content = {
+                            content(onDismiss)
+                        },
+                    )
+                }
             }
         }
     }

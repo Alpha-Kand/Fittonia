@@ -141,6 +141,7 @@ class Navigator(private val mainViewModel: MainViewModel) {
             viewModel = viewModel,
             data = data,
             onBackClicked = ::pop,
+            onDeleteDestinations = mainViewModel::deleteDestinations,
         )
     }
 

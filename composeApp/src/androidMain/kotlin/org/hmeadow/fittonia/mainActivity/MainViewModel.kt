@@ -105,6 +105,14 @@ class MainViewModel(val dataStore: DataStore<SettingsDataAndroid>) : ViewModel()
         updateTemporaryPort(port = null)
     }
 
+    fun deleteDestinations(names: List<String>) {
+        launch {
+            dataStore.updateData {
+                it.copy(destinations = it.destinations.filter { destination -> !names.contains(destination.name) })
+            }
+        }
+    }
+
     fun updateServerAccessCode(accessCode: String) {
         launch {
             dataStore.updateData {
