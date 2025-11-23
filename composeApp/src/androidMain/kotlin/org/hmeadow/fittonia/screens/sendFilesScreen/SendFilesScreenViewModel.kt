@@ -5,9 +5,6 @@ import androidx.documentfile.provider.DocumentFile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.hmeadow.fittonia.BaseViewModel
 import org.hmeadow.fittonia.components.EquivalentIPCode
 import org.hmeadow.fittonia.components.decipherIpAndCode
@@ -18,12 +15,13 @@ import org.hmeadow.fittonia.models.Ping
 import org.hmeadow.fittonia.models.PingStatus
 import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.models.TransferStatus
-import org.hmeadow.fittonia.models.mostRecent
+import org.hmeadow.fittonia.utility.ContinueFlow
+import org.hmeadow.fittonia.utility.DestinationPing
+import org.hmeadow.fittonia.utility.canContinue
 import org.hmeadow.fittonia.utility.debug
 import org.hmeadow.fittonia.utility.decodeIpAddress
 import org.hmeadow.fittonia.utility.getFileSizeBytes
 import org.hmeadow.fittonia.utility.tryOrNull
-import java.time.Instant
 
 internal class SendFilesScreenViewModel(
     private val onSaveOneTimeDestinationCallback: (
@@ -34,23 +32,39 @@ internal class SendFilesScreenViewModel(
     private val onAddNewDestinationCallback: (onFinish: (newDestination: SettingsManager.Destination) -> Unit) -> Unit,
     private val onPing: suspend (ip: String, port: Int, accessCode: String, requestTimestamp: Long) -> Ping,
     private val onConfirmCallback: suspend (OutgoingJob) -> Unit,
-) : BaseViewModel() {
+) : BaseViewModel(), DestinationPing {
     val itemListState = MutableStateFlow<List<TransferJob.Item>>(emptyList())
+    val itemListContinue: ContinueFlow<List<TransferJob.Item>> = ContinueFlow(flow = itemListState) { itemList ->
+        if (itemList.isNotEmpty()) {
+            ContinueFlow.ContinueFlag.Pass
+        } else {
+            ContinueFlow.ContinueFlag.Fail
+        }
+    }
     val selectedDestinationState = MutableStateFlow<SettingsManager.Destination?>(null)
+    val selectedDestinationContinue = ContinueFlow(flow = selectedDestinationState) { itemList ->
+        if (itemList != null) {
+            ContinueFlow.ContinueFlag.Pass
+        } else {
+            ContinueFlow.ContinueFlag.Fail
+        }
+    }
     val portState: InputFlow = initInputFlow(
         initial = debug(debugValue = "44556", releaseValue = "44556"), // TODO
         onValueChange = { port ->
             if (port.isNotEmpty()) {
                 selectedDestinationState.value?.let {
-                    updatePing(it, port.toInt())
+                    updatePing(it, port.toInt(), onPing = onPing)
                 } ?: updatePing(
                     ip = oneTimeIpAddressState.text,
                     accessCode = oneTimeAccessCodeState.text,
                     port = port.toInt(),
+                    onPing = onPing,
                 )
             }
         },
     )
+    override val ping = MutableStateFlow(value = Ping(PingStatus.NoPing))
     val descriptionState: InputFlow = initInputFlow(initial = "")
 
     val equivelentIpOrCode: MutableStateFlow<EquivalentIPCode> = MutableStateFlow(value = EquivalentIPCode.Neither)
@@ -62,10 +76,18 @@ internal class SendFilesScreenViewModel(
                 ip = ip,
                 accessCode = oneTimeAccessCodeState.text,
                 port = portState.text.toInt(),
+                onPing = onPing,
             )
             equivelentIpOrCode.update { decipherIpAndCode(ip = ip) }
         },
     )
+    val oneTimeIpAddressContinue: ContinueFlow<String> = ContinueFlow(flow = oneTimeIpAddressState) { ipAddress ->
+        if (ipAddress.isNotEmpty() && decipherIpAndCode(ipAddress) !is EquivalentIPCode.Neither) {
+            ContinueFlow.ContinueFlag.Pass
+        } else {
+            ContinueFlow.ContinueFlag.Fail
+        }
+    }
     val oneTimeAccessCodeState: InputFlow = initInputFlow(
         initial = "",
         onValueChange = { accessCode ->
@@ -74,17 +96,43 @@ internal class SendFilesScreenViewModel(
                     ip = oneTimeIpAddressState.text,
                     accessCode = accessCode,
                     port = portState.text.toInt(),
+                    onPing = onPing,
                 )
             }
         },
     )
+    val oneTimeAccessCodeContinue: ContinueFlow<String> = ContinueFlow(flow = oneTimeAccessCodeState) { accessCode ->
+        if (accessCode.isNotEmpty()) {
+            ContinueFlow.ContinueFlag.Pass
+        } else {
+            ContinueFlow.ContinueFlag.Fail
+        }
+    }
 
     val canContinue = combine(
-        itemListState,
-        selectedDestinationState,
+        itemListContinue.result,
+        selectedDestinationContinue.result,
         portState,
-    ) { itemList, _, port ->
-        itemList.isNotEmpty() && port.isNotEmpty()
+        ping,
+    ) { itemList, destination, port, pingStatus ->
+        itemList.canContinue
+            .and(port.isNotEmpty())
+            .and(destination.canContinue)
+            .and(pingStatus.isSuccessful)
+    }
+
+    val canContinueOneTime = combine(
+        itemListContinue.result,
+        oneTimeIpAddressContinue.result,
+        oneTimeAccessCodeContinue.result,
+        portState,
+        ping,
+    ) { itemList, ip, accessCode, port, pingStatus ->
+        itemList.canContinue
+            .and(ip.canContinue)
+            .and(port.isNotEmpty())
+            .and(accessCode.canContinue)
+            .and(pingStatus.isSuccessful)
     }
 
     init {
@@ -94,64 +142,15 @@ internal class SendFilesScreenViewModel(
     fun updateDestination(destination: SettingsManager.Destination) {
         selectedDestinationState.value = destination
         if (portState.text.isNotEmpty()) {
-            updatePing(destination, portState.text.toInt())
+            updatePing(destination = destination, portState.text.toInt(), onPing = onPing)
         }
-    }
-
-    private fun updatePing(destination: SettingsManager.Destination, port: Int) {
-        updatePing(ip = destination.ip, accessCode = destination.accessCode, port = port)
-    }
-
-    private fun updatePing(ip: String, accessCode: String, port: Int) {
-        if (ip.isNotBlank() && accessCode.isNotBlank()) {
-            launch {
-                val timestamp = Instant.now().toEpochMilli()
-                updatePingAtomically(newPing = Ping(PingStatus.Processing, timestamp))
-                updatePingAtomically(
-                    newPing = onPing(
-                        ip,
-                        port, // TODO remove Port type. - After release
-                        accessCode, // TODO before release - check if access code should be string and not bytearray.
-                        Instant.now().toEpochMilli().let { now ->
-                            if (now == timestamp) {
-                                timestamp + 1
-                            } else {
-                                now
-                            }
-                        },
-                    ),
-                )
-            }
-        }
-    }
-
-    val ping = MutableStateFlow(value = Ping(PingStatus.NoPing))
-    private val pingMutex = Mutex()
-    private suspend fun updatePingAtomically(newPing: Ping) {
-        pingMutex.withLock {
-            ping.value = mostRecent(ping.value, newPing)
-        }
-    }
-
-    val canContinueOneTime = combine(
-        itemListState,
-        oneTimeIpAddressState,
-        oneTimeAccessCodeState,
-        portState,
-        ping,
-    ) { itemList, ip, accessCode, port, pingStatus ->
-        itemList.isNotEmpty()
-            .and(ip.isNotEmpty())
-            .and(port.isNotEmpty())
-            .and(accessCode.isNotEmpty())
-            .and(pingStatus.pingStatus is PingStatus.Success)
     }
 
     fun onSaveOneTimeDestinationClicked() {
         onSaveOneTimeDestinationCallback(oneTimeIpAddressState.text, oneTimeAccessCodeState.text) { newDestination ->
             selectedDestinationState.value = newDestination
             if (portState.text.isNotEmpty()) {
-                updatePing(destination = newDestination, port = portState.text.toInt())
+                updatePing(destination = newDestination, port = portState.text.toInt(), onPing = onPing)
             }
         }
     }
@@ -160,7 +159,7 @@ internal class SendFilesScreenViewModel(
         onAddNewDestinationCallback { newDestination ->
             selectedDestinationState.value = newDestination
             if (portState.text.isNotEmpty()) {
-                updatePing(destination = newDestination, port = portState.text.toInt())
+                updatePing(destination = newDestination, port = portState.text.toInt(), onPing = onPing)
             }
         }
     }

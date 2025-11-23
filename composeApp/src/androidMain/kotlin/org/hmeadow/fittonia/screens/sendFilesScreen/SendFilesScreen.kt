@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -17,7 +16,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -29,20 +30,22 @@ import kotlinx.coroutines.flow.update
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.components.ButtonIcon
+import org.hmeadow.fittonia.components.EquivalentIPCode
 import org.hmeadow.fittonia.components.EquivalentIpCodeText
 import org.hmeadow.fittonia.components.FittoniaHeader
 import org.hmeadow.fittonia.components.FittoniaIcon
 import org.hmeadow.fittonia.components.FittoniaModal
 import org.hmeadow.fittonia.components.FittoniaScaffold
 import org.hmeadow.fittonia.components.HorizontalLine
+import org.hmeadow.fittonia.components.PingStatusComponent
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerHeight
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWeightRow
 import org.hmeadow.fittonia.compose.architecture.FittoniaSpacerWidth
 import org.hmeadow.fittonia.compose.architecture.currentStyle
 import org.hmeadow.fittonia.compose.components.FittoniaButton
 import org.hmeadow.fittonia.compose.components.FittoniaCheckbox
-import org.hmeadow.fittonia.compose.components.FittoniaLoadingIndicator
 import org.hmeadow.fittonia.compose.components.FittoniaTextInput
+import org.hmeadow.fittonia.compose.components.InputFlow
 import org.hmeadow.fittonia.design.Spacing.spacing16
 import org.hmeadow.fittonia.design.Spacing.spacing2
 import org.hmeadow.fittonia.design.Spacing.spacing32
@@ -56,8 +59,11 @@ import org.hmeadow.fittonia.design.fonts.readOnlyFieldLightTextStyle
 import org.hmeadow.fittonia.design.fonts.readOnlyFieldTextStyle
 import org.hmeadow.fittonia.models.Ping
 import org.hmeadow.fittonia.models.PingStatus
+import org.hmeadow.fittonia.models.TransferJob
 import org.hmeadow.fittonia.screens.overviewScreen.Options
+import org.hmeadow.fittonia.utility.ContinueStatusIcon
 import org.hmeadow.fittonia.utility.InfoBorderState.InfoBoxOverlay
+import org.hmeadow.fittonia.utility.pingStatus
 import org.hmeadow.fittonia.utility.rememberSuspendedAction
 
 @Composable
@@ -85,61 +91,31 @@ internal fun SendFilesScreen(
                     text = stringResource(R.string.send_files_screen_select_files_folders),
                     style = headingMStyle,
                 )
-                FittoniaSpacerHeight(height = spacing4)
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(width = 2.dp, color = Color(0xFF446644))
-                        .background(color = Color(0xFFDDFFEE)),
-                ) {
-                    val fileList = viewModel.itemListState.collectAsState()
-                    fileList.value.forEachIndexed { index, file ->
-                        Row(
-                            modifier = Modifier.padding(all = spacing4),
-                            verticalAlignment = CenterVertically,
-                        ) {
-                            Text(text = file.name)
-                            FittoniaSpacerWeightRow()
-                            FittoniaIcon(
-                                modifier = Modifier
-                                    .requiredSize(14.dp)
-                                    .clickable {
-                                        viewModel.itemListState.value = fileList.value.filter { it != file }
-                                    },
-                                drawableRes = R.drawable.ic_clear,
-                                tint = Color(0xFF222222),
-                            )
-                        }
-                        if (index != fileList.value.lastIndex) {
-                            HorizontalLine()
-                        }
-                    }
-                }
-                FittoniaSpacerHeight(height = spacing4)
-                Row {
-                    FittoniaButton(
-                        onClick = viewModel::onUserSelectItem,
-                        content = {
-                            ButtonText(text = stringResource(R.string.send_files_screen_add_file))
-                            FittoniaSpacerWidth(width = spacing4)
-                            ButtonIcon(drawableRes = R.drawable.ic_add)
-                        },
-                        onInfo = {
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.send_files_screen_add_item_button_info1),
-                                    style = paragraphTextStyle,
-                                )
-                                FittoniaSpacerHeight(height = spacing8)
-                                Text(
-                                    text = stringResource(R.string.send_files_screen_add_item_button_info2),
-                                    style = paragraphTextStyle,
-                                )
-                            }
-                        },
+
+                FittoniaSpacerHeight(height = spacing8)
+
+                Row(verticalAlignment = Top) {
+                    val itemList = viewModel.itemListState.collectAsState().value
+
+                    ContinueStatusIcon(
+                        modifier = Modifier.padding(top = if (itemList.isEmpty()) spacing4 else 0.dp),
+                        continueStatus = viewModel.itemListContinue.collect(),
                     )
-                    Spacer(modifier = Modifier.weight(1.0f))
+
+                    FittoniaSpacerWidth(width = spacing16)
+
+                    Column {
+                        SelectedFileList(
+                            selectedFiles = itemList,
+                            updatedSelectedFiles = { viewModel.itemListState.value = it },
+                        )
+
+                        AddFileButton(onClicked = viewModel::onUserSelectItem)
+                    }
+
+                    FittoniaSpacerWeightRow()
                 }
+
                 FittoniaSpacerHeight(height = spacing32)
                 Text(
                     text = stringResource(R.string.send_files_screen_add_destination),
@@ -152,159 +128,84 @@ internal fun SendFilesScreen(
                         viewModel.ping.update { Ping(PingStatus.NoPing) }
                     }
                 }
+
                 FittoniaSpacerHeight(height = spacing8)
+
                 if (oneTimeDestinationState) {
                     FittoniaSpacerHeight(height = spacing16)
 
-                    FittoniaTextInput(
-                        modifier = Modifier.fillMaxWidth(),
-                        inputFlow = viewModel.oneTimeIpAddressState,
-                        label = stringResource(R.string.send_files_screen_ip_address_code),
-                        // todo hint = "Tip: Check destination's \"This Device\" tab",
-                    )
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        val equivelentIpOrCode = viewModel.equivelentIpOrCode.collectAsState().value
+                        val continueStatusBottomPadding = if (equivelentIpOrCode !is EquivalentIPCode.Neither) {
+                            23.dp
+                        } else {
+                            0.dp
+                        }
 
-                    FittoniaSpacerHeight(height = spacing4)
+                        ContinueStatusIcon(
+                            modifier = Modifier.padding(bottom = continueStatusBottomPadding),
+                            continueStatus = viewModel.oneTimeIpAddressContinue.collect(),
+                        )
 
-                    EquivalentIpCodeText(equivalentIPCode = viewModel.equivelentIpOrCode.collectAsState().value)
+                        FittoniaSpacerWidth(width = spacing16)
+
+                        Column {
+                            FittoniaTextInput(
+                                modifier = Modifier.fillMaxWidth(),
+                                inputFlow = viewModel.oneTimeIpAddressState,
+                                label = stringResource(R.string.send_files_screen_ip_address_code),
+                                // todo hint = "Tip: Check destination's \"This Device\" tab",
+                            )
+
+                            FittoniaSpacerHeight(height = spacing4)
+
+                            EquivalentIpCodeText(equivalentIPCode = viewModel.equivelentIpOrCode.collectAsState().value)
+                        }
+                    }
 
                     FittoniaSpacerHeight(height = spacing16)
 
-                    FittoniaTextInput(
-                        modifier = Modifier.fillMaxWidth(),
-                        inputFlow = viewModel.oneTimeAccessCodeState,
-                        label = stringResource(R.string.send_files_screen_access_code), // TODO trim whitespace.
-                    )
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        ContinueStatusIcon(continueStatus = viewModel.oneTimeAccessCodeContinue.collect())
 
+                        FittoniaSpacerWidth(width = spacing16)
+
+                        FittoniaTextInput(
+                            modifier = Modifier.fillMaxWidth(),
+                            inputFlow = viewModel.oneTimeAccessCodeState,
+                            label = stringResource(R.string.send_files_screen_access_code), // TODO trim whitespace.
+                        )
+                    }
                     FittoniaSpacerHeight(height = spacing32)
                 }
+
                 if (data.destinations.isNotEmpty() && !oneTimeDestinationState) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(width = 1.dp, color = currentStyle.primaryButtonType.borderColour)
-                            .background(color = currentStyle.primaryButtonType.backgroundColor)
-                            .padding(all = spacing4)
-                            .clickable(onClick = { destinationPickerActive = true }),
-                    ) {
-                        val selectedDestination = viewModel.selectedDestinationState.collectAsState()
-                        Row(
-                            modifier = Modifier.padding(start = spacing4),
-                            verticalAlignment = CenterVertically,
-                        ) {
-                            Text(
-                                text = selectedDestination.value?.name
-                                    ?: stringResource(R.string.send_files_screen_select_destination),
-                                style = readOnlyFieldTextStyle,
-                                color = currentStyle.primaryButtonType.contentColour,
-                            )
-                            FittoniaSpacerWeightRow()
-                            FittoniaIcon(
-                                modifier = Modifier.requiredSize(10.dp),
-                                drawableRes = R.drawable.ic_chevron_down,
-                                tint = currentStyle.primaryButtonType.contentColour,
-                            )
-                        }
-                        selectedDestination.value?.let { destination ->
-                            FittoniaSpacerHeight(height = spacing4)
-                            HorizontalLine()
-                            FittoniaSpacerHeight(height = spacing8)
-                            listOf(
-                                // TODO fix alignment here.
-                                "IP Address: ${destination.ip}",
-                                "Access Code: • • • • • • • • • • • •",
-                            ).fastForEach {
-                                Text(
-                                    modifier = Modifier
-                                        .padding(start = spacing4)
-                                        .padding(vertical = spacing2),
-                                    text = it,
-                                    style = readOnlyFieldLightTextStyle,
-                                )
-                            }
-                        }
+                    Row {
+                        ContinueStatusIcon(continueStatus = viewModel.selectedDestinationContinue.collect())
+                        FittoniaSpacerWidth(width = spacing16)
+                        SelectDestinationPicker(
+                            onClicked = { destinationPickerActive = true },
+                            selectedDestination = viewModel.selectedDestinationState.collectAsState().value,
+                        )
                     }
                 }
+
                 FittoniaSpacerHeight(height = spacing4)
+
                 if (oneTimeDestinationState) {
-                    FittoniaButton(
-                        type = currentStyle.secondaryButtonType,
-                        onClick = viewModel::onSaveOneTimeDestinationClicked,
-                    ) {
-                        ButtonText(text = stringResource(R.string.send_files_screen_save_new_destination))
-                        FittoniaSpacerWidth(width = spacing4)
-                        ButtonIcon(drawableRes = R.drawable.ic_add)
-                    }
+                    SaveNewDestination(onClicked = viewModel::onSaveOneTimeDestinationClicked)
                 } else {
-                    FittoniaButton(
-                        onClick = viewModel::onAddNewDestinationClicked,
-                        onInfo = {
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.send_files_screen_add_destination_button_info1),
-                                    style = paragraphTextStyle,
-                                )
-                                FittoniaSpacerHeight(height = spacing8)
-                                Text(
-                                    text = stringResource(R.string.send_files_screen_add_destination_button_info2),
-                                    style = paragraphTextStyle,
-                                )
-                            }
-                        },
-                    ) {
-                        ButtonText(text = stringResource(R.string.send_files_screen_add_destination))
-                    }
+                    AddNewDestinationButton(onClicked = viewModel::onAddNewDestinationClicked)
                 }
 
                 FittoniaSpacerHeight(height = spacing8)
 
-                // TODO move the ping status somewhere you can see it as you type ip and code.
-                when (viewModel.ping.collectAsState(Ping(PingStatus.NoPing)).value.pingStatus) {
-                    is PingStatus.NoPing -> Unit
-                    is PingStatus.Processing -> Row {
-                        Text(
-                            text = stringResource(R.string.send_files_screen_ping_processing),
-                            style = paragraphTextStyle,
-                        )
-                        FittoniaLoadingIndicator()
-                    }
-
-                    is PingStatus.Success -> Text(
-                        text = stringResource(R.string.send_files_screen_ping_success),
-                        style = paragraphTextStyle,
-                    )
-
-                    is PingStatus.Failure -> Text(
-                        text = stringResource(R.string.send_files_screen_ping_failure),
-                        style = paragraphTextStyle,
-                    )
-                }
+                PingStatusComponent(pingStatus = viewModel.pingStatus)
 
                 FittoniaSpacerHeight(height = spacing32)
 
-                FittoniaTextInput(
-                    modifier = Modifier.fillMaxWidth(),
-                    inputFlow = viewModel.descriptionState,
-                    label = {
-                        Row {
-                            Text(
-                                text = stringResource(R.string.send_files_screen_description),
-                                style = inputLabelStyle,
-                            )
-                            FittoniaSpacerWidth(width = spacing4)
-                            Text(
-                                modifier = Modifier.align(alignment = CenterVertically),
-                                text = stringResource(R.string.send_files_screen_description_optional),
-                                style = psstStyle,
-                            )
-                        }
-                    },
-                    onInfo = {
-                        Text(
-                            text = stringResource(R.string.send_files_screen_description_field_info),
-                            style = paragraphTextStyle,
-                        )
-                    },
-                )
+                DescriptionInputField(inputFlow = viewModel.descriptionState)
+
                 FittoniaSpacerHeight(height = spacing32)
             }
         },
@@ -366,6 +267,178 @@ internal fun SendFilesScreen(
             }
         },
     )
+}
+
+@Composable
+private fun SelectDestinationPicker(
+    onClicked: () -> Unit,
+    selectedDestination: SettingsManager.Destination?,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(width = 1.dp, color = currentStyle.primaryButtonType.borderColour)
+            .background(color = currentStyle.primaryButtonType.backgroundColor)
+            .padding(all = spacing4)
+            .clickable(onClick = onClicked),
+    ) {
+        Row(
+            modifier = Modifier.padding(start = spacing4),
+            verticalAlignment = CenterVertically,
+        ) {
+            Text(
+                text = selectedDestination?.name
+                    ?: stringResource(R.string.send_files_screen_select_destination),
+                style = readOnlyFieldTextStyle,
+                color = currentStyle.primaryButtonType.contentColour,
+            )
+            FittoniaSpacerWeightRow()
+            FittoniaIcon(
+                modifier = Modifier.requiredSize(10.dp),
+                drawableRes = R.drawable.ic_chevron_down,
+                tint = currentStyle.primaryButtonType.contentColour,
+            )
+        }
+        selectedDestination?.let { destination ->
+            FittoniaSpacerHeight(height = spacing4)
+            HorizontalLine()
+            FittoniaSpacerHeight(height = spacing8)
+            listOf(
+                // TODO fix alignment here.
+                "IP Address: ${destination.ip}",
+                "Access Code: • • • • • • • • • • • •",
+            ).fastForEach {
+                Text(
+                    modifier = Modifier
+                        .padding(start = spacing4)
+                        .padding(vertical = spacing2),
+                    text = it,
+                    style = readOnlyFieldLightTextStyle,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SelectedFileList(
+    selectedFiles: List<TransferJob.Item>,
+    updatedSelectedFiles: (List<TransferJob.Item>) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(width = 2.dp, color = Color(0xFF446644))
+            .background(color = Color(0xFFDDFFEE)),
+    ) {
+        selectedFiles.forEachIndexed { index, file ->
+            Row(
+                modifier = Modifier.padding(all = spacing4),
+                verticalAlignment = CenterVertically,
+            ) {
+                Text(text = file.name)
+                FittoniaSpacerWeightRow()
+                FittoniaIcon(
+                    modifier = Modifier
+                        .requiredSize(spacing16)
+                        .clickable { updatedSelectedFiles(selectedFiles.filter { it != file }) },
+                    drawableRes = R.drawable.ic_clear,
+                    tint = Color(0xFF222222),
+                )
+            }
+            if (index != selectedFiles.lastIndex) {
+                HorizontalLine()
+            }
+        }
+    }
+}
+
+@Composable
+private fun AddFileButton(modifier: Modifier = Modifier, onClicked: () -> Unit) {
+    FittoniaButton(
+        modifier = modifier,
+        onClick = onClicked,
+        content = {
+            ButtonText(text = stringResource(R.string.send_files_screen_add_file))
+            FittoniaSpacerWidth(width = spacing4)
+            ButtonIcon(drawableRes = R.drawable.ic_add)
+        },
+        onInfo = {
+            Column {
+                Text(
+                    text = stringResource(R.string.send_files_screen_add_item_button_info1),
+                    style = paragraphTextStyle,
+                )
+                FittoniaSpacerHeight(height = spacing8)
+                Text(
+                    text = stringResource(R.string.send_files_screen_add_item_button_info2),
+                    style = paragraphTextStyle,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun DescriptionInputField(inputFlow: InputFlow) {
+    FittoniaTextInput(
+        modifier = Modifier.fillMaxWidth(),
+        inputFlow = inputFlow,
+        label = {
+            Row {
+                Text(
+                    text = stringResource(R.string.send_files_screen_description),
+                    style = inputLabelStyle,
+                )
+                FittoniaSpacerWidth(width = spacing4)
+                Text(
+                    modifier = Modifier.align(alignment = CenterVertically),
+                    text = stringResource(R.string.send_files_screen_description_optional),
+                    style = psstStyle,
+                )
+            }
+        },
+        onInfo = {
+            Text(
+                text = stringResource(R.string.send_files_screen_description_field_info),
+                style = paragraphTextStyle,
+            )
+        },
+    )
+}
+
+@Composable
+private fun SaveNewDestination(onClicked: () -> Unit) {
+    FittoniaButton(
+        type = currentStyle.secondaryButtonType,
+        onClick = onClicked,
+    ) {
+        ButtonText(text = stringResource(R.string.send_files_screen_save_new_destination))
+        FittoniaSpacerWidth(width = spacing4)
+        ButtonIcon(drawableRes = R.drawable.ic_add)
+    }
+}
+
+@Composable
+private fun AddNewDestinationButton(onClicked: () -> Unit) {
+    FittoniaButton(
+        onClick = onClicked,
+        onInfo = {
+            Column {
+                Text(
+                    text = stringResource(R.string.send_files_screen_add_destination_button_info1),
+                    style = paragraphTextStyle,
+                )
+                FittoniaSpacerHeight(height = spacing8)
+                Text(
+                    text = stringResource(R.string.send_files_screen_add_destination_button_info2),
+                    style = paragraphTextStyle,
+                )
+            }
+        },
+    ) {
+        ButtonText(text = stringResource(R.string.send_files_screen_add_destination))
+    }
 }
 
 @Composable
