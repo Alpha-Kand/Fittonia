@@ -228,7 +228,7 @@ class MainActivity : ComponentActivity() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         val operation = PendingIntent.getForegroundService(
                             this,
-                            69,
+                            19,
                             intent,
                             PendingIntent.FLAG_IMMUTABLE,
                         )
