@@ -113,6 +113,7 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 4
         versionName = "0.3.0"
+        buildConfigField("long", "BUILDTIMESTAMP", "${System.currentTimeMillis()}L")
     }
     packaging {
         resources {

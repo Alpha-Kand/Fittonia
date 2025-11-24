@@ -32,6 +32,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.update
+import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.R
 import org.hmeadow.fittonia.SettingsDataAndroid
 import org.hmeadow.fittonia.UserAlert
@@ -202,14 +203,14 @@ internal fun OverviewScreen(
                         text = stringResource(
                             R.string.about_modal_name_format,
                             stringResource(R.string.app_name),
-                            stringResource(R.string.app_version),
+                            BuildConfig.VERSION_NAME,
                         ),
                         style = headingMStyle,
                     )
                     FittoniaSpacerHeight(height = spacing8)
 
                     Text(
-                        text = stringResource(R.string.last_built_date),
+                        text = stringResource(R.string.last_built_date, viewModel.buildTimeStamp),
                         style = paragraphTextStyle,
                     )
 

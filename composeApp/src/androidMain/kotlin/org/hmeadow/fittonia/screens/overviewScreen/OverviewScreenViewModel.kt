@@ -1,11 +1,14 @@
 package org.hmeadow.fittonia.screens.overviewScreen
 
 import SettingsManager
+import android.icu.text.DateFormat
+import android.icu.util.Calendar
 import android.net.Uri
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.hmeadow.fittonia.BaseViewModel
+import org.hmeadow.fittonia.BuildConfig
 import org.hmeadow.fittonia.UserAlert
 import org.hmeadow.fittonia.androidServer.AndroidServer
 import org.hmeadow.fittonia.mainActivity.MainActivity
@@ -21,8 +24,13 @@ internal class OverviewScreenViewModel(
 ) : BaseViewModel() {
     val needDumpAccess = MutableStateFlow(false)
     val deviceIp = MutableStateFlow("Unknown")
+    val buildTimeStamp: String
 
     init {
+        val calendar = Calendar.getInstance().apply { timeInMillis = BuildConfig.BUILDTIMESTAMP }
+        val dateFormatter = DateFormat.getDateTimeInstance().apply { timeZone = calendar.timeZone }
+        buildTimeStamp = dateFormatter.format(calendar.time)
+
         launch {
             when (val state = MainActivity.mainActivity.createJobDirectory(jobName = "ACCESS")) {
                 is MainActivity.CreateDumpDirectory.Error -> {
