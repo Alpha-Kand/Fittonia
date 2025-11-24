@@ -3,6 +3,7 @@ package org.hmeadow.fittonia.androidServer
 import LogType
 import Server
 import ServerCommandFlag
+import android.app.ForegroundServiceStartNotAllowedException
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.Service
@@ -10,6 +11,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 import android.net.Uri
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import androidx.compose.ui.util.fastForEach
 import androidx.core.app.ServiceCompat
@@ -65,6 +67,11 @@ import java.net.SocketTimeoutException
 import kotlin.coroutines.CoroutineContext
 
 internal class AndroidServer : Service(), CoroutineScope, Server {
+    private val foregroundStartErrorCountError =
+        $$"ForegroundServiceStartNotAllowedException was thrown %1$d times during %2$d seconds."
+    private var firstForegroundStartErrorTimestamp: Long = 0
+    private var foregroundStartErrorCount: Int = 0
+
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
         recordThrowable(throwable = throwable)
         debug {
@@ -127,23 +134,47 @@ internal class AndroidServer : Service(), CoroutineScope, Server {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        ServiceCompat.startForeground(
-            this,
-            NOTIFICATION_ID,
-            constructNotification(transferJobsActive = transferJobs.value.size),
-            FOREGROUND_SERVICE_TYPE_DATA_SYNC,
-        )
-        if (serverSocket == null) {
-            if (initServerFromIntent(intent = intent)) {
-                launchServerJob()
-                return START_STICKY // If the service is killed, it will be automatically restarted.
+        try {
+            ServiceCompat.startForeground(
+                this,
+                NOTIFICATION_ID,
+                constructNotification(transferJobsActive = transferJobs.value.size),
+                FOREGROUND_SERVICE_TYPE_DATA_SYNC,
+            )
+            if (serverSocket == null) {
+                if (initServerFromIntent(intent = intent)) {
+                    launchServerJob()
+                    return START_STICKY // If the service is killed, it will be automatically restarted.
+                }
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                MainActivity.mainActivityForServer?.unbindFromServer()
+                stopSelf()
+                return START_NOT_STICKY
             }
-            stopForeground(STOP_FOREGROUND_REMOVE)
-            MainActivity.mainActivityForServer?.unbindFromServer()
-            stopSelf()
-            return START_NOT_STICKY
+            return START_STICKY // If the service is killed, it will be automatically restarted.
+        } catch (e: Exception) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (e is ForegroundServiceStartNotAllowedException) {
+                    if (firstForegroundStartErrorTimestamp == 0L) {
+                        firstForegroundStartErrorTimestamp = System.currentTimeMillis()
+                    }
+                    foregroundStartErrorCount++
+                    if (foregroundStartErrorCount >= 3) {
+                        val seconds = (System.currentTimeMillis() - firstForegroundStartErrorTimestamp) / 1000
+                        recordThrowable(
+                            throwable = RuntimeException(
+                                foregroundStartErrorCountError.format(
+                                    foregroundStartErrorCount,
+                                    seconds,
+                                ),
+                            ),
+                        )
+                    }
+                }
+            }
+            recordThrowable(e)
+            return START_REDELIVER_INTENT // If all else fails, try to restart the intent.
         }
-        return START_STICKY // If the service is killed, it will be automatically restarted.
     }
 
     private fun startServerSocket(port: Int): Boolean {
