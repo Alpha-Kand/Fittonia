@@ -1,11 +1,22 @@
-This is a Kotlin Multiplatform project targeting Android, Desktop.
+### FITTONIA
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
+<ins>**FI**</ins>le <ins>**T**</ins>ransfer <ins>**T**</ins>ech <ins>**O**</ins>ver a <ins>**N
+**</ins>etwork using <ins>**I**</ins>P <ins>**A**</ins>ddresses
 
+An app for transfering files between Android devices.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+1. Peer to peer: Connects to other devices by supplying IP addresses. IP addresses can be encoded as
+   something easier to communicate with a peer. Supports adding devices as 'destinations' which
+   saves their connection info to reuse quickly later.
+2. Security: User must enter the destination phone's access-code in order to send files. It's
+   impossible to send files to a recipient that hasn't shared their access-code. Files are also
+   encrypted before being send over the network using Android keystore encryption.
+3. No limits: Each transfer can send any amount of files at any size, and the app can send and
+   receive files in the background.
+
+Limitations (there are plans to address these eventually):
+
+- Only supports local networks. Connecting devices must be on the same local network to see each
+  other.
+- Doesn't support sending folders.
+- Doesn't support advanced transfer actions (pausing, resuming, throttling, etc.).
