@@ -31,7 +31,7 @@ class CommandHandler(private val args: List<String>) {
                 serverCommand -> ServerCommand()
                 sendFilesCommand -> SendFilesCommand()
                 setDefaultPortCommand -> SetDefaultPortCommand()
-                serverPasswordCommand -> ServerPasswordCommand()
+                serverAccessCodeCommand -> ServerAccessCodeCommand()
                 sendMessageCommand -> SendMessageCommand()
                 ipCodeCommand -> IPCodeCommand()
                 decodeIpCodeCommand -> DecodeIPCodeCommand()

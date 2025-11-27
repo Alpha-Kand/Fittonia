@@ -1,16 +1,16 @@
 package commandHandler.executeCommand
 
-import BaseMockkTest
+import DesktopBaseMockkTest
 import OutputIO
 import UnitTest
 import commandHandler.IPCodeCommand
 import io.mockk.every
 import io.mockk.mockkStatic
-import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions
 import java.net.Inet4Address
 
-private class EncodeIpCodeExecutionTest : BaseMockkTest() {
+private class EncodeIpCodeExecutionTest : DesktopBaseMockkTest() {
 
     @UnitTest
     fun default() = runTest {
@@ -19,10 +19,10 @@ private class EncodeIpCodeExecutionTest : BaseMockkTest() {
 
         encodeIpCodeExecution(
             command = IPCodeCommand().also {
-                it.ioFormat = true
+                it.machineReadableOutput.ioFormat = true
             },
         )
-        assertEquals(
+        Assertions.assertEquals(
             listOf("twin-theatre-60"),
             OutputIO.flush(),
         )

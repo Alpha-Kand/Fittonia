@@ -3,7 +3,7 @@ package commandHandler
 import commandHandler.Command.Companion.verifyArgumentIsSet
 import requireNull
 
-class ServerCommand : Command {
+class ServerCommand : Command() {
     private var port: Int? = null
 
     fun getPort() = verifyArgumentIsSet(argument = port, reportingName = portArguments.first())

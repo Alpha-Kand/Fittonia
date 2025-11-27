@@ -1,9 +1,8 @@
 package commandHandler
 
-import commandHandler.Command.Companion.verifyArgumentIsSet
 import requireNull
 
-class RemoveCommand : Command {
+class RemoveCommand : Command() {
     private var name: String? = null
 
     fun getName() = verifyArgumentIsSet(argument = name, reportingName = nameArguments.first())

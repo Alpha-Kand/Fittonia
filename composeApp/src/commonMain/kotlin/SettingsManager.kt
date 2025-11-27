@@ -1,3 +1,5 @@
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import java.util.Base64
 import java.util.LinkedList
@@ -17,7 +19,9 @@ abstract class SettingsManager {
 
     abstract fun loadSettings(): SettingsData
 
-    abstract fun saveSettings()
+    abstract suspend fun saveSettings()
+
+    val settingsMutex = Mutex()
 
     val defaultPort: Int
         get() = settings.defaultPort
@@ -25,17 +29,17 @@ abstract class SettingsManager {
     val previousCmdEntries: LinkedList<String>
         get() = settings.previousCmdEntries
 
-    fun setDumpPath(dumpPath: String) {
+    suspend fun setDumpPath(dumpPath: String) {
         settings = settings.copy(dumpPath = dumpPath)
         saveSettings()
     }
 
     fun hasDumpPath(): Boolean = settings.dumpPath.isNotEmpty()
 
-    fun addDestination(
+    suspend fun addDestination(
         name: String,
         ip: String,
-        password: String,
+        accessCode: String,
     ) {
         if (settings.destinations.find { it.name == name } != null) {
             throw FittoniaError(FittoniaErrorType.ADD_DESTINATION_ALREADY_EXISTS)
@@ -45,14 +49,14 @@ abstract class SettingsManager {
                 Destination(
                     name = name,
                     ip = ip,
-                    password = password,
+                    accessCode = accessCode,
                 ),
             ),
         )
         saveSettings()
     }
 
-    fun removeDestination(name: String): Boolean {
+    suspend fun removeDestination(name: String): Boolean {
         if (settings.destinations.find { it.name == name } == null) {
             return false
         }
@@ -63,25 +67,25 @@ abstract class SettingsManager {
         return true
     }
 
-    fun setDefaultPort(port: Int) {
+    suspend fun setDefaultPort(port: Int) {
         settings = settings.copy(defaultPort = port)
         saveSettings()
     }
 
-    fun clearDefaultPort() = setDefaultPort(port = DEFAULT_PORT)
+    suspend fun clearDefaultPort() = setDefaultPort(port = DEFAULT_PORT)
 
-    fun setServerPassword(newPassword: String) {
-        settings = settings.copy(serverPassword = newPassword)
+    suspend fun setServerAccessCode(newAccessCode: String) {
+        settings = settings.copy(serverAccessCode = newAccessCode)
         saveSettings()
     }
 
-    fun checkPassword(password: String): Boolean {
-        return settings.serverPassword == password
+    fun checkAccessCode(accessCode: String): Boolean {
+        return settings.serverAccessCode == accessCode
     }
 
-    fun hasServerPassword(): Boolean = settings.serverPassword != null
+    fun hasServerAccessCode(): Boolean = settings.serverAccessCode != null
 
-    fun getAutoJobName(): String = synchronized(settings) {
+    suspend fun getAutoJobName(): String = settingsMutex.withLock {
         settings.nextAutoJobName.let {
             settings = settings.copy(nextAutoJobName = it + 1)
             saveSettings()
@@ -101,7 +105,7 @@ abstract class SettingsManager {
         val destinations: List<Destination>,
         val dumpPath: String,
         val defaultPort: Int,
-        val serverPassword: String?,
+        val serverAccessCode: String?,
         val nextAutoJobName: Long,
         val previousCmdEntries: LinkedList<String>,
     ) {
@@ -109,7 +113,7 @@ abstract class SettingsManager {
             destinations = emptyList(),
             dumpPath = "",
             defaultPort = DEFAULT_PORT,
-            serverPassword = null,
+            serverAccessCode = null,
             nextAutoJobName = 0,
             previousCmdEntries = LinkedList(),
         )
@@ -119,13 +123,13 @@ abstract class SettingsManager {
     data class Destination(
         val name: String,
         val ip: String,
-        val password: String,
+        val accessCode: String,
     )
 
     object AESEncyption {
         // Based off of code by Kasım Özdemir.
 
-        // TODO
+        // TODO FOR REAL
         private const val secretKey = "U29tZWJvZHkgb25jZSB0b2xkIG1lIHRoZSB3b3JsZCB3YXMgZ29pbmcgdG8gcm9sbCBtZ"
         private const val salt = "QWxsIHRoYXQgZ2xpdHRlcg=="
         private const val iv = "SG9tZSBzd2VldCBwaW5lYQ=="

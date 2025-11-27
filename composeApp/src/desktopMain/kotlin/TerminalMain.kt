@@ -25,8 +25,8 @@ import commandHandler.LogsCommand
 import commandHandler.RemoveCommand
 import commandHandler.SendFilesCommand
 import commandHandler.SendMessageCommand
+import commandHandler.ServerAccessCodeCommand
 import commandHandler.ServerCommand
-import commandHandler.ServerPasswordCommand
 import commandHandler.SetDefaultPortCommand
 import commandHandler.executeCommand.addExecution
 import commandHandler.executeCommand.decodeIpCodeExecution
@@ -38,8 +38,8 @@ import commandHandler.executeCommand.logsExecution
 import commandHandler.executeCommand.removeExecution
 import commandHandler.executeCommand.sendExecution.sendFilesExecution
 import commandHandler.executeCommand.sendExecution.sendMessageExecution
+import commandHandler.executeCommand.serverAccessCodeExecution
 import commandHandler.executeCommand.serverExecution
-import commandHandler.executeCommand.serverPasswordExecution
 import commandHandler.executeCommand.setDefaultPortExecution
 import fittonia.composeapp.generated.resources.Res
 import fittonia.composeapp.generated.resources.no_valid_command
@@ -61,7 +61,8 @@ fun terminalMain() = session {
                         false -> ""
                         true -> "⏳ "
                     }
-                    text("$serverStatus> "); input()
+                    text("$serverStatus> ")
+                    input()
                 }
             }.runUntilInputEntered {
                 onKeyPressed {
@@ -108,7 +109,7 @@ fun terminalMain() = session {
                     is SendFilesCommand -> sendFilesExecution(command = command)
                     is SendMessageCommand -> sendMessageExecution(command = command)
                     is ServerCommand -> serverExecution(command = command)
-                    is ServerPasswordCommand -> serverPasswordExecution(command = command)
+                    is ServerAccessCodeCommand -> serverAccessCodeExecution(command = command)
                     is SetDefaultPortCommand -> setDefaultPortExecution(command = command)
                     else -> printlnIO(Res.string.no_valid_command)
                 }

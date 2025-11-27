@@ -5,7 +5,7 @@ import FittoniaErrorType
 import alsoIfTrue
 import requireNull
 
-class HelpCommand : Command {
+class HelpCommand : Command() {
     private var commandSearch: String? = null
     private var search: String? = null
 

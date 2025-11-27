@@ -7,7 +7,7 @@ const val dumpCommand = "dump"
 const val serverCommand = "server"
 const val sendFilesCommand = "send"
 const val setDefaultPortCommand = "default-port"
-const val serverPasswordCommand = "server-password"
+const val serverAccessCodeCommand = "server-accesscode"
 const val sendMessageCommand = "send-message"
 const val ipCodeCommand = "ip-code"
 const val decodeIpCodeCommand = "decode-ip-code"
@@ -25,7 +25,7 @@ val commands = listOf(
     sendFilesCommand,
     serverCommand,
     setDefaultPortCommand,
-    serverPasswordCommand,
+    serverAccessCodeCommand,
     sendMessageCommand,
     ipCodeCommand,
     decodeIpCodeCommand,
@@ -38,7 +38,7 @@ val commands = listOf(
 
 val nameArguments = listOf("--name", "-n")
 val ipArguments = listOf("--ip", "-i")
-val passwordArguments = listOf("--password", "-P", "--pw")
+val accessCodeArguments = listOf("--accesscode", "-A", "--ac")
 val pathArguments = listOf("--path", "--dump", "-D")
 val portArguments = listOf("--port", "-p")
 val destinationArguments = listOf("--destination", "-d", "--dest")

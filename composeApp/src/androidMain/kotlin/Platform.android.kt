@@ -1,7 +1,8 @@
-import android.os.Build
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import org.hmeadow.fittonia.BuildConfig
 
-class AndroidPlatform : Platform {
-    override val name: String = "Android ${Build.VERSION.SDK_INT}"
+actual fun getPlatform(): Platform = Platform.ANDROID
+actual fun isDebug(): Boolean = BuildConfig.DEBUG
+actual fun recordThrowable(throwable: Throwable) {
+    FirebaseCrashlytics.getInstance().recordException(throwable)
 }
-
-actual fun getPlatform(): Platform = AndroidPlatform()

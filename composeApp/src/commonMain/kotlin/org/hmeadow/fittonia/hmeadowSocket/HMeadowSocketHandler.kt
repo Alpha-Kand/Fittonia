@@ -1,0 +1,289 @@
+package org.hmeadow.fittonia.hmeadowSocket
+
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler.Now.now
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketHandler.Sleeper.sleep
+import org.hmeadow.fittonia.utility.debug
+import org.hmeadow.fittonia.utility.readNBytesHM
+import java.io.BufferedInputStream
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
+import java.net.Socket
+import java.nio.file.Files
+import java.nio.file.Path
+import java.time.Instant
+import kotlin.io.path.Path
+
+open class HMeadowSocketHandler {
+
+    data object Sleeper {
+        fun sleep(millis: Long) {
+            Thread.sleep(millis)
+        }
+    }
+
+    data object Now {
+        fun now(): Long {
+            return Instant.now().toEpochMilli()
+        }
+    }
+
+    data object FilesObject {
+        fun size(path: Path): Long {
+            return Files.size(path)
+        }
+
+        fun inputStream(filePath: String): InputStream {
+            return File(filePath).inputStream()
+        }
+    }
+
+    open var sendBytesPerSecond: Long = Long.MAX_VALUE
+    open var receiveBytesPerSecond: Long = Long.MAX_VALUE
+
+    companion object {
+        private const val BUFFER_SIZE_LONG: Long = 8192
+        private const val BUFFER_SIZE_INT: Int = 8192
+
+        private const val CIPHER_BLOCK_SIZE_INT: Int = 128
+        private const val CIPHER_BLOCK_SIZE_LONG: Long = 128
+    }
+
+    open lateinit var mDataInput: DataInputStream
+    open lateinit var mDataOutput: DataOutputStream
+
+    open fun bindToSocket(block: () -> Socket): Socket {
+        val socket = block()
+        mDataInput = DataInputStream(socket.getInputStream())
+        mDataOutput = DataOutputStream(socket.getOutputStream())
+        return socket
+    }
+
+    open fun close() {
+        mDataInput.close()
+        mDataOutput.close()
+    }
+
+    open fun sendInt(message: Int) = mDataOutput.writeInt(message)
+    open fun receiveInt() = mDataInput.readInt()
+
+    open fun sendLong(message: Long) = mDataOutput.writeLong(message)
+    open fun receiveLong() = mDataInput.readLong()
+
+    open fun sendBoolean(message: Boolean) = mDataOutput.writeBoolean(message)
+    open fun receiveBoolean() = mDataInput.readBoolean()
+
+    open fun sendString(message: String) {
+        val byteArray = message.encodeToByteArray()
+        val totalBytes = byteArray.size
+        sendInt(message = totalBytes)
+        mDataOutput.write(byteArray, 0, totalBytes)
+    }
+
+    open fun receiveString(): String {
+        val messageLength = receiveInt()
+        return String(mDataInput.readNBytesHM(messageLength), Charsets.UTF_8)
+    }
+
+    open fun sendFile(
+        stream: InputStream,
+        name: String,
+        size: Long,
+        progressPrecision: Double,
+        onProgressUpdate: (bytes: Long) -> Unit,
+    ) {
+        val startTime: Long = System.nanoTime()
+        val bufferedReadFile = BufferedInputStream(stream)
+
+        // 1. Send file size in bytes.
+        sendLong(size)
+        val step = (size * progressPrecision).toLong()
+        var currentStep = step
+
+        // 2. Send file name.
+        sendString(
+            message = name.takeIf {
+                it.isNotEmpty()
+            } ?: throw IllegalArgumentException("Name should not be empty."),
+        )
+
+        // 3. Send the file.
+        var remainingBytes = size
+
+        var throttle = sendBytesPerSecond
+        var now = now()
+        var writingPerformance: Long = 0
+        var readingPerformance: Long = 0
+        while (remainingBytes > 0) {
+            val nextBytes = minOf(remainingBytes, BUFFER_SIZE_LONG)
+            val readBytesStartTime: Long = System.nanoTime()
+            val readBytes: ByteArray = bufferedReadFile.readNBytesHM(nextBytes.toInt())
+            readingPerformance += System.nanoTime() - readBytesStartTime
+            remainingBytes -= nextBytes
+            if ((size - remainingBytes) > currentStep) {
+                currentStep += step
+                onProgressUpdate(size - remainingBytes)
+            }
+
+            throttle -= BUFFER_SIZE_LONG
+            val writeBytesStartTime: Long = System.nanoTime()
+            mDataOutput.write(readBytes)
+            writingPerformance += System.nanoTime() - writeBytesStartTime
+
+            if (throttle <= 0L) {
+                onProgressUpdate(size - remainingBytes)
+                throttle = sendBytesPerSecond
+                sleep((1000L - ((now() - now).coerceAtLeast(minimumValue = 0))))
+                now = now()
+            }
+        }
+        bufferedReadFile.close()
+        onProgressUpdate(size)
+        debug {
+            val writingSeconds = writingPerformance / 1_000_000_000f
+            val readingSeconds = readingPerformance / 1_000_000_000f
+            val totalSeconds = (System.nanoTime() - startTime) / 1_000_000_000f
+            println("PERFORMANCE")
+            println("Time sending file: $totalSeconds")
+            println("Time spent writing to network: $writingSeconds")
+            println("Percentage of time writing to network: ${writingSeconds / totalSeconds} ")
+            println("Time reading from disk: $readingSeconds")
+            println("Percentage of reading from disk: ${readingSeconds / totalSeconds} ")
+        }
+    }
+
+    open fun sendFile(
+        filePath: String,
+        progressPrecision: Double,
+        onProgressUpdate: (bytes: Long) -> Unit,
+    ) {
+        val path = Path(filePath)
+        val size = FilesObject.size(path)
+        sendFile(
+            stream = FilesObject.inputStream(filePath),
+            name = path.fileName.toString(),
+            size = size,
+            progressPrecision = progressPrecision,
+            onProgressUpdate = onProgressUpdate,
+        )
+    }
+
+    open fun receiveFile(
+        destination: String,
+        prefix: String,
+        suffix: String,
+    ): Pair<String, String> {
+        /* Must receive the following information in order.
+           1. (8 byte int) File size in bytes.
+           2. (127 char bytes) File name. Character bytes at beginning of buffer, then blank spaces
+              up to max file name size.
+           3. (File data bytes) Should consist of full blocks of buffer size plus one partially
+              filled buffer to finish the file transfer.
+         */
+
+        // 1. Get total file size in bytes.
+        var transferByteCount = receiveLong()
+        // 2. Get file name.
+        val fileName = receiveString()
+        // 3. Receive and write file data.
+        val file = if (destination.isEmpty()) {
+            File.createTempFile(prefix, suffix)
+        } else {
+            File.createTempFile(prefix, suffix, File(Path("$destination/").toString()))
+        }
+        if (transferByteCount == 0L) {
+            // File to transfer is empty, just create a new empty file.
+        } else {
+            while (transferByteCount > 0) {
+                val nextBytes = minOf(transferByteCount, BUFFER_SIZE_LONG)
+                val readBytes = mDataInput.readNBytesHM(nextBytes.toInt())
+                transferByteCount -= nextBytes
+                file.appendBytes(readBytes)
+            }
+        }
+        return file.absolutePath to fileName
+    }
+
+    open fun receiveFile(
+        onOutputStream: (fileName: String) -> OutputStream?,
+        progressPrecision: Double,
+        beforeDownload: (totalBytes: Long, fileName: String) -> Unit,
+        onProgressUpdate: (progress: Long) -> Unit,
+    ) {
+        val startTime: Long = System.nanoTime()
+
+        // 1. Get total file size in bytes.
+        val size = receiveLong()
+        var transferByteCount = size
+        // 2. Get file name.
+        val fileName = receiveString()
+        beforeDownload(transferByteCount, fileName)
+        // 3. Receive and write file data.
+        val step = (transferByteCount * progressPrecision).toLong()
+        var currentStep = step
+
+        var readingPerformance: Long = 0
+        var writingPerformance: Long = 0
+        onOutputStream(fileName)?.use { stream ->
+            if (transferByteCount == 0L) {
+                // File to transfer is empty, just create a new empty file.
+            } else {
+                while (transferByteCount > 0) {
+                    val nextBytes = minOf(transferByteCount, BUFFER_SIZE_LONG)
+                    val readBytesStartTime = System.nanoTime()
+                    val readBytes = mDataInput.readNBytesHM(nextBytes.toInt())
+                    readingPerformance += System.nanoTime() - readBytesStartTime
+                    transferByteCount -= nextBytes
+                    val writeBytesStartTime = System.nanoTime()
+                    stream.write(readBytes)
+                    writingPerformance += System.nanoTime() - writeBytesStartTime
+                    if ((size - transferByteCount) > currentStep) {
+                        currentStep += step
+                        onProgressUpdate(size - transferByteCount)
+                    }
+                }
+            }
+        }
+        onProgressUpdate(size)
+        debug {
+            val readingSeconds = readingPerformance / 1_000_000_000f
+            val writingSeconds = writingPerformance / 1_000_000_000f
+            val totalSeconds = (System.nanoTime() - startTime) / 1_000_000_000f
+            println("PERFORMANCE")
+            println("Time receiving file: $totalSeconds")
+            println("Time spent reading from network: $readingSeconds")
+            println("Percentage of time reading from network: ${readingSeconds / totalSeconds} ")
+            println("Time spent writing to disk: $writingSeconds")
+            println("Percentage of time writing to disk: ${writingSeconds / totalSeconds} ")
+        }
+    }
+
+    open fun sendContinue() = sendBoolean(message = true)
+    open fun receiveContinue() {
+        receiveBoolean()
+    }
+
+    open fun sendByteArray(message: ByteArray) {
+        sendInt(message.size)
+        mDataOutput.write(message)
+    }
+
+    open fun sendByteArrayRaw(message: ByteArray) {
+        mDataOutput.write(message)
+    }
+
+    open fun receiveByteArray(): ByteArray {
+        val size = receiveInt()
+        val buffer = ByteArray(size)
+        mDataInput.read(buffer, 0, size)
+        return buffer
+    }
+
+    open fun receiveByteArrayRaw(size: Int): ByteArray {
+        val buffer = ByteArray(size)
+        mDataInput.read(buffer, 0, size)
+        return buffer
+    }
+}

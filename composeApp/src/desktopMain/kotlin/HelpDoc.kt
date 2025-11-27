@@ -16,8 +16,8 @@ import commandHandler.removeCommand
 import commandHandler.searchArguments
 import commandHandler.sendFilesCommand
 import commandHandler.sendMessageCommand
+import commandHandler.serverAccessCodeCommand
 import commandHandler.serverCommand
-import commandHandler.serverPasswordCommand
 import commandHandler.setDefaultPortCommand
 import fittonia.composeapp.generated.resources.Res
 import fittonia.composeapp.generated.resources.decode_ip_code_help_arguments_ip
@@ -45,13 +45,13 @@ import fittonia.composeapp.generated.resources.send_files_help_format
 import fittonia.composeapp.generated.resources.send_message_help_arguments_ip
 import fittonia.composeapp.generated.resources.send_message_help_description
 import fittonia.composeapp.generated.resources.send_message_help_format
+import fittonia.composeapp.generated.resources.server_access_code_help_arguments_new
+import fittonia.composeapp.generated.resources.server_access_code_help_arguments_old
+import fittonia.composeapp.generated.resources.server_access_code_help_description
+import fittonia.composeapp.generated.resources.server_access_code_help_format
 import fittonia.composeapp.generated.resources.server_init_help_arguments_port
 import fittonia.composeapp.generated.resources.server_init_help_description
 import fittonia.composeapp.generated.resources.server_init_help_format
-import fittonia.composeapp.generated.resources.server_password_help_arguments_new
-import fittonia.composeapp.generated.resources.server_password_help_arguments_old
-import fittonia.composeapp.generated.resources.server_password_help_description
-import fittonia.composeapp.generated.resources.server_password_help_format
 import fittonia.composeapp.generated.resources.set_default_port_help_arguments_port
 import fittonia.composeapp.generated.resources.set_default_port_help_description
 import fittonia.composeapp.generated.resources.set_default_port_help_format
@@ -74,7 +74,7 @@ object HelpDocLoader {
             return if (initialized) {
                 mHelpDocs
             } else {
-                throw Exception() // TODO
+                throw Exception() // TODO - After release
             }
         }
 
@@ -90,7 +90,7 @@ object HelpDocLoader {
                 createSendMessageHelpDoc(),
                 createSetDefaultPortHelpDoc(),
                 createServerHelpDoc(),
-                createServerPasswordHelpDoc(),
+                createServerAccessCodeHelpDoc(),
                 createHelpHelpDoc(),
                 createExitHelpDoc(),
             ),
@@ -158,13 +158,13 @@ object HelpDocLoader {
         ),
     )
 
-    private suspend fun createServerPasswordHelpDoc() = HelpDoc(
-        title = serverPasswordCommand,
-        description = getString(Res.string.server_password_help_description),
-        format = getString(Res.string.server_password_help_format, serverPasswordCommand),
+    private suspend fun createServerAccessCodeHelpDoc() = HelpDoc(
+        title = serverAccessCodeCommand,
+        description = getString(Res.string.server_access_code_help_description),
+        format = getString(Res.string.server_access_code_help_format, serverAccessCodeCommand),
         arguments = listOf(
-            newArguments to getString(Res.string.server_password_help_arguments_new),
-            oldArguments to getString(Res.string.server_password_help_arguments_old),
+            newArguments to getString(Res.string.server_access_code_help_arguments_new),
+            oldArguments to getString(Res.string.server_access_code_help_arguments_old),
         ),
     )
 

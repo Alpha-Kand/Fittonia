@@ -1,5 +1,17 @@
 <resources>
     <string name="app_name">Fittonia</string>
+    <string-array name="fittonia_name_explain">
+        <item>File</item>
+        <item>Transfer</item>
+        <item>Tech</item>
+        <item>Over a</item>
+        <item>Network using</item>
+        <item>IP</item>
+        <item>Addresses</item>
+    </string-array>
+    <string name="about_modal_name_format">%1$s, %2$s</string>
+    <string name="last_built_date">Version built %1$s</string>
+    <string name="credits">By Hunter Wiesman</string>
 
     <!-- Send/Receive Files Channel -->
     <string name="send_receive_channel_id">send-receive-channel-id</string>
@@ -7,22 +19,88 @@
     <string name="send_receive_channel_description">Shows progress and status of active incoming/outgoing transfers.</string>
 
     <!-- Send/Receive Foreground Service -->
-    <string name="send_receive_foreground_service_notification_content">%1$d transfers active.</string>
+    <plurals name="send_receive_foreground_service_notification_content">
+        <item quantity="one">%1$d transfer active.</item>
+        <item quantity="other">%1$d transfers active.</item>
+    </plurals>
+
+    <!-- Encode/Decode IP address and code -->
+    <string name="encode_decode_matching_code">Matching code: %1$s</string>
+    <string name="encode_decode_matching_ip">Matching IP: %1$s</string>
 
     <!-- Welcome Screen -->
-    <string name="welcome_screen_title">Welcome!</string>
-    <string name="welcome_screen_body">To get started, you just need a new server password, server socket port, and a place to put incoming files.</string>
+    <string name="welcome_screen_title">Welcome to Fittonia!</string>
+    <string name="welcome_screen_body">To get started, you just need an access code, and a place to put incoming files.</string>
     <string name="welcome_screen_you_can_change_these_later">(You can change these later)</string>
-    <string name="welcome_screen_new_server_password_label">New server password</string>
-    <string name="welcome_screen_new_server_port_label">New server default port.</string>
+    <string name="welcome_screen_new_server_access_code_label">Access Code</string>
+    <string name="welcome_screen_new_server_port_label">Custom default port.</string>
     <string name="welcome_screen_new_destination_folder_label">Destination folder</string>
     <string name="welcome_screen_new_destination_select_folder_button">Select folder</string>
     <string name="welcome_screen_continue_button">Continue</string>
+    <string name="welcome_screen_access_code_field_info_1">This is the access code</string>
+    <string name="welcome_screen_access_code_field_info_2">other</string>
+    <string name="welcome_screen_access_code_field_info_3">devices will need in order to send this device any files.</string>
+    <string name="welcome_screen_access_code_field_info_4">You can think of it as a password that you can share with friends, family, trusted individuals, or just keep to yourself to send yourself files.</string>
+    <string name="welcome_screen_select_folder_button_info_1">Fittonia needs a place to put incoming files. Ideally, pick a place that you can access easily with a file browser so you can use them.</string>
+    <string name="welcome_screen_select_folder_button_info_2">Please note that some Android devices may have strict system access permissions which can limit your options. For example, you are unlikely to be allowed to pick the generic "Documents" location.</string>
+    <string name="welcome_screen_select_folder_button_info_3">However, you could create a new folder inside "Documents" and give Fittonia access to that sub-folder.</string>
+
+    <!-- Overview Screen -->
+    <string name="overview_screen_dump_permission_lost_notice">Permission was lost for your previously selected \'incoming transfers\' folder. Please reselect or choose another folder.</string>
 
     <!-- New Destination Screen -->
-    <string name="new_destination_screen_body">If you plan on sending files/messages to a remote device often, saving it as a destination can save you having to remember its details.</string>
+    <string name="new_destination_heading">New destination</string>
+    <string name="new_destination_screen_body_1">If you plan on sending files/messages to a remote device often, making it a Destination can help you from having to remember its details every time.</string>
+    <string name="new_destination_screen_body_2">The destination will be pinged to confirm its existence.</string>
+    <string name="new_destination_save_button">Save</string>
+    <string name="new_destination_access_code_label">Access Code</string>
+    <string name="new_destination_ip_address_label">IP Address/Code</string>
+    <string name="new_destination_name_label">Name</string>
 
     <!-- Transfer Details Screen -->
     <string name="transfer_details_screen_progress">%1$s - %2$d out of %3$d items %4$s.</string>
     <string name="transfer_details_screen_item_transfer_status">%1$s : %2$s</string>
+    <string name="transfer_details_screen_destination_label">Destination</string>
+    <string name="transfer_details_screen_source_label">Source</string>
+    <string name="transfer_details_screen_status_label">Status</string>
+    <string name="transfer_details_screen_progress_label">Progress</string>
+    <string name="transfer_details_screen_logs_label">Logs</string>
+
+    <!-- Notifications -->
+    <string name="notification_default_port_in_use_title">Default port unavailable</string>
+    <string name="notification_default_port_in_use_description">The default port you set for the server (%1$d) is already in use by some other application. You can either choose a new temporary port or select a new default port.</string>
+    <string name="notification_default_dump_permission_lost_title">\'Incoming files\' destination permissions lost.</string>
+    <string name="notification_default_dump_permission_lost_description">The permission to access your previously selected \'Incoming files\' destination has been lost or the destination has been moved/deleted. Please select a new destination or try to select your previous destination.</string>
+
+    <!-- Send Files Screen -->
+    <string name="send_files_screen_heading">Send files</string>
+    <string name="send_files_screen_select_files_folders">Select files/folders to send.</string>
+    <string name="send_files_screen_add_file">Add</string>
+
+    <string name="send_files_screen_destination">Destination</string>
+    <string name="send_files_screen_select_destination">Select destination…</string>
+    <string name="send_files_screen_one_time_destination">One-time destination</string>
+    <string name="send_files_screen_ip_address_code">IP Address/Code</string>
+    <string name="send_files_screen_access_code">Access Code</string>
+    <string name="send_files_screen_save_new_destination">Save as new destination</string>
+    <string name="send_files_screen_add_destination">Add new destination</string>
+    <string name="send_files_screen_description">Description</string>
+    <string name="send_files_screen_description_optional">(optional)</string>
+    <string name="send_files_screen_confirm">Confirm</string>
+
+    <string name="send_files_screen_ping_success">Connection success</string>
+    <string name="send_files_screen_ping_processing">Trying to connect</string>
+    <string name="send_files_screen_ping_failure">Connection failure</string>
+    <string name="send_files_screen_add_item_button_info1">Select individual files that you want to send. Fittonia doesn\'t support folders, yet.</string>
+    <string name="send_files_screen_add_item_button_info2">Each file is encrypted before sending.</string>
+    <string name="send_files_screen_add_destination_button_info1">If you plan on sending files to the same device more than once, you can add it as a saved \'Destination\' so you don\'t have to enter its info each time.</string>
+    <string name="send_files_screen_add_destination_button_info2">If the device\'s IP address changes, the saved \'Destination\' does not automatically update.</string>
+    <string name="send_files_screen_description_field_info">You can give your group of files a name so it\'s easier to keep track of them.</string>
+
+    <!-- Emoticons -->
+    <string name="success_emoticon">✅</string>
+    <string name="connection_emoticon">📶</string>
+    <string name="failure_emoticon">❌</string>
+    <string name="right_arrow_emoticon">➡️</string>
+    <string name="trash_emoticon">🗑️</string>
 </resources>

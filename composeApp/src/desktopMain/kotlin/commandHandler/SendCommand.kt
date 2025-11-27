@@ -3,8 +3,8 @@ package commandHandler
 import OutputIO.printlnIO
 import ServerCommandFlag
 import SettingsManagerDesktop
-import communicateCommand
-import hmeadowSocket.HMeadowSocketClient
+import communicateCommandBoolean
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketClient
 
 fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
     val destination = SettingsManagerDesktop.settingsManager.findDestination(command.getDestination())
@@ -13,30 +13,30 @@ fun setupSendCommandClient(command: SendCommand): HMeadowSocketClient {
             ipAddress = destination.ip,
             port = command.getPort(),
             operationTimeoutMillis = 2000,
-            handshakeTimeoutMillis = 2000L,
+            handshakeTimeoutMillis = 2000,
         )
     } ?: HMeadowSocketClient(
         ipAddress = command.getIP(),
         port = command.getPort(),
         operationTimeoutMillis = 2000,
-        handshakeTimeoutMillis = 2000L,
+        handshakeTimeoutMillis = 2000,
     )
 }
 
-// TODO Sending files should be handled in DesktopServer.
+// TODO Sending files should be handled in DesktopServer. - After release
 fun SendCommand.canContinueSendCommand(client: HMeadowSocketClient): Boolean {
     val destination = SettingsManagerDesktop.settingsManager.findDestination(this.getDestination())
-    val password = destination?.password ?: this.getPassword()
+    val accessCode = destination?.accessCode ?: this.getAccessCode()
     val commandFlag = when (this) {
         is SendFilesCommand -> ServerCommandFlag.SEND_FILES
         is SendMessageCommand -> ServerCommandFlag.SEND_MESSAGE
         is AddCommand -> ServerCommandFlag.ADD_DESTINATION
     }
-    return client.communicateCommand(
+    return client.communicateCommandBoolean(
         commandFlag = commandFlag,
-        password = password,
+        accessCode = accessCode,
         onSuccess = { },
-        onPasswordRefused = { printlnIO("Server refused password.") },
+        onAccessCodeRefused = { printlnIO("Server refused access code.") },
         onFailure = { printlnIO("Connected, but request refused.") },
     )
 }

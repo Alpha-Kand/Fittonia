@@ -1,0 +1,3 @@
+- Confirmation when receiving items even if have accesscode.
+- Checkbox to show/hide completed items in job list.
+- In transfer details, have a shortcut button to file destination or file directly.

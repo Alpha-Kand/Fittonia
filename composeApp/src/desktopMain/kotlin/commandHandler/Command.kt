@@ -2,16 +2,17 @@ package commandHandler
 
 import FittoniaError
 import FittoniaErrorType
+import ServerFlagsString
 import SessionManager
-import commandHandler.Command.Companion.verifyArgumentIsSet
-import decodeIpAddress
-import hmeadowSocket.HMeadowSocket
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocket
+import org.hmeadow.fittonia.utility.decodeIpAddress
 import requireNull
 
-sealed interface Command {
+sealed class Command {
+    val machineReadableOutput = MachineReadableOutput()
 
-    suspend fun addArg(argumentName: String, value: String)
-    fun verify()
+    abstract suspend fun addArg(argumentName: String, value: String)
+    abstract fun verify()
 
     suspend fun tryCatch(argumentName: String, value: String, addArgBlock: suspend () -> Boolean) {
         try {
@@ -44,25 +45,25 @@ fun verifyPortNumber(port: Int?): Boolean {
     return false
 }
 
-fun HMeadowSocket.receiveConfirmation(): Boolean { // TODO replace with sending and receiving booleans.
+fun HMeadowSocket.receiveConfirmation(): Boolean { // TODO replace with sending and receiving booleans. - After release
     return receiveString() == ServerFlagsString.CONFIRM && receiveBoolean()
 }
 
-sealed class SendCommand : Command {
+sealed class SendCommand : Command() {
     private var port: Int? = null
     private var destination: String? = null
     private var ip: String? = null
-    private var password: String? = null
+    private var accessCode: String? = null
 
     open fun getDestination() = destination
     fun getPort() = verifyArgumentIsSet(argument = port, reportingName = portArguments.first())
     fun getIP() = verifyArgumentIsSet(argument = ip, reportingName = ipArguments.first())
-    fun getPassword() = verifyArgumentIsSet(argument = password, reportingName = passwordArguments.first())
+    fun getAccessCode() = verifyArgumentIsSet(argument = accessCode, reportingName = accessCodeArguments.first())
 
     override fun verify() {
         if (destination == null) {
-            // getIP() TODO
-            getPassword()
+            // getIP() TODO - After release
+            getAccessCode()
         }
         verifyPortNumber(port)
     }
@@ -71,7 +72,7 @@ sealed class SendCommand : Command {
         SessionManager.port?.let { port = it }
         SessionManager.destination?.let { destination = it }
         SessionManager.ip?.let { ip = it }
-        SessionManager.password?.let { password = it }
+        SessionManager.accessCode?.let { accessCode = it }
     }
 
     fun handleSendCommandArgument(argumentName: String, value: String): Boolean {
@@ -85,16 +86,16 @@ sealed class SendCommand : Command {
             destination = value
             return true
         }
-        if (passwordArguments.contains(argumentName)) {
-            requireNull(password)
-            password = value
+        if (accessCodeArguments.contains(argumentName)) {
+            requireNull(accessCode)
+            accessCode = value
             return true
         }
         if (ipArguments.contains(argumentName)) {
             requireNull(ip)
             ip = try {
-                decodeIpAddress(value)
-            } catch (e: Exception) {
+                decodeIpAddress(ipAddress = value)
+            } catch (_: Exception) {
                 null
             } ?: value
             return true

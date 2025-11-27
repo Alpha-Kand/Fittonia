@@ -2,7 +2,7 @@ package commandHandler
 
 import requireNull
 
-class DumpCommand : Command, HelpDocs {
+class DumpCommand : Command(), HelpDocs {
     override var hasHelped = defaultHelped()
     private var path: String? = null
 

@@ -1,15 +1,18 @@
 import commandHandler.FileTransfer
 import fileOperations.FileOperations
-import hmeadowSocket.HMeadowSocketServer
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import org.hmeadow.fittonia.hmeadowSocket.HMeadowSocketServer
 import java.nio.file.Path
 import kotlin.io.path.Path
 
 class DesktopServer private constructor(port: Int) : ServerLogs, Server {
     override var jobId: Int = 100
+    override val jobIdMutex = Mutex()
+    override val logsMutex = Mutex()
 
     private val serverCoroutineScope = CoroutineScope(
         context = Dispatchers.IO + CoroutineExceptionHandler { _, e ->
@@ -27,9 +30,7 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
             while (true) {
                 log("Waiting for client.")
                 waitForClient { server ->
-                    val newJobId = synchronized(instance()) {
-                        jobId++
-                    }
+                    val newJobId = getAndIncrementJobId()
                     log("Connected to client.", jobId = newJobId)
                     serverCoroutineScope.launch {
                         handleCommand(server, jobId = newJobId)
@@ -39,9 +40,13 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         }
     }
 
-    override fun onAddDestination(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
-        if (!clientPasswordSuccess) {
-            logWarning("Client attempted to add this server as destination, password refused.", jobId = jobId)
+    override suspend fun onPing(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        TODO("Not yet implemented") // After release
+    }
+
+    override suspend fun onAddDestination(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientAccessCodeSuccess) {
+            logWarning("Client attempted to add this server as destination, access code refused.", jobId = jobId)
         } else {
             if (server.receiveBoolean()) {
                 log("Client added this server as a destination.", jobId = jobId)
@@ -51,9 +56,9 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         }
     }
 
-    override fun onSendFiles(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
-        if (!clientPasswordSuccess) {
-            logWarning("Client attempted to send files to this server, password refused.", jobId = jobId)
+    override suspend fun onSendFiles(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientAccessCodeSuccess) {
+            logWarning("Client attempted to send files to this server, access code refused.", jobId = jobId)
         } else {
             log("Client attempting to send files.", jobId = jobId)
             val jobPath = server.getJobName2(flag = server.receiveString(), jobId = jobId)
@@ -76,25 +81,25 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
         }
     }
 
-    override fun onSendMessage(clientPasswordSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
-        if (!clientPasswordSuccess) {
-            logWarning("Client attempted to send a message, password refused.", jobId = jobId)
+    override suspend fun onSendMessage(clientAccessCodeSuccess: Boolean, server: HMeadowSocketServer, jobId: Int) {
+        if (!clientAccessCodeSuccess) {
+            logWarning("Client attempted to send a message, access code refused.", jobId = jobId)
         } else {
             log("Client message: ${server.receiveString()}", jobId = jobId)
             server.sendConfirmation()
         }
     }
 
-    override fun onInvalidCommand(unknownCommand: String) {
+    override suspend fun onInvalidCommand(unknownCommand: String) {
         logWarning("Received invalid server command from client: $unknownCommand", jobId = jobId)
     }
 
-    private fun waitForClient(block: (HMeadowSocketServer) -> Unit) {
+    private suspend fun waitForClient(block: suspend (HMeadowSocketServer) -> Unit) {
         block(HMeadowSocketServer.createServerFromSocket(serverSocket = mainServerSocket))
     }
 
-    override fun HMeadowSocketServer.passwordIsValid(): Boolean {
-        return SettingsManagerDesktop.settingsManager.checkPassword(receiveString())
+    override fun HMeadowSocketServer.accessCodeIsValid(): Boolean {
+        return SettingsManagerDesktop.settingsManager.checkAccessCode(receiveString())
     }
 
     companion object {
@@ -121,7 +126,7 @@ class DesktopServer private constructor(port: Int) : ServerLogs, Server {
     }
 }
 
-private fun HMeadowSocketServer.getJobName2(flag: String, jobId: Int): String {
+private suspend fun HMeadowSocketServer.getJobName2(flag: String, jobId: Int): String {
     val settingsManager = SettingsManagerDesktop.settingsManager
     val autoJobName = when (flag) {
         ServerFlagsString.NEED_JOB_NAME -> settingsManager.getAutoJobName().also {
@@ -132,7 +137,7 @@ private fun HMeadowSocketServer.getJobName2(flag: String, jobId: Int): String {
             DesktopServer.log("Client provided job name: $it", jobId = jobId)
         }
 
-        else -> throw Exception() // TODO
+        else -> throw Exception() // TODO - After release
     }
     var nonConflictedJobName: String = autoJobName
 
@@ -141,7 +146,7 @@ private fun HMeadowSocketServer.getJobName2(flag: String, jobId: Int): String {
         nonConflictedJobName = autoJobName + "_" + settingsManager.getAutoJobName()
         i++
         if (i > 20) {
-            throw Exception() // TODO
+            throw Exception() // TODO - After release
         }
     }
     return (settingsManager.settings.dumpPath + "/$nonConflictedJobName").also {

@@ -22,7 +22,8 @@ fun MainRenderScope.fileNamesTooLongRenderBlock(
     actionList.forEach { action ->
         optionStringMap[action]?.format(action)
     }
-    text(text = "? "); input()
+    text(text = "? ")
+    input()
 }
 
 fun MainRenderScope.renderCutoffPath(index: Int, path: String, cutoff: Int) {

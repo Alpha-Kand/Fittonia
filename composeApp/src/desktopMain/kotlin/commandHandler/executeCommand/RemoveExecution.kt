@@ -8,6 +8,6 @@ suspend fun removeExecution(command: RemoveCommand) {
     if (SettingsManagerDesktop.settingsManager.removeDestination(name = command.getName())) {
         successIO()
     } else {
-        // TODO errorIO("No destination with that name found.")
+        // TODO errorIO("No destination with that name found.") - After release
     }
 }

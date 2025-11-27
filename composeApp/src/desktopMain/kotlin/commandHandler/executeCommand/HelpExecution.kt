@@ -47,7 +47,7 @@ private suspend fun printHelpSection(helpDoc: HelpDoc) {
     kotter.section {
         cyan { textLine(text = helpDoc.title) }
         textLine(text = helpDoc.description)
-        textLine(text = format) // TODO
+        textLine(text = format) // TODO - After release
         helpDoc.arguments?.forEach {
             textLine("${it.first.joinToString(separator = ", ")}: ${it.second}")
         }
