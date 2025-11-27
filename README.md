@@ -1,7 +1,6 @@
 ### FITTONIA
 
-<ins>**FI**</ins>le <ins>**T**</ins>ransfer <ins>**T**</ins>ech <ins>**O**</ins>ver a <ins>**N
-**</ins>etwork using <ins>**I**</ins>P <ins>**A**</ins>ddresses
+<ins>**FI**</ins>le <ins>**T**</ins>ransfer <ins>**T**</ins>ech <ins>**O**</ins>ver a <ins>**N**</ins>etwork using <ins>**I**</ins>P <ins>**A**</ins>ddresses
 
 An app for transfering files between Android devices.
 
